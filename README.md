@@ -1,2 +1,6 @@
-# macOS-Images-for-Hackintosh
-Hi friends these images are made by me.
+<!-- omit in toc -->
+# macOS Catalina
+
+# macOS Mojave
+
+# macOS High Sierra
