@@ -4,8 +4,8 @@
 # macOS Mojave
 | **Details**                                |                                    |
 | -----------------------------------  | -------- |
-|  Turbo boost and CPU frequency stage |  ✅  |
-|  Intel UHD Graphics 620              |  ✅  |
+|  macOS Mojave 10.14.6 (18G103) |  ✅  |
+|  Can you use on original Mac?              |  ✅  |
 |  Brightness control                  |  ✅  |
 |  HDMI                                |  ✅  |
 |  Audio Conexant CX20753/4            |  ✅  |
