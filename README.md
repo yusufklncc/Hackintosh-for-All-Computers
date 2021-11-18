@@ -56,7 +56,7 @@
 <p align="center">
   <img src="https://github.com/yusfklncc/macOS-Images-for-Hackintosh/blob/main/Resources/Google%20Drive%20Icon.png" width="50"/> </a>
 <a href="https://drive.google.com/file/d/1EykVAh4Bktt_fKrp_uicJf0VVXQP2dUd/view?usp=sharing">
-  <img src="https://img.shields.io/badge/Download-El%Capitan%2010.11.6%20(15G31)-red" width="400"/> </a> 
+  <img src="https://img.shields.io/badge/Download-El%20Capitan%2010.11.6%20(15G31)-red" width="400"/> </a> 
 
 <h1 align="center"> macOS Yosemite </h1>
 <p align="center">
