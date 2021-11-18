@@ -15,7 +15,7 @@
 <p align="center">
   <img src="https://github.com/yusfklncc/macOS-Images-for-Hackintosh/blob/main/Resources/Google%20Drive%20Icon.png" width="50"/> </a>
 <a href="https://drive.google.com/file/d/19Ij2bXr-GdtuvCVeo8f7FLo1tX-oh6j5/view?usp=sharing">
-  <img src="https://img.shields.io/badge/Download-Big%20Sur%2011.6.1-blue" width="300"/> </a>
+  <img src="https://img.shields.io/badge/Download-Big%20Sur%2011.6-blue" width="300"/> </a>
 
 <h1 align="center"> macOS Catalina </h1>
 <p align="center">
