@@ -2,7 +2,7 @@
 
 <h1 align="left"> macOS Big Sur </h1>
 <p align="center">
-  <img src="https://github.com/yusfklncc/Lenovo-Thinkpad-E570-Hackintosh/blob/main/ThinkPad%20E570.png" alt="Thinkpad E570" width="500">
+  <img src="https://github.com/yusfklncc/macOS-Images-for-Hackintosh/blob/main/macOS/macOS%20Big%20Sur.png" alt="Thinkpad E570" width="500">
 </p>
 
 <h1 align="left"> macOS Catalina </h1>
