@@ -35,5 +35,8 @@
 
 <h1 align="left"> macOS Yosemite </h1>
 <p align="left">
-  <img src="https://github.com/yusfklncc/macOS-Images-for-Hackintosh/blob/main/macOS/macOS%20Yosemite.png" alt="Thinkpad E570" width="500"> https://drive.google.com/file/d/1TdlPEyWjvi7epGLdgOWzVSaXm-cjmdNh/view?usp=sharing
+  <img src="https://github.com/yusfklncc/macOS-Images-for-Hackintosh/blob/main/macOS/macOS%20Yosemite.png" alt="Thinkpad E570" width="500"> 
+</p>
+<p align="right">
+  <img src="https://github.com/yusfklncc/macOS-Images-for-Hackintosh/blob/main/macOS/macOS%20Yosemite.png" alt="Thinkpad E570" width="500"> 
 </p>
