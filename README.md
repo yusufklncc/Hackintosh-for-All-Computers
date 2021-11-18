@@ -1,10 +1,10 @@
 <h1 align="left"> macOS Monterey </h1>
-<p align="center">
+<p align="left">
   <img src="https://github.com/yusfklncc/macOS-Images-for-Hackintosh/blob/main/macOS/macOS%20Monterey.png" alt="Thinkpad E570" width="500">
 </p>
 
 <h1 align="left"> macOS Big Sur </h1>
-<p align="center">
+<p align="left">
   <img src="https://github.com/yusfklncc/macOS-Images-for-Hackintosh/blob/main/macOS/macOS%20Big%20Sur.png" alt="Thinkpad E570" width="500">
 </p>
 
