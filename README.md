@@ -6,7 +6,7 @@
   <img src="https://img.shields.io/badge/Download-Monterey_v12.0.1-blueviolet" width="300"/> </a> Google Drive
 <a href="https://mega.nz/file/P59RgARB#nb0n3l5e-4XobcnLzbsPTqBHBPhYTc01G0XvABhdExk">
   <img src="https://img.shields.io/badge/Download-Monterey_v12.0.1-blueviolet" width="300"/> </a>
-  <img src="https://github.com/yusfklncc/macOS-Images-for-Hackintosh/blob/main/Resources/MEGA%20Icon.png" width="30"/> </a>
+  <img src="https://github.com/yusfklncc/macOS-Images-for-Hackintosh/blob/main/Resources/MEGA%20Icon.png" width="50"/> </a>
 
 <h1 align="left"> macOS Big Sur </h1>
 <p align="left">
