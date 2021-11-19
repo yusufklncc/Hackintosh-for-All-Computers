@@ -13,6 +13,15 @@ Hello my friends. This repo contains the image and global EFI needed to install 
   - [El Capitan](https://github.com/yusfklncc/macOS-Images-for-Hackintosh#-macos-el-capitan-)
   - [Yosemite](https://github.com/yusfklncc/macOS-Images-for-Hackintosh#-macos-yosemite-)
 
+<h3 align="left">Writing OSX Image </h3>
+
+- Unzip the zip file to desktop.
+- Download balenaEtcher from this link https://www.balena.io/etcher/
+- Open program and click to "Flash from file"
+- Select the OSX image from the popup window.
+- Click to "Select target" and select OSX image.
+- Click to "Flash!" and allow app in popup window.
+- When writing is finished, remove the USB stick and plug it back in.
 
 <h1 align="center"> macOS Monterey </h1>
 <p align="center">
