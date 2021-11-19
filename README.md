@@ -1,5 +1,6 @@
 <h1 align="center"> macOS Monterey </h1>
 OpenCore config for Hackintosh OpenCore HP EliteBook 840 G5.
+<img align="right" src="https://i.loli.net/2021/02/17/KqIEFsp6SjneLTY.png" width="250px" alt="preview">
 <p align="left">
   <img src="https://github.com/yusfklncc/macOS-Images-for-Hackintosh/blob/main/macOS/macOS%20Monterey.png" width="500">
 <p align="left">
