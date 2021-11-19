@@ -15,6 +15,7 @@
 * Includes macOS Monterey 12.0.1 (21A559).
 * It can be installed on original Mac devices.
         - If you want to install it on a Mac computer, after writing the image to USB with balenaEtcher insert the USB into your Mac device and open the "Install macOS XXX" after entering the boot selector menu with the options key.
+
 * 16GB or higher USB required.
 * Compatible for laptop installation.
 * Compatible for desktop installation.
