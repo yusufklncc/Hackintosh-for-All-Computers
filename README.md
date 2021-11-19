@@ -12,7 +12,7 @@ Hello my friends. This repo contains the image and global EFI needed to install 
   - [Sierra](https://github.com/yusfklncc/macOS-Images-for-Hackintosh#-macos-sierra-)
   - [El Capitan](https://github.com/yusfklncc/macOS-Images-for-Hackintosh#-macos-el-capitan-)
   - [Yosemite](https://github.com/yusfklncc/macOS-Images-for-Hackintosh#-macos-yosemite-)
-- s
+
 
 <h1 align="center"> macOS Monterey </h1>
 <p align="center">
