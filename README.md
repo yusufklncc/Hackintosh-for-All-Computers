@@ -1,4 +1,4 @@
-<h1 align="center"> macOS on All Computers </h1>
+<h1 align="left"> macOS on All Computers </h1>
 Hello my friends. This repo contains the image and global EFI needed to install macOS on your "compatible" computer.
 
 <h1 align="center"> macOS Monterey </h1>
