@@ -12,18 +12,17 @@
 
 <h3 align="left"> Features </h3>
 
-* Includes macOS Monterey 12.0.1 (21A559).
-* It can be installed on original Mac devices.
-        - If you want to install it on a Mac computer, after writing the image to USB with balenaEtcher insert the USB into your Mac device and open the "Install macOS XXX" after entering the boot selector menu with the options key.
-
-* 16GB or higher USB required.
-* Compatible for laptop installation.
-* Compatible for desktop installation.
-* Compatible with UEFI and Legacy systems.
-* You can install OSX next to your Windows installed disk.
-* It has SSE support.
-* "Kurulum Sonrası - Post Installation" contains the most necessary programs after installation.
-* Compatible for computers with Intel and AMD processors.
+- Includes macOS Monterey 12.0.1 (21A559).
+- It can be installed on original Mac devices.
+- If you want to install it on a Mac computer, after writing the image to USB with balenaEtcher insert the USB into your Mac device and open the "Install macOS XXX" after entering the boot selector menu with the options key.
+- 16GB or higher USB required.
+- Compatible for laptop installation.
+- Compatible for desktop installation.
+- Compatible with UEFI and Legacy systems.
+- You can install OSX next to your Windows installed disk.
+- It has SSE support.
+- "Kurulum Sonrası - Post Installation" contains the most necessary programs after installation.
+- Compatible for computers with Intel and AMD processors.
 
 <h1 align="center"> macOS Big Sur </h1>
 <p align="center">
