@@ -10,7 +10,8 @@
 <a href="https://mega.nz/file/P59RgARB#nb0n3l5e-4XobcnLzbsPTqBHBPhYTc01G0XvABhdExk">
   <img src="https://img.shields.io/badge/Download-Monterey%2012.0.1%20(21A559)-blueviolet" width="400"/> </a>
 
-<h3 align="left"> macOS Monterey </h3>
+<h3 align="left"> Features </h3>
+
 * Includes macOS Monterey 12.0.1 (21A559).
 
 <h1 align="center"> macOS Big Sur </h1>
