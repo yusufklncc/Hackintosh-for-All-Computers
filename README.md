@@ -1,4 +1,5 @@
 <h1 align="center"> macOS Monterey </h1>
+<h4 align="right"> OpenCore config for Hackintosh OpenCore Lenovo Thinkpad E570 </h4>
 <p align="left">
   <img src="https://github.com/yusfklncc/macOS-Images-for-Hackintosh/blob/main/macOS/macOS%20Monterey.png" width="500">
 <p align="left">
