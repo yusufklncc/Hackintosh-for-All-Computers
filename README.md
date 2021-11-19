@@ -1,6 +1,6 @@
 <h1 align="center"> macOS Monterey </h1>
 <p align="left">
-  <img src="https://github.com/yusfklncc/macOS-Images-for-Hackintosh/blob/main/macOS/macOS%20Monterey.png" width="500">
+  <img src="https://github.com/yusfklncc/macOS-Images-for-Hackintosh/blob/main/macOS/macOS%20Monterey.png" width="500"> s
 <p align="left">
   <img src="https://github.com/yusfklncc/macOS-Images-for-Hackintosh/blob/main/Resources/Google%20Drive%20Icon.png" width="50"/> </a>
 <a href="https://drive.google.com/file/d/1eng7war8rNsPgmf4eCaE3G0k9joZR7jx/view?usp=sharing">
