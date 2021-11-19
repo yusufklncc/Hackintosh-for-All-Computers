@@ -1,6 +1,7 @@
 <h1 align="center"> macOS Monterey </h1>
 <p align="left">
   <img src="https://github.com/yusfklncc/macOS-Images-for-Hackintosh/blob/main/macOS/macOS%20Monterey.png" width="500">
+  - macOS
 <p align="left">
   <img src="https://github.com/yusfklncc/macOS-Images-for-Hackintosh/blob/main/Resources/Google%20Drive%20Icon.png" width="50"/> </a>
 <a href="https://drive.google.com/file/d/1eng7war8rNsPgmf4eCaE3G0k9joZR7jx/view?usp=sharing">
@@ -9,7 +10,6 @@
   <img src="https://github.com/yusfklncc/macOS-Images-for-Hackintosh/blob/main/Resources/MEGA%20Icon.png" width="50"/> </a>
 <a href="https://mega.nz/file/P59RgARB#nb0n3l5e-4XobcnLzbsPTqBHBPhYTc01G0XvABhdExk">
   <img src="https://img.shields.io/badge/Download-Monterey%2012.0.1%20(21A559)-blueviolet" width="400"/> </a>
-- macOS
 
 <h1 align="center"> macOS Big Sur </h1>
 <p align="center">
