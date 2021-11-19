@@ -2,6 +2,7 @@
 Hello my friends. This repo contains the image and global EFI needed to install macOS on your "compatible" computer.
 
 <h3 align="left"> Downloading OSX Image </h3>
+
 - Go to OSX Image Google Drive or MEGA link and download it.
   - [Monterey](https://github.com/yusfklncc/macOS-Images-for-Hackintosh#-macos-monterey-)
   - [Big Sur](https://github.com/yusfklncc/macOS-Images-for-Hackintosh#-macos-big-sur-)
@@ -11,6 +12,7 @@ Hello my friends. This repo contains the image and global EFI needed to install 
   - [Sierra](https://github.com/yusfklncc/macOS-Images-for-Hackintosh#-macos-sierra-)
   - [El Capitan](https://github.com/yusfklncc/macOS-Images-for-Hackintosh#-macos-el-capitan-)
   - [Yosemite](https://github.com/yusfklncc/macOS-Images-for-Hackintosh#-macos-yosemite-)
+- s
 
 <h1 align="center"> macOS Monterey </h1>
 <p align="center">
