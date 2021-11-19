@@ -1,5 +1,4 @@
 <h1 align="center"> macOS Monterey </h1>
-sea
 <p align="left">
   <img src="https://github.com/yusfklncc/macOS-Images-for-Hackintosh/blob/main/macOS/macOS%20Monterey.png" width="500">
 <p align="left">
