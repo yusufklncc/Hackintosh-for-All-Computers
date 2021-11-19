@@ -2,6 +2,8 @@
 <p align="left">
   <img src="https://github.com/yusfklncc/macOS-Images-for-Hackintosh/blob/main/macOS/macOS%20Monterey.png" width="500">
   - macOS
+  - mac
+  - mac
 <p align="left">
   <img src="https://github.com/yusfklncc/macOS-Images-for-Hackintosh/blob/main/Resources/Google%20Drive%20Icon.png" width="50"/> </a>
 <a href="https://drive.google.com/file/d/1eng7war8rNsPgmf4eCaE3G0k9joZR7jx/view?usp=sharing">
