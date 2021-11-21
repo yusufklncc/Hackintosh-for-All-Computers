@@ -1,5 +1,6 @@
 <h1 align="left"> macOS on All Computers </h1>
-Hello my friends. This repo contains the image and global EFI needed to install macOS on your "compatible" computer.
+
+Hello to everyone. This repo contains the image and global EFI needed to install macOS on your "compatible" computer. Today, I present to all of you the solidified OpenCore Bootloader and the OSX images I have prepared. If you report the problems you encounter as feedback, I can fix my problems. Since there is no EFI in the image yet, I will update it externally with the image every month. What you need to do is to throw the EFI folder into the EFI partition created after writing the image to your USB memory. I wish everyone a smooth hackintosh. See you in healthy days..
 
 <h3 align="left"> Downloading OSX Image </h3>
 
