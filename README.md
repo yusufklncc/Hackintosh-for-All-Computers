@@ -237,3 +237,8 @@ Not every system has the same BIOS settings. Apply whatever settings are availab
 - It has SSE support.
 - "Kurulum Sonrası - Post Installation" contains the most necessary programs after installation.
 - Compatible for computers with Intel and AMD processors.
+
+<h1 align="center"> Donate - Bağış </h1>
+<p align="center">
+<a href="https://github.com/yusfklncc/yusfklncc/blob/main/Donate%20-%20Ba%C4%9F%C4%B1%C5%9F.md">
+  <img src="https://github.com/yusfklncc/yusfklncc/blob/main/Resources/Donate.png" width="300">
