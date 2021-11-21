@@ -33,6 +33,7 @@ Hello to everyone. This repo contains the image and global EFI needed to install
 
 - Intel
   -Başlamadan önce BIOS ayarlarınızı öntanımlı ayarlara çekin (Load Default Settings).
+  
   -SATA: AHCI olarak ayarlayın
   -VT-D: Disable olarak ayarlayın
   -EHCI Hand-off / xHCI Hand-off: Enable olarak ayarlayın.
