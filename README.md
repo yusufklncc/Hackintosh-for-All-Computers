@@ -32,27 +32,26 @@ Hello to everyone. This repo contains the image and global EFI needed to install
 <h4 align="left">Setting BIOS Settings </h4>
 
 - Intel
-  -Başlamadan önce BIOS ayarlarınızı öntanımlı ayarlara çekin (Load Default Settings).
-  
-  -SATA: AHCI olarak ayarlayın
-  -VT-D: Disable olarak ayarlayın
-  -EHCI Hand-off / xHCI Hand-off: Enable olarak ayarlayın.
-  -xHCI Mode: Smart Auto
-  -Secureboot: Disable (Other OS) olarak ayarlayın
-  -CFG-Lock= Disable
-  -Boot Option Priorities: UEFI USB olarak ayarlayın. Yada UEFI and Legacy.
+  - Başlamadan önce BIOS ayarlarınızı öntanımlı ayarlara çekin (Load Default Settings).
+  - SATA: AHCI olarak ayarlayın
+  - VT-D: Disable olarak ayarlayın
+  - EHCI Hand-off / xHCI Hand-off: Enable olarak ayarlayın.
+  - xHCI Mode: Smart Auto
+  - Secureboot: Disable (Other OS) olarak ayarlayın
+  - CFG-Lock= Disable
+  - Boot Option Priorities: UEFI USB olarak ayarlayın. Yada UEFI and Legacy.
 
 - AMD Ryzen
-  -Başlamadan önce BIOS ayarlarınızı öntanımlı ayarlara çekin (Load Default Settings).
-  -OC Tweaker -> Load XMP Setting: XMP 2.0 Profile 1
-  -Advanced \CPU Configuration -> SWM Mode = Enabled
-  -Advanced\North Bridge Configuration -> IOMMU: Disabled
-  -Advanced \South Bridge Configuration -> Deep Sleep: Disabled
-  -Advanced \Storage Configuration -> Sata Mode: AHCI Mode
-  -Advanced\AMD CBS\FCH Common Options\USB Configuration Options -> XCHCI controller enable: Enabled
-  -Advanced\AMD CBS/NBIO Common Options\NB Configuration -> IOMMU: Disabled
-  -Security -> Secure Boot: Disabled
-  -Boot -> Fast Boot: Disabled
+  - Başlamadan önce BIOS ayarlarınızı öntanımlı ayarlara çekin (Load Default Settings).
+  - OC Tweaker -> Load XMP Setting: XMP 2.0 Profile 1
+  - Advanced \CPU Configuration -> SWM Mode = Enabled
+  - Advanced\North Bridge Configuration -> IOMMU: Disabled
+  - Advanced \South Bridge Configuration -> Deep Sleep: Disabled
+  - Advanced \Storage Configuration -> Sata Mode: AHCI Mode
+  - Advanced\AMD CBS\FCH Common Options\USB Configuration Options -> XCHCI controller enable: Enabled
+  - Advanced\AMD CBS/NBIO Common Options\NB Configuration -> IOMMU: Disabled
+  - Security -> Secure Boot: Disabled
+  - Boot -> Fast Boot: Disabled
 
 Her sistemde aynı BIOS ayarları olmayabilir. Olan ayarlar ne ise onları uygulayın.
 
