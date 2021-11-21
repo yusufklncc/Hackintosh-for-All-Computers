@@ -29,6 +29,9 @@ Hello to everyone. This repo contains the image and global EFI needed to install
 - Click to "Flash!" and allow app in popup window.
 - When writing is finished, remove the USB stick and plug it back in.
 
+<h4 align="left">Setting BIOS Settings </h4>
+
+
 <h1 align="center"> macOS Monterey </h1>
 <p align="center">
   <img src="https://github.com/yusfklncc/macOS-Images-for-Hackintosh/blob/main/macOS/macOS%20Monterey.png" width="500">
