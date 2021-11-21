@@ -5,6 +5,7 @@ Hello to everyone. This repo contains the image and global EFI needed to install
 ## Table of contents
 
 - [Downloading OSX Image](https://github.com/yusfklncc/Hackintosh-for-All-Computers#-downloading-osx-image-)
+- [Writing OSX Image](https://github.com/yusfklncc/Hackintosh-for-All-Computers#writing-osx-image-)
 
 <h4 align="left"> Downloading OSX Image </h4>
 
