@@ -2,7 +2,7 @@
 
 Hello to everyone. This repo contains the image and global EFI needed to install macOS on your "compatible" computer. Today, I present to all of you the solidified OpenCore Bootloader and the OSX images I have prepared. If you report the problems you encounter as feedback, I can fix my problems. Since there is no EFI in the image yet, I will update it externally with the image every month. What you need to do is to throw the EFI folder into the EFI partition created after writing the image to your USB memory. I wish everyone a smooth hackintosh. See you in healthy days..
 
-# Table of contents
+## Table of contents
 
 - [Downloading OSX Image](https://github.com/yusfklncc/Hackintosh-for-All-Computers#-downloading-osx-image-)
 
