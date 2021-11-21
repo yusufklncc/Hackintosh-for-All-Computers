@@ -6,7 +6,7 @@ Hello to everyone. This repo contains the image and global EFI needed to install
 
 - [Downloading OSX Image](https://github.com/yusfklncc/Hackintosh-for-All-Computers#-downloading-osx-image-)
 
-<h3 align="left"> Downloading OSX Image </h3>
+<h4 align="left"> Downloading OSX Image </h4>
 
 - Go to OSX Image Google Drive or MEGA link and download it.
   - [Monterey](https://github.com/yusfklncc/macOS-Images-for-Hackintosh#-macos-monterey-)
@@ -18,7 +18,7 @@ Hello to everyone. This repo contains the image and global EFI needed to install
   - [El Capitan](https://github.com/yusfklncc/macOS-Images-for-Hackintosh#-macos-el-capitan-)
   - [Yosemite](https://github.com/yusfklncc/macOS-Images-for-Hackintosh#-macos-yosemite-)
 
-<h3 align="left">Writing OSX Image </h3>
+<h4 align="left">Writing OSX Image </h4>
 
 - Unzip the zip file to desktop.
 - Download balenaEtcher from this link https://www.balena.io/etcher/
