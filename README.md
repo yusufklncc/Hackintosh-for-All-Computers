@@ -53,7 +53,7 @@ Hello to everyone. This repo contains the image and global EFI needed to install
   - Security -> Secure Boot: Disabled
   - Boot -> Fast Boot: Disabled
 
-Her sistemde aynı BIOS ayarları olmayabilir. Olan ayarlar ne ise onları uygulayın.
+Not every system has the same BIOS settings. Apply whatever settings are available.
 
 <h1 align="center"> macOS Monterey </h1>
 <p align="center">
