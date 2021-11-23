@@ -13,6 +13,7 @@ Hello to everyone. This repo contains the image and global EFI needed to install
 
 - [Downloading OSX Image](https://github.com/yusfklncc/Hackintosh-for-All-Computers#-downloading-osx-image-)
 - [Writing OSX Image](https://github.com/yusfklncc/Hackintosh-for-All-Computers#writing-osx-image-)
+- [Setting EFI Folder](https://github.com/yusfklncc/Hackintosh-for-All-Computers#setting-efi-folder-)
 - [Setting BIOS Settings](https://github.com/yusfklncc/Hackintosh-for-All-Computers/blob/main/README.md#setting-bios-settings-)
 
 <h4 align="left"> Downloading OSX Image </h4>
@@ -37,7 +38,7 @@ Hello to everyone. This repo contains the image and global EFI needed to install
 - Click to "Flash!" and allow app in popup window.
 - When writing is finished, remove the USB stick and plug it back in.
 
-<h4 align="left">Writing OSX Image </h4>
+<h4 align="left">Setting EFI Folder </h4>
 
 - When you plug USB back, you can see EFI partition in "My Computer"
 - Open EFI partition and you will see "Kurulum Sonrası" Folder. It is Post-Installation Folder.
