@@ -37,6 +37,18 @@ Hello to everyone. This repo contains the image and global EFI needed to install
 - Click to "Flash!" and allow app in popup window.
 - When writing is finished, remove the USB stick and plug it back in.
 
+<h4 align="left">Writing OSX Image </h4>
+
+- When you plug USB back, you can see EFI partition in "My Computer"
+- Open EFI partition and you will see "Kurulum Sonrası" Folder. It is Post-Installation Folder.
+- Whatever, you have to copy your EFI file in EFI partititon.
+- If you dont have EFI. You can use my global EFI.
+- Download from release and copy the EFI folder to EFI partition
+- Open EFI/OC and set your config file. Example:
+  - my CPU is i5-7200U. It is Kaby Lake Mobile (Laptop) cpu.
+  - Find Laptop Kaby Lake.plist and rename "config"
+- Now you can boot from USB.
+
 <h4 align="left">Setting BIOS Settings </h4>
 
 - ### Intel
