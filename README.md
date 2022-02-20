@@ -38,6 +38,9 @@ Hello to everyone. This repo contains the image and global EFI needed to install
 - Click to "Flash!" and allow app in popup window.
 - When writing is finished, remove the USB stick and plug it back in.
 
+![image](https://user-images.githubusercontent.com/78423442/154849816-0a04602a-9064-4780-9d4e-ed86254b4fea.png)
+
+
 <h4 align="left">Setting EFI Folder </h4>
 
 - When you plug USB back, you can see EFI partition in "My Computer"
