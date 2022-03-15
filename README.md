@@ -84,7 +84,7 @@ Not every system has the same BIOS settings. Apply whatever settings are availab
   <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/macOS/macOS%20Monterey.png" width="500">
 <p align="center">
   <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Google%20Drive%20Icon.png" width="50"/> </a>
-<a href="https://drive.google.com/file/d/1eng7war8rNsPgmf4eCaE3G0k9joZR7jx/view?usp=sharing">
+<a href="https://drive.google.com/file/d/1hCObrljlhz-t-wYShWaBXS2QddMVDMUt/view?usp=sharing">
   <img src="https://img.shields.io/badge/Download-Monterey%2012.0.1%20(21A559)-blueviolet" width="400"/> </a>
 <p align="center">  
   <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/MEGA%20Icon.png" width="50"/> </a>
