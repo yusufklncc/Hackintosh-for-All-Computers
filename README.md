@@ -103,7 +103,7 @@ Not every system has the same BIOS settings. Apply whatever settings are availab
       - [RTL8125](https://github.com/Mieze/LucyRTL8125Ethernet)
     - [Broadcom Wi-Fi](https://github.com/acidanthera/airportbrcmfixup/releases)
     - [Atheros Wi-Fi](https://dortania.github.io/Wireless-Buyers-Guide/Kext.html#atheros)
-- Let's download the kext we need and put it in EFI/OC/Kexts. Next is to show this kext to the config. We will do this with notepad/notepad++. Let our example kext be ### AirportBrcmFixUp.kext, which is required for Broadcom WiFi.
+- Let's download the kext we need and put it in EFI/OC/Kexts. Next is to show this kext to the config. We will do this with notepad/notepad++. Let our example kext be AirportBrcmFixUp.kext, which is required for Broadcom WiFi.
 - Right click on our config.plist file and open it with notepad/notepad++. Let's search the Kernel with the Ctrl+F combination. The result will be:
   - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/config:kernel.png">
 
@@ -111,6 +111,18 @@ Not every system has the same BIOS settings. Apply whatever settings are availab
   - [Show kext to config](https://yadi.sk/i/0868TpQvJQa2UQ)
 
 ### macOS Installation Steps
+- Now let's turn off our computer and boot from USB. Choose the Install macOS High Sierra (whatever you have) option and go to the installation screen.
+- If you are going to install macOS next to windows, create a partition with the video guide below. (This operation can only be performed on OSX to Mojave.)
+  - ATTENTION: You can install next to the Windows only with images that support MBR HFS+. Mojave and below macOS versions support MBR.
+    - [Splitting the disk in HFS+ format](https://yadi.sk/i/MEDvBBLVCzneBQ)
+    - After doing this, you can select your disk directly on the installation screen and start the installation.
+- What to do on the following screens:
+  - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Installation.png">
+    - Let's continue and check if the Wi-Fi we installed worked.
+  - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Checking%20Wi-Fi%20or%20Ethernet.png">
+    - There is nothing wrong. Now open "Utilities/Disk Utility" from the top to prepare our disk. Follow the steps in the image below.
+    - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Erasing%20Disk%201.png">
+    - Select "Show All Devices" from the "Display" option and select the name of our disk and click Erase.
 
 <h1 align="center"> macOS Monterey </h1>
 <p align="center">
