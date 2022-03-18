@@ -118,11 +118,11 @@ Not every system has the same BIOS settings. Apply whatever settings are availab
     - After doing this, you can select your disk directly on the installation screen and start the installation.
 - What to do on the following screens:
   - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Installation.png">
-    - Let's continue and check if the Wi-Fi we installed worked.
+  - Let's continue and check if the Wi-Fi we installed worked.
   - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Checking%20Wi-Fi%20or%20Ethernet.png">
-    - There is nothing wrong. Now open "Utilities/Disk Utility" from the top to prepare our disk. Follow the steps in the image below.
+  - There is nothing wrong. Now open "Utilities/Disk Utility" from the top to prepare our disk. Follow the steps in the image below.
   - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Erasing%20Disk%201.png">
-    - Select "Show All Devices" from the "Display" option and select the name of our disk and click Erase.
+  - Select "Show All Devices" from the "Display" option and select the name of our disk and click Erase.
 
 <h1 align="center"> macOS Monterey </h1>
 <p align="center">
