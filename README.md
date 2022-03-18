@@ -115,7 +115,7 @@ Not every system has the same BIOS settings. Apply whatever settings are availab
 <p align="center">
   <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Google%20Drive%20Icon.png" width="50"/> </a>
 <a href="https://drive.google.com/file/d/1JmUNIZhUyxQ7VPLmIdbA-r2STzkyHwk3/view?usp=sharing">
-  <img src="https://img.shields.io/badge/Download-Big%20Sur%2011.6%20(20G165)-blue" width="400"/> </a>
+  <img src="https://img.shields.io/badge/Download-Big%20Sur%2011.6.5%20(20G527)-blue" width="400"/> </a>
 
 <h3 align="left"> Features </h3>
 
