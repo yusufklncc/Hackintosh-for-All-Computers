@@ -21,6 +21,8 @@ Hello to everyone. This repo contains the image and global EFI needed to install
 - [Writing OSX Image](https://github.com/yusufklncc/Hackintosh-for-All-Computers#writing-osx-image)
 - [Setting EFI Folder](https://github.com/yusufklncc/Hackintosh-for-All-Computers#setting-efi-folder)
 - [Setting BIOS Settings](https://github.com/yusufklncc/Hackintosh-for-All-Computers#setting-bios-settings)
+- [Editing EFI](https://github.com/yusufklncc/Hackintosh-for-All-Computers#editing-efi)
+- [macOS Installation Steps](https://github.com/yusufklncc/Hackintosh-for-All-Computers#macos-installation-steps)
 
 ### Downloading OSX Image
 
@@ -44,9 +46,6 @@ Hello to everyone. This repo contains the image and global EFI needed to install
 - Click to "Flash!" and allow app in popup window.
 ![image](https://user-images.githubusercontent.com/78423442/154849816-0a04602a-9064-4780-9d4e-ed86254b4fea.png)
 - When writing is finished, remove the USB stick and plug it back in.
-
-
-
 
 ### Setting EFI Folder
 
@@ -85,6 +84,8 @@ Hello to everyone. This repo contains the image and global EFI needed to install
   - Boot -> Fast Boot: Disabled
 
 Not every system has the same BIOS settings. Apply whatever settings are available.
+
+### Editing Our EFI
 
 #### NOTE: If you have LEGACY BIOS. Try to boot already without touching the default "boot" file that comes in the EFI partition. If you can't boot, come back and change the name of the "boot" file to "boot-default". Change the name of the "boox64 or bootx32" file to "boot" according to the architecture of your processor. it does not matter. If you still can't boot, try the "boot6", "boot7" and "boot9" files.
 
