@@ -44,9 +44,10 @@ Hello to everyone. This repo contains the image and global EFI needed to install
 - Select the OSX image from the popup window.
 - Click to "Select target" and select OSX image.
 - Click to "Flash!" and allow app in popup window.
+![image](https://user-images.githubusercontent.com/78423442/154849816-0a04602a-9064-4780-9d4e-ed86254b4fea.png)
 - When writing is finished, remove the USB stick and plug it back in.
 
-![image](https://user-images.githubusercontent.com/78423442/154849816-0a04602a-9064-4780-9d4e-ed86254b4fea.png)
+
 
 
 <h4 align="left">Setting EFI Folder </h4>
