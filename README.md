@@ -53,8 +53,8 @@ Hello to everyone. This repo contains the image and global EFI needed to install
 <h4 align="left">Setting EFI Folder </h4>
 
 - When you plug USB back, you can see EFI partition in "My Computer"
-- Open EFI partition and you will see "Kurulum Sonrası" Folder. It is Post-Installation Folder.
-- Whatever, you have to copy your EFI file in EFI partititon.
+- Open EFI partition.
+- Copy your EFI file in EFI partititon.
 - If you dont have EFI. You can use my global EFI.
 - Download from release and copy the EFI folder to EFI partition
 - Open EFI/OC and set your config file. Example:
@@ -87,6 +87,8 @@ Hello to everyone. This repo contains the image and global EFI needed to install
   - Boot -> Fast Boot: Disabled
 
 Not every system has the same BIOS settings. Apply whatever settings are available.
+
+[B][COLOR=rgb(235, 107, 86)]NOT: Eğer LEGACY boot ayarına sahipseniz EFI bölüntüsü içinde gelen default boot dosyasına dokunmadan hali hazırda boot etmeyi deneyin. Eğer boot edemez iseniz tekrar gelin ve işlemcinizin mimarisine göre olan boot dosyasının adını boot olarak değiştirin. Varsayılan olanın adını da boot-default yapabilirsiniz farketmez.[/COLOR][/B]
 
 <h1 align="center"> macOS Monterey </h1>
 <p align="center">
