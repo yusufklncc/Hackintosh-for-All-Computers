@@ -1,4 +1,4 @@
-## macOS on All Computers
+# macOS on All Computers
 
 <p align="center">
   <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/macOS/All%20macOS.png" alt="All macOS">
