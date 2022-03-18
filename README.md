@@ -17,7 +17,7 @@ Hello to everyone. This repo contains the image and global EFI needed to install
 
 ## Table of contents
 
-- [Downloading OSX Image](https://github.com/yusufklncc/Hackintosh-for-All-Computers#-downloading-osx-image-)
+- [Downloading OSX Image](https://github.com/yusufklncc/Hackintosh-for-All-Computers#downloading-osx-image)
 - [Writing OSX Image](https://github.com/yusufklncc/Hackintosh-for-All-Computers#writing-osx-image-)
 - [Setting EFI Folder](https://github.com/yusufklncc/Hackintosh-for-All-Computers#setting-efi-folder-)
 - [Setting BIOS Settings](https://github.com/yusufklncc/Hackintosh-for-All-Computers#setting-bios-settings-)
