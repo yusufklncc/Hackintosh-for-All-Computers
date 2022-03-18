@@ -88,7 +88,7 @@ Hello to everyone. This repo contains the image and global EFI needed to install
 
 Not every system has the same BIOS settings. Apply whatever settings are available.
 
-### NOTE: If you have LEGACY BIOS. Try to boot already without touching the default "boot" file that comes in the EFI partition. If you can't boot, come back and change the name of the "boot" file to "boot-default". Change the name of the "boox64 or bootx32" file to "boot" according to the architecture of your processor. it does not matter. If you still can't boot, try the "boot6", "boot7" and "boot9" files.
+#### NOTE: If you have LEGACY BIOS. Try to boot already without touching the default "boot" file that comes in the EFI partition. If you can't boot, come back and change the name of the "boot" file to "boot-default". Change the name of the "boox64 or bootx32" file to "boot" according to the architecture of your processor. it does not matter. If you still can't boot, try the "boot6", "boot7" and "boot9" files.
 
 - After making the BIOS settings, let's choose USB from the boot menu of our computer and continue.
 - The OpenCore screen will come up, let's choose Install macOS High Sierra (whatever yours is) and continue.
@@ -101,6 +101,10 @@ Not every system has the same BIOS settings. Apply whatever settings are availab
     - [Intel I211-AT](https://github.com/khronokernel/SmallTree-I211-AT-patch/releases)
     - Realtek Ethernet
       - [RTL8111](https://github.com/Mieze/RTL8111_driver_for_OS_X/releases)
+      - [RTL810x](https://www.insanelymac.com/forum/files/file/259-realtekrtl8100-binary/)
+      - [RTL8125](https://github.com/Mieze/LucyRTL8125Ethernet)
+    - [Broadcom Wi-Fi](https://github.com/acidanthera/airportbrcmfixup/releases)
+    - [Atheros Wi-Fi](https://dortania.github.io/Wireless-Buyers-Guide/Kext.html#atheros)
 
 
 <h1 align="center"> macOS Monterey </h1>
