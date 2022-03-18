@@ -22,7 +22,7 @@ Hello to everyone. This repo contains the image and global EFI needed to install
 - [Setting EFI Folder](https://github.com/yusufklncc/Hackintosh-for-All-Computers#setting-efi-folder-)
 - [Setting BIOS Settings](https://github.com/yusufklncc/Hackintosh-for-All-Computers#setting-bios-settings-)
 
-<h4 align="left"> Downloading OSX Image </h4>
+### Downloading OSX Image
 
 - Go to OSX Image Google Drive or MEGA link and download it.
   - [Monterey](https://github.com/yusufklncc/Hackintosh-for-All-Computers#-macos-monterey-)
