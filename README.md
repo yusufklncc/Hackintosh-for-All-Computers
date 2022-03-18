@@ -88,7 +88,7 @@ Hello to everyone. This repo contains the image and global EFI needed to install
 
 Not every system has the same BIOS settings. Apply whatever settings are available.
 
-[B][COLOR=rgb(235, 107, 86)]NOT: Eğer LEGACY boot ayarına sahipseniz EFI bölüntüsü içinde gelen default boot dosyasına dokunmadan hali hazırda boot etmeyi deneyin. Eğer boot edemez iseniz tekrar gelin ve işlemcinizin mimarisine göre olan boot dosyasının adını boot olarak değiştirin. Varsayılan olanın adını da boot-default yapabilirsiniz farketmez.[/COLOR][/B]
+### NOTE: Eğer LEGACY boot ayarına sahipseniz EFI bölüntüsü içinde gelen default boot dosyasına dokunmadan hali hazırda boot etmeyi deneyin. Eğer boot edemez iseniz tekrar gelin ve işlemcinizin mimarisine göre olan boot dosyasının adını boot olarak değiştirin. Varsayılan olanın adını da boot-default yapabilirsiniz farketmez.
 
 <h1 align="center"> macOS Monterey </h1>
 <p align="center">
