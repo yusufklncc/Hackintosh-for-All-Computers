@@ -18,21 +18,21 @@ Hello to everyone. This repo contains the image and global EFI needed to install
 ## Table of contents
 
 - [Downloading OSX Image](https://github.com/yusufklncc/Hackintosh-for-All-Computers#downloading-osx-image)
-- [Writing OSX Image](https://github.com/yusufklncc/Hackintosh-for-All-Computers#writing-osx-image-)
-- [Setting EFI Folder](https://github.com/yusufklncc/Hackintosh-for-All-Computers#setting-efi-folder-)
-- [Setting BIOS Settings](https://github.com/yusufklncc/Hackintosh-for-All-Computers#setting-bios-settings-)
+- [Writing OSX Image](https://github.com/yusufklncc/Hackintosh-for-All-Computers#writing-osx-image)
+- [Setting EFI Folder](https://github.com/yusufklncc/Hackintosh-for-All-Computers#setting-efi-folder)
+- [Setting BIOS Settings](https://github.com/yusufklncc/Hackintosh-for-All-Computers#setting-bios-settings)
 
 ### Downloading OSX Image
 
 - Go to OSX Image Google Drive or MEGA link and download it.
-  - [Monterey](https://github.com/yusufklncc/Hackintosh-for-All-Computers#-macos-monterey-)
-  - [Big Sur](https://github.com/yusufklncc/Hackintosh-for-All-Computers#-macos-big-sur-)
-  - [Catalina](https://github.com/yusufklncc/Hackintosh-for-All-Computers#-macos-catalina-)
-  - [Mojave](https://github.com/yusufklncc/Hackintosh-for-All-Computers#-macos-mojave-)
-  - [High Sierra](https://github.com/yusufklncc/Hackintosh-for-All-Computers#-macos-high-sierra-)
-  - [Sierra](https://github.com/yusufklncc/Hackintosh-for-All-Computers#-macos-sierra-)
-  - [El Capitan](https://github.com/yusufklncc/Hackintosh-for-All-Computers#-macos-el-capitan-)
-  - [Yosemite](https://github.com/yusufklncc/Hackintosh-for-All-Computers#-macos-yosemite-)
+  - [Monterey](https://github.com/yusufklncc/Hackintosh-for-All-Computers#macos-monterey)
+  - [Big Sur](https://github.com/yusufklncc/Hackintosh-for-All-Computers#macos-big-sur)
+  - [Catalina](https://github.com/yusufklncc/Hackintosh-for-All-Computers#macos-catalina)
+  - [Mojave](https://github.com/yusufklncc/Hackintosh-for-All-Computers#macos-mojave)
+  - [High Sierra](https://github.com/yusufklncc/Hackintosh-for-All-Computers#macos-high-sierra)
+  - [Sierra](https://github.com/yusufklncc/Hackintosh-for-All-Computers#macos-sierra)
+  - [El Capitan](https://github.com/yusufklncc/Hackintosh-for-All-Computers#macos-el-capitan)
+  - [Yosemite](https://github.com/yusufklncc/Hackintosh-for-All-Computers#macos-yosemite)
 
 ### Writing OSX Image
 
