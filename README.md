@@ -107,6 +107,9 @@ Not every system has the same BIOS settings. Apply whatever settings are availab
 - Right click on our config.plist file and open it with notepad/notepad++. Let's search the Kernel with the Ctrl+F combination. The result will be:
   - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/config:kernel.png">
 
+- Now come to the bottom of the "Add" section and let's show our kext. For that, follow this video:
+  - [Show kext to config](https://yadi.sk/i/0868TpQvJQa2UQ)
+
 <h1 align="center"> macOS Monterey </h1>
 <p align="center">
   <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/macOS/macOS%20Monterey.png" width="500">
