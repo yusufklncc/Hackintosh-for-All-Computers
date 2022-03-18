@@ -95,9 +95,9 @@ Not every system has the same BIOS settings. Apply whatever settings are availab
 - Texts will start to flow on the screen, this is verbose mode. Here, the processes that occur while your computer is booting are displayed as text.
 - If, after waiting for a while, the texts don't stop, if they stay normal, you're out of luck 😊. If the texts do not stop, you will see the Apple logo and then the macOS loading screen. We have no problems so far. Now it's time to install our Network/Ethernet card, which is our important hardware after installation.
 - Press the Apple logo in the top left and turn off the computer. Open Windows.
- - Network or ethernet cards possible models:
-  - [Intel Wi-Fi](https://github.com/OpenIntelWireless/itlwm/releases)
-  - [Intel Ethernet](https://github.com/acidanthera/IntelMausi/releases)
+  - Network or ethernet cards possible models:
+    - [Intel Wi-Fi](https://github.com/OpenIntelWireless/itlwm/releases)
+    - [Intel Ethernet](https://github.com/acidanthera/IntelMausi/releases)
 
 
 <h1 align="center"> macOS Monterey </h1>
