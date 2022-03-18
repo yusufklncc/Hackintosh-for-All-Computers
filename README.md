@@ -123,6 +123,19 @@ Not every system has the same BIOS settings. Apply whatever settings are availab
   - There is nothing wrong. Now open "Utilities/Disk Utility" from the top to prepare our disk. Follow the steps in the image below.
   - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Erasing%20Disk%201.png">
   - Select "Show All Devices" from the "Display" option and select the name of our disk and click Erase.
+  - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Erasing%20Disk%202.png">
+  - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Erasing%20Disk%203.png">
+  - If you are going to install a version of High Sierra and above, format it as APFS/GUID, if you are going to install a version of Sierra and below, format it as "MacOS Extended Journaled"/GUID.
+  - After erasing is complete, close disk utility and select our disk and resume.
+  - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Disk%20Selection.png">
+  - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Installation%20Starting.png">
+  - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Installation%20Finishing.png">
+  - When the installation is finished, choose the name of our disk from OpenCore if we installed Mojave and below versions, choose macOS Installer if we installed Catalina and above versions. Keep selecting until this option is gone.
+  - After the installation steps are over, the language selection screen will welcome us:
+  - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Language%20Selection.png">
+  - Complete the installation without connecting to the internet. Because we need to set our serial numbers and ROM for iCloud and iMessage.
+  - annd yeah Desktop:
+  - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Desktop.png">
 
 <h1 align="center"> macOS Monterey </h1>
 <p align="center">
