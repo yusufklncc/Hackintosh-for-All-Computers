@@ -98,6 +98,9 @@ Not every system has the same BIOS settings. Apply whatever settings are availab
   - Network or ethernet cards possible models:
     - [Intel Wi-Fi](https://github.com/OpenIntelWireless/itlwm/releases)
     - [Intel Ethernet](https://github.com/acidanthera/IntelMausi/releases)
+    - [Intel I211-AT](https://github.com/khronokernel/SmallTree-I211-AT-patch/releases)
+    - Realtek Ethernet
+      - [RTL8111](https://github.com/Mieze/RTL8111_driver_for_OS_X/releases)
 
 
 <h1 align="center"> macOS Monterey </h1>
