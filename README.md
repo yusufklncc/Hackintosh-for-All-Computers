@@ -1,4 +1,4 @@
-<h1 align="center"> macOS on All Computers </h1>
+## macOS on All Computers
 
 <p align="center">
   <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/macOS/All%20macOS.png" alt="All macOS">
@@ -34,7 +34,7 @@ Hello to everyone. This repo contains the image and global EFI needed to install
   - [El Capitan](https://github.com/yusufklncc/Hackintosh-for-All-Computers#-macos-el-capitan-)
   - [Yosemite](https://github.com/yusufklncc/Hackintosh-for-All-Computers#-macos-yosemite-)
 
-<h4 align="left">Writing OSX Image </h4>
+### Writing OSX Image
 
 - Unzip the zip file to desktop.
 - Download balenaEtcher from this link https://www.balena.io/etcher/
@@ -48,7 +48,7 @@ Hello to everyone. This repo contains the image and global EFI needed to install
 
 
 
-<h4 align="left">Setting EFI Folder </h4>
+### Setting EFI Folder
 
 - When you plug USB back, you can see EFI partition in "My Computer"
 - Open EFI partition.
@@ -60,7 +60,7 @@ Hello to everyone. This repo contains the image and global EFI needed to install
   - Find Laptop Kaby Lake.plist and rename "config"
 - Now you can boot from USB.
 
-<h4 align="left">Setting BIOS Settings </h4>
+### Setting BIOS Settings 
 
 - ### Intel
   - Başlamadan önce BIOS ayarlarınızı öntanımlı ayarlara çekin (Load Default Settings).
@@ -103,14 +103,14 @@ Not every system has the same BIOS settings. Apply whatever settings are availab
       - [RTL8125](https://github.com/Mieze/LucyRTL8125Ethernet)
     - [Broadcom Wi-Fi](https://github.com/acidanthera/airportbrcmfixup/releases)
     - [Atheros Wi-Fi](https://dortania.github.io/Wireless-Buyers-Guide/Kext.html#atheros)
-- Let's download the kext we need and put it in EFI/OC/Kexts. Next is to show this kext to the config. We will do this with notepad/notepad++. Let our example kext be AirportBrcmFixUp.kext, which is required for Broadcom WiFi.
+- Let's download the kext we need and put it in EFI/OC/Kexts. Next is to show this kext to the config. We will do this with notepad/notepad++. Let our example kext be ### AirportBrcmFixUp.kext, which is required for Broadcom WiFi.
 - Right click on our config.plist file and open it with notepad/notepad++. Let's search the Kernel with the Ctrl+F combination. The result will be:
   - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/config:kernel.png">
 
 - Now come to the bottom of the "Add" section and let's show our kext. For that, follow this video:
   - [Show kext to config](https://yadi.sk/i/0868TpQvJQa2UQ)
 
-## macOS Installation Steps
+### macOS Installation Steps
 
 <h1 align="center"> macOS Monterey </h1>
 <p align="center">
