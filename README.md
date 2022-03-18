@@ -8,14 +8,12 @@ Hello to everyone. This repo contains the image and global EFI needed to install
 - [Anti-Hackintosh Buyers](https://dortania.github.io/Anti-Hackintosh-Buyers-Guide/)
 - [GPU Buyers Guide](https://dortania.github.io/GPU-Buyers-Guide/)
 - [Wireless Buyers Guide](https://dortania.github.io/Wireless-Buyers-Guide/)
-
-
-- My laptop specs:
-  - Model: Lenovo Thinkpad E570
-  - CPU: i5-7200U
-  - Graphic Device: HD 620
-  - Network Devices: DW1820A Wi-Fi & Bt , RTL8111 Ethernet
-  - Disk and Ram: KBG40ZNV256G KIOXIA NVMe 256GB & SAMSUNG SSD 860 EVO 250GB ve 8GB Ram DDR3
+  - My laptop specs:
+    - Model: Lenovo Thinkpad E570
+    - CPU: i5-7200U
+    - Graphic Device: HD 620
+    - Network Devices: DW1820A Wi-Fi & Bt , RTL8111 Ethernet
+    - Disk and Ram: KBG40ZNV256G KIOXIA NVMe 256GB & SAMSUNG SSD 860 EVO 250GB ve 8GB Ram DDR3
 
 ## Table of contents
 
