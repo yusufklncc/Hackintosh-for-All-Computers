@@ -88,7 +88,7 @@ Hello to everyone. This repo contains the image and global EFI needed to install
 
 Not every system has the same BIOS settings. Apply whatever settings are available.
 
-### NOTE: Eğer LEGACY boot ayarına sahipseniz EFI bölüntüsü içinde gelen default boot dosyasına dokunmadan hali hazırda boot etmeyi deneyin. Eğer boot edemez iseniz tekrar gelin ve işlemcinizin mimarisine göre olan boot dosyasının adını boot olarak değiştirin. Varsayılan olanın adını da boot-default yapabilirsiniz farketmez.
+### NOTE: If you have LEGACY BIOS. Try to boot already without touching the default "boot" file that comes in the EFI partition. If you can't boot, come back and change the name of the "boot" file to "boot-default". Change the name of the "boox64 or bootx32" file to "boot" according to the architecture of your processor. it does not matter. If you still can't boot, try the "boot6", "boot7" and "boot9" files.
 
 <h1 align="center"> macOS Monterey </h1>
 <p align="center">
