@@ -174,7 +174,7 @@ Not every system has the same BIOS settings. Apply whatever settings are availab
 
 <h3 align="left"> Features </h3>
 
-- Includes macOS Big Sur 11.6 (20G165).
+- Includes macOS Big Sur 11.6.5 (20G527).
 - It can be installed on original Mac devices.
   - If you want to install it on a Mac computer, after writing the image to USB with balenaEtcher insert the USB into your Mac device and open the "Install macOS XXX" after entering the boot selector menu with the options key.
 - 16GB or higher USB required.
@@ -191,7 +191,7 @@ Not every system has the same BIOS settings. Apply whatever settings are availab
   <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/macOS/macOS%20Catalina.png" width="500">
 <p align="center">
   <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Google%20Drive%20Icon.png" width="50"/> </a>
-<a href="[URL unfurl="true"]https://drive.google.com/file/d/1lTrMAuWKY6gJzg7LrQ4xkgR2O1Jw5aga/view?usp=sharing[/URL]">
+<a href="https://drive.google.com/file/d/1su1aht3HdKle8KhFdh8Hgis8iVdCS0Av/view?usp=sharing">
   <img src="https://img.shields.io/badge/Download-Catalina%2010.15.7%20(19H15)-red" width="400"/> </a>
 
 <h3 align="left"> Features </h3>
