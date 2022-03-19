@@ -113,7 +113,7 @@ Not every system has the same BIOS settings. Apply whatever settings are availab
 ### macOS Installation Steps
 - Now let's turn off our computer and boot from USB. Choose the `Install macOS High Sierra` (whatever you have) option and go to the installation screen.
 - If you are going to install macOS `next to windows`, create a partition with the video guide below. <b>(This operation can only be performed on OSX to Mojave.)</b>
-  - ATTENTION: You can install next to the Windows only with images that support `MBR HFS+`. `Mojave and below macOS versions support MBR.`
+  - <b>ATTENTION:</b> You can install next to the Windows only with images that support `MBR HFS+`. `Mojave and below macOS versions support MBR.`
     - [Splitting the disk in HFS+ format](https://yadi.sk/i/MEDvBBLVCzneBQ)
     - After doing this, you can select your disk directly on the installation screen and start the installation.
 - What to do on the following screens:
