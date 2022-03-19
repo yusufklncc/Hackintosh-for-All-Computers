@@ -87,7 +87,7 @@ Not every system has the same BIOS settings. Apply whatever settings are availab
 
 ### Editing EFI
 
-#### NOTE: If you have LEGACY BIOS. Try to boot already without touching the default "boot" file that comes in the EFI partition. If you can't boot, come back and change the name of the "boot" file to "boot-default". Change the name of the "boox64 or bootx32" file to "boot" according to the architecture of your processor. it does not matter. If you still can't boot, try the "boot6", "boot7" and "boot9" files.
+`NOTE`: If you have `LEGACY BIOS`. Try to boot already without touching the default "boot" file that comes in the EFI partition. If you can't boot, come back and change the name of the "boot" file to "boot-default". Change the name of the "boox64 or bootx32" file to "boot" according to the architecture of your processor. it does not matter. If you still can't boot, try the "boot6", "boot7" and "boot9" files.
 
 - After making the BIOS settings, let's choose USB from the boot menu of our computer and continue.
 - The OpenCore screen will come up, let's choose Install macOS High Sierra (whatever yours is) and continue.
@@ -103,8 +103,8 @@ Not every system has the same BIOS settings. Apply whatever settings are availab
       - [RTL8125](https://github.com/Mieze/LucyRTL8125Ethernet)
     - [Broadcom Wi-Fi](https://github.com/acidanthera/airportbrcmfixup/releases)
     - [Atheros Wi-Fi](https://dortania.github.io/Wireless-Buyers-Guide/Kext.html#atheros)
-- Let's download the kext we need and put it in EFI/OC/Kexts. Next is to show this kext to the config. We will do this with notepad/notepad++. Let our example kext be 'AirportBrcmFixUp.kext' , which is required for Broadcom WiFi.
-- Right click on our config.plist file and open it with notepad/notepad++. Let's search the Kernel with the Ctrl+F combination. The result will be:
+- Let's download the kext we need and put it in EFI/OC/Kexts. Next is to show this kext to the config. We will do this with `notepad/notepad++`. Let our example kext be `AirportBrcmFixUp.kext` , which is required for Broadcom WiFi.
+- Right click on our `config.plist` file and open it with `notepad/notepad++`. Let's search the Kernel with the Ctrl+F combination. The result will be:
   - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/config:kernel.png">
 
 - Now come to the bottom of the "Add" section and let's show our kext. For that, follow this video:
