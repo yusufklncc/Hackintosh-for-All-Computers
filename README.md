@@ -62,17 +62,17 @@ Hello to everyone. This repo contains the image and global EFI needed to install
 ### Setting BIOS Settings 
 
 - ### Intel
-  - Başlamadan önce BIOS ayarlarınızı öntanımlı ayarlara çekin (Load Default Settings).
-  - SATA: AHCI olarak ayarlayın
-  - VT-D: Disable olarak ayarlayın
-  - EHCI Hand-off / xHCI Hand-off: Enable olarak ayarlayın.
+  - Load Default Settings
+  - SATA: AHCI 
+  - VT-D: Disable 
+  - EHCI Hand-off / xHCI Hand-off: Enable 
   - xHCI Mode: Smart Auto
-  - Secureboot: Disable (Other OS) olarak ayarlayın
+  - Secureboot: Disable (Other OS)
   - CFG-Lock= Disable
-  - Boot Option Priorities: UEFI USB olarak ayarlayın. Yada UEFI and Legacy.
+  - Boot Option Priorities: UEFI or UEFI and Legacy.
 
 - ### AMD Ryzen
-  - Başlamadan önce BIOS ayarlarınızı öntanımlı ayarlara çekin (Load Default Settings).
+  - Load Default Settings
   - OC Tweaker -> Load XMP Setting: XMP 2.0 Profile 1
   - Advanced \CPU Configuration -> SWM Mode = Enabled
   - Advanced\North Bridge Configuration -> IOMMU: Disabled
