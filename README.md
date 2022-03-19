@@ -191,7 +191,7 @@ Not every system has the same BIOS settings. Apply whatever settings are availab
   <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/macOS/macOS%20Catalina.png" width="500">
 <p align="center">
   <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Google%20Drive%20Icon.png" width="50"/> </a>
-<a href="https://drive.google.com/file/d/1lTrMAuWKY6gJzg7LrQ4xkgR2O1Jw5aga/view?usp=sharing">
+<a href="[URL unfurl="true"]https://drive.google.com/file/d/1lTrMAuWKY6gJzg7LrQ4xkgR2O1Jw5aga/view?usp=sharing[/URL]">
   <img src="https://img.shields.io/badge/Download-Catalina%2010.15.7%20(19H15)-red" width="400"/> </a>
 
 <h3 align="left"> Features </h3>
