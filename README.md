@@ -159,6 +159,37 @@ Note: Most of these options may not be present in your firmware, we recommend ma
   - annd yeah Desktop:
   - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Desktop.png">
 
+<h1 align="center"> macOS Ventura </h1>
+<p align="center">
+  <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/macOS%20Ventura%20%C4%B0maj.png" width="500">
+<p align="center">
+  <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Google%20Drive%20Icon.png" width="50"/> </a>
+<a href="https://drive.google.com/file/d/1hCObrljlhz-t-wYShWaBXS2QddMVDMUt/view?usp=sharing">
+  <img src="https://img.shields.io/badge/Download-Ventura%2013.0%20(22A380)-blueviolet" width="400"/> </a>
+
+<h3 align="left"> Features </h3>
+
+- Includes macOS Ventura 13.0 (22A380).
+- It can be installed on original Mac devices.
+  - If you want to install it on a Mac computer, after writing the image to USB with balenaEtcher insert the USB into your Mac device and open the "Install macOS XXX" after entering the boot selector menu with the options key.
+- 16GB or higher USB required.
+- Compatible for laptop installation.
+- Compatible for desktop installation.
+- Compatible with UEFI and Legacy systems.
+- You can install OSX next to your GPT Windows installed disk.
+- It has SSE4,1 support.
+- "Kurulum Sonrası - Post Installation" contains the most necessary programs after installation.
+- Compatible for computers with Intel and AMD processors.
+
+<h1 align="center"> macOS Ventura </h1>
+<p align="center">
+  <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/macOS%20Ventura%20%C4%B0maj.png" width="500">
+<p align="center">
+  <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Google%20Drive%20Icon.png" width="50"/> </a>
+<a href="https://drive.google.com/file/d/1nOtZB-pFURK5bTQE13zcPMxRtYzGZexT/view?usp=sharing">
+  <img src="https://img.shields.io/badge/Download-Big%20Sur%2013.0%20(22A380)-orange" width="400"/> </a>
+
+
 <h1 align="center"> macOS Monterey </h1>
 <p align="center">
   <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/macOS%20Monterey%20%C4%B0maj.png" width="500">
