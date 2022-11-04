@@ -139,7 +139,7 @@ Not every system has the same BIOS settings. Apply whatever settings are availab
 
 <h1 align="center"> macOS Monterey </h1>
 <p align="center">
-  <img src="[https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/macOS/macOS%20Monterey.png](https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/macOS%20Monterey%20%C4%B0maj.png)" width="500">
+  <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/macOS%20Monterey%20%C4%B0maj.png" width="500">
 <p align="center">
   <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Google%20Drive%20Icon.png" width="50"/> </a>
 <a href="https://drive.google.com/file/d/1hCObrljlhz-t-wYShWaBXS2QddMVDMUt/view?usp=sharing">
@@ -165,7 +165,7 @@ Not every system has the same BIOS settings. Apply whatever settings are availab
 
 <h1 align="center"> macOS Big Sur </h1>
 <p align="center">
-  <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/macOS/macOS%20Big%20Sur.png" width="500">
+  <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/macOS%20Big%20Sur%20%C4%B0maj.png" width="500">
 <p align="center">
   <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Google%20Drive%20Icon.png" width="50"/> </a>
 <a href="https://drive.google.com/file/d/1JmUNIZhUyxQ7VPLmIdbA-r2STzkyHwk3/view?usp=sharing">
@@ -187,7 +187,7 @@ Not every system has the same BIOS settings. Apply whatever settings are availab
 
 <h1 align="center"> macOS Catalina </h1>
 <p align="center">
-  <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/macOS/macOS%20Catalina.png" width="500">
+  <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/macOS%20Catalina%20%C4%B0maj.png" width="500">
 <p align="center">
   <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Google%20Drive%20Icon.png" width="50"/> </a>
 <a href="https://drive.google.com/file/d/1su1aht3HdKle8KhFdh8Hgis8iVdCS0Av/view?usp=sharing">
@@ -209,7 +209,7 @@ Not every system has the same BIOS settings. Apply whatever settings are availab
 
 <h1 align="center"> macOS Mojave </h1>
 <p align="center">
-  <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/macOS/macOS%20Mojave.png" width="500">
+  <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/macOS%20Mojave%20%C4%B0maj.png" width="500">
 <p align="center">
   <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Google%20Drive%20Icon.png" width="50"/> </a>
 <a href="https://drive.google.com/file/d/1su1aht3HdKle8KhFdh8Hgis8iVdCS0Av/view?usp=sharing">
@@ -230,7 +230,7 @@ Not every system has the same BIOS settings. Apply whatever settings are availab
 
 <h1 align="center"> macOS High Sierra </h1>
 <p align="center">
-  <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/macOS/macOS%20High%20Sierra.png" width="500">
+  <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/macOS%20High%20Sierra%20%C4%B0maj.png" width="500">
 <p align="center">
   <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Google%20Drive%20Icon.png" width="50"/> </a>
 <a href="https://drive.google.com/file/d/1LLtzrU3NjIFAqq_UsGHUEUvovWyuQUK-/view?usp=sharing">
