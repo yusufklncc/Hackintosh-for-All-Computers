@@ -64,14 +64,33 @@ Hello to everyone. This repo contains the image and global EFI needed to install
 ### Setting BIOS Settings 
 
 - ### Intel
-  - Load Default Settings
-  - SATA: AHCI 
-  - VT-D: Disable 
-  - EHCI Hand-off / xHCI Hand-off: Enable 
-  - xHCI Mode: Smart Auto
-  - Secureboot: Disable (Other OS)
-  - CFG-Lock= Disable
-  - Boot Option Priorities: UEFI or UEFI and Legacy.
+[LIST]
+[*]Başlamadan önce BIOS ayarlarınızı öntanımlı ayarlara çekin (Load Default Settings).
+[*][B]Disable[/B]
+[LIST]
+[*]Fast Boot
+[*]Secure Boot
+[*]Serial/COM Port
+[*]Parallel Port
+[*]CSM
+[*]Thunderbolt
+[*]Intel SGX
+[*]Intel Platform Trust
+[*]CFG Lock (MSR 0xE2 write protection)[B](Kesinlikle kapalı olmalı, Eğer bu ayarı bulamadıysan config -> Kernel -> Quirks altından AppleXcpmCfgLock ayarını aç. CFG-Lock açıkken sisteminiz açılmayacak)[/B]
+[/LIST]
+[*][B]Enable[/B]
+[LIST]
+[*]VT-x
+[*]VT-d
+[*]Above 4G decoding
+[*]Hyper-Threading
+[*]Execute Disable Bit
+[*]EHCI/XHCI Hand-off
+[*]OS type: Windows 8.1/10 UEFI Mode
+[*]DVMT Pre-Allocated(iGPU Memory): 64MB
+[*]SATA Mode: AHCI
+[/LIST]
+[/LIST]
 
 - ### AMD Ryzen
   - Load Default Settings
