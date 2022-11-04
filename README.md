@@ -62,42 +62,50 @@ Hello to everyone. This repo contains the image and global EFI needed to install
 - Now you can boot from USB.
 
 ### Setting BIOS Settings 
+  
+Note: Most of these options may not be present in your firmware, we recommend matching up as closely as possible but don't be too concerned if many of these options are not available in your BIOS
 
 - ### Intel
-  - Başlamadan önce BIOS ayarlarınızı öntanımlı ayarlara çekin (Load Default Settings).
+  - Before you start, reset your BIOS settings to default.
   - `Disable`
     - Fast Boot
     - Secure Boot
     - Serial/COM Port
     - Parallel Port
-    - CSM
-    - Thunderbolt
+    - Compatibility Support Module (CSM) (Must be off in most cases, GPU errors/stalls like gIO are common when this option is enabled)
+    - Thunderbolt (For initial install, as Thunderbolt can cause issues if not setup correctly)
     - Intel SGX
-    - CFG Lock (MSR 0xE2 write protection)[B](Kesinlikle kapalı olmalı, Eğer bu ayarı bulamadıysan config -> Kernel -> Quirks altından AppleXcpmCfgLock ayarını aç. CFG-Lock açıkken sisteminiz açılmayacak)[/B]
+    - Intel Platform Trust
+    - CFG Lock (MSR 0xE2 write protection)(This must be off, if you can't find the option then enable AppleXcpmCfgLock under Kernel -> Quirks. Your hack will not boot with CFG-Lock enabled)
   - `Enable`
     - VT-x
-    - VT-d
     - Above 4G decoding
     - Hyper-Threading
     - Execute Disable Bit
     - EHCI/XHCI Hand-off
-    - OS type: Windows 8.1/10 UEFI Mode
-    - DVMT Pre-Allocated(iGPU Memory): 64MB
+    - OS type: OS type: Windows 8.1/10 UEFI Mode (some motherboards may require "Other OS" instead)
+    - DVMT Pre-Allocated(iGPU Memory): 64MB or higher
     - SATA Mode: AHCI
 
 - ### AMD Ryzen
-  - Load Default Settings
-  - OC Tweaker -> Load XMP Setting: XMP 2.0 Profile 1
-  - Advanced \CPU Configuration -> SWM Mode = Enabled
-  - Advanced\North Bridge Configuration -> IOMMU: Disabled
-  - Advanced \South Bridge Configuration -> Deep Sleep: Disabled
-  - Advanced \Storage Configuration -> Sata Mode: AHCI Mode
-  - Advanced\AMD CBS\FCH Common Options\USB Configuration Options -> XCHCI controller enable: Enabled
-  - Advanced\AMD CBS/NBIO Common Options\NB Configuration -> IOMMU: Disabled
-  - Security -> Secure Boot: Disabled
-  - Boot -> Fast Boot: Disabled
-
-Not every system has the same BIOS settings. Apply whatever settings are available.
+  - Before you start, reset your BIOS settings to default.
+  - `Disable`
+    - Fast Boot
+    - Secure Boot
+    - Serial/COM Port
+    - Parallel Port
+    - Compatibility Support Module (CSM) (Must be off in most cases, GPU errors/stalls like gIO are common when this option is enabled)
+    - IOMMU
+  
+  - `Enable`
+    - Above 4G Decoding (This must be on, if you can't find the option then add npci=0x3000 to boot-args. Do not have both this option and npci enabled at the same time.)
+      - If you are on a Gigabyte/Aorus or an AsRock motherboard, enabling this option may break certain drivers(ie. Ethernet) and/or boot failures on other OSes, if it does happen then disable this option and opt for npci instead
+      - 2020+ BIOS Notes: When enabling Above4G, Resizable BAR Support may become an available on some X570 and newer motherboards. Please ensure that Booter -> Quirks -> ResizeAppleGpuBars is set to 0 if this is enabled.
+    - EHCI/XHCI Hand-off
+    - OS type: Windows 8.1/10 UEFI Mode (some motherboards may require "Other OS" instead)
+    - SATA Mode: AHCI
+    - SWM Mode
+  
 
 ### Editing EFI
 
