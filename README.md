@@ -279,7 +279,7 @@ Note: Most of these options may not be present in your firmware, we recommend ma
   <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/macOS%20High%20Sierra%20%C4%B0maj.png" width="500">
 <p align="center">
   <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Google%20Drive%20Icon.png" width="50"/> </a>
-<a href="https://drive.google.com/file/d/1LLtzrU3NjIFAqq_UsGHUEUvovWyuQUK-/view?usp=sharing">
+<a href="https://drive.google.com/file/d/1reS464pquOVKLCI-V5VF3OA5_uzGvele/view?usp=sharing">
   <img src="https://img.shields.io/badge/Download-High%20Sierra%2010.13.6%20(17G66)-orange" width="400"/> </a>
 
 <h3 align="left"> Features </h3>
@@ -300,7 +300,7 @@ Note: Most of these options may not be present in your firmware, we recommend ma
   <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/macOS/macOS%20Sierra.png" width="500">
 <p align="center">
   <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Google%20Drive%20Icon.png" width="50"/> </a>
-<a href="https://drive.google.com/file/d/1KKRlAO9_OuK_KH_nEDhxxWHWMd2-a-fU/view?usp=sharing">
+<a href="https://drive.google.com/file/d/1JpAKVwvF9v5ivZDOKR65xBDi7uoZRcwR/view?usp=sharingg">
   <img src="https://img.shields.io/badge/Download-Sierra%2010.12.6%20(16G29)-yellowgreen" width="400"/> </a>
 
 <h3 align="left"> Features </h3>
@@ -321,7 +321,7 @@ Note: Most of these options may not be present in your firmware, we recommend ma
   <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/macOS/macOS%20El%20Capitan.png" width="500">
 <p align="center">
   <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Google%20Drive%20Icon.png" width="50"/> </a>
-<a href="https://drive.google.com/file/d/1EykVAh4Bktt_fKrp_uicJf0VVXQP2dUd/view?usp=sharing">
+<a href="https://drive.google.com/file/d/1ZN5i1acptGn49uOfVeT8scGPnjBFnVAn/view?usp=sharing">
   <img src="https://img.shields.io/badge/Download-El%20Capitan%2010.11.6%20(15G31)-red" width="400"/> </a> 
 
 <h3 align="left"> Features </h3>
