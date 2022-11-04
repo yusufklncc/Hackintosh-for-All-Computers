@@ -139,7 +139,7 @@ Not every system has the same BIOS settings. Apply whatever settings are availab
 
 <h1 align="center"> macOS Monterey </h1>
 <p align="center">
-  <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/macOS/macOS%20Monterey.png" width="500">
+  <img src="[https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/macOS/macOS%20Monterey.png](https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/macOS%20Monterey%20%C4%B0maj.png)" width="500">
 <p align="center">
   <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Google%20Drive%20Icon.png" width="50"/> </a>
 <a href="https://drive.google.com/file/d/1hCObrljlhz-t-wYShWaBXS2QddMVDMUt/view?usp=sharing">
