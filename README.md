@@ -131,13 +131,13 @@ Note: Most of these options may not be present in your firmware, we recommend ma
   - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/config:kernel.png">
 
 - Now come to the bottom of the `Add` section and let's show our kext. For that, follow this video:
-  - [Show kext to config](https://yadi.sk/i/0868TpQvJQa2UQ)
+  - [Show kext to config](https://vk.com/video749455540_456239017)
 
 ### macOS Installation Steps
 - Now let's turn off our computer and boot from USB. Choose the `Install macOS High Sierra` (whatever you have) option and go to the installation screen.
 - If you are going to install macOS `next to windows`, create a partition with the video guide below. <b>(This operation can only be performed on OSX to Mojave.)</b>
   - <b>ATTENTION:</b> You can install next to the Windows only with images that support `MBR HFS+`. `Mojave and below macOS versions support MBR.`
-    - [Splitting the disk in HFS+ format](https://yadi.sk/i/MEDvBBLVCzneBQ)
+    - [Splitting the disk in HFS+ format](https://vk.com/video749455540_456239018)
     - After doing this, you can select your disk directly on the installation screen and start the installation.
 - What to do on the following screens:
   - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Installation.png">
