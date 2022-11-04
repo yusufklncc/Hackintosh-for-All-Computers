@@ -181,14 +181,6 @@ Note: Most of these options may not be present in your firmware, we recommend ma
 - "Kurulum Sonrası - Post Installation" contains the most necessary programs after installation.
 - Compatible for computers with Intel and AMD processors.
 
-<h1 align="center"> macOS Ventura </h1>
-<p align="center">
-  <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/macOS%20Ventura%20%C4%B0maj.png" width="500">
-<p align="center">
-  <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Google%20Drive%20Icon.png" width="50"/> </a>
-<a href="https://drive.google.com/file/d/1nOtZB-pFURK5bTQE13zcPMxRtYzGZexT/view?usp=sharing">
-  <img src="https://img.shields.io/badge/Download-Big%20Sur%2013.0%20(22A380)-orange" width="400"/> </a>
-
 
 <h1 align="center"> macOS Monterey </h1>
 <p align="center">
