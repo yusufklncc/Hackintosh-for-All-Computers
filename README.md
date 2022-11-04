@@ -258,7 +258,7 @@ Note: Most of these options may not be present in your firmware, we recommend ma
   <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/macOS%20Mojave%20%C4%B0maj.png" width="500">
 <p align="center">
   <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Google%20Drive%20Icon.png" width="50"/> </a>
-<a href="https://drive.google.com/file/d/1su1aht3HdKle8KhFdh8Hgis8iVdCS0Av/view?usp=sharing">
+<a href="https://drive.google.com/file/d/1CZI7VDSVkBP0RFTkFjKSWA1jRTRCFMea/view?usp=sharing">
   <img src="https://img.shields.io/badge/Download-Mojave%2010.14.6%20(18G103)-yellow" width="400"/> </a>
 
 <h3 align="left"> Features </h3>
