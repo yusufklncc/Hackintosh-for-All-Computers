@@ -187,8 +187,8 @@ Note: Most of these options may not be present in your firmware, we recommend ma
   <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/macOS%20Monterey%20%C4%B0maj.png" width="500">
 <p align="center">
   <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Google%20Drive%20Icon.png" width="50"/> </a>
-<a href="https://drive.google.com/file/d/1hCObrljlhz-t-wYShWaBXS2QddMVDMUt/view?usp=sharing">
-  <img src="https://img.shields.io/badge/Download-Monterey%2012.3%20(21E230)-blueviolet" width="400"/> </a>
+<a href="https://drive.google.com/file/d/1owJK1zTBNIpRNxoWewrurRljb-60L7Gy/view?usp=sharing">
+  <img src="https://img.shields.io/badge/Download-Monterey%2012.6%20(21G115)-blueviolet" width="400"/> </a>
 <p align="center">  
   <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/MEGA%20Icon.png" width="50"/> </a>
 <a href="https://mega.nz/file/P59RgARB#nb0n3l5e-4XobcnLzbsPTqBHBPhYTc01G0XvABhdExk">
@@ -196,14 +196,14 @@ Note: Most of these options may not be present in your firmware, we recommend ma
 
 <h3 align="left"> Features </h3>
 
-- Includes macOS Monterey 12.0.1 (21A559).
+- Includes macOS Monterey 12.6 (21G115).
 - It can be installed on original Mac devices.
   - If you want to install it on a Mac computer, after writing the image to USB with balenaEtcher insert the USB into your Mac device and open the "Install macOS XXX" after entering the boot selector menu with the options key.
 - 16GB or higher USB required.
 - Compatible for laptop installation.
 - Compatible for desktop installation.
 - Compatible with UEFI and Legacy systems.
-- You can install OSX next to your Windows installed disk.
+- You can install OSX next to your GPT Windows installed disk.
 - It has SSE support.
 - "Kurulum Sonrası - Post Installation" contains the most necessary programs after installation.
 - Compatible for computers with Intel and AMD processors.
@@ -213,12 +213,12 @@ Note: Most of these options may not be present in your firmware, we recommend ma
   <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/macOS%20Big%20Sur%20%C4%B0maj.png" width="500">
 <p align="center">
   <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Google%20Drive%20Icon.png" width="50"/> </a>
-<a href="https://drive.google.com/file/d/1JmUNIZhUyxQ7VPLmIdbA-r2STzkyHwk3/view?usp=sharing">
-  <img src="https://img.shields.io/badge/Download-Big%20Sur%2011.6.5%20(20G527)-blue" width="400"/> </a>
+<a href="https://drive.google.com/file/d/13w2Ht7tjF70hvH1JJcz_FTxjiUlP0W5X/view?usp=sharing">
+  <img src="https://img.shields.io/badge/Download-Big%20Sur%2011.7.1%20(20G908)-blue" width="400"/> </a>
 
 <h3 align="left"> Features </h3>
 
-- Includes macOS Big Sur 11.6.5 (20G527).
+- Includes macOS Big Sur 11.7.1 (20G908).
 - It can be installed on original Mac devices.
   - If you want to install it on a Mac computer, after writing the image to USB with balenaEtcher insert the USB into your Mac device and open the "Install macOS XXX" after entering the boot selector menu with the options key.
 - 16GB or higher USB required.
