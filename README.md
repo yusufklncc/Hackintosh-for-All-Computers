@@ -165,7 +165,7 @@ Note: Most of these options may not be present in your firmware, we recommend ma
 <p align="center">
   <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Google%20Drive%20Icon.png" width="50"/> </a>
 <a href="https://drive.google.com/file/d/1hCObrljlhz-t-wYShWaBXS2QddMVDMUt/view?usp=sharing">
-  <img src="https://img.shields.io/badge/Download-Ventura%2013.0%20(22A380)-blueviolet" width="400"/> </a>
+  <img src="https://img.shields.io/badge/Download-Ventura%2013.0%20(22A380)-orange" width="400"/> </a>
 
 <h3 align="left"> Features </h3>
 
