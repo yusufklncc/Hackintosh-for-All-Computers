@@ -64,33 +64,26 @@ Hello to everyone. This repo contains the image and global EFI needed to install
 ### Setting BIOS Settings 
 
 - ### Intel
-[LIST]
-[*]Başlamadan önce BIOS ayarlarınızı öntanımlı ayarlara çekin (Load Default Settings).
-[*][B]Disable[/B]
-[LIST]
-[*]Fast Boot
-[*]Secure Boot
-[*]Serial/COM Port
-[*]Parallel Port
-[*]CSM
-[*]Thunderbolt
-[*]Intel SGX
-[*]Intel Platform Trust
-[*]CFG Lock (MSR 0xE2 write protection)[B](Kesinlikle kapalı olmalı, Eğer bu ayarı bulamadıysan config -> Kernel -> Quirks altından AppleXcpmCfgLock ayarını aç. CFG-Lock açıkken sisteminiz açılmayacak)[/B]
-[/LIST]
-[*][B]Enable[/B]
-[LIST]
-[*]VT-x
-[*]VT-d
-[*]Above 4G decoding
-[*]Hyper-Threading
-[*]Execute Disable Bit
-[*]EHCI/XHCI Hand-off
-[*]OS type: Windows 8.1/10 UEFI Mode
-[*]DVMT Pre-Allocated(iGPU Memory): 64MB
-[*]SATA Mode: AHCI
-[/LIST]
-[/LIST]
+  - Başlamadan önce BIOS ayarlarınızı öntanımlı ayarlara çekin (Load Default Settings).
+  - [B]Disable[/B]
+    - Fast Boot
+    - Secure Boot
+    - Serial/COM Port
+    - Parallel Port
+    - CSM
+    - Thunderbolt
+    - Intel SGX
+    - CFG Lock (MSR 0xE2 write protection)[B](Kesinlikle kapalı olmalı, Eğer bu ayarı bulamadıysan config -> Kernel -> Quirks altından AppleXcpmCfgLock ayarını aç. CFG-Lock açıkken sisteminiz açılmayacak)[/B]
+  - [B]Enable[/B]
+    - VT-x
+    - VT-d
+    - Above 4G decoding
+    - Hyper-Threading
+    - Execute Disable Bit
+    - EHCI/XHCI Hand-off
+    - OS type: Windows 8.1/10 UEFI Mode
+    - DVMT Pre-Allocated(iGPU Memory): 64MB
+    - SATA Mode: AHCI
 
 - ### AMD Ryzen
   - Load Default Settings
