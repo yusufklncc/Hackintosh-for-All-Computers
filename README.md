@@ -46,6 +46,7 @@ Hello to everyone. This repo contains the image and global EFI needed to install
 - Click to "Flash!" and allow app in popup window.
 <p align="center">
   <img src="https://user-images.githubusercontent.com/78423442/154849816-0a04602a-9064-4780-9d4e-ed86254b4fea.png">
+
 - When writing is finished, `remove` the USB stick and plug it back in.
 
 ### Setting EFI Folder
