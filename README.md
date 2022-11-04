@@ -65,7 +65,7 @@ Hello to everyone. This repo contains the image and global EFI needed to install
 
 - ### Intel
   - Başlamadan önce BIOS ayarlarınızı öntanımlı ayarlara çekin (Load Default Settings).
-  - [B]Disable[/B]
+  - `Disable`
     - Fast Boot
     - Secure Boot
     - Serial/COM Port
@@ -74,7 +74,7 @@ Hello to everyone. This repo contains the image and global EFI needed to install
     - Thunderbolt
     - Intel SGX
     - CFG Lock (MSR 0xE2 write protection)[B](Kesinlikle kapalı olmalı, Eğer bu ayarı bulamadıysan config -> Kernel -> Quirks altından AppleXcpmCfgLock ayarını aç. CFG-Lock açıkken sisteminiz açılmayacak)[/B]
-  - [B]Enable[/B]
+  - `Enable`
     - VT-x
     - VT-d
     - Above 4G decoding
