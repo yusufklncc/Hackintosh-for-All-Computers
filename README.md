@@ -164,13 +164,13 @@ Note: Most of these options may not be present in your firmware, we recommend ma
 <p align="center">
   <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/macOS%20Ventura%20%C4%B0maj.png" width="500">
 <p align="center">
-  <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Google%20Drive%20Icon.png" width="50"/> </a>
-<a href="https://drive.google.com/file/d/1hCObrljlhz-t-wYShWaBXS2QddMVDMUt/view?usp=sharing">
-  <img src="https://img.shields.io/badge/Download-Ventura%2013.0%20(22A380)-orange" width="400"/> </a>
+  <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/OneDrive%20Icon.png" width="50"/> </a>
+<a href="">
+  <img src="https://img.shields.io/badge/Download-Ventura%2013.4%20(22F66)-orange" width="400"/> </a>
 
 <h3 align="left"> Features </h3>
 
-- Includes macOS Ventura 13.0 (22A380).
+- Includes macOS Ventura 13.4 (22F66).
 - It can be installed on original Mac devices.
   - If you want to install it on a Mac computer, after writing the image to USB with balenaEtcher insert the USB into your Mac device and open the "Install macOS XXX" after entering the boot selector menu with the options key.
 - 16GB or higher USB required.
@@ -187,17 +187,13 @@ Note: Most of these options may not be present in your firmware, we recommend ma
 <p align="center">
   <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/macOS%20Monterey%20%C4%B0maj.png" width="500">
 <p align="center">
-  <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Google%20Drive%20Icon.png" width="50"/> </a>
-<a href="https://drive.google.com/file/d/1owJK1zTBNIpRNxoWewrurRljb-60L7Gy/view?usp=sharing">
-  <img src="https://img.shields.io/badge/Download-Monterey%2012.6%20(21G115)-blueviolet" width="400"/> </a>
-<p align="center">  
-  <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/MEGA%20Icon.png" width="50"/> </a>
-<a href="https://mega.nz/file/P59RgARB#nb0n3l5e-4XobcnLzbsPTqBHBPhYTc01G0XvABhdExk">
-  <img src="https://img.shields.io/badge/Download-Monterey%2012.0.1%20(21A559)-blueviolet" width="400"/> </a>
+  <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/OneDrive%20Icon.png" width="50"/> </a>
+<a href="">
+  <img src="https://img.shields.io/badge/Download-Monterey%2012.6.6%20(21G646)-blueviolet" width="400"/> </a>
 
 <h3 align="left"> Features </h3>
 
-- Includes macOS Monterey 12.6 (21G115).
+- Includes macOS Monterey 12.6.6 (21G646).
 - It can be installed on original Mac devices.
   - If you want to install it on a Mac computer, after writing the image to USB with balenaEtcher insert the USB into your Mac device and open the "Install macOS XXX" after entering the boot selector menu with the options key.
 - 16GB or higher USB required.
@@ -213,13 +209,13 @@ Note: Most of these options may not be present in your firmware, we recommend ma
 <p align="center">
   <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/macOS%20Big%20Sur%20%C4%B0maj.png" width="500">
 <p align="center">
-  <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Google%20Drive%20Icon.png" width="50"/> </a>
-<a href="https://drive.google.com/file/d/13w2Ht7tjF70hvH1JJcz_FTxjiUlP0W5X/view?usp=sharing">
-  <img src="https://img.shields.io/badge/Download-Big%20Sur%2011.7.1%20(20G908)-blue" width="400"/> </a>
+  <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/OneDrive%20Icon.png" width="50"/> </a>
+<a href="">
+  <img src="https://img.shields.io/badge/Download-Big%20Sur%2011.7.8%20(20G1403)-blue" width="400"/> </a>
 
 <h3 align="left"> Features </h3>
 
-- Includes macOS Big Sur 11.7.1 (20G908).
+- Includes macOS Big Sur 11.7.8 (20G1403).
 - It can be installed on original Mac devices.
   - If you want to install it on a Mac computer, after writing the image to USB with balenaEtcher insert the USB into your Mac device and open the "Install macOS XXX" after entering the boot selector menu with the options key.
 - 16GB or higher USB required.
@@ -236,7 +232,7 @@ Note: Most of these options may not be present in your firmware, we recommend ma
   <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/macOS%20Catalina%20%C4%B0maj.png" width="500">
 <p align="center">
   <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Google%20Drive%20Icon.png" width="50"/> </a>
-<a href="https://drive.google.com/file/d/1su1aht3HdKle8KhFdh8Hgis8iVdCS0Av/view?usp=sharing">
+<a href="https://drive.google.com/u/0/uc?id=1su1aht3HdKle8KhFdh8Hgis8iVdCS0Av&export=download">
   <img src="https://img.shields.io/badge/Download-Catalina%2010.15.7%20(19H15)-red" width="400"/> </a>
 
 <h3 align="left"> Features </h3>
@@ -258,7 +254,7 @@ Note: Most of these options may not be present in your firmware, we recommend ma
   <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/macOS%20Mojave%20%C4%B0maj.png" width="500">
 <p align="center">
   <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Google%20Drive%20Icon.png" width="50"/> </a>
-<a href="https://drive.google.com/file/d/1CZI7VDSVkBP0RFTkFjKSWA1jRTRCFMea/view?usp=sharing">
+<a href="https://drive.google.com/uc?id=1CZI7VDSVkBP0RFTkFjKSWA1jRTRCFMea&export=download">
   <img src="https://img.shields.io/badge/Download-Mojave%2010.14.6%20(18G103)-yellow" width="400"/> </a>
 
 <h3 align="left"> Features </h3>
@@ -279,7 +275,7 @@ Note: Most of these options may not be present in your firmware, we recommend ma
   <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/macOS%20High%20Sierra%20%C4%B0maj.png" width="500">
 <p align="center">
   <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Google%20Drive%20Icon.png" width="50"/> </a>
-<a href="https://drive.google.com/file/d/1reS464pquOVKLCI-V5VF3OA5_uzGvele/view?usp=sharing">
+<a href="https://drive.google.com/uc?id=1reS464pquOVKLCI-V5VF3OA5_uzGvele&export=download">
   <img src="https://img.shields.io/badge/Download-High%20Sierra%2010.13.6%20(17G66)-orange" width="400"/> </a>
 
 <h3 align="left"> Features </h3>
@@ -300,7 +296,7 @@ Note: Most of these options may not be present in your firmware, we recommend ma
   <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/macOS/macOS%20Sierra.png" width="500">
 <p align="center">
   <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Google%20Drive%20Icon.png" width="50"/> </a>
-<a href="https://drive.google.com/file/d/1JpAKVwvF9v5ivZDOKR65xBDi7uoZRcwR/view?usp=sharingg">
+<a href="https://drive.google.com/uc?id=1JpAKVwvF9v5ivZDOKR65xBDi7uoZRcwR&export=download">
   <img src="https://img.shields.io/badge/Download-Sierra%2010.12.6%20(16G29)-yellowgreen" width="400"/> </a>
 
 <h3 align="left"> Features </h3>
@@ -321,7 +317,7 @@ Note: Most of these options may not be present in your firmware, we recommend ma
   <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/macOS/macOS%20El%20Capitan.png" width="500">
 <p align="center">
   <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Google%20Drive%20Icon.png" width="50"/> </a>
-<a href="https://drive.google.com/file/d/1ZN5i1acptGn49uOfVeT8scGPnjBFnVAn/view?usp=sharing">
+<a href="https://drive.google.com/uc?id=1ZN5i1acptGn49uOfVeT8scGPnjBFnVAn&export=download">
   <img src="https://img.shields.io/badge/Download-El%20Capitan%2010.11.6%20(15G31)-red" width="400"/> </a> 
 
 <h3 align="left"> Features </h3>
@@ -342,7 +338,7 @@ Note: Most of these options may not be present in your firmware, we recommend ma
   <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/macOS/macOS%20Yosemite.png" width="500">
 <p align="center">
   <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Google%20Drive%20Icon.png" width="50"/> </a>
-<a href="https://drive.google.com/file/d/1TdlPEyWjvi7epGLdgOWzVSaXm-cjmdNh/view?usp=sharing">
+<a href="https://drive.google.com/uc?id=1TdlPEyWjvi7epGLdgOWzVSaXm-cjmdNh&export=download">
   <img src="https://img.shields.io/badge/Download-Yosemite%2010.10.5%20(14F27)-lightgrey" width="400"/> </a> 
 
 <h3 align="left"> Features </h3>
