@@ -165,7 +165,7 @@ Note: Most of these options may not be present in your firmware, we recommend ma
   <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/macOS%20Ventura%20%C4%B0maj.png" width="500">
 <p align="center">
   <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/OneDrive%20Icon.png" width="40"/> </a>
-<a href="">
+<a href="https://onedrive.live.com/download?resid=83E8AF2D3EA2BA57%214070&authkey=!AB2868FpHBJiV9s">
   <img src="https://img.shields.io/badge/Download-Ventura%2013.4%20(22F66)-orange" width="400"/> </a>
 
 <h3 align="left"> Features </h3>
@@ -188,7 +188,7 @@ Note: Most of these options may not be present in your firmware, we recommend ma
   <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/macOS%20Monterey%20%C4%B0maj.png" width="500">
 <p align="center">
   <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/OneDrive%20Icon.png" width="40"/> </a>
-<a href="">
+<a href="https://onedrive.live.com/download?resid=83E8AF2D3EA2BA57%214135&authkey=!ABQ6JqGHQptSOSc">
   <img src="https://img.shields.io/badge/Download-Monterey%2012.6.6%20(21G646)-blueviolet" width="400"/> </a>
 
 <h3 align="left"> Features </h3>
@@ -210,7 +210,7 @@ Note: Most of these options may not be present in your firmware, we recommend ma
   <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/macOS%20Big%20Sur%20%C4%B0maj.png" width="500">
 <p align="center">
   <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/OneDrive%20Icon.png" width="40"/> </a>
-<a href="">
+<a href="https://onedrive.live.com/download?resid=83E8AF2D3EA2BA57%214119&authkey=!AIFsYE9kbFDoGLs">
   <img src="https://img.shields.io/badge/Download-Big%20Sur%2011.7.8%20(20G1403)-blue" width="400"/> </a>
 
 <h3 align="left"> Features </h3>
