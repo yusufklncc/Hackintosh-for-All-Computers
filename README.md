@@ -4,7 +4,7 @@
   <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/All%20macOS.png">
 </p>
 
-Hello to everyone. This repo contains the image and global EFI needed to install macOS on your `compatible` computer. Today, I present to all of you the solidified OpenCore Bootloader and the OSX images I have prepared. If you report the problems you encounter as feedback, I can fix my problems. Since there is no EFI in the image yet, I will update it externally with the image every month. What you need to do is to throw the EFI folder into the EFI partition created after writing the image to your USB memory. I wish everyone a smooth hackintosh. See you in healthy days.. Check your hardware `compability`:
+Hello to everyone. This repo contains the image and global EFI needed to install macOS on your `compatible` computer. Today, I present to all of you the solidified OpenCore Bootloader and the OSX images I have prepared. If you report the problems you encounter as feedback, I can fix my problems. Since there is no EFI in the image yet, I will update it externally with the image every month. What you need to do is to put the EFI folder into the EFI partition created after writing the image to your USB memory. I wish everyone a smooth hackintosh. See you in healthy days.. Check your hardware `compability`:
 - [Anti-Hackintosh Buyers](https://dortania.github.io/Anti-Hackintosh-Buyers-Guide/)
 - [GPU Buyers Guide](https://dortania.github.io/GPU-Buyers-Guide/)
 - [Wireless Buyers Guide](https://dortania.github.io/Wireless-Buyers-Guide/)
@@ -26,7 +26,7 @@ Hello to everyone. This repo contains the image and global EFI needed to install
 
 ### Downloading OSX Image
 
-- Go to OSX Image Google Drive or MEGA link and download it.
+- Go
   - [Ventura](https://github.com/yusufklncc/Hackintosh-for-All-Computers#-macos-ventura-)
   - [Monterey](https://github.com/yusufklncc/Hackintosh-for-All-Computers#macos-monterey)
   - [Big Sur](https://github.com/yusufklncc/Hackintosh-for-All-Computers#macos-big-sur)
@@ -39,11 +39,11 @@ Hello to everyone. This repo contains the image and global EFI needed to install
 
 ### Writing OSX Image
 
-- Unzip the zip file to desktop.
+- Unzip the ZIP file to desktop.
 - Download balenaEtcher from this link https://www.balena.io/etcher/
 - Open program and click to "Flash from file"
 - Select the OSX image `(.raw file)` from the popup window.
-- Click to "Select target" and select OSX image.
+- Click to "Select target" and select USB drive.
 - Click to "Flash!" and allow app in popup window.
 <p align="center">
   <img src="https://user-images.githubusercontent.com/78423442/154849816-0a04602a-9064-4780-9d4e-ed86254b4fea.png">
@@ -52,14 +52,14 @@ Hello to everyone. This repo contains the image and global EFI needed to install
 
 ### Setting EFI Folder
 
-- When you plug USB back, you can see EFI partition in "My Computer"
+- When you plug-in USB back, you can see EFI partition in "My Computer"
 - Open EFI partition.
-- Copy your EFI file in EFI partititon.
-- If you dont have EFI. You can use my global EFI.
-- Download from release and copy the EFI folder to EFI partition
-- Open EFI/OC and set your config file. Example:
+- Copy your EFI folder to EFI partititon.
+- If you don't have EFI. You can use my global EFI.
+- Download from release and copy the EFI folder to EFI partition.
+- Open EFI/OC/config, find compatible config for your hardware. Copy it to EFI/OC and set your file name config. Example:
   - my CPU is `i5-7200U`. It is `Kaby Lake Mobile (Laptop)` cpu.
-  - Find Laptop `Kaby Lake.plist` and rename `config`
+  - Go EFI/OC/config/Laptop and copy `Kaby Lake.plist` to EFI/OC and rename `config`
 - Now you can boot from USB.
 
 ### Setting BIOS Settings 
