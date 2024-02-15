@@ -27,6 +27,7 @@ Hello everyone. This repository contains the RAW macOS image and global EFI need
 ### Downloading OSX Image
 
 - Go
+  - [Sonoma](#macos-sonoma)
   - [Ventura](#macos-ventura)
   - [Monterey](#macos-monterey)
   - [Big Sur](#macos-big-sur)
@@ -159,6 +160,28 @@ Note: Most of these options may not be present in your firmware, we recommend ma
   - Complete the installation without connecting to the internet. Because we need to set our `serial numbers and ROM for iCloud and iMessage`.
   - annd yeah Desktop:
   - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Desktop.png">
+
+
+# macOS Sonoma
+<p align="center">
+  <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/macOS%20Sonoma%20%C4%B0maj.png" width="500">
+<p align="center">
+  <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/techolay.png" width="40"/> </a>
+<a href="https://techolay.net/sosyal/konu/macos-sonoma-14-3-intel-amd-kurulum-imaji.6963/">
+  <img src="https://img.shields.io/badge/Download-Sonoma%2014.3%20(23D56)-green" width="400"/> </a>
+
+<h3 align="left"> Features </h3>
+
+- It can be installed on original Mac devices.
+  - If you want to install it on a Mac computer, after writing the image to USB with balenaEtcher insert the USB into your Mac device and open the "Install macOS XXX" after entering the boot selector menu with the options key.
+- 16GB or higher USB required.
+- Compatible for laptop installation.
+- Compatible for desktop installation.
+- Compatible with UEFI and Legacy systems.
+- You can install OSX next to your GPT Windows installed disk.
+- It has SSE4,1 support.
+- "Kurulum Sonrası - Post Installation" contains the most necessary programs after installation.
+- Compatible for computers with Intel and AMD processors.
 
 # macOS Ventura
 <p align="center">
