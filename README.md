@@ -4,7 +4,7 @@
   <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/All%20macOS.png">
 </p>
 
-Hello to everyone. This repo contains the image and global EFI needed to install macOS on your `compatible` computer. Today, I present to all of you the solidified OpenCore Bootloader and the OSX images I have prepared. If you report the problems you encounter as feedback, I can fix my problems. Since there is no EFI in the image yet, I will update it externally with the image every month. What you need to do is to put the EFI folder into the EFI partition created after writing the image to your USB memory. I wish everyone a smooth hackintosh. See you in healthy days.. Check your hardware `compability`:
+Hello everyone. This repository contains the RAW macOS image and global EFI needed to install macOS on your `compatible` computer. I am going to share with you my own OpenCore bootloader folder and macOS images. If you send me the problems you encounter, we can work together to solve them. I will update it externally with the image every month as there is no EFI folder in the image. What you need to do is to place the EFI folder in the EFI partition that will be created after you have written the image to your USB flash drive. I hope you all have a smooth hackintosh. Check your hardware `compability`:
 - [Anti-Hackintosh Buyers](https://dortania.github.io/Anti-Hackintosh-Buyers-Guide/)
 - [GPU Buyers Guide](https://dortania.github.io/GPU-Buyers-Guide/)
 - [Wireless Buyers Guide](https://dortania.github.io/Wireless-Buyers-Guide/)
