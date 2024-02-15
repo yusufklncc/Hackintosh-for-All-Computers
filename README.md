@@ -27,7 +27,7 @@ Hello to everyone. This repo contains the image and global EFI needed to install
 ### Downloading OSX Image
 
 - Go
-  - [Ventura](https://github.com/yusufklncc/Hackintosh-for-All-Computers#-macos-ventura-)
+  - [Ventura](#macos-ventura)
   - [Monterey](https://github.com/yusufklncc/Hackintosh-for-All-Computers#-macos-monterey-)
   - [Big Sur](https://github.com/yusufklncc/Hackintosh-for-All-Computers#-macos-big-sur-)
   - [Catalina](https://github.com/yusufklncc/Hackintosh-for-All-Computers#-macos-catalina-)
