@@ -140,7 +140,8 @@ Note: Most of these options may not be present in your firmware, we recommend th
   - [Show kext to config](https://vk.com/video749455540_456239017)
 
 ### macOS Installation Steps
-- Now let's turn off our computer and boot from USB. Choose the `Install macOS High Sierra` (whatever you have) option and go to the installation screen.
+- Now let's shutdown our computer and boot from USB. Choose the `Install macOS "Sonoma"` option and go to the installation screen.
+  - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Installation/opencore-install-macos.png">
 - If you are going to install macOS `next to windows`, create a partition with the video guide below. <b>(This operation can only be performed on OSX to Mojave.)</b>
   - <b>ATTENTION:</b> You can install next to the Windows only with images that support `MBR HFS+`. `Mojave and below macOS versions support MBR.`
     - [Splitting the disk in HFS+ format](https://vk.com/video749455540_456239018)
