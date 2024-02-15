@@ -142,30 +142,106 @@ Note: Most of these options may not be present in your firmware, we recommend th
 ### macOS Installation Steps
 - Now let's shutdown our computer and boot from USB. Choose the `Install macOS "Sonoma"` option and go to the installation screen.
   - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Installation/opencore-install-macos.png">
-- If you are going to install macOS `next to windows`, create a partition with the video guide below. <b>(This operation can only be performed on OSX to Mojave.)</b>
-  - <b>ATTENTION:</b> You can install next to the Windows only with images that support `MBR HFS+`. `Mojave and below macOS versions support MBR.`
-    - [Splitting the disk in HFS+ format](https://vk.com/video749455540_456239018)
-    - After doing this, you can select your disk directly on the installation screen and start the installation.
-- What to do on the following screens:
-  - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Installation.png">
-  - Let's continue and check if the `Wi-Fi or LAN` we installed worked.
-  - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Checking%20Wi-Fi%20or%20Ethernet.png">
-  - There is nothing wrong. Now open `Utilities/Disk Utility` from the top to prepare our disk. Follow the steps in the image below.
-  - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Erasing%20Disk%201.png">
-  - Select `Show All Devices` from the `Display` option and select the name of our disk and click `Erase`.
-  - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Erasing%20Disk%202.png">
-  - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Erasing%20Disk%203.png">
-  - If you are going to install a version of `High Sierra and above`, format it as `APFS/GUID`, if you are going to install a version of `Sierra and below`, format it as `MacOS Extended Journaled/GUID.`
-  - After erasing is complete, close disk utility and select our disk and resume.
-  - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Disk%20Selection.png">
-  - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Installation%20Starting.png">
-  - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Installation%20Finishing.png">
-  - When the installation is finished, choose the name of our disk from OpenCore if we installed `Mojave and below` versions, choose macOS Installer if we installed `Catalina and above` versions. Keep selecting until this option is `gone`.
-  - After the installation steps are over, the language selection screen will welcome us:
-  - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Language%20Selection.png">
-  - Complete the installation without connecting to the internet. Because we need to set our `serial numbers and ROM for iCloud and iMessage`.
-  - annd yeah Desktop:
-  - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Desktop.png">
+  - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Installation/verbose-start.png">
+  - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Installation/middle-verbose.png">
+  - If you get the error in the image, this is due to a mismatch between the macOS version you are trying to install and the Mac ID you are using. Check the Mac IDs supported by the macOS version you are trying to install. Then open your config file with a text editor and change the SystemProductName value. Try booting again.
+  - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Installation/change-smbios.png">
+
+  
+- Select language.
+  - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Installation/install-macos-select-language.png">
+- Open Disk Utility.
+  - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Installation/open-disk-utility.png">
+- Select Show All Devices from View button.
+  - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Installation/show-all-devices.png">
+- Select installation disk name from left menu and click Erase from top-right menu.
+  - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Installation/select-main-disk-name-erase.png">
+ 
+- If you are going to install macOS `next to windows`, create a partition with the video guide below.
+  - [Splitting the disk in HFS+ format](https://vk.com/video749455540_456239018)
+  - After doing this, right-click created volume name on left sida from Disk Utility and click Convert APFS. You can select your disk on the installation screen and start the installation.
+
+- Give your disk a name, set Format to APFS and Scheme to GUID. Click Erase.
+  - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Installation/name-format-scheme.png">
+- I have macOS installed disk. So I am going to create new volume and install Sonoma there. After selecting Container, click + button from top-right menu.
+  - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Installation/add-apfs-volume.png">
+- Give your volume a name and set Format to APFS. Click Erase.
+  - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Installation/name-new-volume.png">
+- After erasing complete, click Done.
+  - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Installation/erase-done.png">
+- Close Disk Utility and open Install macOS "Sonoma".
+  - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Installation/open-instal-macos.png">
+- Click Continue > Agree > Agree.
+  - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Installation/install-macos-1.png">
+  - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Installation/install-macos-2.png">
+  - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Installation/install-macos-3.png">
+- Select disk that you erased and click Continue.
+  - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Installation/install-macos-select-disk.png">
+  - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Installation/install-macos-start.png">
+  - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Installation/install-macos-middle.png">
+- When installation process come About 12 minutes remaining, your computer should restart and goes verbose.
+  - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Installation/first-restart.png">
+- OpenCore should create a new boot entry named "OpenCore". Every restart computer will boot from this entry. You can drink a coffe and wait for installation complete if you don't have any operating system on your computer. But some computers doesn't allow custom entries. So if you have any other operating system on your computer. You should select USB from boot menu for every restart.
+- After first restart chose macOS Installer on OpenCore menu.
+  - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Installation/first-restart-macos-installer.png">
+- You will see the Apple logo and a time bar. After this time has passed, the computer will restart again.
+  - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Installation/second-installation.png">
+  - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Installation/second-restart.png">
+- If macOS Installer still exist. Keep selecting until the option disappears.
+- On the last reboot you will now see an option for the name you gave the disk. Select this option and continue.
+  - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Installation/last-select-disk.png">
+- Now we will reach the macOS installation completion steps.
+- Let's choose our country.
+  - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Installation/select-country.png">
+- I will click Customize Settings on the next screen because even though I use the computer in English, my native language and keyboard input are different. If the settings are correct for you, you can click Continue.
+  - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Installation/select-language.png">
+  - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Installation/select-input.png">
+  - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Installation/select-input-2.png">
+  - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Installation/select-dictation.png">
+- I am skipping the accessibility settings by clicking Not Now.
+  - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Installation/accessibility.png">
+- Even if you have an internet connection, continue with the I have no network connection option on this screen. Because we need to set our `serial numbers and ROM for iCloud and iServices`.
+  - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Installation/select-network-type.png">
+  - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Installation/select-network-type-2.png">
+- Click Continue.
+  - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Installation/data-privacy.png">
+- If you are not installing hackintosh for the first time, you can transfer data from your other devices in this screen. However, assuming this is the first time, I am clicking Not Now.
+  - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Installation/migration-assistant.png">
+- Click Agree > Agree.
+  - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Installation/terms-conditions.png">
+  - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Installation/terms-conditions-2.png">
+- Let's create an account here with name, username and password.
+  - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Installation/create-account.png">
+- You can turn Location Services on or off as you wish.
+  - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Installation/enable-location.png">
+- Disable Analytics options and click Continue.
+  - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Installation/analytics.png">
+- Complete the Screen Time settings by clicking Continue.
+  - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Installation/screen-time.png">
+- Setting up Siri.
+  - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Installation/enable-siri.png">
+  - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Installation/select-siri-language.png">
+  - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Installation/select-siri-voice.png">
+  - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Installation/improve-siri-dictation.png">
+- Finally, let's select a theme and complete the installation.
+  - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Installation/select-theme.png">
+
+- After installation, you may see a window for keyboard setup. Let's make the adjustments here.
+  - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Installation/keyboard-setup-assistant.png">
+  - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Installation/identifying-keyboard.png">
+  - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Installation/select-keyboard-type.png">
+
+- We can finally get the macOS desktop.
+  - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Installation/desktop-2.png">
+  - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Installation/lock-screen.png">
+
+- If you are experiencing crashes when opening System Settings and About This Mac. Open the Terminal application and run sudo purge command.
+  - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Installation/system-settings-crash.png">
+  - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Installation/spotlight-terminal.png">
+  - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Installation/sudo-purge.png">
+  - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Installation/sudo-purge-2.png">
+  - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Installation/about-this-mac.png">
+  - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Installation/system-settings.png">
 
 
 # macOS Sonoma
