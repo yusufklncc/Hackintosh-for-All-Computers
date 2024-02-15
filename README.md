@@ -5,9 +5,9 @@
 </p>
 
 Hello to everyone. This repo contains the image and global EFI needed to install macOS on your `compatible` computer. Today, I present to all of you the solidified OpenCore Bootloader and the OSX images I have prepared. If you report the problems you encounter as feedback, I can fix my problems. Since there is no EFI in the image yet, I will update it externally with the image every month. What you need to do is to put the EFI folder into the EFI partition created after writing the image to your USB memory. I wish everyone a smooth hackintosh. See you in healthy days.. Check your hardware `compability`:
-- [Anti-Hackintosh Buyers](https://dortania.github.io/Anti-Hackintosh-Buyers-Guide/)
-- [GPU Buyers Guide](https://dortania.github.io/GPU-Buyers-Guide/)
-- [Wireless Buyers Guide](https://dortania.github.io/Wireless-Buyers-Guide/)
+- [Anti-Hackintosh Buyers](https://dortania.github.io/Anti-Hackintosh-Buyers-Guide/){:target="_blank"}
+- [GPU Buyers Guide](https://dortania.github.io/GPU-Buyers-Guide/){:target="_blank"}
+- [Wireless Buyers Guide](https://dortania.github.io/Wireless-Buyers-Guide/){:target="_blank"}
   - My laptop specs:
     - Model: Lenovo Thinkpad E570
     - CPU: i5-7200U
