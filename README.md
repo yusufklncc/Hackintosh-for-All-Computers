@@ -17,12 +17,12 @@ Hello everyone. This repository contains the RAW macOS image and global EFI need
 
 ## Table of contents
 
-- [Downloading OSX Image](https://github.com/yusufklncc/Hackintosh-for-All-Computers#downloading-osx-image)
-- [Writing OSX Image](https://github.com/yusufklncc/Hackintosh-for-All-Computers#writing-osx-image)
-- [Setting EFI Folder](https://github.com/yusufklncc/Hackintosh-for-All-Computers#setting-efi-folder)
-- [Setting BIOS Settings](https://github.com/yusufklncc/Hackintosh-for-All-Computers#setting-bios-settings)
-- [Editing EFI](https://github.com/yusufklncc/Hackintosh-for-All-Computers#editing-efi)
-- [macOS Installation Steps](https://github.com/yusufklncc/Hackintosh-for-All-Computers#macos-installation-steps)
+- [Downloading OSX Image](#downloading-osx-image)
+- [Writing OSX Image](#writing-osx-image)
+- [Setting EFI Folder](#setting-efi-folder)
+- [Setting BIOS Settings](#setting-bios-settings)
+- [Editing EFI](#editing-efi)
+- [macOS Installation Steps](#macos-installation-steps)
 
 ### Downloading OSX Image
 
