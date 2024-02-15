@@ -160,7 +160,7 @@ Note: Most of these options may not be present in your firmware, we recommend ma
   - annd yeah Desktop:
   - <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/Desktop.png">
 
-<h1> macOS Ventura </h1>
+# macOS Ventura
 <p align="center">
   <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/macOS%20Ventura%20%C4%B0maj.png" width="500">
 <p align="center">
@@ -183,7 +183,7 @@ Note: Most of these options may not be present in your firmware, we recommend ma
 - Compatible for computers with Intel and AMD processors.
 
 
-<h1> macOS Monterey </h1>
+# macOS Monterey
 <p align="center">
   <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/macOS%20Monterey%20%C4%B0maj.png" width="500">
 <p align="center">
@@ -205,7 +205,7 @@ Note: Most of these options may not be present in your firmware, we recommend ma
 - "Kurulum Sonrası - Post Installation" contains the most necessary programs after installation.
 - Compatible for computers with Intel and AMD processors.
 
-<h1> macOS Big Sur </h1>
+# macOS Big Sur
 <p align="center">
   <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/macOS%20Big%20Sur%20%C4%B0maj.png" width="500">
 <p align="center">
@@ -227,7 +227,7 @@ Note: Most of these options may not be present in your firmware, we recommend ma
 - "Kurulum Sonrası - Post Installation" contains the most necessary programs after installation.
 - Compatible for computers with Intel and AMD processors.
 
-<h1> macOS Catalina </h1>
+# macOS Catalina
 <p align="center">
   <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/macOS%20Catalina%20%C4%B0maj.png" width="500">
 <p align="center">
@@ -249,7 +249,7 @@ Note: Most of these options may not be present in your firmware, we recommend ma
 - "Kurulum Sonrası - Post Installation" contains the most necessary programs after installation.
 - Compatible for computers with Intel and AMD processors.
 
-<h1> macOS Mojave </h1>
+# macOS Mojave
 <p align="center">
   <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/macOS%20Mojave%20%C4%B0maj.png" width="500">
 <p align="center">
@@ -270,7 +270,7 @@ Note: Most of these options may not be present in your firmware, we recommend ma
 - "Kurulum Sonrası - Post Installation" contains the most necessary programs after installation.
 - Compatible for computers with Intel and AMD processors.
 
-<h1> macOS High Sierra </h1>
+# macOS High Sierra
 <p align="center">
   <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/Resources/macOS%20High%20Sierra%20%C4%B0maj.png" width="500">
 <p align="center">
@@ -291,7 +291,7 @@ Note: Most of these options may not be present in your firmware, we recommend ma
 - "Kurulum Sonrası - Post Installation" contains the most necessary programs after installation.
 - Compatible for computers with Intel and AMD processors.
 
-<h1> macOS Sierra </h1>
+# macOS Sierra
 <p align="center">
   <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/macOS/macOS%20Sierra.png" width="500">
 <p align="center">
@@ -312,7 +312,7 @@ Note: Most of these options may not be present in your firmware, we recommend ma
 - "Kurulum Sonrası - Post Installation" contains the most necessary programs after installation.
 - Compatible for computers with Intel and AMD processors.
 
-<h1> macOS El Capitan </h1>
+# macOS El Capitan
 <p align="center">
   <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/macOS/macOS%20El%20Capitan.png" width="500">
 <p align="center">
@@ -333,7 +333,7 @@ Note: Most of these options may not be present in your firmware, we recommend ma
 - "Kurulum Sonrası - Post Installation" contains the most necessary programs after installation.
 - Compatible for computers with Intel and AMD processors.
 
-<h1> macOS Yosemite </h1>
+# macOS Yosemite
 <p align="center">
   <img src="https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/macOS/macOS%20Yosemite.png" width="500">
 <p align="center">
