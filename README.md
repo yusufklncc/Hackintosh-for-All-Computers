@@ -28,14 +28,14 @@ Hello to everyone. This repo contains the image and global EFI needed to install
 
 - Go
   - [Ventura](https://github.com/yusufklncc/Hackintosh-for-All-Computers#-macos-ventura-)
-  - [Monterey](https://github.com/yusufklncc/Hackintosh-for-All-Computers#macos-monterey)
-  - [Big Sur](https://github.com/yusufklncc/Hackintosh-for-All-Computers#macos-big-sur)
-  - [Catalina](https://github.com/yusufklncc/Hackintosh-for-All-Computers#macos-catalina)
-  - [Mojave](https://github.com/yusufklncc/Hackintosh-for-All-Computers#macos-mojave)
-  - [High Sierra](https://github.com/yusufklncc/Hackintosh-for-All-Computers#macos-high-sierra)
-  - [Sierra](https://github.com/yusufklncc/Hackintosh-for-All-Computers#macos-sierra)
-  - [El Capitan](https://github.com/yusufklncc/Hackintosh-for-All-Computers#macos-el-capitan)
-  - [Yosemite](https://github.com/yusufklncc/Hackintosh-for-All-Computers#macos-yosemite)
+  - [Monterey](https://github.com/yusufklncc/Hackintosh-for-All-Computers#-macos-monterey-)
+  - [Big Sur](https://github.com/yusufklncc/Hackintosh-for-All-Computers#-macos-big-sur-)
+  - [Catalina](https://github.com/yusufklncc/Hackintosh-for-All-Computers#-macos-catalina-)
+  - [Mojave](https://github.com/yusufklncc/Hackintosh-for-All-Computers#-macos-mojave-)
+  - [High Sierra](https://github.com/yusufklncc/Hackintosh-for-All-Computers#-macos-high-sierra-)
+  - [Sierra](https://github.com/yusufklncc/Hackintosh-for-All-Computers#-macos-sierra-)
+  - [El Capitan](https://github.com/yusufklncc/Hackintosh-for-All-Computers#-macos-el-capitan-)
+  - [Yosemite](https://github.com/yusufklncc/Hackintosh-for-All-Computers#-macos-yosemite-)
 
 ### Writing OSX Image
 
