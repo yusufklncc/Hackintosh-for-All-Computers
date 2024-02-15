@@ -10,10 +10,11 @@ Hello everyone. This repository contains the RAW macOS image and global EFI need
 - [Wireless Buyers Guide](https://dortania.github.io/Wireless-Buyers-Guide/)
   - My laptop specs:
     - Model: Lenovo Thinkpad E570
-    - CPU: i5-7200U
-    - Graphic Device: HD 620
-    - Network Devices: DW1820A Wi-Fi & Bt , RTL8111 Ethernet
-    - Disk and Ram: KBG40ZNV256G KIOXIA NVMe 256GB & SAMSUNG SSD 860 EVO 250GB ve 8GB Ram DDR3
+    - CPU: Intel(R) Core(TM) i5-7200U
+    - Graphic Device: Intel(R) HD Graphics 620
+    - Network Devices: Dell Wireless 1820A Wi-Fi & BT , Realtek RTL8111/8168/8411 Ethernet
+    - Audio: Conexant CX20753/4
+    - Disk and RAM: KBG40ZNV256G KIOXIA NVMe 256GB & SAMSUNG SSD 860 EVO 250GB
 
 ## Table of contents
 
@@ -24,6 +25,7 @@ Hello everyone. This repository contains the RAW macOS image and global EFI need
 - [Editing EFI](#editing-efi)
 - [macOS Installation Steps](#macos-installation-steps)
 
+de
 ### Downloading OSX Image
 
 - Go
@@ -38,34 +40,37 @@ Hello everyone. This repository contains the RAW macOS image and global EFI need
   - [El Capitan](#macos-el-capitan)
   - [Yosemite](#macos-yosemite)
 
-### Writing OSX Image
 
-- Unzip the ZIP file to desktop.
+### Writing macOS Image
+
+- Extract RAW file from ZIP to the desktop.
 - Download balenaEtcher from this link https://www.balena.io/etcher/
 - Open program and click to "Flash from file"
 - Select the OSX image `(.raw file)` from the popup window.
 - Click to "Select target" and select USB drive.
-- Click to "Flash!" and allow app in popup window.
+- Click to "Flash!" and select allow in popup window.
 <p align="center">
   <img src="https://user-images.githubusercontent.com/78423442/154849816-0a04602a-9064-4780-9d4e-ed86254b4fea.png">
 
-- When writing is finished, `remove` the USB stick and plug it back in.
+- When you have finished writing, 'unplug' the USB stick and plug it back in again.
+
 
 ### Setting EFI Folder
 
 - When you plug-in USB back, you can see EFI partition in "My Computer"
 - Open EFI partition.
 - Copy your EFI folder to EFI partititon.
-- If you don't have EFI. You can use my global EFI.
-- Download from release and copy the EFI folder to EFI partition.
-- Open EFI/OC/config, find compatible config for your hardware. Copy it to EFI/OC and set your file name config. Example:
+  - If you don't have EFI. You can use my global EFI.
+  - Download from release and copy the EFI folder to EFI partition.
+- Open EFI/OC/config folder, find compatible config for your hardware. Copy it to EFI/OC and set your file name config. Example:
   - my CPU is `i5-7200U`. It is `Kaby Lake Mobile (Laptop)` cpu.
-  - Go EFI/OC/config/Laptop and copy `Kaby Lake.plist` to EFI/OC and rename `config`
+  - Go EFI/OC/config/Laptop and copy `Kaby Lake.plist` to EFI/OC and rename `config.plist`
 - Now you can boot from USB.
+
 
 ### Setting BIOS Settings 
   
-Note: Most of these options may not be present in your firmware, we recommend matching up as closely as possible but don't be too concerned if many of these options are not available in your BIOS
+Note: Most of these options may not be present in your firmware, we recommend that you match them as closely as possible, but don't worry if many of these options are not present in your BIOS.
 
 - ### Intel
   - Before you start, reset your BIOS settings to default.
@@ -98,6 +103,7 @@ Note: Most of these options may not be present in your firmware, we recommend ma
     - Parallel Port
     - Compatibility Support Module (CSM) (Must be off in most cases, GPU errors/stalls like gIO are common when this option is enabled)
     - IOMMU
+    - Note for 3990X users: MacOS currently does not support more than 64 threads in the kernel. If more threads are detected, the kernel will panic. The 3990X processor has 128 threads and half of these will need to be disabled. In these cases we recommend disabling hyper-threading in the BIOS.
   
   - `Enable`
     - Above 4G Decoding (This must be on, if you can't find the option then add npci=0x3000 to boot-args. Do not have both this option and npci enabled at the same time.)
@@ -106,7 +112,6 @@ Note: Most of these options may not be present in your firmware, we recommend ma
     - EHCI/XHCI Hand-off
     - OS type: Windows 8.1/10 UEFI Mode (some motherboards may require "Other OS" instead)
     - SATA Mode: AHCI
-    - SWM Mode
   
 
 ### Editing EFI
