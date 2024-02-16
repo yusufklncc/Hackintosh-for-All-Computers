@@ -88,7 +88,7 @@ To check if your hardware is incompatible, I leave links below.
 - Select the OSX image `(.raw file)` from the popup window.
 - Click to "Select target" and select USB drive.
 - Click to "Flash!" and select allow in popup window.
-<p style="text-align: center">
+<p align="center">
   <img src="https://user-images.githubusercontent.com/78423442/154849816-0a04602a-9064-4780-9d4e-ed86254b4fea.png">
 </p>
 
