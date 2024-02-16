@@ -162,7 +162,8 @@ Note: Most of these options may not be present in your firmware, we recommend th
 
 - After adjusting the `BIOS` settings, select USB from the boot menu of our computer and continue.
 - The OpenCore screen will come up, press enter on `Install macOS "Sonoma"` (whatever yours is).
-
+- If you get the error in the image, this is due to a mismatch between the macOS version you are trying to install and the Mac SMBIOS you are using. Check the Mac SMBIOS supported by the macOS version you are trying to install. Then open your config file with a text editor and change the `SystemProductName`. Try booting again.
+  - <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/Installation/change-smbios.png">
 - Texts will start to flow on the screen, this is `verbose` mode. Here, the processes that occur while your computer is booting are displayed as text.
 - If the text stops after waiting for a while, you are unfortunately a bit unlucky. But if the text doesn't stop, after a while you will see the Apple logo and the macOS installation screen. We have no problems so far. Now it's time to install our `Network/Ethernet` card's kext, which is our important hardware after installation.
 - Click the Apple logo on the top left and `Shutdown` the computer. Boot the Windows operating system.
@@ -189,9 +190,6 @@ Note: Most of these options may not be present in your firmware, we recommend th
   - <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/Installation/opencore-install-macos.png">
   - <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/Installation/verbose-start.png">
   - <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/Installation/middle-verbose.png">
-  - If you get the error in the image, this is due to a mismatch between the macOS version you are trying to install and the Mac ID you are using. Check the Mac IDs supported by the macOS version you are trying to install. Then open your config file with a text editor and change the SystemProductName value. Try booting again.
-  - <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/Installation/change-smbios.png">
-
   
 - Select language.
   - <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/Installation/install-macos-select-language.png">
@@ -514,4 +512,5 @@ Note: Most of these options may not be present in your firmware, we recommend th
 <h1> Donate - Bağış </h1>
 <p align="center">
 <a href="https://raw.githubusercontent.com/yusufklncc/yusufklncc/main/Donate%20-%20Ba%C4%9F%C4%B1%C5%9F.md">
-  <img src="https://raw.githubusercontent.com/yusufklncc/yusufklncc/main/Resources/Donate.png" width="300">
+  <img src="https://raw.githubusercontent.com/yusufklncc/yusufklncc/main/Resources/Donate.png" width="300"></a>
+</p>
