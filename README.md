@@ -90,6 +90,7 @@ To check if your hardware is incompatible, I leave links below.
 - Click to "Flash!" and select allow in popup window.
 <p style="text-align: center">
   <img src="https://user-images.githubusercontent.com/78423442/154849816-0a04602a-9064-4780-9d4e-ed86254b4fea.png">
+</p>
 
 - When you have finished writing, 'unplug' the USB stick and plug it back in again.
 
