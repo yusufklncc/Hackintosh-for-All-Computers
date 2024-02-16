@@ -2,7 +2,7 @@
 
 # macOS on All Computers
 
-<p style="text-align: center">
+<p align="center">
   <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/All%20macOS.png">
 </p>
 
@@ -89,8 +89,7 @@ To check if your hardware is incompatible, I leave links below.
 - Click to "Select target" and select USB drive.
 - Click to "Flash!" and select allow in popup window.
 <p align="center">
-  <img src="https://user-images.githubusercontent.com/78423442/154849816-0a04602a-9064-4780-9d4e-ed86254b4fea.png">
-</p>
+  <img src="https://user-images.githubusercontent.com/78423442/154849816-0a04602a-9064-4780-9d4e-ed86254b4fea.png"></p>
 
 - When you have finished writing, 'unplug' the USB stick and plug it back in again.
 
@@ -299,7 +298,7 @@ Note: Most of these options may not be present in your firmware, we recommend th
 <br>
 
 # macOS Sonoma
-<p style="text-align: center">
+<p align="center">
   <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/macOS%20Sonoma%20%C4%B0maj.png" width="700"></p>
 
 <p style="display: flex; align-items: center; justify-content: center; gap: 10px">
@@ -320,7 +319,7 @@ Note: Most of these options may not be present in your firmware, we recommend th
 - Compatible for computers with Intel and AMD processors.
 
 # macOS Ventura
-<p style="text-align: center">
+<p align="center">
   <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/macOS%20Ventura%20%C4%B0maj.png" width="700">
 
 <p style="display: flex; align-items: center; justify-content: center; gap: 10px">
@@ -342,7 +341,7 @@ Note: Most of these options may not be present in your firmware, we recommend th
 
 
 # macOS Monterey
-<p style="text-align: center">
+<p align="center">
   <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/macOS%20Monterey%20%C4%B0maj.png" width="700"></p>
 
 <p style="display: flex; align-items: center; justify-content: center; gap: 10px">
@@ -363,7 +362,7 @@ Note: Most of these options may not be present in your firmware, we recommend th
 - Compatible for computers with Intel and AMD processors.
 
 # macOS Big Sur
-<p style="text-align: center">
+<p align="center">
   <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/macOS%20Big%20Sur%20%C4%B0maj.png" width="700"></p>
 
 <p style="display: flex; align-items: center; justify-content: center; gap: 10px">
@@ -384,7 +383,7 @@ Note: Most of these options may not be present in your firmware, we recommend th
 - Compatible for computers with Intel and AMD processors.
 
 # macOS Catalina
-<p style="text-align: center">
+<p align="center">
   <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/macOS%20Catalina%20%C4%B0maj.png" width="700"></p>
 
 <p style="display: flex; align-items: center; justify-content: center; gap: 10px">
@@ -406,7 +405,7 @@ Note: Most of these options may not be present in your firmware, we recommend th
 - Compatible for computers with Intel and AMD processors.
 
 # macOS Mojave
-<p style="text-align: center">
+<p align="center">
   <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/macOS%20Mojave%20%C4%B0maj.png" width="700"></p>
 
 <p style="display: flex; align-items: center; justify-content: center; gap: 10px">
@@ -427,7 +426,7 @@ Note: Most of these options may not be present in your firmware, we recommend th
 - Compatible for computers with Intel and AMD processors.
 
 # macOS High Sierra
-<p style="text-align: center">
+<p align="center">
   <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/macOS%20High%20Sierra%20%C4%B0maj.png" width="700"></p>
 
 <p style="display: flex; align-items: center; justify-content: center; gap: 10px">
@@ -448,7 +447,7 @@ Note: Most of these options may not be present in your firmware, we recommend th
 - Compatible for computers with Intel and AMD processors.
 
 # macOS Sierra
-<p style="text-align: center">
+<p align="center">
   <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/macOS/macOS%20Sierra.png" width="700"></p>
 
 <p style="display: flex; align-items: center; justify-content: center; gap: 10px">
@@ -469,7 +468,7 @@ Note: Most of these options may not be present in your firmware, we recommend th
 - Compatible for computers with Intel and AMD processors.
 
 # macOS El Capitan
-<p style="text-align: center">
+<p align="center">
   <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/macOS/macOS%20El%20Capitan.png" width="700"></p>
 
 <p style="display: flex; align-items: center; justify-content: center; gap: 10px">
@@ -490,7 +489,7 @@ Note: Most of these options may not be present in your firmware, we recommend th
 - Compatible for computers with Intel and AMD processors.
 
 # macOS Yosemite
-<p style="text-align: center">
+<p align="center">
   <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/macOS/macOS%20Yosemite.png" width="700"></p>
 
 <p style="display: flex; align-items: center; justify-content: center; gap: 10px">
@@ -513,6 +512,6 @@ Note: Most of these options may not be present in your firmware, we recommend th
 <br>
 
 <h1> Donate - Bağış </h1>
-<p style="text-align: center">
+<p align="center">
 <a href="https://raw.githubusercontent.com/yusufklncc/yusufklncc/main/Donate%20-%20Ba%C4%9F%C4%B1%C5%9F.md">
   <img src="https://raw.githubusercontent.com/yusufklncc/yusufklncc/main/Resources/Donate.png" width="300">
