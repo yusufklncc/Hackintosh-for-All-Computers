@@ -64,7 +64,7 @@ To check if your hardware is incompatible, I leave links below.
 
 <br>
 
-### Download OSX Image
+### Download macOS Image
 
 - Go
   - [Sonoma](#macos-sonoma)
