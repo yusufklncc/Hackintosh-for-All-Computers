@@ -299,7 +299,7 @@ Note: Most of these options may not be present in your firmware, we recommend th
 <p align="center">
   <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/macOS%20Sonoma%20%C4%B0maj.png" width="700"></p>
 
-<p style="display: flex; align-items: center; justify-content: center; gap: 10px">
+<p align="center">
   <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/techolay.png" width="50">
 <a href="https://techolay.net/sosyal/konu/macos-sonoma-14-3-intel-amd-kurulum-imaji.6963/"><img src="https://img.shields.io/badge/Download-Sonoma%2014.3%20(23D56)-green" width="400"></a>
 
@@ -320,7 +320,7 @@ Note: Most of these options may not be present in your firmware, we recommend th
 <p align="center">
   <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/macOS%20Ventura%20%C4%B0maj.png" width="700">
 
-<p style="display: flex; align-items: center; justify-content: center; gap: 10px">
+<p align="center">
   <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/techolay.png" width="50">
 <a href="https://techolay.net/sosyal/konu/macos-ventura-13-6-4-intel-amd-kurulum-imaji.8867/"><img src="https://img.shields.io/badge/Download-Ventura%2013.6.4%20(22G513)-orange" width="400"></a>
 
