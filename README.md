@@ -342,7 +342,7 @@ Note: Most of these options may not be present in your firmware, we recommend th
 <p align="center">
   <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/macOS%20Monterey%20%C4%B0maj.png" width="700"></p>
 
-<p style="display: flex; align-items: center; justify-content: center; gap: 10px">
+<p align="center">
   <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/techolay.png" width="50">
 <a href="https://techolay.net/sosyal/konu/macos-monterey-12-7-3-intel-amd-kurulum-imaji.9318/"><img src="https://img.shields.io/badge/Download-Monterey%2012.7.3%20(21H1015)-blueviolet" width="400"></a>
 
@@ -363,7 +363,7 @@ Note: Most of these options may not be present in your firmware, we recommend th
 <p align="center">
   <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/macOS%20Big%20Sur%20%C4%B0maj.png" width="700"></p>
 
-<p style="display: flex; align-items: center; justify-content: center; gap: 10px">
+<p align="center">
   <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/techolay.png" width="50">
 <a href="https://techolay.net/sosyal/konu/macos-big-sur-11-7-10-intel-amd-kurulum-imaji.9679/"><img src="https://img.shields.io/badge/Download-Big%20Sur%2011.7.10%20(20G1427)-blue" width="400"></a> </p>
 
@@ -384,7 +384,7 @@ Note: Most of these options may not be present in your firmware, we recommend th
 <p align="center">
   <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/macOS%20Catalina%20%C4%B0maj.png" width="700"></p>
 
-<p style="display: flex; align-items: center; justify-content: center; gap: 10px">
+<p align="center">
   <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/Google%20Drive%20Icon.png" width="50"/> </a>
 <a href="https://drive.google.com/u/0/uc?id=1su1aht3HdKle8KhFdh8Hgis8iVdCS0Av&export=download">
   <img src="https://img.shields.io/badge/Download-Catalina%2010.15.7%20(19H15)-red" width="400"/> </a>
@@ -406,7 +406,7 @@ Note: Most of these options may not be present in your firmware, we recommend th
 <p align="center">
   <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/macOS%20Mojave%20%C4%B0maj.png" width="700"></p>
 
-<p style="display: flex; align-items: center; justify-content: center; gap: 10px">
+<p align="center">
   <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/Google%20Drive%20Icon.png" width="50"/> </a>
 <a href="https://drive.google.com/uc?id=1CZI7VDSVkBP0RFTkFjKSWA1jRTRCFMea&export=download">
   <img src="https://img.shields.io/badge/Download-Mojave%2010.14.6%20(18G103)-yellow" width="400"/> </a>
@@ -427,7 +427,7 @@ Note: Most of these options may not be present in your firmware, we recommend th
 <p align="center">
   <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/macOS%20High%20Sierra%20%C4%B0maj.png" width="700"></p>
 
-<p style="display: flex; align-items: center; justify-content: center; gap: 10px">
+<p align="center">
   <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/Google%20Drive%20Icon.png" width="50"/> </a>
 <a href="https://drive.google.com/uc?id=1reS464pquOVKLCI-V5VF3OA5_uzGvele&export=download">
   <img src="https://img.shields.io/badge/Download-High%20Sierra%2010.13.6%20(17G66)-orange" width="400"/> </a>
@@ -448,7 +448,7 @@ Note: Most of these options may not be present in your firmware, we recommend th
 <p align="center">
   <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/macOS/macOS%20Sierra.png" width="700"></p>
 
-<p style="display: flex; align-items: center; justify-content: center; gap: 10px">
+<p align="center">
   <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/Google%20Drive%20Icon.png" width="50"/> </a>
 <a href="https://drive.google.com/uc?id=1JpAKVwvF9v5ivZDOKR65xBDi7uoZRcwR&export=download">
   <img src="https://img.shields.io/badge/Download-Sierra%2010.12.6%20(16G29)-yellowgreen" width="400"/> </a>
@@ -469,7 +469,7 @@ Note: Most of these options may not be present in your firmware, we recommend th
 <p align="center">
   <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/macOS/macOS%20El%20Capitan.png" width="700"></p>
 
-<p style="display: flex; align-items: center; justify-content: center; gap: 10px">
+<p align="center">
   <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/Google%20Drive%20Icon.png" width="50"/> </a>
 <a href="https://drive.google.com/uc?id=1ZN5i1acptGn49uOfVeT8scGPnjBFnVAn&export=download">
   <img src="https://img.shields.io/badge/Download-El%20Capitan%2010.11.6%20(15G31)-red" width="400"/> </a> 
@@ -490,7 +490,7 @@ Note: Most of these options may not be present in your firmware, we recommend th
 <p align="center">
   <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/macOS/macOS%20Yosemite.png" width="700"></p>
 
-<p style="display: flex; align-items: center; justify-content: center; gap: 10px">
+<p align="center">
   <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/Google%20Drive%20Icon.png" width="50"/> </a>
 <a href="https://drive.google.com/uc?id=1TdlPEyWjvi7epGLdgOWzVSaXm-cjmdNh&export=download">
   <img src="https://img.shields.io/badge/Download-Yosemite%2010.10.5%20(14F27)-lightgrey" width="400"/> </a> 
