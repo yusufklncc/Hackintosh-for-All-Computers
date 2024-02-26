@@ -330,7 +330,7 @@ Note: Most of these options may not be present in your firmware, we recommend th
 <a href="https://techolay.net/sosyal/konu/macos-sonoma-14-3-intel-amd-kurulum-imaji.6963/"><img src="https://img.shields.io/badge/Download-Sonoma%2014.3%20(23D56)-green" width="400"></a>
 <p align="center">
   <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/YandexDisk.png" width="50">
-<a href="https://disk.yandex.com.tr/d/R7uXMIv00bkUCA"><img src="https://img.shields.io/badge/Download-Sonoma%2014.3%20(23D56)-green" width="400"></a>
+<a href="https://disk.yandex.com.tr/d/R7uXMIv00bkUCA"><img src="https://img.shields.io/badge/Download-Sonoma%2014.3%20(23D56)-yellow" width="400"></a>
 
 <h3>Features</h3>
 
@@ -352,6 +352,9 @@ Note: Most of these options may not be present in your firmware, we recommend th
 <p align="center">
   <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/techolay.png" width="50">
 <a href="https://techolay.net/sosyal/konu/macos-ventura-13-6-4-intel-amd-kurulum-imaji.8867/"><img src="https://img.shields.io/badge/Download-Ventura%2013.6.4%20(22G513)-orange" width="400"></a>
+<p align="center">
+  <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/YandexDisk.png" width="50">
+<a href="https://disk.yandex.com.tr/d/rJr68ehwyTqDqQ"><img src="https://img.shields.io/badge/Download-Ventura%2013.6.4%20(22G513)-yellow" width="400"></a>
 
 <h3>Features</h3>
 
@@ -374,6 +377,9 @@ Note: Most of these options may not be present in your firmware, we recommend th
 <p align="center">
   <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/techolay.png" width="50">
 <a href="https://techolay.net/sosyal/konu/macos-monterey-12-7-3-intel-amd-kurulum-imaji.9318/"><img src="https://img.shields.io/badge/Download-Monterey%2012.7.3%20(21H1015)-blueviolet" width="400"></a>
+<p align="center">
+  <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/YandexDisk.png" width="50">
+<a href="https://disk.yandex.com.tr/d/Er0c_wlvct3Zsw"><img src="https://img.shields.io/badge/Download-Monterey%2012.7.3%20(21H1015)-yellow" width="400"></a>
 
 <h3>Features</h3>
 
@@ -395,6 +401,9 @@ Note: Most of these options may not be present in your firmware, we recommend th
 <p align="center">
   <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/techolay.png" width="50">
 <a href="https://techolay.net/sosyal/konu/macos-big-sur-11-7-10-intel-amd-kurulum-imaji.9679/"><img src="https://img.shields.io/badge/Download-Big%20Sur%2011.7.10%20(20G1427)-blue" width="400"></a> </p>
+<p align="center">
+  <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/YandexDisk.png" width="50">
+<a href="https://disk.yandex.com.tr/d/T80jcRkR11QoYA"><img src="https://img.shields.io/badge/Download-Big%20Sur%2011.7.10%20(20G1427)-yellow" width="400"></a>
 
 <h3>Features</h3>
 
@@ -417,6 +426,9 @@ Note: Most of these options may not be present in your firmware, we recommend th
   <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/Google%20Drive%20Icon.png" width="50"/> </a>
 <a href="https://drive.google.com/u/0/uc?id=1su1aht3HdKle8KhFdh8Hgis8iVdCS0Av&export=download">
   <img src="https://img.shields.io/badge/Download-Catalina%2010.15.7%20(19H15)-red" width="400"/> </a>
+<p align="center">
+  <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/YandexDisk.png" width="50">
+<a href="https://disk.yandex.com.tr/d/9BL9JNpdO30xvg"><img src="https://img.shields.io/badge/Download-Catalina%2010.15.7%20(19H15)-yellow" width="400"></a>
 
 <h3>Features</h3>
 
@@ -439,6 +451,9 @@ Note: Most of these options may not be present in your firmware, we recommend th
   <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/Google%20Drive%20Icon.png" width="50"/> </a>
 <a href="https://drive.google.com/uc?id=1CZI7VDSVkBP0RFTkFjKSWA1jRTRCFMea&export=download">
   <img src="https://img.shields.io/badge/Download-Mojave%2010.14.6%20(18G103)-yellow" width="400"/> </a>
+<p align="center">
+  <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/YandexDisk.png" width="50">
+<a href="https://disk.yandex.com.tr/d/xPv1jGkvlTA_0A"><img src="https://img.shields.io/badge/Download-Mojave%2010.14.6%20(18G103)-yellow" width="400"></a>
 
 <h3>Features</h3>
 
@@ -460,6 +475,9 @@ Note: Most of these options may not be present in your firmware, we recommend th
   <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/Google%20Drive%20Icon.png" width="50"/> </a>
 <a href="https://drive.google.com/uc?id=1reS464pquOVKLCI-V5VF3OA5_uzGvele&export=download">
   <img src="https://img.shields.io/badge/Download-High%20Sierra%2010.13.6%20(17G66)-orange" width="400"/> </a>
+<p align="center">
+  <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/YandexDisk.png" width="50">
+<a href="https://disk.yandex.com.tr/d/52J3Y2axXJeAzg"><img src="https://img.shields.io/badge/Download-High%20Sierra%2010.13.6%20(17G66)-yellow" width="400"></a>
 
 <h3>Features</h3>
 
@@ -481,6 +499,9 @@ Note: Most of these options may not be present in your firmware, we recommend th
   <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/Google%20Drive%20Icon.png" width="50"/> </a>
 <a href="https://drive.google.com/uc?id=1JpAKVwvF9v5ivZDOKR65xBDi7uoZRcwR&export=download">
   <img src="https://img.shields.io/badge/Download-Sierra%2010.12.6%20(16G29)-yellowgreen" width="400"/> </a>
+<p align="center">
+  <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/YandexDisk.png" width="50">
+<a href="https://disk.yandex.com.tr/d/SDMVIO070FSlqQ"><img src="https://img.shields.io/badge/Download-Sierra%2010.12.6%20(16G29)-yellow" width="400"></a>
 
 <h3>Features</h3>
 
