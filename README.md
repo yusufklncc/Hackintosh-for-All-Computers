@@ -295,6 +295,32 @@ Note: Most of these options may not be present in your firmware, we recommend th
 
 <br>
 
+### Post Installation
+
+<br>
+
+- Open config file with `Text Edit`.
+  - Search `HideAuxiliary` and change `false` value to `true`.
+  - Search `SecureBootModel` and change `Disabled` value to `Default`. (Big Sur+)
+    - If you have patched your system with `OCLP`, do not do this step.
+  - Search `boot-args` and delete `-v` argument.
+- Now we have to set our serial numbers and ROM value.
+  - Download [GenSMBIOS](https://github.com/corpnewt/GenSMBIOS/archive/refs/heads/master.zip) and open .command file. If program asks `Download Python` download it. After that select option 3.
+  - <img src="https://github.com/yusufklncc/Lenovo-Thinkpad-E570-Hackintosh/blob/main/Resources/GenSMBIOS/GenSMBIOS%201.png">
+  - Now list 5 SMBIOS first. `MacBookPro14,1` (Compatible SMBIOS with your hardware)
+    - If your hardware compatible SMBIOS doesn't support installed macOS version, add `-no_compat_check` to `boot-args`. 
+  - <img src="https://github.com/yusufklncc/Lenovo-Thinkpad-E570-Hackintosh/blob/main/Resources/GenSMBIOS/GenSMBIOS%202.png">
+  - Select and copy first Serial.
+  - <img src="https://github.com/yusufklncc/Lenovo-Thinkpad-E570-Hackintosh/blob/main/Resources/GenSMBIOS/GenSMBIOS%203.png">
+  - Go [check](https://checkcoverage.apple.com/) serial number. Your serial should be like this. If not, try second serial.
+  - <img src="https://github.com/yusufklncc/Lenovo-Thinkpad-E570-Hackintosh/blob/main/Resources/GenSMBIOS/Check%20Serial.png">
+  - Search MacBookPro15,1 and replace `Type > SystemProductName, Serial > SystemSerialNumber, Board Serial > MLB and SmUUID > SystemUUID` values. Now we will set our ROM value.
+  - Go `System Setting > Netwotk > Ethernet > Details > Hardware`. If our MAC adress is `54:1A:AF:43:70:CA` remove `:` characters = `541AAF4370CA`. Convert it to [Base64](https://base64.guru/converter/encode/hex). 
+  - Now we have `VBqvQ3DK`. Replace this with ROM value and save config file.
+  - Restart computer and press `Space` key on OpenCore menu. Then enter `ResetNVRAM`. After that BIOS settings may change. Check it and boot macOS.
+  - Now you can login iCloud, iMessage or other apple services and you can use macOS.
+
+
 # macOS Sonoma
 <p align="center">
   <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/macOS%20Sonoma%20%C4%B0maj.png" width="700"></p>
