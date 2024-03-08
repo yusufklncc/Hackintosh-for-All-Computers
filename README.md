@@ -326,11 +326,8 @@ Note: Most of these options may not be present in your firmware, we recommend th
   <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/macOS%20Sonoma%20%C4%B0maj.png" width="700"></p>
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/techolay.png" width="50">
-<a href="https://techolay.net/sosyal/konu/macos-sonoma-14-3-intel-amd-kurulum-imaji.6963/"><img src="https://img.shields.io/badge/Download-Sonoma%2014.3%20(23D56)-green" width="400"></a>
-<p align="center">
   <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/YandexDisk.png" width="50">
-<a href="https://disk.yandex.com.tr/d/R7uXMIv00bkUCA"><img src="https://img.shields.io/badge/Download-Sonoma%2014.3%20(23D56)-yellow" width="400"></a>
+<a href="https://disk.yandex.com/d/V2HBod0kqR--7w"><img src="https://img.shields.io/badge/Download-Sonoma%2014.4%20(23E214)-yellow" width="400"></a>
 
 <h3>Features</h3>
 
