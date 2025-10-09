@@ -1,4 +1,4 @@
-# Work is in progress for this repository. 
+# Work is in progress for this repository.
 
 # macOS on All Computers
 
@@ -6,7 +6,7 @@
   <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/All%20macOS.png">
 </p>
 
-Hello everyone. This repository contains the RAW macOS image and global EFI needed to install macOS on your `compatible` computer. I am going to share with you my own OpenCore bootloader folder and macOS images. If you send me the problems you encounter, we can work together to solve them. I will update it externally with the image every month as there is no EFI folder in the image. What you need to do is to place the EFI folder in the EFI partition that will be created after you have written the image to your USB flash drive. I hope you all have a smooth hackintosh.
+Hello everyone. This repository contains the RAW macOS installation files and global EFI needed to install macOS on your `compatible` computer. I am going to share with you my own OpenCore bootloader folder and macOS installation files. If you send me the problems you encounter, we can work together to solve them. I will update it externally with the image every month as there is no EFI folder in the installation file. What you need to do is to place the EFI folder in the EFI partition that will be created after you have written the installation file to your USB flash drive. I hope you all have a smooth hackintosh.
 
 ## Table of contents
 
@@ -20,6 +20,7 @@ Hello everyone. This repository contains the RAW macOS image and global EFI need
 - [macOS Installation Steps](#macos-installation-steps)
 
 ### Find Hardware Information
+
 - Download and install [AIDA64 Extreme](https://www.aida64.com/downloads).
 - Open `AIDA64 Extreme` and double click `Summary`
 - We can see our CPU, motherboard, GPU and Audio Adapter. Make a note of these.
@@ -49,11 +50,13 @@ I took the screenshots from my current computer. According to this guide, here a
 <br>
 
 ### Check Compability
+
 - [Anti-Hackintosh Buyers](https://dortania.github.io/Anti-Hackintosh-Buyers-Guide/)
 
 <br>
 
 To check if your hardware is incompatible, I leave links below.
+
 - [Processors](https://dortania.github.io/Anti-Hackintosh-Buyers-Guide/CPU.html#cpus-to-avoid)
   - Intel Core i5-10200H (Unfortunately, this processor's integrated graphics card is not supported by macOS.)
 - [Graphics Cards](https://dortania.github.io/GPU-Buyers-Guide/)
@@ -109,11 +112,12 @@ To check if your hardware is incompatible, I leave links below.
 
 <br>
 
-### Adjust BIOS Settings 
-  
+### Adjust BIOS Settings
+
 Note: Most of these options may not be present in your firmware, we recommend that you match them as closely as possible, but don't worry if many of these options are not present in your BIOS.
 
 - ### Intel
+
   - Before you start, reset your BIOS settings to default.
   - `Disable`
     - Fast Boot
@@ -136,8 +140,10 @@ Note: Most of these options may not be present in your firmware, we recommend th
     - SATA Mode: AHCI
 
 - ### AMD Ryzen
+
   - Before you start, reset your BIOS settings to default.
   - `Disable`
+
     - Fast Boot
     - Secure Boot
     - Serial/COM Port
@@ -145,7 +151,7 @@ Note: Most of these options may not be present in your firmware, we recommend th
     - Compatibility Support Module (CSM) (Must be off in most cases, GPU errors/stalls like gIO are common when this option is enabled)
     - IOMMU
     - Note for 3990X users: MacOS currently does not support more than 64 threads in the kernel. If more threads are detected, the kernel will panic. The 3990X processor has 128 threads and half of these will need to be disabled. In these cases we recommend disabling hyper-threading in the BIOS.
-  
+
   - `Enable`
     - Above 4G Decoding (This must be on, if you can't find the option then add npci=0x3000 to boot-args. Do not have both this option and npci enabled at the same time.)
       - If you are on a Gigabyte/Aorus or an AsRock motherboard, enabling this option may break certain drivers(ie. Ethernet) and/or boot failures on other OSes, if it does happen then disable this option and opt for npci instead
@@ -153,7 +159,7 @@ Note: Most of these options may not be present in your firmware, we recommend th
     - EHCI/XHCI Hand-off
     - OS type: Windows 8.1/10 UEFI Mode (some motherboards may require "Other OS" instead)
     - SATA Mode: AHCI
-  
+
 <br>
 
 ### Editing EFI
@@ -178,6 +184,7 @@ Note: Most of these options may not be present in your firmware, we recommend th
     - [Atheros Wi-Fi](https://dortania.github.io/Wireless-Buyers-Guide/Kext.html#atheros)
 - Download the kext we need and put it in EFI/OC/Kexts. Next is to add this kext to the config. We will do this with `Notepad/Notepad++`. I will use `AirportBrcmFixUp.kext` which is required for Broadcom card.
 - Right click on our `config.plist` file and open it with `notepad/notepad++`. Search `Kernel` with the Ctrl+F key combination. The result will be:
+
   - <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/config:kernel.png">
 
 - Now come to the bottom of the `Add` section and add our kext. For that, follow this video:
@@ -186,11 +193,11 @@ Note: Most of these options may not be present in your firmware, we recommend th
 <br>
 
 ### macOS Installation Steps
+
 - Now let's shutdown our computer and boot from USB. Choose the `Install macOS "Sonoma"` option and go to the installation screen.
   - <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/Installation/opencore-install-macos.png">
   - <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/Installation/verbose-start.png">
   - <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/Installation/middle-verbose.png">
-  
 - Select language.
   - <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/Installation/install-macos-select-language.png">
 
@@ -205,9 +212,11 @@ Note: Most of these options may not be present in your firmware, we recommend th
 - Select Show All Devices from View button.
   - <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/Installation/show-all-devices.png">
 - Select installation disk name from left menu and click Erase from top-right menu.
+
   - <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/Installation/select-main-disk-name-erase.png">
- 
+
 - If you are going to install macOS `next to windows`, create a partition with the video guide below.
+
   - [Splitting the disk in HFS+ format](https://vk.com/video749455540_456239018)
   - After doing this, right-click created volume name on left sida from Disk Utility and click Convert APFS. You can select your disk on the installation screen and start the installation.
 
@@ -274,14 +283,17 @@ Note: Most of these options may not be present in your firmware, we recommend th
   - <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/Installation/select-siri-voice.png">
   - <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/Installation/improve-siri-dictation.png">
 - Finally, let's select a theme and complete the installation.
+
   - <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/Installation/select-theme.png">
 
 - After installation, you may see a window for keyboard setup. Let's make the adjustments here.
+
   - <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/Installation/keyboard-setup-assistant.png">
   - <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/Installation/identifying-keyboard.png">
   - <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/Installation/select-keyboard-type.png">
 
 - We can finally get the macOS desktop.
+
   - <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/Installation/desktop-2.png">
   - <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/Installation/lock-screen.png">
 
@@ -308,20 +320,20 @@ Note: Most of these options may not be present in your firmware, we recommend th
   - Download [GenSMBIOS](https://github.com/corpnewt/GenSMBIOS/archive/refs/heads/master.zip) and open .command file. If program asks `Download Python` download it. After that select option 3.
   - <img src="https://github.com/yusufklncc/Lenovo-Thinkpad-E570-Hackintosh/blob/main/Resources/GenSMBIOS/GenSMBIOS%201.png">
   - Now list 5 SMBIOS first. `MacBookPro14,1` (Compatible SMBIOS with your hardware)
-    - If your hardware compatible SMBIOS doesn't support installed macOS version, add `-no_compat_check` to `boot-args`. 
+    - If your hardware compatible SMBIOS doesn't support installed macOS version, add `-no_compat_check` to `boot-args`.
   - <img src="https://github.com/yusufklncc/Lenovo-Thinkpad-E570-Hackintosh/blob/main/Resources/GenSMBIOS/GenSMBIOS%202.png">
   - Select and copy first Serial.
   - <img src="https://github.com/yusufklncc/Lenovo-Thinkpad-E570-Hackintosh/blob/main/Resources/GenSMBIOS/GenSMBIOS%203.png">
   - Go [check](https://checkcoverage.apple.com/) serial number. Your serial should be like this. If not, try second serial.
   - <img src="https://github.com/yusufklncc/Lenovo-Thinkpad-E570-Hackintosh/blob/main/Resources/GenSMBIOS/Check%20Serial.png">
   - Search MacBookPro15,1 and replace `Type > SystemProductName, Serial > SystemSerialNumber, Board Serial > MLB and SmUUID > SystemUUID` values. Now we will set our ROM value.
-  - Go `System Setting > Netwotk > Ethernet > Details > Hardware`. If our MAC adress is `54:1A:AF:43:70:CA` remove `:` characters = `541AAF4370CA`. Convert it to [Base64](https://base64.guru/converter/encode/hex). 
+  - Go `System Setting > Netwotk > Ethernet > Details > Hardware`. If our MAC adress is `54:1A:AF:43:70:CA` remove `:` characters = `541AAF4370CA`. Convert it to [Base64](https://base64.guru/converter/encode/hex).
   - Now we have `VBqvQ3DK`. Replace this with ROM value and save config file.
   - Restart computer and press `Space` key on OpenCore menu. Then enter `ResetNVRAM`. After that BIOS settings may change. Check it and boot macOS.
   - Now you can login iCloud, iMessage or other apple services and you can use macOS.
 
-
 # macOS Sonoma
+
 <p align="center">
   <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/macOS%20Sonoma%20%C4%B0maj.png" width="700"></p>
 
@@ -343,6 +355,7 @@ Note: Most of these options may not be present in your firmware, we recommend th
 - Compatible for computers with Intel and AMD processors.
 
 # macOS Ventura
+
 <p align="center">
   <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/macOS%20Ventura%20%C4%B0maj.png" width="700">
 
@@ -366,8 +379,8 @@ Note: Most of these options may not be present in your firmware, we recommend th
 - "Kurulum Sonrası - Post Installation" contains the most necessary programs after installation.
 - Compatible for computers with Intel and AMD processors.
 
-
 # macOS Monterey
+
 <p align="center">
   <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/macOS%20Monterey%20%C4%B0maj.png" width="700"></p>
 
@@ -392,6 +405,7 @@ Note: Most of these options may not be present in your firmware, we recommend th
 - Compatible for computers with Intel and AMD processors.
 
 # macOS Big Sur
+
 <p align="center">
   <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/macOS%20Big%20Sur%20%C4%B0maj.png" width="700"></p>
 
@@ -416,6 +430,7 @@ Note: Most of these options may not be present in your firmware, we recommend th
 - Compatible for computers with Intel and AMD processors.
 
 # macOS Catalina
+
 <p align="center">
   <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/macOS%20Catalina%20%C4%B0maj.png" width="700"></p>
 
@@ -441,6 +456,7 @@ Note: Most of these options may not be present in your firmware, we recommend th
 - Compatible for computers with Intel and AMD processors.
 
 # macOS Mojave
+
 <p align="center">
   <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/macOS%20Mojave%20%C4%B0maj.png" width="700"></p>
 
@@ -465,6 +481,7 @@ Note: Most of these options may not be present in your firmware, we recommend th
 - Compatible for computers with Intel and AMD processors.
 
 # macOS High Sierra
+
 <p align="center">
   <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/macOS%20High%20Sierra%20%C4%B0maj.png" width="700"></p>
 
@@ -489,6 +506,7 @@ Note: Most of these options may not be present in your firmware, we recommend th
 - Compatible for computers with Intel and AMD processors.
 
 # macOS Sierra
+
 <p align="center">
   <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/macOS/macOS%20Sierra.png" width="700"></p>
 
@@ -513,13 +531,14 @@ Note: Most of these options may not be present in your firmware, we recommend th
 - Compatible for computers with Intel and AMD processors.
 
 # macOS El Capitan
+
 <p align="center">
   <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/macOS/macOS%20El%20Capitan.png" width="700"></p>
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/Google%20Drive%20Icon.png" width="50"/> </a>
 <a href="https://drive.google.com/uc?id=1ZN5i1acptGn49uOfVeT8scGPnjBFnVAn&export=download">
-  <img src="https://img.shields.io/badge/Download-El%20Capitan%2010.11.6%20(15G31)-red" width="400"/> </a> 
+  <img src="https://img.shields.io/badge/Download-El%20Capitan%2010.11.6%20(15G31)-red" width="400"/> </a>
 
 <h3>Features</h3>
 
@@ -534,13 +553,14 @@ Note: Most of these options may not be present in your firmware, we recommend th
 - Compatible for computers with Intel and AMD processors.
 
 # macOS Yosemite
+
 <p align="center">
   <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/macOS/macOS%20Yosemite.png" width="700"></p>
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/Google%20Drive%20Icon.png" width="50"/> </a>
 <a href="https://drive.google.com/uc?id=1TdlPEyWjvi7epGLdgOWzVSaXm-cjmdNh&export=download">
-  <img src="https://img.shields.io/badge/Download-Yosemite%2010.10.5%20(14F27)-lightgrey" width="400"/> </a> 
+  <img src="https://img.shields.io/badge/Download-Yosemite%2010.10.5%20(14F27)-lightgrey" width="400"/> </a>
 
 <h3>Features</h3>
 
