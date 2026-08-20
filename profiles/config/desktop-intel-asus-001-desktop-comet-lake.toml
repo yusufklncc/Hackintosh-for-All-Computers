@@ -1,4 +1,4 @@
-# Exception: EFI/OC/config/Desktop/Intel/ASUS/001 - Desktop - Comet Lake.plist
+# Residual specific to EFI/OC/config/Desktop/Intel/ASUS/001 - Desktop - Comet Lake.plist
 
 [[Kernel.Add]]
 Arch = "x86_64"

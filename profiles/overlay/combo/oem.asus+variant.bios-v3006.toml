@@ -1,4 +1,4 @@
-# 1 configs, identical delta.
+# 1 configs; residual after composing the single-axis overlays.
 
 [Booter.Quirks]
 SetupVirtualMap = false

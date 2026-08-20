@@ -1,4 +1,4 @@
-# 35 configs, identical delta.
+# 35 configs use this alone.
 
 [Kernel.Quirks]
 LapicKernelPanic = true

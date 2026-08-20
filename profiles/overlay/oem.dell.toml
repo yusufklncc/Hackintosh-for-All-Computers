@@ -1,4 +1,4 @@
-# 13 configs, identical delta.
+# 13 configs use this alone.
 
 [Kernel.Quirks]
 CustomSMBIOSGuid = true

@@ -189,13 +189,44 @@ def flatten(o, pre=''):
     return out
 
 
+def prune(o, keep_comments=False, pre=''):
+    """Drop generated identity, and Comment strings unless asked to keep them."""
+    if isinstance(o, dict):
+        out = {}
+        for k, v in o.items():
+            path = f'{pre}{k}'
+            if path in IDENTITY:
+                continue
+            if not keep_comments and k == 'Comment' and isinstance(v, str):
+                continue
+            out[k] = prune(v, keep_comments, f'{path}.')
+        return out
+    if isinstance(o, list):
+        return [prune(v, keep_comments, pre) for v in o]
+    return o
+
+
+def canonical_bytes(plist, keep_comments=False):
+    """Serialise to XML with dict keys sorted, so two trees compare byte for byte.
+
+    Comparing decoded Python values is not enough: True == 1 == 1.0 in Python
+    while <true/>, <integer>1</integer> and <real>1</real> are three different
+    things to OpenCore, and an empty <array/> is not the same as a missing key.
+    Round-tripping through plistlib makes every one of those differences visible
+    in the bytes."""
+    return plistlib.dumps(prune(plist, keep_comments), fmt=plistlib.FMT_XML,
+                          sort_keys=True)
+
+
+def typed_flatten(o, pre=''):
+    """flatten(), but each value carries its type so True and 1 do not collide."""
+    return {k: (type(v).__name__, v) for k, v in flatten(o).items()}
+
+
 def comparable(plist, keep_comments=False):
-    """Key/value view used by the equivalence gate: generated identity dropped,
-    Comment strings dropped unless explicitly requested."""
-    return {
-        k: v for k, v in flatten(plist).items()
-        if k not in IDENTITY and (keep_comments or not k.endswith('.Comment'))
-    }
+    """Typed key/value view. Used to report *where* two trees differ; the gate
+    itself compares canonical_bytes()."""
+    return typed_flatten(prune(plist, keep_comments))
 
 
 def load_plist(path):
@@ -250,8 +281,11 @@ def cpu_name(row):
     return row['cpu'] + (f"-{row['cores']}core" if row['cores'] else '')
 
 
+OVERLAY_ORDER = ('chipset', 'oem', 'variant')
+
+
 def overlay_tag(row):
-    act = [(t, row[t]) for t in ('oem', 'chipset', 'variant') if row[t]]
+    act = [(t, row[t]) for t in OVERLAY_ORDER if row[t]]
     return '+'.join(f'{t}.{n}' for t, n in act) if act else None
 
 
@@ -260,16 +294,22 @@ def exception_name(row):
 
 
 def layer_chain(row, profiles):
-    """Ordered profile files for one config. Missing optional layers are skipped;
-    a per-config exception file replaces the shared overlay when present."""
+    """Ordered profile files for one config.
+
+    Single-axis overlays compose: chipset first (what the board needs), then oem
+    (vendor firmware workarounds), so a vendor quirk wins over a board default.
+    A combo or per-config file may follow, carrying only what composition did not
+    already produce."""
     chain = [profiles / 'base.toml',
              profiles / 'platform' / f'{platform_name(row)}.toml',
              profiles / 'cpu' / platform_name(row) / f'{cpu_name(row)}.toml']
+    for axis in OVERLAY_ORDER:
+        if row[axis]:
+            chain.append(profiles / 'overlay' / f'{axis}.{row[axis]}.toml')
     tag = overlay_tag(row)
     if tag:
-        exc = profiles / 'config' / f'{exception_name(row)}.toml'
-        chain.append(exc if exc.exists()
-                     else profiles / 'overlay' / (tag.replace('+', '/') + '.toml'))
+        chain.append(profiles / 'overlay' / 'combo' / f'{tag}.toml')
+        chain.append(profiles / 'config' / f'{exception_name(row)}.toml')
     return [p for p in chain if p.exists()]
 
 

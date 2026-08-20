@@ -13,11 +13,19 @@ Python 3.11+, standard library only.
 A config is `Sample.plist` from the pinned OpenCore release, with profiles
 merged on top in order:
 
-    base            -> what every config in this repository changes
-    platform/<x>    -> desktop-intel | desktop-amd | laptop
-    cpu/<x>/<y>     -> one per CPU generation
-    overlay/<tag>   -> chipset and OEM deltas (oem.hp is six lines, 35 configs)
-    config/<x>      -> per-config exception, when a group is not uniform
+    base              -> what every config in this repository changes
+    platform/<x>      -> desktop-intel | desktop-amd | laptop
+    cpu/<x>/<y>       -> one per CPU generation
+    overlay/<axis>.<v> -> one per chipset or OEM (oem.hp is six lines, 35 configs)
+    overlay/combo/<t> -> residual for one combination, if composing is not enough
+    config/<x>        -> residual for one config, if its group is not uniform
+
+Single-axis overlays compose in a fixed order - chipset first, then oem, then
+variant - so a vendor firmware workaround wins over a board default. An overlay
+is learned only from configs where that axis is the *only* active one, so a
+combination can never contaminate it. Whatever composition does not reproduce
+becomes a small residual, which is why there is one combo file and six per-config
+residuals rather than a file per combination.
 
 Dicts merge key by key. Lists and scalars replace wholesale, because an ordered
 list such as `Kernel.Add` is one decision, not a set of independent ones.
@@ -47,6 +55,13 @@ migration.
 file on disk. Identity fields are excluded because a profile never stores them;
 `--comments` additionally requires `Comment` strings to match.
 
+The comparison is on canonical XML bytes, not on decoded Python values. That
+distinction matters: in Python `True == 1 == 1.0`, while `<true/>`,
+`<integer>1</integer>` and `<real>1</real>` are three different things to
+OpenCore, and an empty `<array/>` is not the same as a missing key. Both trees
+are pruned, re-serialised with sorted keys, and compared byte for byte, so those
+differences cannot pass.
+
     179/179 configs reproduced (Comment strings included)
 
 Nothing under `EFI/OC/config/` may be deleted while that number is short of
@@ -55,11 +70,12 @@ report about it.
 
 ## Known non-minimality
 
-Two things still produce more profile text than necessary. Both are correctness
-preserving and scheduled next:
+One thing still produces more profile text than necessary. It is correctness
+preserving:
 
 * The 11 AMD core-count profiles differ only in one byte of one kernel patch.
-* Combined overlays (`oem.hp/chipset.h77-...`) store the full delta instead of
-  composing `oem.hp` with `chipset.h77-...`.
+
+Residuals that carry a whole `Kernel.Add` list are expected rather than wasteful:
+a list replaces wholesale, so enabling one extra kext restates the list.
 
 `phase0/` holds the read-only analysis that established the layer structure.

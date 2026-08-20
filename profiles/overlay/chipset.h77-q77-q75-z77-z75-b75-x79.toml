@@ -1,4 +1,4 @@
-# 2 configs, identical delta.
+# 2 configs use this alone.
 
 [[ACPI.Add]]
 Comment = ""

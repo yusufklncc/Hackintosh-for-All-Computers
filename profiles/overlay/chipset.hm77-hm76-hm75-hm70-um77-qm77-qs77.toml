@@ -1,4 +1,4 @@
-# Exception: EFI/OC/config/Laptop/HM77 - HM76 - HM75 - HM70 - UM77 - QM77 - QS77/HP/002 - Laptop - Sandy Bridge UEFI BIOS.plist
+# 2 configs use this alone.
 
 [[ACPI.Add]]
 Comment = ""
@@ -22,9 +22,3 @@ Path = "SSDT-XOSI.aml"
 
 [DeviceProperties.Add."PciRoot(0x0)/Pci(0x16,0x0)"]
 device-id = "hex:3a1c0000"
-
-[Kernel.Quirks]
-LapicKernelPanic = true
-
-[UEFI.Quirks]
-UnblockFsConnect = true

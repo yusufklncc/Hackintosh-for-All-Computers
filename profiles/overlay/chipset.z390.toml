@@ -1,4 +1,4 @@
-# 1 configs, identical delta.
+# 1 configs use this alone.
 
 [Booter.Quirks]
 ProtectUefiServices = true

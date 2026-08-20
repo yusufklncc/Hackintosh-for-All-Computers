@@ -46,6 +46,10 @@ def common_diff(ref, targets):
     return intersect([ocgen.diff(ref, t) or {} for t in targets])
 
 
+def key_of(r):
+    return (r['platform'], r['vendor'], r['cpu'], r['cores'])
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('sample')
@@ -83,41 +87,63 @@ def main():
     # ---- level 2: one profile per cpu generation (per core count for AMD)
     cpu_ref = {}
     for r in canon:
-        key = (r['platform'], r['vendor'], r['cpu'], r['cores'])
+        key = key_of(r)
         name = r['cpu'] + (f'-{r["cores"]}core' if r['cores'] else '')
         plat = f'{r["platform"]}-{r["vendor"]}' if r['vendor'] else r['platform']
         prof = ocgen.diff(lvl1[(r['platform'], r['vendor'])], tree[r['path']]) or {}
         emit(f'cpu/{plat}/{name}.toml', prof, f'Derived from {r["path"]}')
         cpu_ref[key] = ocgen.merge(lvl1[(r['platform'], r['vendor'])], prof)
 
-    # ---- level 3: overlays, only where every member agrees
+    # ---- level 3a: single-axis overlays, learned from configs where that axis
+    #      is the only one active, so a combination cannot contaminate them.
+    solo = collections.defaultdict(list)
+    for r in rows:
+        act = [(ax, r[ax]) for ax in ocgen.OVERLAY_ORDER if r[ax]]
+        if len(act) == 1:
+            solo[act[0]].append(r)
+    overlays = {}
+    for (axis, name), rs in sorted(solo.items()):
+        # each config is diffed against its own cpu reference, then intersected;
+        # the group spans several cpu generations, so one shared reference is wrong
+        d = intersect([ocgen.diff(cpu_ref[key_of(r)], tree[r['path']]) or {} for r in rs])
+        if d:
+            emit(f'overlay/{axis}.{name}.toml', d, f'{len(rs)} configs use this alone.')
+            overlays[(axis, name)] = d
+
+    # ---- level 3b: whatever composing those overlays does not already produce
+    def composed(r):
+        t = cpu_ref[key_of(r)]
+        for ax in ocgen.OVERLAY_ORDER:
+            if r[ax] and (ax, r[ax]) in overlays:
+                t = ocgen.merge(t, overlays[(ax, r[ax])])
+        return t
+
     by_tag = collections.defaultdict(list)
     for r in rows:
-        act = [(t, r[t]) for t in ('oem', 'chipset', 'variant') if r[t]]
-        if act:
-            by_tag['+'.join(f'{t}.{n}' for t, n in act)].append(r)
-    shared, leaves = 0, []
+        if ocgen.overlay_tag(r):
+            by_tag[ocgen.overlay_tag(r)].append(r)
+    combos, leaves = 0, []
     for tag, rs in sorted(by_tag.items()):
-        deltas = {}
-        for r in rs:
-            d = ocgen.diff(cpu_ref[(r['platform'], r['vendor'], r['cpu'], r['cores'])],
-                           tree[r['path']]) or {}
-            deltas.setdefault(repr(ocgen.encode(d)), []).append((r, d))
-        if len(deltas) == 1:
-            _, pairs = next(iter(deltas.items()))
-            emit(f'overlay/{tag.replace("+", "/")}.toml', pairs[0][1],
-                 f'{len(pairs)} configs, identical delta.')
-            shared += 1
+        res = {r['path']: (ocgen.diff(composed(r), tree[r['path']]) or {}) for r in rs}
+        if not any(res.values()):
+            continue
+        uniq = {repr(ocgen.encode(d)) for d in res.values()}
+        if len(uniq) == 1:
+            emit(f'overlay/combo/{tag}.toml', next(iter(res.values())),
+                 f'{len(rs)} configs; residual after composing the single-axis overlays.')
+            combos += 1
         else:
-            for r, d in [p for v in deltas.values() for p in v]:
-                rel = os.path.relpath(r['path'], ROOT)[:-6]
-                emit(f'config/{slug(rel)}.toml', d, f'Exception: {r["path"]}')
-                leaves.append(r['path'])
+            for r in rs:
+                if res[r['path']]:
+                    emit(f'config/{ocgen.exception_name(r)}.toml', res[r['path']],
+                         f'Residual specific to {r["path"]}')
+                    leaves.append(r['path'])
 
     print(f'  base              1')
     for k in ('platform', 'cpu', 'overlay', 'config'):
         print(f'  {k:16s} {written[k]:3d}')
-    print(f'\n  shared overlays: {shared}   per-config exceptions: {len(leaves)}')
+    print(f'\n  single-axis overlays: {len(overlays)}   combo residuals: {combos}'
+          f'   per-config residuals: {len(leaves)}')
     for p in leaves:
         print(f'      {p}')
     print(f'\n  total profile files: {sum(written.values()) + (1 if base else 0) - written["base.toml"] if False else sum(written.values())}')
