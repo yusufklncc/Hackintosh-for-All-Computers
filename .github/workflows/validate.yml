@@ -29,23 +29,30 @@ jobs:
 
       - name: The interactive builder still runs
         run: |
-          printf '2\n10\n3\n' | python3 tools/setup.py --out /tmp/setup-laptop/EFI
-          printf '1\n2\n2\n3\n6\n' | python3 tools/setup.py --out /tmp/setup-amd/EFI
+          python3 tools/setup.py --answers 2,10,3 --out /tmp/setup-laptop/EFI
+          python3 tools/setup.py --answers 1,2,2,3,6 --out /tmp/setup-amd/EFI
           python3 tools/detect.py
           python3 tools/advise.py --ids 8086:15b8,8086:2723 --usb-ids 8087:0029
           python3 tools/advise.py --ids 10ec:c822
-          # both network kext modes, and declining
+
+      - name: Network kexts, both modes and declining
+        run: |
           IDS='--ids 8086:15b8 --usb-ids 8087:0029'
-          printf '2\n10\n3\n1\n'     | python3 tools/setup.py $IDS --out /tmp/net-all/EFI
-          printf '2\n10\n3\n2\n10\n' | python3 tools/setup.py $IDS --out /tmp/net-sonoma/EFI
-          printf '2\n10\n3\n3\n'     | python3 tools/setup.py $IDS --out /tmp/net-none/EFI
-          # Wi-Fi resolves to one build; the vendored one needs no network
-          printf '2\n10\n3\n2\n10\n' | python3 tools/setup.py --ids 8086:2723 --out /tmp/wifi-sonoma/EFI
+          python3 tools/setup.py $IDS --answers 2,10,3,1   --out /tmp/net-all/EFI
+          python3 tools/setup.py $IDS --answers 2,10,3,2,10 --out /tmp/net-sonoma/EFI
+          python3 tools/setup.py $IDS --answers 2,10,3,3   --out /tmp/net-none/EFI
+
+      - name: Wi-Fi resolves to one build, or to none
+        run: |
+          python3 tools/setup.py --ids 8086:2723 --answers 2,10,3,2,10 --out /tmp/wifi-sonoma/EFI
           test -d /tmp/wifi-sonoma/EFI/OC/Kexts/AirportItlwm.kext
-          # a release with no build must decline rather than ship the wrong one
-          printf '2\n10\n3\n2\n11\n' | python3 tools/setup.py --ids 8086:2723 --out /tmp/wifi-sequoia/EFI
+          # v2.3.0 has no Sequoia build; shipping the wrong one would be worse
+          python3 tools/setup.py --ids 8086:2723 --answers 2,10,3,2,11 --out /tmp/wifi-sequoia/EFI
           test ! -d /tmp/wifi-sequoia/EFI/OC/Kexts/AirportItlwm.kext
           python3 tools/itlwm.py
+
+      - name: The hardware table still matches the kexts
+        run: |
           python3 tools/hwtable.py EFI/OC/Kexts --out /tmp/hardware.toml
           diff /tmp/hardware.toml data/hardware.toml
 

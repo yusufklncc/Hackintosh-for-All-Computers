@@ -54,6 +54,9 @@ if os.environ.get('NO_COLOR') or not sys.stdout.isatty():
     BOLD = DIM = GREEN = YELLOW = RESET = ''
 
 
+SCRIPTED = []
+
+
 def ask(step, total, question, options, detected=None, allow_skip=False):
     """One numbered menu. options is [(value, label)]. Returns the chosen value.
 
@@ -78,7 +81,11 @@ def ask(step, total, question, options, detected=None, allow_skip=False):
     if allow_skip:
         print(f'      {len(options) + 1:2d}) none of these')
     while True:
-        raw = input('      > ').strip()
+        if SCRIPTED:
+            raw = SCRIPTED.pop(0)
+            print(f'      > {raw}')
+        else:
+            raw = input('      > ').strip()
         if raw.isdigit():
             n = int(raw)
             if 1 <= n <= len(options):
@@ -102,6 +109,22 @@ def cpu_choices(platform_name):
     return out
 
 
+def unbundle():
+    """When running as a frozen executable, work from the bundled copy.
+
+    PyInstaller unpacks everything - profiles, data, EFI, vendor - into a temp
+    directory, and every path in these tools is relative to the repository root.
+    Moving there makes the frozen build behave exactly like the checkout, so
+    there is no second code path to keep working. Only --out has to be pinned to
+    where the person actually is first."""
+    base = getattr(sys, '_MEIPASS', None)
+    if not base:
+        return None
+    here = Path.cwd()
+    os.chdir(base)
+    return here
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--out', default='build/EFI')
@@ -109,7 +132,16 @@ def main():
                     help='skip hardware detection and just ask')
     ap.add_argument('--ids', help='PCI ids to use instead of probing, comma separated')
     ap.add_argument('--usb-ids', help='USB ids to use instead of probing, comma separated')
+    ap.add_argument('--answers', help='answer the menus non-interactively, comma separated; '
+                                      'for scripting and for CI')
     a = ap.parse_args()
+
+    if a.answers:
+        SCRIPTED.extend(x.strip() for x in a.answers.split(',') if x.strip())
+
+    started_in = unbundle()
+    if started_in:
+        a.out = str((started_in / a.out).resolve())
 
     hw = {} if a.no_detect else detect.probe()
     if a.ids is not None or a.usb_ids is not None:

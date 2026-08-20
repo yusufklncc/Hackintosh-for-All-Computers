@@ -10,7 +10,29 @@ on:
         required: true
 
 jobs:
+  windows-exe:
+    # Built on Windows because that is where it will be run: the EFI is almost
+    # always prepared from the machine being converted, and that machine has no
+    # Python on it.
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install pyinstaller
+      - run: pyinstaller --clean --noconfirm --distpath dist tools/pyinstaller.spec
+      - name: It builds an EFI from the bundle alone
+        run: |
+          dist/HackintoshEFIBuilder.exe --no-detect --answers 2,10,3 --out smoke/EFI
+          if (-not (Test-Path smoke/EFI/OC/config.plist)) { exit 1 }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-exe
+          path: dist/HackintoshEFIBuilder.exe
+
   build:
+    needs: windows-exe
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -27,14 +49,26 @@ jobs:
           chmod +x vendor/opencore/*/Utilities/*/*.linux
           python3 tools/release.py --out dist
 
+      - uses: actions/download-artifact@v4
+        with:
+          name: windows-exe
+          path: dist
+
       - name: Publish
         uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ github.event.inputs.tag || github.ref_name }}
-          files: dist/*.zip
+          files: |
+            dist/*.zip
+            dist/HackintoshEFIBuilder.exe
           body: |
-            Two files. `EFI-base.zip` is the EFI folder; `configs.zip` holds one
-            `config.plist` per supported machine.
+            **`HackintoshEFIBuilder.exe`** is the easy path on Windows. Download
+            it, run it, answer a few questions and it writes the EFI folder for
+            your machine - reading your CPU, board and network cards to suggest
+            the answers. Nothing else to install.
+
+            The two zips are the manual path. `EFI-base.zip` is the EFI folder;
+            `configs.zip` holds one `config.plist` per supported machine.
 
             1. Extract `EFI-base.zip` - you get an `EFI` folder.
             2. Open `configs.zip`, find the entry matching your hardware, and copy

@@ -292,6 +292,21 @@ port limit, and neither does this repository: `XhciPortLimit` is false in all 17
 Because `ocvalidate` and `macserial` are vendored for Linux too, the runner needs
 nothing beyond a checkout and Python.
 
+## The Windows executable
+
+Most people preparing an EFI are sitting at the Windows machine they are about
+to convert, and that machine has no Python. So the release carries
+`HackintoshEFIBuilder.exe`: `tools/pyinstaller.spec` bundles the profiles, the
+data files, `EFI/` and `vendor/` into it, and `setup.py` chdirs into the
+unpacked bundle at startup. The frozen build therefore runs the same code down
+the same paths as a checkout, with no second branch to keep working.
+
+It is built on a Windows runner by `.github/workflows/release.yml`, which then
+makes it build an EFI from the bundle alone before the release is published.
+
+`--answers 2,10,3` replays a menu run non-interactively. That is what CI uses,
+on both platforms, instead of piping keystrokes.
+
 ## The gate
 
 `verify.py` rebuilds every published config from the profiles and compares it
