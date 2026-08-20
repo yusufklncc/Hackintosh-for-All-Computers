@@ -234,7 +234,7 @@
                     <key>ExecutablePath</key>
                     <string>Contents/MacOS/USBInjectAll</string>
                     <key>MaxKernel</key>
-                    <string>19.9.9</string>
+                    <string></string>
                     <key>MinKernel</key>
                     <string>15.0.0</string>
                     <key>PlistPath</key>
