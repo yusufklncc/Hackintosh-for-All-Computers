@@ -2,6 +2,12 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
     <dict>
+        <key># BASE EFI INTEL 11th ROCKET LAKE (doest not support iGPU) - RELEASE Version</key>
+        <string></string>
+        <key># BY: https://luchina.com.br</key>
+        <string></string>
+        <key># DISCORD: https://discord.universohackintosh.com</key>
+        <string></string>
         <key>ACPI</key>
         <dict>
             <key>Add</key>
