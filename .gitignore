@@ -22,3 +22,7 @@ build/
 
 # AirportItlwm variants fetched by tools/itlwm.py
 .itlwm-cache/
+
+# Python bytecode
+__pycache__/
+*.py[cod]
