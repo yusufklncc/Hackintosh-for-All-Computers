@@ -23,6 +23,33 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import ocgen
 
 
+def _row(e):
+    return {'path': f"{ocgen.CONFIG_ROOT}/{e['name']}.plist",
+            'platform': e['platform'], 'vendor': e.get('vendor'), 'cpu': e['cpu'],
+            'chipset': e.get('chipset'), 'oem': e.get('oem'),
+            'variant': e.get('variant'), 'cores': e.get('cores')}
+
+
+def rehash(sample, profiles):
+    """Recompute the catalogue hashes. Deliberate: the diff is what gets reviewed."""
+    import hashlib
+    path = profiles / 'catalogue.toml'
+    text = path.read_text(encoding='utf-8')
+    header = ''.join(l for l in text.splitlines(keepends=True) if l.startswith('#'))
+    entries = ocgen.read_toml(path)['config']
+    changed = 0
+    for e in entries:
+        row = _row(e)
+        built = ocgen.assemble(sample, ocgen.layer_chain(row, profiles),
+                               ocgen.build_params(row))
+        new = hashlib.sha256(ocgen.canonical_bytes(built, True)).hexdigest()
+        changed += new != e['sha256']
+        e['sha256'] = new
+    ocgen.write_toml(path, {'config': entries}, header.rstrip('\n'))
+    print(f'  {changed}/{len(entries)} catalogue hashes changed')
+    return 0
+
+
 def against_catalogue(sample, profiles, comments):
     """Once EFI/OC/config is gone, the catalogue's hashes are the reference."""
     import hashlib
@@ -31,10 +58,7 @@ def against_catalogue(sample, profiles, comments):
     for e in entries:
         # a catalogue entry *is* a published config, so it must pick up its
         # per-config residual; the name is what resolves that file
-        row = {'path': f"{ocgen.CONFIG_ROOT}/{e['name']}.plist",
-               'platform': e['platform'], 'vendor': e.get('vendor'),
-               'cpu': e['cpu'], 'chipset': e.get('chipset'), 'oem': e.get('oem'),
-               'variant': e.get('variant'), 'cores': e.get('cores')}
+        row = _row(e)
         built = ocgen.assemble(sample, ocgen.layer_chain(row, profiles),
                                ocgen.build_params(row))
         got = hashlib.sha256(ocgen.canonical_bytes(built, True)).hexdigest()
@@ -55,6 +79,8 @@ def main():
     ap.add_argument('--profiles', default='profiles')
     ap.add_argument('--comments', action='store_true', help='also require Comment strings to match')
     ap.add_argument('-v', '--verbose', action='store_true')
+    ap.add_argument('--rehash', action='store_true',
+                    help='rewrite catalogue hashes from current output; the diff is the review')
     a = ap.parse_args()
     a.sample = a.sample or ocgen.vendored_sample()
     if not a.sample:
@@ -63,6 +89,8 @@ def main():
     profiles = Path(a.profiles)
     sample = ocgen.load_plist(a.sample)
     paths = sorted(glob.glob(f'{ocgen.CONFIG_ROOT}/**/*.plist', recursive=True))
+    if a.rehash:
+        return rehash(sample, profiles)
     if not paths:
         return against_catalogue(sample, profiles, a.comments)
     ok, bad = 0, []

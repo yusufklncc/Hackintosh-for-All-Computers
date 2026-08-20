@@ -1,5 +1,4 @@
 # 8 config, 8 core counts
-
 [Booter.Quirks]
 EnableWriteUnprotector = false
 RebuildAppleMemoryMap = true
@@ -78,7 +77,7 @@ PlistPath = "Contents/Info.plist"
 [[Kernel.Patch]]
 Arch = "x86_64"
 Base = "_cpuid_set_info"
-Comment = "algrey - Force cpuid_cores_per_package 10.13,10.14"
+Comment = "algrey | Force cpuid_cores_per_package to constant (user-specified) | 10.13-10.14"
 Count = 1
 Enabled = true
 Find = "hex:c1e81a000000"
@@ -94,7 +93,7 @@ Skip = 0
 [[Kernel.Patch]]
 Arch = "x86_64"
 Base = "_cpuid_set_info"
-Comment = "algrey - Force cpuid_cores_per_package 10.15,11.0"
+Comment = "algrey | Force cpuid_cores_per_package to constant (user-specified) | 10.15-11.0"
 Count = 1
 Enabled = true
 Find = "hex:c1e81a000000"
@@ -110,7 +109,7 @@ Skip = 0
 [[Kernel.Patch]]
 Arch = "x86_64"
 Base = "_cpuid_set_info"
-Comment = "algrey - Force cpuid_cores_per_package 12.0"
+Comment = "algrey | Force cpuid_cores_per_package to constant (user-specified) | 12.0-13.2"
 Count = 1
 Enabled = true
 Find = "hex:c1e81a000000"
@@ -126,7 +125,7 @@ Skip = 0
 [[Kernel.Patch]]
 Arch = "x86_64"
 Base = "_cpuid_set_info"
-Comment = "algrey - Force cpuid_cores_per_package 13.3+"
+Comment = "algrey | Force cpuid_cores_per_package to constant (user-specified) | 13.3+"
 Count = 1
 Enabled = true
 Find = "hex:c1e81a0000"
@@ -142,30 +141,30 @@ Skip = 0
 [[Kernel.Patch]]
 Arch = "x86_64"
 Base = ""
-Comment = "algrey - _commpage_populate - Remove rdmsr - 10.13/10.14/10.15/11.0/12.0"
+Comment = "algrey | _commpage_populate | Remove rdmsr | 10.13+"
 Count = 1
 Enabled = true
 Find = "hex:b9a00100000f32"
 Identifier = "kernel"
 Limit = 0
 Mask = "hex:"
-MaxKernel = "22.99.99"
+MaxKernel = "25.99.99"
 MinKernel = "17.0.0"
-Replace = "hex:0f1f8000000000"
+Replace = "hex:66906690669090"
 ReplaceMask = "hex:"
 Skip = 0
 
 [[Kernel.Patch]]
 Arch = "x86_64"
 Base = ""
-Comment = "algrey - _cpuid_set_cache_info - Set cpuid to 0x8000001D instead 4 - 10.13/10.14/10.15/11.0/12.0"
+Comment = "algrey | _cpuid_set_cache_info | Set CPUID proper instead of 4 | 10.13+"
 Count = 1
 Enabled = true
 Find = "hex:b8040000004489f14489"
 Identifier = "kernel"
 Limit = 0
 Mask = "hex:"
-MaxKernel = "22.99.99"
+MaxKernel = "25.99.99"
 MinKernel = "17.0.0"
 Replace = "hex:b81d0000804489f14489"
 ReplaceMask = "hex:"
@@ -174,30 +173,30 @@ Skip = 0
 [[Kernel.Patch]]
 Arch = "x86_64"
 Base = ""
-Comment = "algrey - _cpuid_set_generic_info - Remove wrmsr - 10.13/10.14/10.15/11.0/12.0"
+Comment = "algrey | _cpuid_set_generic_info | Remove wrmsr(0x8B) | 10.13+"
 Count = 1
 Enabled = true
 Find = "hex:b98b00000031c031d20f30"
 Identifier = "kernel"
 Limit = 0
 Mask = "hex:"
-MaxKernel = "22.99.99"
+MaxKernel = "25.99.99"
 MinKernel = "17.0.0"
-Replace = "hex:660f1f8400000000006690"
+Replace = "hex:6690669066906690669090"
 ReplaceMask = "hex:"
 Skip = 0
 
 [[Kernel.Patch]]
 Arch = "x86_64"
 Base = ""
-Comment = "algrey - _cpuid_set_generic_info - Set microcode=186 - 10.13/10.14/10.15/11.0/12.0"
+Comment = "algrey | _cpuid_set_generic_info | Replace rdmsr(0x8B) with constant 186 | 10.13+"
 Count = 1
 Enabled = true
 Find = "hex:b98b0000000f32"
 Identifier = "kernel"
 Limit = 0
 Mask = "hex:"
-MaxKernel = "22.99.99"
+MaxKernel = "25.99.99"
 MinKernel = "17.0.0"
 Replace = "hex:baba0000006690"
 ReplaceMask = "hex:"
@@ -206,14 +205,14 @@ Skip = 0
 [[Kernel.Patch]]
 Arch = "x86_64"
 Base = ""
-Comment = "algrey - _cpuid_set_generic_info - Set flag=1 - 10.13/10.14/10.15/11.0/12.0"
+Comment = "algrey | _cpuid_set_generic_info | Set flag=1 | 10.13+"
 Count = 1
 Enabled = true
 Find = "hex:b9170000000f32c1ea1280e207"
 Identifier = "kernel"
 Limit = 0
 Mask = "hex:"
-MaxKernel = "22.99.99"
+MaxKernel = "25.99.99"
 MinKernel = "17.0.0"
 Replace = "hex:b201660f1f8400000000006690"
 ReplaceMask = "hex:"
@@ -222,7 +221,39 @@ Skip = 0
 [[Kernel.Patch]]
 Arch = "x86_64"
 Base = ""
-Comment = "algrey - _cpuid_set_info - GenuineIntel to AuthenticAMD - 10.13/10.14/10.15/11.0"
+Comment = "algrey | _cpuid_set_generic_info | Disable check to allow leaf7 | 10.13+"
+Count = 1
+Enabled = true
+Find = "hex:003a0f82"
+Identifier = "kernel"
+Limit = 0
+Mask = "hex:"
+MaxKernel = "23.99.99"
+MinKernel = "17.0.0"
+Replace = "hex:00000f82"
+ReplaceMask = "hex:"
+Skip = 0
+
+[[Kernel.Patch]]
+Arch = "x86_64"
+Base = ""
+Comment = "algrey | _cpuid_set_generic_info | Disable check to allow leaf7 | 15.0+"
+Count = 1
+Enabled = true
+Find = "hex:00050f82"
+Identifier = "kernel"
+Limit = 0
+Mask = "hex:"
+MaxKernel = "25.99.99"
+MinKernel = "24.0.0"
+Replace = "hex:00000f82"
+ReplaceMask = "hex:"
+Skip = 0
+
+[[Kernel.Patch]]
+Arch = "x86_64"
+Base = ""
+Comment = "algrey | _cpuid_set_info | GenuineIntel to AuthenticAMD | 10.13-11.0"
 Count = 1
 Enabled = true
 Find = "hex:47656e75696e65496e74656c00"
@@ -237,24 +268,24 @@ Skip = 0
 
 [[Kernel.Patch]]
 Arch = "x86_64"
-Base = ""
-Comment = "Goldfish64 - Bypass GenuineIntel check panic - 12.0"
+Base = "_cpuid_set_info"
+Comment = "Goldfish64, algrey | Bypass GenuineIntel check panic | 12.0+"
 Count = 1
 Enabled = true
-Find = "hex:b96e0000000fbec039c1000000000000"
+Find = "hex:00000000000031d2b301"
 Identifier = "kernel"
 Limit = 0
-Mask = "hex:ffffffffffffffffffff000000000000"
-MaxKernel = "22.99.99"
+Mask = "hex:000000000000ffffffff"
+MaxKernel = "25.99.99"
 MinKernel = "21.0.0"
-Replace = "hex:b96e0000000fbec039c1909090909090"
+Replace = "hex:90909090909031d2b301"
 ReplaceMask = "hex:"
 Skip = 0
 
 [[Kernel.Patch]]
 Arch = "x86_64"
 Base = ""
-Comment = "algrey - _cpuid_set_cpufamily - Force CPUFAMILY_INTEL_PENRYN - 10.13/10.14/10.15/11.2"
+Comment = "algrey | _cpuid_set_cpufamily | Force CPUFAMILY_INTEL_PENRYN | 10.13-11.2"
 Count = 1
 Enabled = true
 Find = "hex:31db803d00000000067500"
@@ -269,15 +300,15 @@ Skip = 0
 
 [[Kernel.Patch]]
 Arch = "x86_64"
-Base = "_cpuid_set_info"
-Comment = "algrey - _cpuid_set_cpufamily - Force CPUFAMILY_INTEL_PENRYN - 11.3 + / 12.0"
+Base = "_cpuid_set_info "
+Comment = "algrey | _cpuid_set_cpufamily | Force CPUFAMILY_INTEL_PENRYN | 11.3+"
 Count = 1
 Enabled = true
 Find = "hex:803d000000000675"
 Identifier = "kernel"
 Limit = 0
 Mask = "hex:ffff00000000ffff"
-MaxKernel = "22.99.99"
+MaxKernel = "25.99.99"
 MinKernel = "20.4.0"
 Replace = "hex:babc4fea7831dbeb"
 ReplaceMask = "hex:"
@@ -286,14 +317,14 @@ Skip = 0
 [[Kernel.Patch]]
 Arch = "x86_64"
 Base = ""
-Comment = "algrey - _i386_init - Remove rdmsr (x3) - 10.13/10.14/10.15/11.0/12.0"
+Comment = "algrey | _i386_init | Remove 3 rdmsr calls | 10.13+"
 Count = 0
 Enabled = true
 Find = "hex:b9990100000f3248c1e22089c64809d6b9980100000f3248c1e22089c04809c2bf5802310531c94531c0"
 Identifier = "kernel"
 Limit = 0
 Mask = "hex:"
-MaxKernel = "22.99.99"
+MaxKernel = "25.99.99"
 MinKernel = "17.0.0"
 Replace = "hex:660f1f840000000000660f1f840000000000660f1f840000000000660f1f840000000000660f1f440000"
 ReplaceMask = "hex:"
@@ -302,14 +333,14 @@ Skip = 0
 [[Kernel.Patch]]
 Arch = "x86_64"
 Base = ""
-Comment = "algrey/XLNC - Remove version check and panic"
+Comment = "algrey, XLNC | Remove version check and panic | 10.13+"
 Count = 1
 Enabled = true
 Find = "hex:25fc00000083f813"
 Identifier = "kernel"
 Limit = 0
 Mask = "hex:"
-MaxKernel = "22.99.99"
+MaxKernel = "25.99.99"
 MinKernel = "17.0.0"
 Replace = "hex:25fc0000000f1f00"
 ReplaceMask = "hex:"
@@ -317,15 +348,79 @@ Skip = 0
 
 [[Kernel.Patch]]
 Arch = "x86_64"
+Base = "__ZN11IOPCIBridge13probeBusGatedEP14probeBusParams"
+Comment = "CaseySJ | probeBusGated | Disable 10 bit tags | 12.0+"
+Count = 1
+Enabled = true
+Find = "hex:e0117200"
+Identifier = "com.apple.iokit.IOPCIFamily"
+Limit = 0
+Mask = "hex:f0fffff0"
+MaxKernel = "25.99.99"
+MinKernel = "21.0.0"
+Replace = "hex:00000300"
+ReplaceMask = "hex:00000f00"
+Skip = 0
+
+[[Kernel.Patch]]
+Arch = "x86_64"
+Base = "__ZN17IOPCIConfigurator18IOPCIIsHotplugPortEP16IOPCIConfigEntry"
+Comment = "CaseySJ | IOPCIIsHotplugPort | Fix PCI bus enumeration on AM5 | 13.0+"
+Count = 1
+Enabled = false
+Find = "hex:8400754b"
+Identifier = "com.apple.iokit.IOPCIFamily"
+Limit = 0
+Mask = "hex:ff00ffff"
+MaxKernel = "25.99.99"
+MinKernel = "22.0.0"
+Replace = "hex:0000eb00"
+ReplaceMask = "hex:0000ff00"
+Skip = 0
+
+[[Kernel.Patch]]
+Arch = "x86_64"
 Base = ""
-Comment = "algrey - _mtrr_update_action fix PAT - 10.13/10.14/10.15/11.0/12.0"
+Comment = "Visual | thread_quantum_expire, thread_unblock, thread_invoke | Remove non-monotonic time panic | 12.0+"
+Count = 3
+Enabled = true
+Find = "hex:48000000020000480000580000000f0000000000"
+Identifier = "kernel"
+Limit = 0
+Mask = "hex:ff00000fffffffff0000ff000000ff0000000000"
+MaxKernel = "25.99.99"
+MinKernel = "21.0.0"
+Replace = "hex:0000000000000000000000000000669066906690"
+ReplaceMask = "hex:0000000000000000000000000000ffffffffffff"
+Skip = 0
+
+[[Kernel.Patch]]
+Arch = "x86_64"
+Base = ""
+Comment = "Visual | thread_invoke, thread_dispatch | Remove non-monotonic time panic | 12.0+"
+Count = 2
+Enabled = true
+Find = "hex:480000800400000f0000000000"
+Identifier = "kernel"
+Limit = 0
+Mask = "hex:480000f0ffffffff0000000000"
+MaxKernel = "25.99.99"
+MinKernel = "21.0.0"
+Replace = "hex:00000000000000669066906690"
+ReplaceMask = "hex:00000000000000ffffffffffff"
+Skip = 0
+
+[[Kernel.Patch]]
+Arch = "x86_64"
+Base = ""
+Comment = "algrey | _mtrr_update_action | fix PAT | 10.13+"
 Count = 0
 Enabled = true
 Find = "hex:89c081e2ffff00ff81ca00000100b977020000"
 Identifier = "kernel"
 Limit = 0
 Mask = "hex:ffffffffffff0fffffffffffffffffffffffff"
-MaxKernel = "22.99.99"
+MaxKernel = "23.99.99"
 MinKernel = "17.0.0"
 Replace = "hex:b977020000b806010700ba060107000f1f4000"
 ReplaceMask = "hex:"
@@ -334,15 +429,47 @@ Skip = 0
 [[Kernel.Patch]]
 Arch = "x86_64"
 Base = ""
-Comment = "Shaneee - _mtrr_update_action fix PAT - 10.13/10.14/10.15/11.0/12.0"
+Comment = "Shaneee | _mtrr_update_action | Fix PAT | 10.13+"
 Count = 0
 Enabled = false
 Find = "hex:89c081e2ffff00ff81ca00000100b977020000"
 Identifier = "kernel"
 Limit = 0
 Mask = "hex:ffffffffffff0fffffffffffffffffffffffff"
-MaxKernel = "22.99.99"
+MaxKernel = "23.99.99"
 MinKernel = "17.0.0"
 Replace = "hex:b977020000b806060606ba060606060f300f09"
+ReplaceMask = "hex:"
+Skip = 0
+
+[[Kernel.Patch]]
+Arch = "x86_64"
+Base = ""
+Comment = "Algrey / Zormeister | _mtrr_update_action | Fix PAT | 15.0+"
+Count = 0
+Enabled = true
+Find = "hex:89c081e2ffff00ff81ca000000000f30"
+Identifier = "kernel"
+Limit = 0
+Mask = "hex:ffffffffffffffffffff00000000ffff"
+MaxKernel = "25.99.99"
+MinKernel = "24.0.0"
+Replace = "hex:89c0b806010700ba060107000f309090"
+ReplaceMask = "hex:"
+Skip = 0
+
+[[Kernel.Patch]]
+Arch = "x86_64"
+Base = ""
+Comment = "Shaneee / Zormeister | _mtrr_update_action | Fix PAT | 15.0+"
+Count = 0
+Enabled = false
+Find = "hex:89c081e2ffff00ff81ca000000000f30"
+Identifier = "kernel"
+Limit = 0
+Mask = "hex:ffffffffffffffffffff00000000ffff"
+MaxKernel = "25.99.99"
+MinKernel = "24.0.0"
+Replace = "hex:89c0b806060606ba060606060f309090"
 ReplaceMask = "hex:"
 Skip = 0

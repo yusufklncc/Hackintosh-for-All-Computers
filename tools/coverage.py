@@ -11,10 +11,10 @@ comments rather than from a table someone typed.
 """
 import argparse
 import collections
-import glob
 import os
 import re
 import sys
+from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import ocgen
@@ -42,18 +42,43 @@ VERSION_TAIL = re.compile(
 
 
 def capability(comment):
-    """A patch comment with its trailing macOS version list removed."""
+    """The function a patch performs, independent of who wrote it and of which
+    macOS versions this particular entry covers.
+
+    AMD_Vanilla writes comments as "author | function | range", and a successor
+    patch for newer kernels often carries a different author. Keying on the
+    middle segment is what lets a handover read as one capability instead of two."""
+    parts = [p.strip() for p in comment.split('|')]
+    if len(parts) >= 3:
+        return ' | '.join(parts[1:-1])
     return VERSION_TAIL.sub('', comment).strip(' -/|,')
 
 
-def recover_names():
+PROFILES = Path('profiles')
+
+
+def load_configs():
+    """Every published config, generated from the profiles."""
+    sample = ocgen.load_plist(ocgen.vendored_sample())
+    out = []
+    for e in ocgen.read_toml(PROFILES / 'catalogue.toml')['config']:
+        row = {'path': f"{ocgen.CONFIG_ROOT}/{e['name']}.plist",
+               'platform': e['platform'], 'vendor': e.get('vendor'), 'cpu': e['cpu'],
+               'chipset': e.get('chipset'), 'oem': e.get('oem'),
+               'variant': e.get('variant'), 'cores': e.get('cores')}
+        out.append((e['name'], ocgen.assemble(sample, ocgen.layer_chain(row, PROFILES),
+                                              ocgen.build_params(row))))
+    return out
+
+
+def recover_names(configs):
     """Darwin major -> macOS versions, learned from patch comments in this tree.
 
     A comment like "... 10.13,10.14" on a patch bounded to 17.0.0-18.99.99 pins
     two majors at once. Only mappings that never contradict themselves are kept."""
     votes = collections.defaultdict(collections.Counter)
-    for f in glob.glob('EFI/OC/config/**/*.plist', recursive=True):
-        for p in ocgen.load_plist(f)['Kernel'].get('Patch', []):
+    for _, cfg in configs:
+        for p in cfg['Kernel'].get('Patch', []):
             c = p.get('Comment', '')
             names = re.findall(r'\b(10\.\d{2}|1[1-9]\.\d|1[1-9])\b', c)
             lo, hi = parse(p.get('MinKernel'), None), parse(p.get('MaxKernel'), None)
@@ -72,7 +97,8 @@ def main():
     ap.add_argument('--names', action='store_true')
     a = ap.parse_args()
 
-    names = recover_names()
+    configs = load_configs()
+    names = recover_names(configs)
     if a.names:
         print('  Darwin major -> macOS, recovered from patch comments in this tree:')
         for k, v in names.items():
@@ -93,9 +119,9 @@ def main():
         return (t[0] + 1, 0, 0) if t != INF else INF
 
     gaps = collections.defaultdict(list)
+    label = {}
     total = 0
-    for f in sorted(glob.glob('EFI/OC/config/**/*.plist', recursive=True)):
-        d = ocgen.load_plist(f)
+    for f, d in configs:
         total += 1
         # a capability is one patch site, or one kext
         caps = collections.defaultdict(list)
@@ -104,8 +130,11 @@ def main():
                 # Successive patches for the same capability differ in Find as
                 # the compiled code shifts between releases, so the byte pattern
                 # cannot identify one. The comment minus its version suffix can.
-                site = (p.get('Identifier', ''), p.get('Base', ''),
-                        capability(p.get('Comment', '')))
+                # Base is part of neither: a successor patch often anchors at a
+                # different symbol and capitalises its comment differently while
+                # doing the same job.
+                site = (p.get('Identifier', ''),
+                        capability(p.get('Comment', '')).casefold())
                 caps[('patch', site, p.get('Comment', '')[:40])].append(
                     (parse(p.get('MinKernel'), (0, 0, 0)), parse(p.get('MaxKernel'), INF)))
         for k in d['Kernel']['Add']:
@@ -119,17 +148,20 @@ def main():
         for (kind, site, comment), rs in caps.items():
             bysite[(kind, site)] += rs
             sitename.setdefault((kind, site),
-                                site if kind == 'kext' else (comment or site[1] or site[0]))
+                                site if kind == 'kext' else (capability(comment) or comment))
         for key, rs in bysite.items():
             top = union_ceiling(rs)
             if top != INF:
-                gaps[(top, sitename[key])].append(f)
+                # keyed by site, not by display name: two distinct patches can
+                # shorten to the same label and must not be counted as one
+                gaps[(top, key)].append(f)
+                label[key] = sitename[key]
 
     print(f'  {total} configs. Capabilities that stop being covered above a fixed kernel:\n')
-    for (top, label), files in sorted(gaps.items()):
+    for (top, key), files in sorted(gaps.items(), key=lambda kv: (kv[0][0], label[kv[0][1]])):
         macos = names.get(top[0], '')
         print(f'  above {fmt(top)}' + (f' (macOS {macos})' if macos else '')
-              + f'   {label}   -   {len(files)} configs')
+              + f'   {label[key]}   -   {len(files)} configs')
         print(f'      e.g. {files[0]}')
     if not gaps:
         print('  none: every capability is unbounded above')

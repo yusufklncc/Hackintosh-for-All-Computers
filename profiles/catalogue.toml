@@ -3,14 +3,13 @@
 # what the equivalence gate compares against once the static tree is
 # gone. Regenerate deliberately: a change here is a change to what
 # users get.
-
 [[config]]
 name = "Desktop/AMD/001 - Desktop - Bulldozer ve Jaguar 4 Core"
 platform = "desktop"
 cpu = "bulldozer-jaguar"
 vendor = "amd"
 cores = 4
-sha256 = "5e261f472e27b52e8e61e10e33b3c012de037db0336390906ec0685e58fa73b5"
+sha256 = "6493327065c02684cbdfd35017ef705bf5492fe03ff072eb551a584826cae188"
 
 [[config]]
 name = "Desktop/AMD/002 - Desktop - Bulldozer ve Jaguar 6 Core"
@@ -18,7 +17,7 @@ platform = "desktop"
 cpu = "bulldozer-jaguar"
 vendor = "amd"
 cores = 6
-sha256 = "f4ae8b791540254b84c6c5bdb15cc0c16a4f25a774d16563e64ab4a7f4417cc2"
+sha256 = "be5903e1173385b705ba9d29b55810ef5694269d311bc63dade3372c823ed9c6"
 
 [[config]]
 name = "Desktop/AMD/003 - Desktop - Bulldozer ve Jaguar 8 Core"
@@ -26,7 +25,7 @@ platform = "desktop"
 cpu = "bulldozer-jaguar"
 vendor = "amd"
 cores = 8
-sha256 = "348263fabaaa087712c964d43a5915291a541cae0fc02ca203707af32dd3deff"
+sha256 = "23a0cc12977151d59039cac6a9d4cebced98122f680692fa5fe7867d6728e431"
 
 [[config]]
 name = "Desktop/AMD/004 - Desktop - Ryzen ve Threadripper 4 Core"
@@ -34,7 +33,7 @@ platform = "desktop"
 cpu = "ryzen-threadripper"
 vendor = "amd"
 cores = 4
-sha256 = "9a8b4735cc3f36f82926cae397ef499c11e9dfb4a918daa703b9416b6d363cc5"
+sha256 = "f8e64f90fcb5607c9bf95682ffb28c54dd86d05b4fcd2ffdfec3d5e0c1a9aa95"
 
 [[config]]
 name = "Desktop/AMD/005 - Desktop - Ryzen ve Threadripper 6 Core"
@@ -42,7 +41,7 @@ platform = "desktop"
 cpu = "ryzen-threadripper"
 vendor = "amd"
 cores = 6
-sha256 = "54730bfbe208899cf3dabe63fb6e28032822bc37d53b46f8056f2dd82054918e"
+sha256 = "a347c329b0505eae3150e360ba17d06591ea83e2c1d34c1def2e19864ec0fd2e"
 
 [[config]]
 name = "Desktop/AMD/006 - Desktop - Ryzen ve Threadripper 8 Core"
@@ -50,7 +49,7 @@ platform = "desktop"
 cpu = "ryzen-threadripper"
 vendor = "amd"
 cores = 8
-sha256 = "62fd878b137ec1b3d9260ca184b32e0298d650f2a46b464868484cfa8dd4e193"
+sha256 = "73077c9d6caa06ba803802c9a8a5f10e4a53426e11cd3db035a40f3cf4f1d5c4"
 
 [[config]]
 name = "Desktop/AMD/007 - Desktop - Ryzen ve Threadripper 12 Core"
@@ -58,7 +57,7 @@ platform = "desktop"
 cpu = "ryzen-threadripper"
 vendor = "amd"
 cores = 12
-sha256 = "e70292482a853b4c69243a6b66e8e72eac7b500170a798ee3ff3159fac55aa8e"
+sha256 = "fd9c2af62585b4c475df4539dc7e77488f437ca361c1f9d515deebf3fe263da9"
 
 [[config]]
 name = "Desktop/AMD/008 - Desktop - Ryzen ve Threadripper 16 Core"
@@ -66,7 +65,7 @@ platform = "desktop"
 cpu = "ryzen-threadripper"
 vendor = "amd"
 cores = 16
-sha256 = "8ea6b8efb0c41426c0f22a5ee8835539b86261f40f7e6a74d1402285bdf1a3ed"
+sha256 = "46d606d914902b78a658be983a32e768bc722c023d0d6505e9312d1b61fb3079"
 
 [[config]]
 name = "Desktop/AMD/009 - Desktop - Ryzen ve Threadripper 24 Core"
@@ -74,7 +73,7 @@ platform = "desktop"
 cpu = "ryzen-threadripper"
 vendor = "amd"
 cores = 24
-sha256 = "f31dd2f499258aae732d1cdb305211e97808aedaf9b88eae6d58597495e0c708"
+sha256 = "5d66fb90da345f35cd87f011682b72925774d3ad8ac56a3840aef1a05c9f0f23"
 
 [[config]]
 name = "Desktop/AMD/010 - Desktop - Ryzen ve Threadripper 32 Core"
@@ -82,7 +81,7 @@ platform = "desktop"
 cpu = "ryzen-threadripper"
 vendor = "amd"
 cores = 32
-sha256 = "d00ecaff5b9b56aecb5a96c4691d2059a7154f4d90c16aa1f5952ea61799ae9a"
+sha256 = "7e814a404f7a02d3f405ef5f566450cb3530cd9fba7fb760e0cdb7a3df57a7f6"
 
 [[config]]
 name = "Desktop/AMD/011 - Desktop - Ryzen ve Threadripper 64 Core"
@@ -90,7 +89,7 @@ platform = "desktop"
 cpu = "ryzen-threadripper"
 vendor = "amd"
 cores = 64
-sha256 = "eadbed66b6a4a3c92a58d35b5b823243aa9f44758363eb4bd4bceb5a78667e9d"
+sha256 = "daaf1d938c5f57942653f8fbac0b5ae052340e5bde380fa266c6fc2f91ebc5d5"
 
 [[config]]
 name = "Desktop/AMD/B450 - X470 - X570/001 - Desktop - Ryzen ve Threadripper 4 Core"
@@ -99,7 +98,7 @@ cpu = "ryzen-threadripper"
 vendor = "amd"
 chipset = "b450-x470-x570"
 cores = 4
-sha256 = "062c91d147acbe0c546ba8275ef150501f4fc743b0d8ebbeb5ade4e996579063"
+sha256 = "f01fef1bde2fce24bf9fa070ccdb4e1e1277f354ac1ddb9fafff5132aa3db30c"
 
 [[config]]
 name = "Desktop/AMD/B450 - X470 - X570/002 - Desktop - Ryzen ve Threadripper 6 Core"
@@ -108,7 +107,7 @@ cpu = "ryzen-threadripper"
 vendor = "amd"
 chipset = "b450-x470-x570"
 cores = 6
-sha256 = "fa8136582bd353e193ec99e7dcb89f0c39a0068a67e0d306e6b349f357a444b3"
+sha256 = "7826cd7fdbc6e9ed2e3462347dc86480425434f2c363ac7aaa7ca2d3bd411644"
 
 [[config]]
 name = "Desktop/AMD/B450 - X470 - X570/003 - Desktop - Ryzen ve Threadripper 8 Core"
@@ -117,7 +116,7 @@ cpu = "ryzen-threadripper"
 vendor = "amd"
 chipset = "b450-x470-x570"
 cores = 8
-sha256 = "c8f9586a9a3794bcbc4038c5971635fe239ad33222878331ed32bb8461908fcd"
+sha256 = "28fdf28b4080bf430e61af20a529a4c8ef5fbacf25ef7f9504d412e0db77787c"
 
 [[config]]
 name = "Desktop/AMD/B450 - X470 - X570/004 - Desktop - Ryzen ve Threadripper 12 Core"
@@ -126,7 +125,7 @@ cpu = "ryzen-threadripper"
 vendor = "amd"
 chipset = "b450-x470-x570"
 cores = 12
-sha256 = "5e57f6f80c86e21f45cd5099b71b2c79a9cc50e1ab3b6d916d10975dca246c8c"
+sha256 = "6c0701f36c39c04b2baf30349f079559d81e3ca136e158cf1fc1b056d94bb064"
 
 [[config]]
 name = "Desktop/AMD/B450 - X470 - X570/005 - Desktop - Ryzen ve Threadripper 16 Core"
@@ -135,7 +134,7 @@ cpu = "ryzen-threadripper"
 vendor = "amd"
 chipset = "b450-x470-x570"
 cores = 16
-sha256 = "ce89df0efe66088a5c897efab434a4bf691be915888229f8a09cb80a4f368638"
+sha256 = "3aefec36d04614a986c3dd9af34b6502252a3182e8fc5529c8dd53a0e4d394bd"
 
 [[config]]
 name = "Desktop/AMD/B450 - X470 - X570/006 - Desktop - Ryzen ve Threadripper 24 Core"
@@ -144,7 +143,7 @@ cpu = "ryzen-threadripper"
 vendor = "amd"
 chipset = "b450-x470-x570"
 cores = 24
-sha256 = "3af22c5c73050d84cbf5c912daa6232d0b1b7a5db30863b2b0d766da0859785d"
+sha256 = "43980c56b410697af61357c8cdf87d07f6ba010b88cac41b929527a5e6fd950c"
 
 [[config]]
 name = "Desktop/AMD/B450 - X470 - X570/007 - Desktop - Ryzen ve Threadripper 32 Core"
@@ -153,7 +152,7 @@ cpu = "ryzen-threadripper"
 vendor = "amd"
 chipset = "b450-x470-x570"
 cores = 32
-sha256 = "19fa70a8dfeae2c10a9555368302bc8b9fb607f9e1becc7105a43d81f550440d"
+sha256 = "fa0c78061a7a0939a8df12a44f4d14badbaf73ffcd4edb8fe766c3a479a801d2"
 
 [[config]]
 name = "Desktop/AMD/B450 - X470 - X570/008 - Desktop - Ryzen ve Threadripper 64 Core"
@@ -162,7 +161,7 @@ cpu = "ryzen-threadripper"
 vendor = "amd"
 chipset = "b450-x470-x570"
 cores = 64
-sha256 = "0a55e660edf73356062fcbb7835b6198c1c2a455309a77f79f7629312b37e7eb"
+sha256 = "cfea8fad45dd69567cde1dc59bec3ca3e147b22111973f05f032740af7bdfcb8"
 
 [[config]]
 name = "Desktop/AMD/B550 - A520/001 - Desktop - Ryzen ve Threadripper 4 Core"
@@ -171,7 +170,7 @@ cpu = "ryzen-threadripper"
 vendor = "amd"
 chipset = "b550-a520"
 cores = 4
-sha256 = "b1e50df751dd627e8b510c8e699ae6aa64e4e1e90184c000983c0ad013ae5424"
+sha256 = "18feb110897cedb24eaddf716e1ae976ffcb39070cc38e376aeedf17da7ab816"
 
 [[config]]
 name = "Desktop/AMD/B550 - A520/002 - Desktop - Ryzen ve Threadripper 6 Core"
@@ -180,7 +179,7 @@ cpu = "ryzen-threadripper"
 vendor = "amd"
 chipset = "b550-a520"
 cores = 6
-sha256 = "0e54a388635bd826e229bf44e6974112168cdecc6c705a4a3044cbb4026e7ee4"
+sha256 = "4e48ce378b6fd905c3e0109af714bb362269ccf505db13da0f914810ab055eca"
 
 [[config]]
 name = "Desktop/AMD/B550 - A520/003 - Desktop - Ryzen ve Threadripper 8 Core"
@@ -189,7 +188,7 @@ cpu = "ryzen-threadripper"
 vendor = "amd"
 chipset = "b550-a520"
 cores = 8
-sha256 = "211c6855981377538b6ff74a1cbb2186ddbe53049fe05640868e060e1bd19d30"
+sha256 = "28ccec084861df84746d6e183266c7b45457c37ff361bb3d3b7f597ea66639f2"
 
 [[config]]
 name = "Desktop/AMD/B550 - A520/004 - Desktop - Ryzen ve Threadripper 12 Core"
@@ -198,7 +197,7 @@ cpu = "ryzen-threadripper"
 vendor = "amd"
 chipset = "b550-a520"
 cores = 12
-sha256 = "4b6d5c0a74f6e911729b1d752324267e462ccbba525db4c3c8d6a2e9f62ad1f0"
+sha256 = "52c5882861b5c04f4f9082e39ca5c28576c7ecbc64716525471c973025a9bf9d"
 
 [[config]]
 name = "Desktop/AMD/B550 - A520/005 - Desktop - Ryzen ve Threadripper 16 Core"
@@ -207,7 +206,7 @@ cpu = "ryzen-threadripper"
 vendor = "amd"
 chipset = "b550-a520"
 cores = 16
-sha256 = "30f855d76795969baf746e72a3c2656bc1cf7641f080cebb37c87bd67ede993a"
+sha256 = "3c63be68c13147b55a644c1af175304b60347ea2798f425fd88d91b03ce373c3"
 
 [[config]]
 name = "Desktop/AMD/B550 - A520/006 - Desktop - Ryzen ve Threadripper 24 Core"
@@ -216,7 +215,7 @@ cpu = "ryzen-threadripper"
 vendor = "amd"
 chipset = "b550-a520"
 cores = 24
-sha256 = "5d9a495c722c211ee80b9dbf0e89d243b21860daf5c872d065c9cd7f09d68ae0"
+sha256 = "f0ee73a522151037cbdd6f7e7e48927109ba016bf21fe66104e7e8adef9918e1"
 
 [[config]]
 name = "Desktop/AMD/B550 - A520/007 - Desktop - Ryzen ve Threadripper 32 Core"
@@ -225,7 +224,7 @@ cpu = "ryzen-threadripper"
 vendor = "amd"
 chipset = "b550-a520"
 cores = 32
-sha256 = "957853bc2e69834c934e2b105d30a5d86fe4cb5cc0b210b196183af5b6883d32"
+sha256 = "49487992eb02e8fbfad9a8262de537181abbf3d77805c46d13d72ba561b2a783"
 
 [[config]]
 name = "Desktop/AMD/B550 - A520/008 - Desktop - Ryzen ve Threadripper 64 Core"
@@ -234,7 +233,7 @@ cpu = "ryzen-threadripper"
 vendor = "amd"
 chipset = "b550-a520"
 cores = 64
-sha256 = "2ab512f8c8b7a05ced424422d60e6d4f1cf747c31d6176e2ef8b23cfa8e6ca38"
+sha256 = "87885558e0c6dafff6861f1a0a5065830567e27722ca98b3d0dcb5dea18f6518"
 
 [[config]]
 name = "Desktop/AMD/TRx40/001 - Desktop - Ryzen ve Threadripper 4 Core"
@@ -243,7 +242,7 @@ cpu = "ryzen-threadripper"
 vendor = "amd"
 chipset = "trx40"
 cores = 4
-sha256 = "f948c415de52d4e19f162e1ef047346060e99942d6c691089cebad1ca1d03910"
+sha256 = "40e281feffd58a297c98ea4cdedd4490d89f4a5799019e96b6e99fa4b420290f"
 
 [[config]]
 name = "Desktop/AMD/TRx40/002 - Desktop - Ryzen ve Threadripper 6 Core"
@@ -252,7 +251,7 @@ cpu = "ryzen-threadripper"
 vendor = "amd"
 chipset = "trx40"
 cores = 6
-sha256 = "9cdab23234882228d2947ddf5cfcbe48edb61c78531e260de124693d759a00a3"
+sha256 = "d63b3e3275fdf1e9389e194aca8dbe859e33d065e4068de17479288ef9cffcca"
 
 [[config]]
 name = "Desktop/AMD/TRx40/003 - Desktop - Ryzen ve Threadripper 8 Core"
@@ -261,7 +260,7 @@ cpu = "ryzen-threadripper"
 vendor = "amd"
 chipset = "trx40"
 cores = 8
-sha256 = "7a6d9825b68537262bbce9620eb9eac9b30c09709596d2b54efaec298c2b40e6"
+sha256 = "9728e28c825eb485418ad9eeb380e2bb07bdaeb60fe082f8d1144c2423edfd7b"
 
 [[config]]
 name = "Desktop/AMD/TRx40/004 - Desktop - Ryzen ve Threadripper 12 Core"
@@ -270,7 +269,7 @@ cpu = "ryzen-threadripper"
 vendor = "amd"
 chipset = "trx40"
 cores = 12
-sha256 = "ad97925aa25201044a1bde6484723244be8d218ec13b36c8bdb3525c9302f8fe"
+sha256 = "46db1e2de2c54d283471bdf24d9e1b0541b93a3ba402c9c4b7d8a11281d43e4c"
 
 [[config]]
 name = "Desktop/AMD/TRx40/005 - Desktop - Ryzen ve Threadripper 16 Core"
@@ -279,7 +278,7 @@ cpu = "ryzen-threadripper"
 vendor = "amd"
 chipset = "trx40"
 cores = 16
-sha256 = "6aee0964f64ac2d35856a021025953a4d1576388b5e54506f0170cd3e9907a29"
+sha256 = "d058ec1ddc73ce09fe4abeb6b1b6739b92bec2d44692aea0fd702df359f2ea30"
 
 [[config]]
 name = "Desktop/AMD/TRx40/006 - Desktop - Ryzen ve Threadripper 24 Core"
@@ -288,7 +287,7 @@ cpu = "ryzen-threadripper"
 vendor = "amd"
 chipset = "trx40"
 cores = 24
-sha256 = "c10482d3d9cd138d7c75bc9eeb14f612ab4bde86d5b3ee9bf0c88cd941525919"
+sha256 = "0a3a0bafecffe8aa69ec947a008402619568262433a34776a9788add9730893b"
 
 [[config]]
 name = "Desktop/AMD/TRx40/007 - Desktop - Ryzen ve Threadripper 32 Core"
@@ -297,7 +296,7 @@ cpu = "ryzen-threadripper"
 vendor = "amd"
 chipset = "trx40"
 cores = 32
-sha256 = "350677e9251be6bd81fecbbff384e05c62fc6e8a5525cba48eb47d5fbc2f77f6"
+sha256 = "564fe809d4ac1772cc40a7665abb861913461ae8f727f4102d21d63b2f525b5a"
 
 [[config]]
 name = "Desktop/AMD/TRx40/008 - Desktop - Ryzen ve Threadripper 64 Core"
@@ -306,7 +305,7 @@ cpu = "ryzen-threadripper"
 vendor = "amd"
 chipset = "trx40"
 cores = 64
-sha256 = "20fec992f1bd4a7869d7e1f27b4a3d52bc4b01e32ad902843b3b9013fa47acf7"
+sha256 = "28b10fac9443a186ef95b35efc3dbcb3c404dc2b112b156808113a8b96fffa84"
 
 [[config]]
 name = "Desktop/Intel/001 - Desktop - Yonah, Conroe ve Penryn Legacy BIOS"
