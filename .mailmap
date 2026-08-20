@@ -1,0 +1,5 @@
+# One person, four identities: a typo in the noreply address (yusfklncc) and
+# commits made before the GitHub noreply address was set. Mapping them here
+# merges the history in git log, shortlog and blame without rewriting it.
+Yusuf İhsan KILINÇ <78423442+yusufklncc@users.noreply.github.com> <78423442+yusfklncc@users.noreply.github.com>
+Yusuf İhsan KILINÇ <78423442+yusufklncc@users.noreply.github.com> <yusufkln.14@gmail.com>

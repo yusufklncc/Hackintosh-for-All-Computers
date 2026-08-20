@@ -9,7 +9,7 @@ jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Make the vendored tools executable
         run: chmod +x vendor/opencore/*/Utilities/*/*.linux
