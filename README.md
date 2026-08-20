@@ -102,21 +102,25 @@ To check if your hardware is incompatible, I leave links below.
 - When you plug-in USB back, you can see EFI partition in "My Computer"
 - Open EFI partition.
 - If you already have an EFI folder for your machine, copy it there and you are done.
-- Otherwise go to `Releases` and download the zip matching your hardware. Each zip
-  is a ready EFI folder, already carrying the right `config.plist`. Example:
+- Otherwise go to `Releases` and download the two files there:
+  - `EFI-base.zip` - the EFI folder itself, the same for every machine.
+  - `configs.zip` - one `config.plist` per supported machine.
+- Extract `EFI-base.zip`. You get an `EFI` folder.
+- Open `configs.zip` and find the entry matching your hardware. Example:
   - my CPU is `i5-7200U`. It is `Kaby Lake Mobile (Laptop)` cpu, and the laptop is an HP.
-  - so I download `Laptop - HP - 009 - Laptop - Kaby Lake.zip`.
-  - if there is no entry for your brand, take the plain one - `Laptop - 009 - Laptop - Kaby Lake.zip`.
-- Extract it and copy the `EFI` folder to the EFI partition.
+  - so I take `Laptop/HP/009 - Laptop - Kaby Lake.plist`.
+  - if there is no entry for your brand, take the plain one - `Laptop/009 - Laptop - Kaby Lake.plist`.
+- Copy that file into `EFI/OC/` and rename it to `config.plist`.
+- Copy the `EFI` folder to the EFI partition.
 - Now you can boot from USB.
 
 <br>
 
-Each release zip is generated with a serial number, MLB and UUID of its own, so
-you are not sharing an identity with everyone else who downloaded it.
+One base folder serves every machine because OpenCore loads only what the
+config names. That is also why the download is about 7 MB instead of a gigabyte.
 
 > [!IMPORTANT]
-> `ROM` is still a placeholder (`11:22:33:44:55:66`), because it has to be your own machine's MAC address and no build can know it in advance. Set it with the [Post Installation](#post-installation) steps before signing in to iCloud, iMessage or FaceTime.
+> Each `config.plist` ships with a serial number, MLB and UUID of its own, but everyone who downloads the same file shares them, and `ROM` is a placeholder (`11:22:33:44:55:66`) because it has to be your own machine's MAC address. Generate your own with the [Post Installation](#post-installation) steps before signing in to iCloud, iMessage or FaceTime.
 
 <br>
 

@@ -33,9 +33,19 @@ jobs:
           tag_name: ${{ github.event.inputs.tag || github.ref_name }}
           files: dist/*.zip
           body: |
-            EFI folders built from the profiles in this repository, one per
-            published config. Each contains only what its config references.
+            Two files. `EFI-base.zip` is the EFI folder; `configs.zip` holds one
+            `config.plist` per supported machine.
 
-            Every build carries a freshly generated serial, MLB and UUID. `ROM`
-            is still a placeholder: it has to be your own machine's MAC address.
-            See the Post Installation section of the README.
+            1. Extract `EFI-base.zip` - you get an `EFI` folder.
+            2. Open `configs.zip`, find the entry matching your hardware, and copy
+               that `.plist` into `EFI/OC/` renamed to `config.plist`.
+            3. Copy the `EFI` folder to the EFI partition of your USB drive.
+
+            OpenCore loads only what the config names, so one base serves every
+            machine.
+
+            Each config ships with a generated serial, MLB and UUID, but everyone
+            downloading the same file shares them. Generate your own with
+            GenSMBIOS, and set `ROM` to your own MAC address, before signing in to
+            iCloud, iMessage or FaceTime. The Post Installation section of the
+            README walks through it.

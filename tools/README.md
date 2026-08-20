@@ -155,15 +155,15 @@ recovered from this tree's own patch comments rather than typed from memory:
     python3 tools/coverage.py
     python3 tools/coverage.py --names
 
-The measured answer: no Intel config has any bounded capability. All 35 AMD
-configs stop at Darwin **22.99.99**, macOS 13. Above that - Sonoma, Sequoia,
-Tahoe - the AMD kernel patches no longer apply, which lines up with AMD_Vanilla
-carrying a fourth `cpuid_cores_per_package` patch for 22.4.0-25.99.99 that this
-tree does not have.
+The measured answer: no Intel config has any bounded capability, and since the
+AMD profiles took upstream's full patch set, every AMD capability reaches Darwin
+**25.99.99**. The one exception is `GenuineIntel to AuthenticAMD`, which upstream
+deliberately ends at 20.99.99 because `Bypass GenuineIntel check panic` takes
+over above it.
 
 This is also the honest answer to "should there be a `--macos` axis". Measured
-against the tree, macOS targeting only varies for AMD, and there it is a missing
-patch rather than a profile dimension.
+against the tree, macOS targeting only ever varied for AMD, and there it was a
+stale patch set rather than a profile dimension.
 
 ## Continuous validation
 
@@ -203,11 +203,19 @@ meant to show up in review, so regenerate it deliberately.
 
 ## Releases
 
-`release.py` builds every catalogue entry and writes one zip per published
-config, each holding only what that config references. `.github/workflows/release.yml`
-runs it on a `v*` tag and uploads the result. Expect roughly 6 MB per zip and
-about 1 GB in total; 164 of the 179 are distinct, the rest are entries whose
-coordinates produce identical output.
+Every EFI in this repository carries the same binaries; only the `config.plist`
+differs, and OpenCore loads nothing the config does not name. So `release.py`
+writes two files rather than 179:
+
+    EFI-base.zip    6.4 MB   the EFI folder, everything but OC/config.plist
+    configs.zip     0.8 MB   one config.plist per published config
+
+7 MB against the gigabyte that 179 near-identical folders would have cost. A
+user extracts the base, copies their `.plist` into `EFI/OC/config.plist`, and
+that is the whole assembly. `.github/workflows/release.yml` runs it on a `v*` tag.
+
+`build.py` still produces a single trimmed EFI holding only what one config
+references - that is the right shape for one machine, just not for a release.
 
 ## Known non-minimality
 
