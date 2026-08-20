@@ -135,6 +135,7 @@ def main():
     ap.add_argument('--ids', help='PCI ids to use instead of probing, comma separated')
     ap.add_argument('--usb-ids', help='USB ids to use instead of probing, comma separated')
     ap.add_argument('--hda-ids', help='HD audio codec ids to use instead of probing')
+    ap.add_argument('--nvme', help='NVMe drive models to use instead of probing')
     ap.add_argument('--answers', help='answer the menus non-interactively, comma separated; '
                                       'for scripting and for CI')
     a = ap.parse_args()
@@ -152,6 +153,8 @@ def main():
         hw['usb_ids'] = [x.strip() for x in (a.usb_ids or '').split(',') if x.strip()]
     if a.hda_ids is not None:
         hw['hda_ids'] = [x.strip() for x in a.hda_ids.split(',') if x.strip()]
+    if a.nvme is not None:
+        hw['nvme'] = [x.strip() for x in a.nvme.split(',') if x.strip()]
     print(f'{BOLD}OpenCore EFI builder{RESET}')
     if hw.get('cpu'):
         print(f'  {DIM}this machine:{RESET} {hw["cpu"]}'
@@ -244,18 +247,47 @@ def main():
             boot_args.append(f'alcid={alcid}')
             notes.append(asteps)
 
+    storage_kexts, storage_drives = netkexts.storage_entries(hw.get('nvme'))
+    if hw.get('nvme'):
+        print(f'\n{BOLD}Storage{RESET}')
+        for drive in hw['nvme']:
+            print(f'  {drive}')
+        if storage_drives:
+            print(f'      {GREEN}NVMeFix improves Apple\'s NVMe driver for '
+                  f'third-party SSDs; adding it{RESET}')
+        else:
+            print(f'      {DIM}Apple NVMe, which is the case NVMeFix is not for{RESET}')
+
+    if hw.get('peripherals'):
+        print(f'\n{BOLD}Camera and card reader{RESET}')
+        for dev in hw['peripherals']:
+            where = 'on USB' if dev['usb'] else 'not on USB'
+            print(f'  {dev["name"]}  {DIM}({dev["kind"]}, {where}){RESET}')
+        if any(d['kind'] == 'camera' and d['usb'] for d in hw['peripherals']):
+            print(f'      {DIM}a USB camera is handled by the class driver macOS already '
+                  f'has, so it usually needs nothing{RESET}')
+        if any(d['kind'] == 'camera' and not d['usb'] for d in hw['peripherals']):
+            print(f'      {YELLOW}a camera that is not on USB is an IPU or MIPI sensor, '
+                  f'which macOS has no driver for{RESET}')
+        print(f'      {DIM}beyond that this repository has no support data for these, '
+              f'so nothing is claimed or added{RESET}')
+
     extra_file = None
     matched = advise.matched_kexts(hw.get('pci_ids', []), hw.get('usb_ids', []))
-    if matched:
-        print(f'\n{BOLD}Network kexts{RESET}')
-        advise.report(hw['pci_ids'], hw['usb_ids'], 'this machine')
+    # storage has no version ambiguity, so it rides along with the same question
+    # rather than adding one - but it must not depend on there being network
+    # hardware to match, or a machine with neither gets nothing
+    if matched or storage_kexts:
+        if matched:
+            print(f'\n{BOLD}Network kexts{RESET}')
+            advise.report(hw['pci_ids'], hw['usb_ids'], 'this machine')
         mode = ask(0, 0, 'Add these to the EFI?',
                    [('all', 'Yes, for every macOS version they support'),
                     ('one', 'Yes, for one macOS version only'),
                     ('no', 'No, leave them out')])
         if mode != 'no':
             darwin = None
-            if mode == 'one':
+            if mode == 'one' and matched:
                 rels = netkexts.releases()
                 darwin = ask(0, 0, 'Which macOS are you installing?',
                              [(r['darwin'], f"{r['name']} {r['version']}") for r in rels])
@@ -269,7 +301,8 @@ def main():
                 wifi_darwin = ask(0, 0, 'Which macOS for the Wi-Fi kext?',
                                   [(r['darwin'], f"{r['name']} {r['version']}") for r in rels],
                                   allow_skip=True)
-            entries, chosen = netkexts.entries(matched, darwin)
+            entries, chosen = netkexts.entries(matched, darwin) if matched else ([], [])
+            entries += storage_kexts
             if wifi_darwin is not None:
                 wifi, note = netkexts.wifi_entry(matched, wifi_darwin)
                 if wifi:

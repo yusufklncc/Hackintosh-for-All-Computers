@@ -134,6 +134,16 @@ def _windows():
     out['usb'] = _ps(
         'Get-CimInstance Win32_PnPEntity | Where-Object { $_.PNPDeviceID -like "USB*" } | '
         'ForEach-Object { "$($_.PNPDeviceID)|$($_.Name)" }')
+    out['peripherals'] = _ps(
+        'Get-CimInstance Win32_PnPEntity | Where-Object '
+        '{ $_.PNPClass -in @("Camera","Image","SDHost","MTD") } | ForEach-Object '
+        '{ "$($_.PNPClass)|$($_.PNPDeviceID)|$($_.Name)" }')
+    # BusType 17 is NVMe in the storage WMI classes, which is a cleaner answer
+    # than guessing from a PCI class code or a model string.
+    out['storage'] = _ps(
+        'Get-CimInstance -Namespace root/Microsoft/Windows/Storage '
+        '-ClassName MSFT_PhysicalDisk | ForEach-Object '
+        '{ "$($_.BusType)|$($_.FriendlyName)" }')
     # The HD Audio codec is a device behind the controller and carries its own
     # VEN/DEV, which is what AppleALC keys its layouts on.
     out['hda'] = _ps(
@@ -160,6 +170,11 @@ def _linux():
     # ALSA prints the codec's full HDA id as one 8-digit word
     out['hda'] = ''.join(_read(p) for p in
                          __import__('glob').glob('/proc/asound/card*/codec#*'))
+    out['peripherals'] = '\n'.join(
+        f'Camera|{l}' for l in (out.get('usb') or '').splitlines() if 'cam' in l.lower())
+    import glob as _glob
+    out['storage'] = '\n'.join(
+        f'17|{_read(p + "/model")}' for p in sorted(_glob.glob('/sys/class/nvme/nvme*')))
     return out
 
 
@@ -174,6 +189,9 @@ def _macos():
     out['vendor'] = ''
     out['pci'] = _run(['system_profiler', 'SPPCIDataType'])
     out['usb'] = _run(['system_profiler', 'SPUSBDataType'])
+    out['storage'] = '\n'.join(
+        f'17|{m}' for m in re.findall(r'^\s{6}(\S.*?):$',
+                                      _run(['system_profiler', 'SPNVMeDataType']), re.M))
     out['gpu'] = [f'PCI|{m.strip()}' for m in re.findall(
         r'^\s*Chipset Model:\s*(.+)$',
         _run(['system_profiler', 'SPDisplaysDataType']), re.M)]
@@ -243,6 +261,40 @@ def split_graphics(entries):
     return real, virtual
 
 
+def peripherals(text):
+    """Cameras and card readers, with the bus each is on.
+
+    The bus is the only part worth reporting: a USB camera is handled by the
+    class driver macOS already has, while one that is not on USB is an IPU or
+    MIPI sensor with no macOS driver at all. Which specific reader or sensor
+    works is not something this repository has data for, so it is not claimed."""
+    out = []
+    for line in (text or '').splitlines():
+        parts = line.split('|')
+        if len(parts) < 2:
+            continue
+        kind, ident = parts[0].strip(), parts[1]
+        name = parts[2].strip() if len(parts) > 2 else ident
+        if not name:
+            continue
+        out.append({'kind': 'camera' if kind.lower() in ('camera', 'image') else 'card reader',
+                    'name': name, 'usb': ident.upper().startswith('USB')})
+    return out
+
+
+def nvme_drives(text):
+    """Model names of the NVMe drives, from "bustype|model" lines.
+
+    Apple's own NVMe is named as such and is the one case NVMeFix is not for,
+    so the name is kept rather than just a count."""
+    out = []
+    for line in (text or '').splitlines():
+        bus, _, model = line.partition('|')
+        if bus.strip() == '17' and model.strip():
+            out.append(model.strip())
+    return out
+
+
 def probe():
     """Everything the machine will tell us, with the gaps left as None."""
     system = platform.system()
@@ -267,6 +319,8 @@ def probe():
                           | (_apple_pairs(raw.get('usb'), 'Vendor ID', 'Product ID')
                              if system == 'Darwin' else set())),
         'hda_ids': sorted(_pairs(raw.get('hda'), HDA_PATTERNS)),
+        'nvme': nvme_drives(raw.get('storage')),
+        'peripherals': peripherals(raw.get('peripherals')),
         'generation': cpu_generation(raw.get('cpu'), bool(laptop)),
     }
 

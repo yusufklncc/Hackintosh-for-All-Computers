@@ -45,6 +45,18 @@ def covers(kext, darwin):
     return True
 
 
+def storage_entries(nvme_drives):
+    """NVMeFix, when there is a third-party NVMe drive to improve.
+
+    Apple's own NVMe is the one case the kext is not for, so a machine whose
+    only NVMe is an Apple one gets nothing, as does a SATA-only machine."""
+    third_party = [d for d in nvme_drives or [] if 'apple' not in d.lower()]
+    if not third_party:
+        return [], None
+    out, chosen = entries({'NVMeFix.kext'}, None)
+    return out, (third_party if out else None)
+
+
 def variant_sets():
     return ocgen.read_toml(DATA / 'network.toml').get('variant_set', [])
 

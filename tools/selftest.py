@@ -85,6 +85,29 @@ def boot_args():
               (out.parent / 'NEXT-STEPS.txt').exists())
 
 
+def storage():
+    import netkexts
+    third, _ = netkexts.storage_entries(['Samsung SSD 970 EVO Plus'])
+    check('a third-party NVMe gets NVMeFix',
+          [e['BundlePath'] for e in third] == ['NVMeFix.kext'], third)
+    check('an Apple NVMe does not, being the case it is not for',
+          netkexts.storage_entries(['APPLE SSD AP0512'])[0] == [])
+    check('a machine with no NVMe does not', netkexts.storage_entries([])[0] == [])
+    check('NVMeFix is bounded to the version its README requires',
+          third and third[0]['MinKernel'] == '18.0.0', third)
+
+
+def peripherals():
+    found = detect.peripherals(
+        'Camera|USB\\VID_04F2&PID_B67C&MI_00\\6&a|Integrated Camera\n'
+        'Image|PCI\\VEN_8086&DEV_9D32\\3&b|Intel Imaging Signal Processor\n'
+        'SDHost|PCI\\VEN_10EC&DEV_5229\\4&c|Realtek PCIE CardReader')
+    kinds = [(d['kind'], d['usb']) for d in found]
+    check('a usb camera is told apart from an on-board sensor',
+          ('camera', True) in kinds and ('camera', False) in kinds, kinds)
+    check('a card reader is recognised as one', ('card reader', False) in kinds, kinds)
+
+
 def tables_match_sources():
     with tempfile.TemporaryDirectory() as tmp:
         gen = Path(tmp) / 'hardware.toml'
@@ -95,7 +118,8 @@ def tables_match_sources():
 
 
 if __name__ == '__main__':
-    for section in (graphics, graphics_advice, audio_advice, boot_args, tables_match_sources):
+    for section in (graphics, graphics_advice, audio_advice, storage, peripherals,
+                    boot_args, tables_match_sources):
         print(f'\n{section.__name__}')
         section()
     print()

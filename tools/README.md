@@ -350,6 +350,25 @@ escape made the whole workflow unparseable, so every run failed in zero seconds
 without executing a step. CI now also parses the workflow files as its first
 job, so that failure mode announces itself.
 
+## Storage, camera and card reader
+
+NVMeFix is offered when there is a non-Apple NVMe drive and not otherwise. Its
+README says it exists to "improve compatibility with non-Apple SSDs" and
+"requires at least Lilu 1.4.1 and at least 10.14 system version", so Apple's own
+NVMe is the case it is not for and a SATA-only machine gains nothing. The
+`MinKernel 18.0.0` comes from that sentence.
+
+Cameras and card readers are reported but nothing is claimed about them. Neither
+Dortania's guides nor any other source I could cite states which specific reader
+or sensor works, and this is not a place to substitute a guess: the only thing
+worth saying is the bus, because a USB camera is handled by the class driver
+macOS already has, while one that is not on USB is an IPU or MIPI sensor with no
+macOS driver at all.
+
+If you want a verdict for particular readers or sensors, that is knowledge to
+write down as data - the same shape as the AMD GPU rules - rather than something
+to derive.
+
 ## Keeping the tables current
 
 Three of the data files are snapshots of other people's work, and they go stale

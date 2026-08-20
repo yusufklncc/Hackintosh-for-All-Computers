@@ -56,6 +56,7 @@ UPSTREAM = {
     'BlueToolFixup.kext': 'acidanthera/BrcmPatchRAM',
     'AirportBrcmFixup.kext': 'acidanthera/AirportBrcmFixup',
     'AirportItlwm.kext': 'OpenIntelWireless/itlwm',
+    'NVMeFix.kext': 'acidanthera/NVMeFix',
     'UTBDefault.kext': 'USBToolBox/kext',
     'AMDRyzenCPUPowerManagement.kext': 'trulyspinach/SMCAMDProcessor',
     'SMCAMDProcessor.kext': 'trulyspinach/SMCAMDProcessor',
