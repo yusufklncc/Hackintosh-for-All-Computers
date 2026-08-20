@@ -4,6 +4,13 @@
 # tools/audiotable.py. A codec usually has several layouts, each
 # contributed for a particular machine and named as such - the right
 # one is found by trying, so the whole set is kept rather than a guess.
+#
+# The ref below is the release it was read from, so a regenerated
+# table shows both the version bump and what it changed.
+[source]
+project = "acidanthera/AppleALC"
+ref = "1.9.7"
+
 [[audio]]
 codec = "AD1884"
 vendor = "AnalogDevices"

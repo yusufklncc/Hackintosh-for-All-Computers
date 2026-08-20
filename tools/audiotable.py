@@ -9,13 +9,19 @@ into "try the one from a Lenovo first, you have a Lenovo".
 Every field comes from AppleALC's Resources/<CODEC>/Info.plist, so a codec's
 CodecID, its vendor and its layout list are the project's own.
 
-    python3 tools/audiotable.py <path-to-AppleALC-checkout> --out data/audio.toml
+    python3 tools/audiotable.py --out data/audio.toml          # fetch the latest release
+    python3 tools/audiotable.py --from <checkout>              # use a tree you have
 """
 import argparse
 import glob
+import io
+import json
 import os
 import plistlib
 import sys
+import tarfile
+import tempfile
+import urllib.request
 from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -27,14 +33,44 @@ VENDOR_IDS = {'realtek': '10ec', 'idt': '111d', 'conexant': '14f1',
               'sigmatel': '8384', 'cmedia': '13f6', 'creative': '1102'}
 
 
+REPO = 'acidanthera/AppleALC'
+
+
+def latest_ref():
+    with urllib.request.urlopen(f'https://api.github.com/repos/{REPO}/releases/latest') as r:
+        return json.load(r)['tag_name']
+
+
+def fetch(ref, dest):
+    """Unpack the source archive for a tag. Pinning to a release rather than
+    master means the table records a version somebody can go and look at."""
+    url = f'https://codeload.github.com/{REPO}/tar.gz/refs/tags/{ref}'
+    with urllib.request.urlopen(url) as r:
+        data = r.read()
+    with tarfile.open(fileobj=io.BytesIO(data)) as tar:
+        members = [m for m in tar.getmembers() if '/Resources/' in m.name
+                   and m.name.endswith('Info.plist')]
+        tar.extractall(dest, members=members, filter='data')
+    return dest
+
+
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('checkout', help='an AppleALC source tree')
+    ap.add_argument('--from', dest='checkout', help='an AppleALC source tree to read instead')
+    ap.add_argument('--ref', help='release tag to fetch (default: latest)')
     ap.add_argument('--out', default='data/audio.toml')
     a = ap.parse_args()
 
+    tmp = None
+    if a.checkout:
+        root, ref = a.checkout, a.ref or 'a local tree'
+    else:
+        ref = a.ref or latest_ref()
+        tmp = tempfile.TemporaryDirectory()
+        root = fetch(ref, tmp.name)
+
     codecs = []
-    for info in sorted(glob.glob(f'{a.checkout}/**/Resources/*/Info.plist', recursive=True)):
+    for info in sorted(glob.glob(f'{root}/**/Resources/*/Info.plist', recursive=True)):
         with open(info, 'rb') as fh:
             d = plistlib.load(fh)
         name, cid = d.get('CodecName'), d.get('CodecID')
@@ -67,16 +103,23 @@ def main():
 
     if len(codecs) < 80:
         sys.exit(f'only found {len(codecs)} codecs; is that an AppleALC tree?')
-    ocgen.write_toml(Path(a.out), {'audio': codecs},
+    ocgen.write_toml(Path(a.out), {'source': {'project': REPO, 'ref': ref},
+                                   'audio': codecs},
                      '# Audio codecs and the layout-ids AppleALC ships for each.\n'
                      '#\n'
                      '# Read from AppleALC\'s own Resources/<CODEC>/Info.plist by\n'
                      '# tools/audiotable.py. A codec usually has several layouts, each\n'
                      '# contributed for a particular machine and named as such - the right\n'
-                     '# one is found by trying, so the whole set is kept rather than a guess.')
+                     '# one is found by trying, so the whole set is kept rather than a guess.\n'
+                     '#\n'
+                     '# The ref below is the release it was read from, so a regenerated\n'
+                     '# table shows both the version bump and what it changed.')
+    if tmp:
+        tmp.cleanup()
     total = sum(len(c['layout']) for c in codecs)
     named = sum(1 for c in codecs for l in c['layout'] if l.get('note'))
-    print(f'  {len(codecs)} codecs, {total} layouts, {named} of them naming a machine')
+    print(f'  {REPO} {ref}: {len(codecs)} codecs, {total} layouts, '
+          f'{named} of them naming a machine')
     print(f'  with an hda id: {sum(1 for c in codecs if c["hda_id"])}')
     for c in codecs[:3]:
         print(f'      {c["codec"]:10s} {c["hda_id"] or "-":10s} {len(c["layout"])} layouts')
