@@ -1,0 +1,31 @@
+name: validate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Make the vendored tools executable
+        run: chmod +x vendor/opencore/*/Utilities/*/*.linux
+
+      - name: Kexts match the lock
+        run: python3 tools/kexts.py check
+
+      - name: Profiles still produce every published config
+        run: python3 tools/verify.py --comments
+
+      - name: Representative builds come out clean
+        run: |
+          python3 tools/build.py --platform laptop --cpu kaby-lake --oem hp --out /tmp/a/EFI
+          python3 tools/build.py --platform desktop --vendor amd \
+            --cpu ryzen-threadripper --cores 8 --chipset b550-a520 --out /tmp/b/EFI
+          python3 tools/build.py --name 'Desktop/Intel/016 - Desktop - Raptor Lake' --out /tmp/c/EFI
+
+      - name: Release packaging works
+        run: python3 tools/release.py --out /tmp/dist --limit 5

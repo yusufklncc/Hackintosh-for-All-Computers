@@ -1,0 +1,63 @@
+# Applies to every generated config.
+
+[Booter]
+MmioWhitelist = []
+Patch = []
+
+[Kernel]
+Block = []
+Force = []
+
+[Kernel.Quirks]
+PanicNoKextDump = true
+PowerTimeoutKernelPanic = true
+
+[Misc]
+Entries = []
+
+[Misc.Boot]
+HibernateSkipsPicker = true
+HideAuxiliary = false
+LauncherOption = "Full"
+PickerMode = "External"
+PollAppleHotKeys = true
+
+[Misc.Debug]
+ApplePanic = true
+DisableWatchDog = true
+
+[Misc.Security]
+AllowSetDefault = true
+ScanPolicy = 0
+SecureBootModel = "Disabled"
+Vault = "Optional"
+
+[Misc.Serial.Custom]
+BaudRate = 115200
+ClockRate = 1843200
+DetectCable = false
+ExtendedTxFifoSize = 64
+FifoControl = 7
+PciDeviceInfo = "hex:ff"
+RegisterAccessWidth = 8
+RegisterBase = 1016
+RegisterStride = 1
+UseHardwareFlowControl = false
+UseMmio = false
+
+[NVRAM.Add.4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14]
+DefaultBackgroundColor = "hex:00000000"
+
+[NVRAM.Add.7C436110-AB2A-4BBB-A880-FE41995C9F82]
+SystemAudioVolume = "hex:46"
+csr-active-config = "hex:00000000"
+run-efi-updater = "No"
+
+[NVRAM.Delete]
+4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14 = ["DefaultBackgroundColor"]
+
+[NVRAM.LegacySchema]
+8BE4DF61-93CA-11D2-AA0D-00E098032B8C = ["Boot0080", "Boot0081", "Boot0082", "BootNext", "BootOrder"]
+
+[UEFI]
+ReservedMemory = []

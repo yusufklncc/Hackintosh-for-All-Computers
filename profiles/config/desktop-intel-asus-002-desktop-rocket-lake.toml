@@ -1,0 +1,107 @@
+# Residual specific to EFI/OC/config/Desktop/Intel/ASUS/002 - Desktop - Rocket Lake.plist
+"# BASE EFI INTEL 11th ROCKET LAKE (doest not support iGPU) - RELEASE Version" = ""
+"# BY: https://luchina.com.br" = ""
+"# DISCORD: https://discord.universohackintosh.com" = ""
+
+[[Kernel.Add]]
+Arch = "x86_64"
+BundlePath = "Lilu.kext"
+Comment = ""
+Enabled = true
+ExecutablePath = "Contents/MacOS/Lilu"
+MaxKernel = ""
+MinKernel = "8.0.0"
+PlistPath = "Contents/Info.plist"
+
+[[Kernel.Add]]
+Arch = "x86_64"
+BundlePath = "VirtualSMC.kext"
+Comment = ""
+Enabled = true
+ExecutablePath = "Contents/MacOS/VirtualSMC"
+MaxKernel = ""
+MinKernel = "8.0.0"
+PlistPath = "Contents/Info.plist"
+
+[[Kernel.Add]]
+Arch = "x86_64"
+BundlePath = "SMCProcessor.kext"
+Comment = ""
+Enabled = true
+ExecutablePath = "Contents/MacOS/SMCProcessor"
+MaxKernel = ""
+MinKernel = "11.0.0"
+PlistPath = "Contents/Info.plist"
+
+[[Kernel.Add]]
+Arch = "x86_64"
+BundlePath = "SMCSuperIO.kext"
+Comment = ""
+Enabled = true
+ExecutablePath = "Contents/MacOS/SMCSuperIO"
+MaxKernel = ""
+MinKernel = "10.0.0"
+PlistPath = "Contents/Info.plist"
+
+[[Kernel.Add]]
+Arch = "x86_64"
+BundlePath = "WhateverGreen.kext"
+Comment = ""
+Enabled = true
+ExecutablePath = "Contents/MacOS/WhateverGreen"
+MaxKernel = ""
+MinKernel = "10.0.0"
+PlistPath = "Contents/Info.plist"
+
+[[Kernel.Add]]
+Arch = "x86_64"
+BundlePath = "AppleALC.kext"
+Comment = ""
+Enabled = true
+ExecutablePath = "Contents/MacOS/AppleALC"
+MaxKernel = ""
+MinKernel = "8.0.0"
+PlistPath = "Contents/Info.plist"
+
+[[Kernel.Add]]
+Arch = "x86_64"
+BundlePath = "USBInjectAll.kext"
+Comment = ""
+Enabled = true
+ExecutablePath = "Contents/MacOS/USBInjectAll"
+MaxKernel = "16.99.99"
+MinKernel = "15.0.0"
+PlistPath = "Contents/Info.plist"
+
+[[Kernel.Add]]
+Arch = "x86_64"
+BundlePath = "USBToolBox.kext"
+Comment = "V1.2.0"
+Enabled = true
+ExecutablePath = "Contents/MacOS/USBToolBox"
+MaxKernel = ""
+MinKernel = "17.0.0"
+PlistPath = "Contents/Info.plist"
+
+[[Kernel.Add]]
+Arch = "x86_64"
+BundlePath = "UTBDefault.kext"
+Comment = "V1.2.0"
+Enabled = true
+ExecutablePath = ""
+MaxKernel = ""
+MinKernel = "17.0.0"
+PlistPath = "Contents/Info.plist"
+
+[[Kernel.Add]]
+Arch = "x86_64"
+BundlePath = "XHCI-unsupported.kext"
+Comment = ""
+Enabled = true
+ExecutablePath = ""
+MaxKernel = ""
+MinKernel = "15.0.0"
+PlistPath = "Contents/Info.plist"
+
+[NVRAM.Delete]
+7C436110-AB2A-4BBB-A880-FE41995C9F82 = ["boot-args"]

@@ -1,0 +1,214 @@
+# 1 config
+[ACPI]
+Delete = []
+Patch = []
+
+[[ACPI.Add]]
+Comment = ""
+Enabled = true
+Path = "SSDT-PLUG-DRTNIA.aml"
+
+[[ACPI.Add]]
+Comment = ""
+Enabled = true
+Path = "SSDT-EC-DESKTOP.aml"
+
+[ACPI.Quirks]
+ResetLogoStatus = false
+
+[DeviceProperties.Add."PciRoot(0x0)/Pci(0x2,0x0)"]
+"AAPL,ig-platform-id" = "hex:12345678"
+
+[Kernel]
+Patch = []
+
+[[Kernel.Add]]
+Arch = "x86_64"
+BundlePath = "Lilu.kext"
+Comment = "V1.5.9"
+Enabled = true
+ExecutablePath = "Contents/MacOS/Lilu"
+MaxKernel = ""
+MinKernel = "8.0.0"
+PlistPath = "Contents/Info.plist"
+
+[[Kernel.Add]]
+Arch = "x86_64"
+BundlePath = "VirtualSMC.kext"
+Comment = "V1.2.8"
+Enabled = true
+ExecutablePath = "Contents/MacOS/VirtualSMC"
+MaxKernel = ""
+MinKernel = "8.0.0"
+PlistPath = "Contents/Info.plist"
+
+[[Kernel.Add]]
+Arch = "x86_64"
+BundlePath = "SMCProcessor.kext"
+Comment = ""
+Enabled = false
+ExecutablePath = "Contents/MacOS/SMCProcessor"
+MaxKernel = ""
+MinKernel = "11.0.0"
+PlistPath = "Contents/Info.plist"
+
+[[Kernel.Add]]
+Arch = "x86_64"
+BundlePath = "SMCSuperIO.kext"
+Comment = ""
+Enabled = false
+ExecutablePath = "Contents/MacOS/SMCSuperIO"
+MaxKernel = ""
+MinKernel = "10.0.0"
+PlistPath = "Contents/Info.plist"
+
+[[Kernel.Add]]
+Arch = "x86_64"
+BundlePath = "WhateverGreen.kext"
+Comment = "V1.5.6"
+Enabled = true
+ExecutablePath = "Contents/MacOS/WhateverGreen"
+MaxKernel = ""
+MinKernel = "10.0.0"
+PlistPath = "Contents/Info.plist"
+
+[[Kernel.Add]]
+Arch = "x86_64"
+BundlePath = "AppleALC.kext"
+Comment = "V1.6.8"
+Enabled = true
+ExecutablePath = "Contents/MacOS/AppleALC"
+MaxKernel = ""
+MinKernel = "8.0.0"
+PlistPath = "Contents/Info.plist"
+
+[[Kernel.Add]]
+Arch = "x86_64"
+BundlePath = "USBInjectAll.kext"
+Comment = "V0.7.6"
+Enabled = true
+ExecutablePath = "Contents/MacOS/USBInjectAll"
+MaxKernel = "16.99.99"
+MinKernel = "15.0.0"
+PlistPath = "Contents/Info.plist"
+
+[[Kernel.Add]]
+Arch = "x86_64"
+BundlePath = "USBToolBox.kext"
+Comment = "V1.2.0"
+Enabled = true
+ExecutablePath = "Contents/MacOS/USBToolBox"
+MaxKernel = ""
+MinKernel = "17.0.0"
+PlistPath = "Contents/Info.plist"
+
+[[Kernel.Add]]
+Arch = "x86_64"
+BundlePath = "UTBDefault.kext"
+Comment = "V1.2.0"
+Enabled = true
+ExecutablePath = ""
+MaxKernel = ""
+MinKernel = "17.0.0"
+PlistPath = "Contents/Info.plist"
+
+[[Kernel.Add]]
+Arch = "x86_64"
+BundlePath = "XHCI-unsupported.kext"
+Comment = ""
+Enabled = true
+ExecutablePath = ""
+MaxKernel = ""
+MinKernel = "15.0.0"
+PlistPath = "Contents/Info.plist"
+
+[Kernel.Quirks]
+AppleXcpmCfgLock = true
+
+[Kernel.Scheme]
+KernelArch = "x86_64"
+
+[Misc.Serial.Custom]
+LineControl = 7
+
+[[Misc.Tools]]
+Arguments = ""
+Auxiliary = true
+Comment = ""
+Enabled = true
+Flavour = "Auto"
+FullNvramAccess = false
+Name = "OpenShell"
+Path = "OpenShell.efi"
+RealPath = false
+TextMode = false
+
+[NVRAM.Add.4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102]
+rtc-blacklist = ""
+
+[NVRAM.Add.7C436110-AB2A-4BBB-A880-FE41995C9F82]
+boot-args = "-v keepsyms=1 debug=0x100 alcid=1"
+"prev-lang:kbd" = "hex:"
+
+[NVRAM.Delete]
+4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102 = ["rtc-blacklist"]
+7C436110-AB2A-4BBB-A880-FE41995C9F82 = ["boot-args"]
+
+[NVRAM.LegacySchema]
+7C436110-AB2A-4BBB-A880-FE41995C9F82 = ["EFILoginHiDPI", "EFIBluetoothDelay", "LocationServicesEnabled", "SystemAudioVolume", "SystemAudioVolumeDB", "SystemAudioVolumeSaved", "bluetoothActiveControllerInfo", "bluetoothInternalControllerInfo", "flagstate", "fmm-computer-name", "nvda_drv", "prev-lang:kbd"]
+
+[PlatformInfo.Generic]
+SystemProductName = "iMac16,2"
+
+[UEFI.APFS]
+MinDate = -1
+MinVersion = -1
+
+[UEFI.AppleInput]
+AppleEvent = "Auto"
+GraphicsInputMirroring = false
+
+[[UEFI.Drivers]]
+Arguments = ""
+Comment = ""
+Enabled = true
+LoadEarly = false
+Path = "HfsPlus.efi"
+
+[[UEFI.Drivers]]
+Arguments = ""
+Comment = ""
+Enabled = true
+LoadEarly = false
+Path = "OpenCanopy.efi"
+
+[[UEFI.Drivers]]
+Arguments = ""
+Comment = ""
+Enabled = true
+LoadEarly = false
+Path = "OpenRuntime.efi"
+
+[[UEFI.Drivers]]
+Arguments = ""
+Comment = ""
+Enabled = true
+LoadEarly = false
+Path = "ToggleSipEntry.efi"
+
+[[UEFI.Drivers]]
+Arguments = ""
+Comment = ""
+Enabled = true
+LoadEarly = false
+Path = "ResetNvramEntry.efi"
+
+[UEFI.Output]
+UIScale = -1
+
+[UEFI.ProtocolOverrides]
+FirmwareVolume = false
+
+[UEFI.Quirks]
+EnableVectorAcceleration = false
+IgnoreInvalidFlexRatio = true

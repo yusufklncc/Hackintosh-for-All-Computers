@@ -1,0 +1,4 @@
+# 8 configs use this alone.
+
+[Booter.Quirks]
+SetupVirtualMap = false

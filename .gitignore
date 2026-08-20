@@ -1,0 +1,21 @@
+# macOS
+.DS_Store
+._*
+.Spotlight-V100
+.Trashes
+.fseventsd
+.TemporaryItems
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# Editors
+*.swp
+*~
+
+# OpenCore release cache used by tools/fetch_oc.py
+.oc-cache/
+
+# Generated EFI folders
+build/

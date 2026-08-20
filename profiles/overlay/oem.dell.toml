@@ -1,0 +1,7 @@
+# 13 configs use this alone.
+
+[Kernel.Quirks]
+CustomSMBIOSGuid = true
+
+[PlatformInfo]
+UpdateSMBIOSMode = "Custom"

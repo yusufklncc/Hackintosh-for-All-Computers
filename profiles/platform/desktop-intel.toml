@@ -1,0 +1,4 @@
+# 22 cpu profiles build on this.
+
+[Kernel.Quirks]
+DisableIoMapper = true

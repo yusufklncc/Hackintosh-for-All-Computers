@@ -1,0 +1,5 @@
+# 8 configs use this alone.
+
+[Booter.Quirks]
+DevirtualiseMmio = true
+SetupVirtualMap = false

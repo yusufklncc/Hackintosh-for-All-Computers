@@ -1,0 +1,100 @@
+# Residual specific to EFI/OC/config/Desktop/Intel/ASUS/001 - Desktop - Comet Lake.plist
+[[Kernel.Add]]
+Arch = "x86_64"
+BundlePath = "Lilu.kext"
+Comment = "V1.5.9"
+Enabled = true
+ExecutablePath = "Contents/MacOS/Lilu"
+MaxKernel = ""
+MinKernel = "8.0.0"
+PlistPath = "Contents/Info.plist"
+
+[[Kernel.Add]]
+Arch = "x86_64"
+BundlePath = "VirtualSMC.kext"
+Comment = "V1.2.8"
+Enabled = true
+ExecutablePath = "Contents/MacOS/VirtualSMC"
+MaxKernel = ""
+MinKernel = "8.0.0"
+PlistPath = "Contents/Info.plist"
+
+[[Kernel.Add]]
+Arch = "x86_64"
+BundlePath = "SMCProcessor.kext"
+Comment = ""
+Enabled = true
+ExecutablePath = "Contents/MacOS/SMCProcessor"
+MaxKernel = ""
+MinKernel = "11.0.0"
+PlistPath = "Contents/Info.plist"
+
+[[Kernel.Add]]
+Arch = "x86_64"
+BundlePath = "SMCSuperIO.kext"
+Comment = ""
+Enabled = true
+ExecutablePath = "Contents/MacOS/SMCSuperIO"
+MaxKernel = ""
+MinKernel = "10.0.0"
+PlistPath = "Contents/Info.plist"
+
+[[Kernel.Add]]
+Arch = "x86_64"
+BundlePath = "WhateverGreen.kext"
+Comment = "V1.5.6"
+Enabled = true
+ExecutablePath = "Contents/MacOS/WhateverGreen"
+MaxKernel = ""
+MinKernel = "10.0.0"
+PlistPath = "Contents/Info.plist"
+
+[[Kernel.Add]]
+Arch = "x86_64"
+BundlePath = "AppleALC.kext"
+Comment = "V1.6.8"
+Enabled = true
+ExecutablePath = "Contents/MacOS/AppleALC"
+MaxKernel = ""
+MinKernel = "8.0.0"
+PlistPath = "Contents/Info.plist"
+
+[[Kernel.Add]]
+Arch = "x86_64"
+BundlePath = "USBInjectAll.kext"
+Comment = ""
+Enabled = true
+ExecutablePath = "Contents/MacOS/USBInjectAll"
+MaxKernel = "16.99.99"
+MinKernel = "15.0.0"
+PlistPath = "Contents/Info.plist"
+
+[[Kernel.Add]]
+Arch = "x86_64"
+BundlePath = "USBToolBox.kext"
+Comment = "V1.2.0"
+Enabled = true
+ExecutablePath = "Contents/MacOS/USBToolBox"
+MaxKernel = ""
+MinKernel = "17.0.0"
+PlistPath = "Contents/Info.plist"
+
+[[Kernel.Add]]
+Arch = "x86_64"
+BundlePath = "UTBDefault.kext"
+Comment = "V1.2.0"
+Enabled = true
+ExecutablePath = ""
+MaxKernel = ""
+MinKernel = "17.0.0"
+PlistPath = "Contents/Info.plist"
+
+[[Kernel.Add]]
+Arch = "x86_64"
+BundlePath = "XHCI-unsupported.kext"
+Comment = ""
+Enabled = true
+ExecutablePath = ""
+MaxKernel = ""
+MinKernel = "15.0.0"
+PlistPath = "Contents/Info.plist"

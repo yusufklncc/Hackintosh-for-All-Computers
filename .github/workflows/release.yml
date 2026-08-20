@@ -1,0 +1,51 @@
+name: release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Tag to publish under
+        required: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify before publishing anything
+        run: |
+          python3 tools/kexts.py check
+          python3 tools/verify.py --comments
+
+      - name: Build every published config
+        run: |
+          chmod +x vendor/opencore/*/Utilities/*/*.linux
+          python3 tools/release.py --out dist
+
+      - name: Publish
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.inputs.tag || github.ref_name }}
+          files: dist/*.zip
+          body: |
+            Two files. `EFI-base.zip` is the EFI folder; `configs.zip` holds one
+            `config.plist` per supported machine.
+
+            1. Extract `EFI-base.zip` - you get an `EFI` folder.
+            2. Open `configs.zip`, find the entry matching your hardware, and copy
+               that `.plist` into `EFI/OC/` renamed to `config.plist`.
+            3. Copy the `EFI` folder to the EFI partition of your USB drive.
+
+            OpenCore loads only what the config names, so one base serves every
+            machine.
+
+            Each config ships with a generated serial, MLB and UUID, but everyone
+            downloading the same file shares them. Generate your own with
+            GenSMBIOS, and set `ROM` to your own MAC address, before signing in to
+            iCloud, iMessage or FaceTime. The Post Installation section of the
+            README walks through it.

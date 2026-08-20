@@ -1,0 +1,219 @@
+# 1 config
+
+[ACPI]
+Delete = []
+
+[[ACPI.Add]]
+Comment = ""
+Enabled = true
+Path = "SSDT-EC-LAPTOP.aml"
+
+[[ACPI.Add]]
+Comment = ""
+Enabled = true
+Path = "SSDT-PNLF.aml"
+
+[[ACPI.Add]]
+Comment = ""
+Enabled = true
+Path = "SSDT-XOSI.aml"
+
+[ACPI.Quirks]
+ResetLogoStatus = false
+
+[Booter.Quirks]
+AvoidRuntimeDefrag = false
+EnableSafeModeSlide = false
+EnableWriteUnprotector = false
+ProvideCustomSlide = false
+SetupVirtualMap = false
+
+[[Kernel.Add]]
+Arch = "Any"
+BundlePath = "Lilu.kext"
+Comment = "V1.5.9"
+Enabled = true
+ExecutablePath = "Contents/MacOS/Lilu"
+MaxKernel = ""
+MinKernel = "8.0.0"
+PlistPath = "Contents/Info.plist"
+
+[[Kernel.Add]]
+Arch = "Any"
+BundlePath = "VirtualSMC.kext"
+Comment = "V1.2.8"
+Enabled = true
+ExecutablePath = "Contents/MacOS/VirtualSMC"
+MaxKernel = ""
+MinKernel = "8.0.0"
+PlistPath = "Contents/Info.plist"
+
+[[Kernel.Add]]
+Arch = "Any"
+BundlePath = "SMCBatteryManager.kext"
+Comment = ""
+Enabled = false
+ExecutablePath = "Contents/MacOS/SMCBatteryManager"
+MaxKernel = ""
+MinKernel = "8.0.0"
+PlistPath = "Contents/Info.plist"
+
+[[Kernel.Add]]
+Arch = "Any"
+BundlePath = "SMCProcessor.kext"
+Comment = ""
+Enabled = false
+ExecutablePath = "Contents/MacOS/SMCProcessor"
+MaxKernel = ""
+MinKernel = "8.0.0"
+PlistPath = "Contents/Info.plist"
+
+[[Kernel.Add]]
+Arch = "Any"
+BundlePath = "WhateverGreen.kext"
+Comment = "V1.5.6"
+Enabled = true
+ExecutablePath = "Contents/MacOS/WhateverGreen"
+MaxKernel = ""
+MinKernel = "10.0.0"
+PlistPath = "Contents/Info.plist"
+
+[[Kernel.Add]]
+Arch = "Any"
+BundlePath = "AppleALC.kext"
+Comment = "V1.6.8"
+Enabled = false
+ExecutablePath = "Contents/MacOS/AppleALC"
+MaxKernel = ""
+MinKernel = "8.0.0"
+PlistPath = "Contents/Info.plist"
+
+[[Kernel.Add]]
+Arch = "Any"
+BundlePath = "ECEnabler.kext"
+Comment = ""
+Enabled = false
+ExecutablePath = "Contents/MacOS/ECEnabler"
+MaxKernel = ""
+MinKernel = "11.0.0"
+PlistPath = "Contents/Info.plist"
+
+[[Kernel.Add]]
+Arch = "Any"
+BundlePath = "VoodooPS2Controller.kext"
+Comment = "V2.2.7"
+Enabled = false
+ExecutablePath = "Contents/MacOS/VoodooPS2Controller"
+MaxKernel = ""
+MinKernel = "15.0.0"
+PlistPath = "Contents/Info.plist"
+
+[[Kernel.Add]]
+Arch = "Any"
+BundlePath = "VoodooPS2Controller.kext/Contents/PlugIns/VoodooInput.kext"
+Comment = "V1.1.3"
+Enabled = false
+ExecutablePath = "Contents/MacOS/VoodooInput"
+MaxKernel = ""
+MinKernel = "15.0.0"
+PlistPath = "Contents/Info.plist"
+
+[[Kernel.Add]]
+Arch = "Any"
+BundlePath = "VoodooPS2Controller.kext/Contents/PlugIns/VoodooPS2Keyboard.kext"
+Comment = "V2.2.7"
+Enabled = false
+ExecutablePath = "Contents/MacOS/VoodooPS2Keyboard"
+MaxKernel = ""
+MinKernel = "15.0.0"
+PlistPath = "Contents/Info.plist"
+
+[[Kernel.Add]]
+Arch = "Any"
+BundlePath = "VoodooPS2Controller.kext/Contents/PlugIns/VoodooPS2Mouse.kext"
+Comment = "V2.2.7"
+Enabled = false
+ExecutablePath = "Contents/MacOS/VoodooPS2Mouse"
+MaxKernel = ""
+MinKernel = "15.0.0"
+PlistPath = "Contents/Info.plist"
+
+[[Kernel.Add]]
+Arch = "Any"
+BundlePath = "VoodooPS2Controller.kext/Contents/PlugIns/VoodooPS2Trackpad.kext"
+Comment = "V2.2.7"
+Enabled = false
+ExecutablePath = "Contents/MacOS/VoodooPS2Trackpad"
+MaxKernel = ""
+MinKernel = "15.0.0"
+PlistPath = "Contents/Info.plist"
+
+[[Kernel.Add]]
+Arch = "Any"
+BundlePath = "USBInjectAll.kext"
+Comment = "V0.7.6"
+Enabled = false
+ExecutablePath = "Contents/MacOS/USBInjectAll"
+MaxKernel = ""
+MinKernel = "15.0.0"
+PlistPath = "Contents/Info.plist"
+
+[Kernel.Quirks]
+AppleCpuPmCfgLock = true
+
+[Kernel.Scheme]
+FuzzyMatch = false
+
+[NVRAM.Add.7C436110-AB2A-4BBB-A880-FE41995C9F82]
+boot-args = "-v keepsyms=1 debug=0x100"
+
+[PlatformInfo.Generic]
+SystemProductName = "MacBookPro6,1"
+
+[[UEFI.Drivers]]
+Arguments = ""
+Comment = ""
+Enabled = true
+LoadEarly = false
+Path = "HfsPlusLegacy.efi"
+
+[[UEFI.Drivers]]
+Arguments = ""
+Comment = ""
+Enabled = true
+LoadEarly = false
+Path = "OpenCanopy.efi"
+
+[[UEFI.Drivers]]
+Arguments = ""
+Comment = ""
+Enabled = true
+LoadEarly = false
+Path = "OpenRuntime.efi"
+
+[[UEFI.Drivers]]
+Arguments = ""
+Comment = ""
+Enabled = true
+LoadEarly = false
+Path = "OpenUsbKbDxe.efi"
+
+[[UEFI.Drivers]]
+Arguments = ""
+Comment = ""
+Enabled = true
+LoadEarly = false
+Path = "ToggleSipEntry.efi"
+
+[[UEFI.Drivers]]
+Arguments = ""
+Comment = ""
+Enabled = true
+LoadEarly = false
+Path = "ResetNvramEntry.efi"
+
+[UEFI.Input]
+KeySupport = false
+
+[UEFI.Quirks]
+IgnoreInvalidFlexRatio = true

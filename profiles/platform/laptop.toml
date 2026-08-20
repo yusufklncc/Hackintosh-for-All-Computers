@@ -1,0 +1,70 @@
+# 13 cpu profiles build on this.
+
+[[ACPI.Patch]]
+Base = ""
+BaseSkip = 0
+Comment = "Rename _OSI to XOSI (OS)"
+Count = 0
+Enabled = true
+Find = "hex:5f4f5349"
+Limit = 0
+Mask = "hex:"
+OemTableId = "hex:"
+Replace = "hex:584f5349"
+ReplaceMask = "hex:"
+Skip = 0
+TableLength = 0
+TableSignature = "hex:"
+
+[Kernel]
+Patch = []
+
+[Kernel.Quirks]
+AppleXcpmCfgLock = true
+DisableIoMapper = true
+
+[Misc.Serial.Custom]
+LineControl = 7
+
+[[Misc.Tools]]
+Arguments = ""
+Auxiliary = true
+Comment = ""
+Enabled = true
+Flavour = "Auto"
+FullNvramAccess = false
+Name = "OpenShell"
+Path = "OpenShell.efi"
+RealPath = false
+TextMode = false
+
+[NVRAM.Add.4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102]
+rtc-blacklist = ""
+
+[NVRAM.Add.7C436110-AB2A-4BBB-A880-FE41995C9F82]
+"prev-lang:kbd" = "hex:"
+
+[NVRAM.Delete]
+4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102 = ["rtc-blacklist"]
+7C436110-AB2A-4BBB-A880-FE41995C9F82 = ["boot-args"]
+
+[NVRAM.LegacySchema]
+7C436110-AB2A-4BBB-A880-FE41995C9F82 = ["EFILoginHiDPI", "EFIBluetoothDelay", "LocationServicesEnabled", "SystemAudioVolume", "SystemAudioVolumeDB", "SystemAudioVolumeSaved", "bluetoothActiveControllerInfo", "bluetoothInternalControllerInfo", "flagstate", "fmm-computer-name", "nvda_drv", "prev-lang:kbd"]
+
+[UEFI.APFS]
+MinDate = -1
+MinVersion = -1
+
+[UEFI.AppleInput]
+AppleEvent = "Auto"
+GraphicsInputMirroring = false
+
+[UEFI.Output]
+UIScale = -1
+
+[UEFI.ProtocolOverrides]
+FirmwareVolume = false
+
+[UEFI.Quirks]
+EnableVectorAcceleration = false
+ReleaseUsbOwnership = true
