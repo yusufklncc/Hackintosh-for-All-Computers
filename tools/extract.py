@@ -84,9 +84,13 @@ def key_of(r):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('sample')
+    ap.add_argument('sample', nargs='?',
+                    help='Sample.plist to build on; defaults to the vendored one')
     ap.add_argument('--out', default='profiles')
     a = ap.parse_args()
+    a.sample = a.sample or ocgen.vendored_sample()
+    if not a.sample:
+        sys.exit('no vendored Sample.plist; pass one or run tools/fetch_oc.py')
 
     out = Path(a.out)
     sample = strip_identity(prepare_sample(ocgen.load_plist(a.sample)))

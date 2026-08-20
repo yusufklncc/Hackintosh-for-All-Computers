@@ -25,11 +25,15 @@ import ocgen
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('sample')
+    ap.add_argument('sample', nargs='?',
+                    help='Sample.plist to build on; defaults to the vendored one')
     ap.add_argument('--profiles', default='profiles')
     ap.add_argument('--comments', action='store_true', help='also require Comment strings to match')
     ap.add_argument('-v', '--verbose', action='store_true')
     a = ap.parse_args()
+    a.sample = a.sample or ocgen.vendored_sample()
+    if not a.sample:
+        sys.exit('no vendored Sample.plist; pass one or run tools/fetch_oc.py')
 
     profiles = Path(a.profiles)
     sample = ocgen.load_plist(a.sample)

@@ -359,3 +359,22 @@ def assemble(sample, chain, params=None):
     for p in chain:
         tree = merge(tree, decode(expand(read_toml(p), params or {})))
     return tree
+
+
+VENDOR_OC = Path = None  # placeholder, see vendored_sample()
+
+
+def vendored_sample(version=None):
+    """Path to a Sample.plist shipped in the repository.
+
+    Keeping it vendored is what lets extract/verify/build run on a fresh clone
+    with no network. It is 51 KB; the ocvalidate and macserial binaries are not
+    vendored because they are 4 MB per OpenCore version and only improve a build
+    rather than being required for one."""
+    import pathlib
+    root = pathlib.Path('vendor/opencore')
+    if version:
+        p = root / version / 'Sample.plist'
+        return p if p.exists() else None
+    found = sorted(root.glob('*/Sample.plist'))
+    return found[-1] if found else None
