@@ -142,6 +142,40 @@ so leaves `base.toml` entirely, which is what a version-portable profile set is
 supposed to do: the floor moved from 0.9.6 to 0.8.7 without anyone editing a
 version number.
 
+## macOS coverage
+
+`tools/coverage.py` reads the `MinKernel`/`MaxKernel` on every enabled kext and
+kernel patch and reports where a capability stops being covered. Patches hitting
+the same site are treated as one capability, so a patch that hands over to its
+successor is not mistaken for a ceiling. Even the Darwin-to-macOS names are
+recovered from this tree's own patch comments rather than typed from memory:
+
+    python3 tools/coverage.py
+    python3 tools/coverage.py --names
+
+The measured answer: no Intel config has any bounded capability. All 35 AMD
+configs stop at Darwin **22.99.99**, macOS 13. Above that - Sonoma, Sequoia,
+Tahoe - the AMD kernel patches no longer apply, which lines up with AMD_Vanilla
+carrying a fourth `cpuid_cores_per_package` patch for 22.4.0-25.99.99 that this
+tree does not have.
+
+This is also the honest answer to "should there be a `--macos` axis". Measured
+against the tree, macOS targeting only varies for AMD, and there it is a missing
+patch rather than a profile dimension.
+
+## Continuous validation
+
+`.github/workflows/validate.yml` runs on every push and pull request:
+
+* kexts match `vendor/kexts.lock`
+* all 179 configs pass the vendored `ocvalidate`
+* the profiles still reproduce all 179 configs
+* `extract.py` is deterministic - regenerating produces byte-identical profiles
+* a laptop build and an AMD build both come out clean
+
+Because `ocvalidate` and `macserial` are vendored for Linux too, the runner needs
+nothing beyond a checkout and Python.
+
 ## The gate
 
 `verify.py` rebuilds every config from the profiles and compares it against the

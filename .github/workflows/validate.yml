@@ -1,0 +1,45 @@
+name: validate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Kexts match the lock
+        run: python3 tools/kexts.py check
+
+      - name: Every config is valid OpenCore
+        run: |
+          ocv=vendor/opencore/1.0.5/Utilities/ocvalidate/ocvalidate.linux
+          chmod +x "$ocv"
+          fail=0
+          while IFS= read -r f; do
+            if ! "$ocv" "$f" | grep -q 'No issues found'; then
+              echo "::error file=$f::ocvalidate reported issues"
+              "$ocv" "$f"
+              fail=1
+            fi
+          done < <(find EFI/OC/config -name '*.plist' | sort)
+          exit $fail
+
+      - name: Profiles still reproduce every config
+        run: python3 tools/verify.py --comments
+
+      - name: Profiles are what the tree produces
+        run: |
+          python3 tools/extract.py --out /tmp/profiles
+          # support.toml is measured separately and never regenerated
+          diff -r --exclude=support.toml profiles /tmp/profiles
+
+      - name: A build comes out clean
+        run: |
+          chmod +x vendor/opencore/1.0.5/Utilities/*/*.linux
+          python3 tools/build.py --platform laptop --cpu kaby-lake --oem hp --out /tmp/EFI
+          python3 tools/build.py --platform desktop --vendor amd \
+            --cpu ryzen-threadripper --cores 8 --chipset b550-a520 --out /tmp/EFI-amd
