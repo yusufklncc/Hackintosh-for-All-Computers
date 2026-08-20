@@ -152,8 +152,14 @@ def main():
         print(f'  {DIM}this machine:{RESET} {hw["cpu"]}'
               + (f', {hw["cores"]} cores' if hw.get('cores') else '')
               + (f', {hw["oem_raw"]}' if hw.get('oem_raw') else ''))
-        if hw.get('gpu'):
-            print(f'  {DIM}graphics:{RESET}     {", ".join(hw["gpu"][:2])}')
+        for g in hw.get('gpu_devices', [])[:3]:
+            print(f'  {DIM}graphics:{RESET}     {g["name"]}'
+                  + (f'  {DIM}[{g["id"]}]{RESET}' if g.get('id') else ''))
+        if hw.get('gpu_virtual'):
+            # named rather than dropped silently: someone who installed one of
+            # these should see that it was recognised and set aside
+            print(f'  {DIM}ignored:{RESET}      {", ".join(hw["gpu_virtual"])}'
+                  f'  {DIM}(virtual display adapters, not graphics hardware){RESET}')
     elif not a.no_detect:
         print(f'  {DIM}could not read this machine; every question is still answerable{RESET}')
 

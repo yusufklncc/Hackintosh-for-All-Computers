@@ -32,6 +32,16 @@ jobs:
           python3 tools/setup.py --answers 2,10,3 --out /tmp/setup-laptop/EFI
           python3 tools/setup.py --answers 1,2,2,3,6 --out /tmp/setup-amd/EFI
           python3 tools/detect.py
+          python3 -c "
+import sys; sys.path.insert(0,'tools'); import detect
+real, virt = detect.split_graphics([
+    r'PCI\\VEN_8086&DEV_E20B&SUBSYS_1&REV_08\\6&a&0|Intel(R) Arc(TM) B580 Graphics',
+    r'ROOT\\DISPLAY\\0000|Virtual Display Driver'])
+assert [g['name'] for g in real] == ['Intel(R) Arc(TM) B580 Graphics'], real
+assert real[0]['id'] == '8086:e20b', real
+assert [g['name'] for g in virt] == ['Virtual Display Driver'], virt
+print('  graphics split ok')
+"
           python3 tools/advise.py --ids 8086:15b8,8086:2723 --usb-ids 8087:0029
           python3 tools/advise.py --ids 10ec:c822
 

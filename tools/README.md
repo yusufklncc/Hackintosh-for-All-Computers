@@ -97,6 +97,14 @@ PowerShell CIM on Windows, `lspci` and sysfs on Linux, `system_profiler` and
 `sysctl` on macOS - so it needs no dependencies and no admin rights. Run it on
 its own to see what it found.
 
+Graphics is read from the bus, not from the adapter list. Windows counts every
+display adapter as a video controller, including the virtual ones a remote
+desktop or dummy-monitor tool installs, and those can outnumber and outrank the
+real card - a machine with an Arc B580 reported a virtual driver instead.
+Adapters that enumerate under `ROOT` rather than `PCI` are therefore set aside,
+and named as ignored rather than dropped quietly, so someone who installed one
+can see it was recognised.
+
 Its CPU rule stays quiet unless it is sure. A four-digit Intel SKU normally
 names its generation with the first digit, so 2600K is 2nd generation; Ice Lake
 mobile breaks that, and 1065G7 is 10th. 10th generation mobile then covers two

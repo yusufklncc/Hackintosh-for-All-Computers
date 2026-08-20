@@ -121,9 +121,13 @@ def _windows():
     if types:
         # 8-14 and 30-32 are the portable chassis codes in the DMTF table
         out['laptop'] = bool(types & {8, 9, 10, 11, 12, 14, 18, 21, 30, 31, 32})
+    # Win32_VideoController lists every display adapter, including virtual ones
+    # a remote desktop or a dummy-monitor tool installs. Those enumerate under
+    # ROOT rather than PCI, so the bus is what separates the graphics card from
+    # a driver pretending to be one.
     out['gpu'] = [l.strip() for l in
-                  _ps('Get-CimInstance Win32_VideoController | '
-                      'ForEach-Object { $_.Name }').splitlines() if l.strip()]
+                  _ps('Get-CimInstance Win32_VideoController | ForEach-Object '
+                      '{ "$($_.PNPDeviceID)|$($_.Name)" }').splitlines() if l.strip()]
     out['pci'] = _ps(
         'Get-CimInstance Win32_PnPEntity | Where-Object { $_.PNPDeviceID -like "PCI*" } | '
         'ForEach-Object { "$($_.PNPDeviceID)|$($_.Name)" }')
@@ -145,7 +149,7 @@ def _linux():
     if chassis.isdigit():
         out['laptop'] = int(chassis) in {8, 9, 10, 11, 12, 14, 18, 21, 30, 31, 32}
     out['pci'] = _run(['lspci', '-nn'])
-    out['gpu'] = [l.split(': ', 1)[-1] for l in out['pci'].splitlines()
+    out['gpu'] = [f"PCI|{l.split(': ', 1)[-1]}" for l in out['pci'].splitlines()
                   if 'VGA compatible controller' in l or '3D controller' in l]
     out['usb'] = _run(['lsusb'])
     return out
@@ -162,7 +166,7 @@ def _macos():
     out['vendor'] = ''
     out['pci'] = _run(['system_profiler', 'SPPCIDataType'])
     out['usb'] = _run(['system_profiler', 'SPUSBDataType'])
-    out['gpu'] = [m.strip() for m in re.findall(
+    out['gpu'] = [f'PCI|{m.strip()}' for m in re.findall(
         r'^\s*Chipset Model:\s*(.+)$',
         _run(['system_profiler', 'SPDisplaysDataType']), re.M)]
     return out
@@ -205,6 +209,26 @@ def _apple_pairs(text, vendor_key, device_key):
     return out
 
 
+def split_graphics(entries):
+    """(real graphics cards, virtual adapters) from "bus-or-id|name" strings.
+
+    Reporting a virtual adapter as the graphics card is worse than reporting
+    nothing: it is the kind of wrong answer that looks right, and someone would
+    configure an EFI around it."""
+    real, virtual = [], []
+    for e in entries or []:
+        ident, _, name = e.partition('|')
+        name = (name or ident).strip()
+        if not name:
+            continue
+        pci = _pairs(e, PCI_PATTERNS)   # the id may sit in either half
+        if ident.upper().startswith('PCI') or pci:
+            real.append({'name': name, 'id': next(iter(sorted(pci)), None)})
+        else:
+            virtual.append({'name': name, 'id': None})
+    return real, virtual
+
+
 def probe():
     """Everything the machine will tell us, with the gaps left as None."""
     system = platform.system()
@@ -218,7 +242,9 @@ def probe():
         'laptop': laptop,
         'oem': normalise_oem(raw.get('vendor')),
         'oem_raw': (raw.get('vendor') or '').strip() or None,
-        'gpu': raw.get('gpu') or [],
+        'gpu': [g['name'] for g in split_graphics(raw.get('gpu'))[0]],
+        'gpu_devices': split_graphics(raw.get('gpu'))[0],
+        'gpu_virtual': [g['name'] for g in split_graphics(raw.get('gpu'))[1]],
         'pci': raw.get('pci') or '',
         'pci_ids': sorted(_pairs(raw.get('pci'), PCI_PATTERNS)
                           | (_apple_pairs(raw.get('pci'), 'Vendor ID', 'Device ID')
@@ -234,6 +260,9 @@ if __name__ == '__main__':
     for k, v in probe().items():
         if k == 'pci':
             print(f'  {k:10s} {len(v.splitlines())} lines')
+        elif k in ('gpu_devices',):
+            for g in v:
+                print(f'  {k:10s} {g["name"]}' + (f'  [{g["id"]}]' if g['id'] else ''))
         elif k in ('pci_ids', 'usb_ids'):
             print(f'  {k:10s} {len(v)}: ' + ', '.join(v[:8]) + (' ...' if len(v) > 8 else ''))
         else:
