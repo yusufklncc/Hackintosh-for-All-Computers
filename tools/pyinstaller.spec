@@ -4,13 +4,20 @@
 # whole thing: no clone, no Python, no downloads for the common path. setup.py
 # chdirs into the unpacked bundle at startup, which is why the frozen build
 # needs no separate code path.
+#
+# Paths are built from SPECPATH rather than written relative. PyInstaller
+# resolves a relative script path against the spec's own directory, and this
+# spec lives in tools/, so 'tools/setup.py' would look for tools/tools/setup.py.
 import os
 
-datas = [(d, d) for d in ('profiles', 'data', 'EFI', 'vendor')]
+ROOT = os.path.dirname(SPECPATH)          # SPECPATH is <repo>/tools
+TOOLS = os.path.join(ROOT, 'tools')
+
+datas = [(os.path.join(ROOT, d), d) for d in ('profiles', 'data', 'EFI', 'vendor')]
 
 a = Analysis(
-    ['tools/setup.py'],
-    pathex=['tools'],
+    [os.path.join(TOOLS, 'setup.py')],
+    pathex=[TOOLS],
     datas=datas,
     hiddenimports=['advise', 'build', 'detect', 'itlwm', 'netkexts', 'ocgen'],
     excludes=['tkinter', 'unittest', 'pydoc_data', 'test'],
