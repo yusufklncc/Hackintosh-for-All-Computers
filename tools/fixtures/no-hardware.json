@@ -1,0 +1,20 @@
+{
+  "cores": null,
+  "cpu": null,
+  "generation": null,
+  "gpu": [],
+  "gpu_devices": [],
+  "gpu_virtual": [],
+  "hda_ids": [],
+  "laptop": null,
+  "nvme": [],
+  "oem": null,
+  "oem_raw": null,
+  "pci_ids": [],
+  "peripherals": [],
+  "ps2": false,
+  "report_version": 1,
+  "system": "none",
+  "usb_ids": [],
+  "written": "a fixture, not a real machine"
+}

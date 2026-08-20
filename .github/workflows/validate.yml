@@ -30,39 +30,68 @@ jobs:
 
       - name: Representative builds come out clean
         run: |
-          python3 tools/setup.py --answers 2,10,3 --out /tmp/laptop/EFI
-          python3 tools/setup.py --answers 1,2,2,3,6 --out /tmp/amd/EFI
+          # NONE starts from a report describing no hardware, so the questions
+          # are the same on every runner. Detecting the runner instead makes the
+          # answer string depend on whether it happens to have an NVMe drive.
+          NONE='--machine tools/fixtures/no-hardware.json'
+          python3 tools/setup.py $NONE --answers 2,10,3 --out /tmp/laptop/EFI
+          python3 tools/setup.py $NONE --answers 1,2,2,3,6 --out /tmp/amd/EFI
           python3 tools/build.py --name 'Desktop/Intel/016 - Desktop - Raptor Lake' --out /tmp/named/EFI
+          # and once against this runner, declining whatever it turns out to have
+          python3 tools/setup.py --answers 1,2,10,3,3 --out /tmp/local/EFI
 
       - name: Storage advice
         run: |
-          python3 tools/setup.py --nvme 'Samsung SSD 970 EVO' --answers 2,10,3,1 --out /tmp/nvme/EFI
-          python3 tools/setup.py --nvme 'APPLE SSD AP0512'    --answers 2,10,3   --out /tmp/apple-nvme/EFI
+          NONE='--machine tools/fixtures/no-hardware.json'
+          python3 tools/setup.py $NONE --nvme 'Samsung SSD 970 EVO' --answers 2,10,3,1 --out /tmp/nvme/EFI
+          test -d /tmp/nvme/EFI/OC/Kexts/NVMeFix.kext
+          python3 tools/setup.py $NONE --nvme 'APPLE SSD AP0512'    --answers 2,10,3   --out /tmp/apple-nvme/EFI
+          test ! -d /tmp/apple-nvme/EFI/OC/Kexts/NVMeFix.kext
 
       - name: Network kexts, both modes and declining
         run: |
-          IDS='--ids 8086:15b8 --usb-ids 8087:0029'
+          IDS='--machine tools/fixtures/no-hardware.json --ids 8086:15b8 --usb-ids 8087:0029'
           python3 tools/setup.py $IDS --answers 2,10,3,1    --out /tmp/net-all/EFI
           python3 tools/setup.py $IDS --answers 2,10,3,2,10 --out /tmp/net-sonoma/EFI
           python3 tools/setup.py $IDS --answers 2,10,3,3    --out /tmp/net-none/EFI
+          test -d /tmp/net-all/EFI/OC/Kexts/IntelMausi.kext
+          test ! -d /tmp/net-none/EFI/OC/Kexts/IntelMausi.kext
 
       - name: Wi-Fi resolves to one build, or to none
         run: |
-          python3 tools/setup.py --ids 8086:2723 --answers 2,10,3,2,10 --out /tmp/wifi-sonoma/EFI
+          NONE='--machine tools/fixtures/no-hardware.json'
+          python3 tools/setup.py $NONE --ids 8086:2723 --answers 2,10,3,2,10 --out /tmp/wifi-sonoma/EFI
           test -d /tmp/wifi-sonoma/EFI/OC/Kexts/AirportItlwm.kext
-          python3 tools/setup.py --ids 8086:2723 --answers 2,10,3,2,11 --out /tmp/wifi-sequoia/EFI
+          python3 tools/setup.py $NONE --ids 8086:2723 --answers 2,10,3,2,11 --out /tmp/wifi-sequoia/EFI
           test ! -d /tmp/wifi-sequoia/EFI/OC/Kexts/AirportItlwm.kext
           python3 tools/itlwm.py
 
       - name: Trackpad, framebuffer and a user-made USB map
         run: |
-          python3 tools/setup.py --ids 8086:9d60 --answers 2,10,3,1 --out /tmp/i2c/EFI
-          python3 tools/setup.py --ids 8086:5912 --answers 2,10,3   --out /tmp/fb/EFI
+          NONE='--machine tools/fixtures/no-hardware.json'
+          python3 tools/setup.py $NONE --ids 8086:9d60 --answers 2,10,3,1 --out /tmp/i2c/EFI
+          python3 tools/setup.py $NONE --ids 8086:5912 --answers 2,10,3   --out /tmp/fb/EFI
           cp -r EFI/OC/Kexts/UTBDefault.kext /tmp/UTBMap.kext
-          python3 tools/setup.py --ids 8086:2723 --usb-map /tmp/UTBMap.kext \
+          python3 tools/setup.py $NONE --ids 8086:2723 --usb-map /tmp/UTBMap.kext \
             --answers 2,10,3,2,10 --out /tmp/usbmap/EFI
           test -d /tmp/usbmap/EFI/OC/Kexts/UTBMap.kext
           test ! -d /tmp/usbmap/EFI/OC/Kexts/UTBDefault.kext
+
+      - name: Building for a machine that is not this one
+        run: |
+          # a real round trip: this runner's own hardware, written out and read
+          # back. The trailing 3 declines whatever it has, since that varies.
+          python3 tools/detect.py --report /tmp/machine.json
+          python3 tools/setup.py --machine /tmp/machine.json --answers 2,10,3,3 \
+            --out /tmp/from-report/EFI
+          # menu route: 2 picks the report, then its path, then the usual answers
+          python3 tools/setup.py --answers 2,/tmp/machine.json,2,10,3,3 --out /tmp/menu-report/EFI
+          # 3 is the other machine with no report: network hardware is named,
+          # here Intel Ethernet, no Wi-Fi, Intel Bluetooth, for every macOS
+          python3 tools/setup.py --answers 3,2,10,3,1,2,1,1 --out /tmp/by-name/EFI
+          test -d /tmp/by-name/EFI/OC/Kexts/IntelMausi.kext
+          test -d /tmp/by-name/EFI/OC/Kexts/IntelBluetoothFirmware.kext
+          test ! -d /tmp/by-name/EFI/OC/Kexts/AirportItlwm.kext
 
       - name: Detection and advice run standalone
         run: |

@@ -9,6 +9,11 @@ nobody rechecks.
 
     python3 tools/setup.py
 
+The first question is which machine the EFI is for, because detection reads the
+machine this runs on and that is often not the target: a USB stick is usually
+made on a computer that already works. Building for another machine either
+reads a report taken from it, or asks by name and claims nothing it cannot know.
+
 Standard library only, no network.
 """
 import argparse
@@ -59,9 +64,34 @@ if os.environ.get('NO_COLOR') or not sys.stdout.isatty():
 
 
 SCRIPTED = []
+SCRIPTING = False
 
 
-def ask(step, total, question, options, detected=None, allow_skip=False):
+def _answer():
+    """The next scripted answer, or a typed one.
+
+    Running out mid-run is a scripting mistake, not a prompt: with --answers the
+    input is usually closed, so falling through to input() would end in an
+    EOFError several frames away from the cause."""
+    if SCRIPTED:
+        raw = SCRIPTED.pop(0)
+        print(f'      > {raw}')
+        return raw
+    if SCRIPTING:
+        sys.exit('--answers ran out: this run asks more questions than it was given')
+    return input('      > ').strip()
+
+
+def prompt(question, note=None):
+    """A free-text answer. Empty means the person declined."""
+    print(f'\n{BOLD}{question}{RESET}')
+    if note:
+        print(f'      {DIM}{note}{RESET}')
+    return _answer().strip()
+
+
+def ask(step, total, question, options, detected=None, allow_skip=False,
+        skip_label='none of these'):
     """One numbered menu. options is [(value, label)]. Returns the chosen value.
 
     `detected` is shown as a note and marks its row, but the person still types
@@ -83,13 +113,9 @@ def ask(step, total, question, options, detected=None, allow_skip=False):
         mark = f' {GREEN}<- detected{RESET}' if value == detected else ''
         print(f'      {i:2d}) {label}{mark}')
     if allow_skip:
-        print(f'      {len(options) + 1:2d}) none of these')
+        print(f'      {len(options) + 1:2d}) {skip_label}')
     while True:
-        if SCRIPTED:
-            raw = SCRIPTED.pop(0)
-            print(f'      > {raw}')
-        else:
-            raw = input('      > ').strip()
+        raw = _answer()
         if raw.isdigit():
             n = int(raw)
             if 1 <= n <= len(options):
@@ -129,11 +155,64 @@ def unbundle():
     return here
 
 
+def show_machine(hw, label):
+    """Print what a probe says, so the person can see it is the right machine."""
+    if not hw.get('cpu'):
+        return
+    print(f'  {DIM}{label}:{RESET} {hw["cpu"]}'
+          + (f', {hw["cores"]} cores' if hw.get('cores') else '')
+          + (f', {hw["oem_raw"]}' if hw.get('oem_raw') else ''))
+    if hw.get('written'):
+        print(f'  {DIM}taken:{RESET}        {hw["written"]} on {hw.get("system", "?")}')
+    for g in hw.get('gpu_devices', [])[:3]:
+        print(f'  {DIM}graphics:{RESET}     {g["name"]}'
+              + (f'  {DIM}[{g["id"]}]{RESET}' if g.get('id') else ''))
+    if hw.get('gpu_virtual'):
+        # named rather than dropped silently: someone who installed one of
+        # these should see that it was recognised and set aside
+        print(f'  {DIM}ignored:{RESET}      {", ".join(hw["gpu_virtual"])}'
+              f'  {DIM}(virtual display adapters, not graphics hardware){RESET}')
+
+
+def pick_network():
+    """Ask by name which network hardware the other machine has.
+
+    Reached only when there is no report to read. Nothing about that machine is
+    known, so the options are the driver sets this repository ships rather than
+    anything matched against device ids, and the answers stay the person's."""
+    picked = set()
+    known = netkexts.sets() + netkexts.variant_sets()
+    for role, label in (('ethernet', 'Ethernet'), ('wifi', 'Wi-Fi'),
+                        ('bluetooth', 'Bluetooth')):
+        options = [(s['match'], s['label']) for s in known if s.get('role') == role]
+        if not options:
+            continue
+        got = ask(0, 0, f'Which {label} does that machine have?', options,
+                  allow_skip=True, skip_label='none, or I do not know')
+        if got:
+            picked.add(got)
+    return picked
+
+
+def load_machine(path):
+    """(probe, label) for a report file, or (None, complaint) if unusable."""
+    hw, complaint = detect.read_report(path)
+    if complaint:
+        return None, complaint
+    return hw, f'report {Path(path).name}'
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--out', default='build/EFI')
     ap.add_argument('--no-detect', action='store_true',
-                    help='skip hardware detection and just ask')
+                    help='skip hardware detection and ask the profile questions only')
+    ap.add_argument('--machine', metavar='FILE',
+                    help='build for the machine in this hardware report instead '
+                         'of the one this runs on')
+    ap.add_argument('--report', metavar='FILE',
+                    help='write this machine\'s hardware report and stop, so an '
+                         'EFI for it can be built elsewhere')
     ap.add_argument('--ids', help='PCI ids to use instead of probing, comma separated')
     ap.add_argument('--usb-ids', help='USB ids to use instead of probing, comma separated')
     ap.add_argument('--hda-ids', help='HD audio codec ids to use instead of probing')
@@ -144,35 +223,25 @@ def main():
     a = ap.parse_args()
 
     if a.answers:
+        global SCRIPTING
+        SCRIPTING = True
         SCRIPTED.extend(x.strip() for x in a.answers.split(',') if x.strip())
 
     started_in = unbundle()
     if started_in:
         a.out = str((started_in / a.out).resolve())
+        for opt in ('machine', 'report', 'usb_map'):
+            if getattr(a, opt):
+                setattr(a, opt, str((started_in / getattr(a, opt)).resolve()))
 
-    hw = {} if a.no_detect else detect.probe()
-    if a.ids is not None or a.usb_ids is not None:
-        hw['pci_ids'] = [x.strip() for x in (a.ids or '').split(',') if x.strip()]
-        hw['usb_ids'] = [x.strip() for x in (a.usb_ids or '').split(',') if x.strip()]
-    if a.hda_ids is not None:
-        hw['hda_ids'] = [x.strip() for x in a.hda_ids.split(',') if x.strip()]
-    if a.nvme is not None:
-        hw['nvme'] = [x.strip() for x in a.nvme.split(',') if x.strip()]
-    print(f'{BOLD}OpenCore EFI builder{RESET}')
-    if hw.get('cpu'):
-        print(f'  {DIM}this machine:{RESET} {hw["cpu"]}'
-              + (f', {hw["cores"]} cores' if hw.get('cores') else '')
-              + (f', {hw["oem_raw"]}' if hw.get('oem_raw') else ''))
-        for g in hw.get('gpu_devices', [])[:3]:
-            print(f'  {DIM}graphics:{RESET}     {g["name"]}'
-                  + (f'  {DIM}[{g["id"]}]{RESET}' if g.get('id') else ''))
-        if hw.get('gpu_virtual'):
-            # named rather than dropped silently: someone who installed one of
-            # these should see that it was recognised and set aside
-            print(f'  {DIM}ignored:{RESET}      {", ".join(hw["gpu_virtual"])}'
-                  f'  {DIM}(virtual display adapters, not graphics hardware){RESET}')
-    elif not a.no_detect:
-        print(f'  {DIM}could not read this machine; every question is still answerable{RESET}')
+    if a.report:
+        written = detect.write_report(a.report)
+        print(f'{BOLD}Hardware report{RESET}')
+        print(f'  wrote {a.report}')
+        print(f'  {detect.describe(written)}')
+        print(f'\n  Copy it to the machine you build on and pass it back:')
+        print(f'      setup.py --machine {Path(a.report).name}')
+        return 0
 
     # a laptop never asks for vendor or core count, so the count is worked out
     # rather than fixed: "[2/3]" should mean two of three questions left
@@ -183,12 +252,84 @@ def main():
         step[0] += 1
         return step[0]
 
+    print(f'{BOLD}OpenCore EFI builder{RESET}')
+
+    # Which machine the EFI is for has to be settled before anything is shown as
+    # detected, because detection reads the machine this runs on. A hint from
+    # the wrong computer is worse than none: it looks like an answer.
+    hw, source, manual = {}, None, False
+    if a.machine:
+        hw, source = load_machine(a.machine)
+        if hw is None:
+            sys.exit(source)
+        show_machine(hw, 'building for')
+    elif a.no_detect:
+        pass
+    else:
+        local = detect.probe()
+        show_machine(local, 'this machine')
+        if not local.get('cpu'):
+            print(f'  {DIM}could not read this machine; every question is still '
+                  f'answerable{RESET}')
+        choice = ask(nxt(), 0, 'Which machine is this EFI for?',
+                     [('this', 'This machine'),
+                      ('file', 'Another machine, and I have its hardware report'),
+                      ('other', 'Another machine, and I do not have one'),
+                      ('report', 'Neither - just write this machine\'s report, '
+                                 'to build for it elsewhere')],
+                     detected='this' if local.get('cpu') else None)
+        if choice == 'report':
+            out = prompt('Where should the report go?',
+                         'a path, or enter for machine.json') or 'machine.json'
+            if started_in:
+                out = str((started_in / out).resolve())
+            written = detect.write_report(out)
+            print(f'\n  wrote {out}')
+            print(f'  {detect.describe(written)}')
+            print(f'\n  Copy it to the machine you build on and pass it back:')
+            print(f'      setup.py --machine {Path(out).name}')
+            return 0
+        if choice == 'this':
+            hw, source = local, 'this machine'
+        elif choice == 'file':
+            while True:
+                path = prompt('Where is the report?',
+                              'a path, or enter to answer the questions instead')
+                if not path:
+                    break
+                if started_in:
+                    path = str((started_in / path).resolve())
+                hw, source = load_machine(path)
+                if hw is not None:
+                    show_machine(hw, 'building for')
+                    break
+                print(f'      {YELLOW}{source}{RESET}')
+                hw = {}
+            manual = not hw
+        else:
+            manual = True
+        if manual:
+            print(f'\n  {DIM}Nothing is known about that machine, so nothing is '
+                  f'detected for it.\n  Graphics, audio and the trackpad need a report '
+                  f'taken there:\n      setup.py --report machine.json{RESET}')
+
+    if a.ids is not None or a.usb_ids is not None:
+        hw['pci_ids'] = [x.strip() for x in (a.ids or '').split(',') if x.strip()]
+        hw['usb_ids'] = [x.strip() for x in (a.usb_ids or '').split(',') if x.strip()]
+    if a.hda_ids is not None:
+        hw['hda_ids'] = [x.strip() for x in a.hda_ids.split(',') if x.strip()]
+    if a.nvme is not None:
+        hw['nvme'] = [x.strip() for x in a.nvme.split(',') if x.strip()]
+    if source is None and (hw.get('pci_ids') or hw.get('hda_ids') or hw.get('nvme')):
+        source = 'the ids you passed'
+
+    asked = step[0]      # the scope question, when it was asked at all
     plat = ask(nxt(), total, 'What kind of machine is this?',
                [('desktop', 'Desktop'), ('laptop', 'Laptop')],
                detected=('laptop' if hw.get('laptop') else
                          'desktop' if hw.get('laptop') is False else None))
 
-    total = 3            # laptop: platform, generation, brand
+    total = asked + 3    # laptop: platform, generation, brand
     vendor = None
     if plat == 'desktop':
         det = ('amd' if hw.get('generation') in ('ryzen-threadripper', 'bulldozer-jaguar')
@@ -197,7 +338,7 @@ def main():
         # first question it cannot honestly claim a total yet
         vendor = ask(nxt(), 0, 'Which CPU vendor?',
                      [('intel', 'Intel'), ('amd', 'AMD')], detected=det)
-        total = 5 if vendor == 'amd' else 4
+        total = asked + (5 if vendor == 'amd' else 4)
     else:
         print(f'\n      {DIM}laptop profiles cover Intel only, so no vendor question{RESET}')
 
@@ -308,6 +449,13 @@ def main():
               f'so nothing is claimed or added{RESET}')
 
     matched = advise.matched_kexts(hw.get('pci_ids', []), hw.get('usb_ids', []))
+    if manual and not matched:
+        # no ids to match, so the person names the hardware instead. Asked only
+        # here: where ids exist, matching them beats being asked to remember.
+        print(f'\n{BOLD}Network{RESET}')
+        print(f'  {DIM}These come from what this repository ships drivers for. Pick what '
+              f'that\n  machine has; anything else is left out rather than guessed at.{RESET}')
+        matched = pick_network()
     # storage has no version ambiguity, so it rides along with the same question
     # rather than adding one - but it must not depend on there being network
     # hardware to match, or a machine with neither gets nothing
@@ -315,9 +463,10 @@ def main():
     # claim the controllers the map is for
     cmd_extra_drop = ['UTBDefault.kext'] if a.usb_map else []
     if matched or storage_kexts or input_kexts:
-        if matched:
+        if matched and not manual:
             print(f'\n{BOLD}Network kexts{RESET}')
-            advise.report(hw['pci_ids'], hw['usb_ids'], 'this machine')
+            advise.report(hw.get('pci_ids', []), hw.get('usb_ids', []),
+                          source or 'the ids you passed')
         mode = ask(0, 0, 'Add these to the EFI?',
                    [('all', 'Yes, for every macOS version they support'),
                     ('one', 'Yes, for one macOS version only'),
@@ -407,9 +556,11 @@ def main():
         os.unlink(notes_file)
     if props_file:
         os.unlink(props_file)
-    elif hw.get('pci_ids') or hw.get('usb_ids'):
+    if not matched and (hw.get('pci_ids') or hw.get('usb_ids')):
+        # nothing matched, so no kext question was asked: say what was seen
         print()
-        advise.report(hw['pci_ids'], hw['usb_ids'], 'this machine')
+        advise.report(hw.get('pci_ids', []), hw.get('usb_ids', []),
+                      source or 'the ids you passed')
 
     print(f'\n  Copy the {BOLD}EFI{RESET} folder from {BOLD}{a.out}{RESET} to the EFI '
           f'partition of your USB drive.')

@@ -6,6 +6,7 @@ the whole file before a single step runs - which is exactly what happened.
 
     python3 tools/selftest.py
 """
+import json
 import os
 import subprocess
 import sys
@@ -21,14 +22,16 @@ import ocgen
 FAILED = []
 
 
-def run(cmd):
+def run(cmd, may_fail=False):
     """Run a tool and, if it fails, say what it said.
 
     capture_output with check=True raises a CalledProcessError carrying only the
     command line, so a failure here used to reach CI as 'exit status 1' with the
-    reason discarded - which is worse than no test."""
+    reason discarded - which is worse than no test. may_fail is for the checks
+    whose point is that a tool refuses: printing that as a failure would put a
+    page of alarming output in a log where everything went right."""
     r = subprocess.run(cmd, capture_output=True, text=True)
-    if r.returncode != 0:
+    if r.returncode != 0 and not may_fail:
         print(f'\n  --- {" ".join(cmd)} exited {r.returncode} ---')
         for stream in (r.stdout, r.stderr):
             for line in (stream or '').strip().splitlines():
@@ -90,7 +93,11 @@ def audio_advice():
 def boot_args():
     with tempfile.TemporaryDirectory() as tmp:
         out = Path(tmp) / 'EFI'
-        r = run([sys.executable, 'tools/setup.py', '--hda-ids', '10ec:0255',
+        # from the fixture, so the questions do not depend on whether the
+        # machine running the test happens to have an NVMe drive
+        r = run([sys.executable, 'tools/setup.py',
+                 '--machine', 'tools/fixtures/no-hardware.json',
+                 '--hda-ids', '10ec:0255',
                  '--answers', '2,10,3', '--out', str(out)])
         check('the guided build succeeds', r.returncode == 0)
         if r.returncode != 0:
@@ -156,6 +163,81 @@ def framebuffer():
           igpu.report('alder-lake', False, False)[1] == {})
 
 
+def other_machine():
+    """A report has to survive the trip and be refused when it is not one."""
+    with tempfile.TemporaryDirectory() as tmp:
+        path = Path(tmp) / 'machine.json'
+        written = detect.write_report(path)
+        back, complaint = detect.read_report(path)
+        check('a report reads back as it was written', complaint is None, complaint)
+        if back:
+            check('the ids survive the round trip',
+                  back['pci_ids'] == written['pci_ids']
+                  and back['usb_ids'] == written['usb_ids']
+                  and back['hda_ids'] == written['hda_ids'])
+            check('it says which machine and when it was taken',
+                  bool(back.get('written')) and 'system' in back)
+        check('the raw device dump is not carried into a file meant to be sent',
+              'pci' not in json.loads(path.read_text()))
+
+        junk = Path(tmp) / 'junk.json'
+        junk.write_text('{"cpu": "something"}')
+        check('a file that is not a report is refused, not half-read',
+              detect.read_report(junk)[0] is None)
+        check('a missing file is refused', detect.read_report(Path(tmp) / 'no.json')[0] is None)
+
+        ahead = json.loads(path.read_text())
+        ahead['report_version'] = detect.REPORT_VERSION + 1
+        newer = Path(tmp) / 'newer.json'
+        newer.write_text(json.dumps(ahead))
+        check('a report from a newer tool is refused rather than guessed at',
+              detect.read_report(newer)[0] is None)
+
+        # named by hand, because nothing about that machine can be detected
+        out = Path(tmp) / 'EFI'
+        r = run([sys.executable, 'tools/setup.py', '--answers', '3,2,10,3,1,2,1,1',
+                 '--out', str(out)])
+        check('naming the hardware of another machine builds', r.returncode == 0)
+        if r.returncode == 0:
+            have = {p.name for p in (out / 'OC' / 'Kexts').iterdir()}
+            check('what was named is added', 'IntelMausi.kext' in have
+                  and 'IntelBluetoothFirmware.kext' in have, sorted(have))
+            check('what was declined is not', 'AirportItlwm.kext' not in have)
+            check('nothing is claimed about graphics it cannot see',
+                  not (out.parent / 'NEXT-STEPS.txt').exists())
+
+
+def scripted_answers():
+    """One answer string has to work whether the extra question appears or not.
+
+    The line in CI that builds from real detection cannot know what the runner
+    has, so it ends in a decline. That only works if a spare answer is harmless
+    when the question it was for never came - which is what this pins down. It
+    is checked here rather than left to whichever runner happens to be handed
+    out, since a runner with no NVMe drive proves nothing."""
+    fixture = 'tools/fixtures/no-hardware.json'
+    with tempfile.TemporaryDirectory() as tmp:
+        with_drive = Path(tmp) / 'with' / 'EFI'
+        without = Path(tmp) / 'without' / 'EFI'
+        a = run([sys.executable, 'tools/setup.py', '--machine', fixture,
+                 '--nvme', 'Samsung SSD 970 EVO',
+                 '--answers', '2,10,3,3', '--out', str(with_drive)])
+        b = run([sys.executable, 'tools/setup.py', '--machine', fixture,
+                 '--answers', '2,10,3,3', '--out', str(without)])
+        check('the same answers build with the extra question', a.returncode == 0)
+        check('and without it, the spare answer being harmless', b.returncode == 0)
+        if a.returncode == 0:
+            check('declining leaves the kext out',
+                  not (with_drive / 'OC' / 'Kexts' / 'NVMeFix.kext').exists())
+        short = run([sys.executable, 'tools/setup.py', '--machine', fixture,
+                     '--nvme', 'Samsung SSD 970 EVO',
+                     '--answers', '2,10,3', '--out', str(Path(tmp) / 'short' / 'EFI')],
+                    may_fail=True)
+        check('running out of answers says so instead of reading a closed stdin',
+              short.returncode != 0 and 'ran out' in (short.stdout + short.stderr),
+              short.returncode)
+
+
 def tables_match_sources():
     with tempfile.TemporaryDirectory() as tmp:
         gen = Path(tmp) / 'hardware.toml'
@@ -169,7 +251,8 @@ def tables_match_sources():
 
 if __name__ == '__main__':
     for section in (graphics, graphics_advice, audio_advice, storage, peripherals,
-                    trackpad, framebuffer, boot_args, tables_match_sources):
+                    trackpad, framebuffer, boot_args, other_machine, scripted_answers,
+                    tables_match_sources):
         print(f'\n{section.__name__}')
         section()
     print()
