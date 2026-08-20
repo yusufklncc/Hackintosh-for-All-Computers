@@ -125,9 +125,30 @@ claims is reported as exactly that, with a link to Dortania's guide - which
 covers both cases honestly, since an unclaimed device may equally be one macOS
 supports with no kext at all.
 
-`AirportItlwm` ships a separate build per macOS release, so a device matching it
-matches several entries. Picking the right one belongs with the step that adds
-kexts to a config, not with the report.
+## Adding the network kexts
+
+`setup.py` offers two ways to add what it found, because both are reasonable:
+
+* **every macOS the hardware supports** - each kext goes in with the Darwin
+  bounds its own documentation gives, and OpenCore loads whichever applies. One
+  EFI that boots any of them.
+* **one macOS** - only the kexts whose range covers that release, and the bounds
+  are dropped since they no longer carry information.
+
+The bounds come from `data/network.toml`, which quotes the project that
+published each rule, because unlike `hardware.toml` this cannot be read out of a
+kext - it lives in prose. Broadcom Bluetooth is the clearest case: BrcmPatchRAM
+for 10.10 and earlier, BrcmPatchRAM2 for 10.11-10.14, BrcmPatchRAM3 for 10.15
+and later, BrcmBluetoothInjector only alongside the third, and BlueToolFixup
+from macOS 12 where it takes over.
+
+`data/macos.toml` maps release names to Darwin majors. Six of its rows are
+cross-checked by `coverage.py --names`, which recovers the same mapping from
+this repository's own patch comments without being told.
+
+Wi-Fi is not covered yet: `AirportItlwm` ships a separate 15 MB build per macOS
+release, so vendoring all eight would add about 126 MB to a repository whose
+entire release is currently 7 MB.
 
 ## Building
 

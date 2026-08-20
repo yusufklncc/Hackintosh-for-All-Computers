@@ -1,0 +1,65 @@
+# macOS release names and the Darwin kernel majors they ship.
+#
+# OpenCore bounds kexts by Darwin version, while people know their machine by
+# the macOS name, so one table has to bridge the two. Six of these rows are
+# cross-checked against this repository's own AMD patch comments by
+# tools/coverage.py --names, which recovers them from the tree independently.
+[[release]]
+name = "Yosemite"
+version = "10.10"
+darwin = 14
+
+[[release]]
+name = "El Capitan"
+version = "10.11"
+darwin = 15
+
+[[release]]
+name = "Sierra"
+version = "10.12"
+darwin = 16
+
+[[release]]
+name = "High Sierra"
+version = "10.13"
+darwin = 17
+
+[[release]]
+name = "Mojave"
+version = "10.14"
+darwin = 18
+
+[[release]]
+name = "Catalina"
+version = "10.15"
+darwin = 19
+
+[[release]]
+name = "Big Sur"
+version = "11"
+darwin = 20
+
+[[release]]
+name = "Monterey"
+version = "12"
+darwin = 21
+
+[[release]]
+name = "Ventura"
+version = "13"
+darwin = 22
+
+[[release]]
+name = "Sonoma"
+version = "14"
+darwin = 23
+
+[[release]]
+name = "Sequoia"
+version = "15"
+darwin = 24
+
+[[release]]
+name = "Tahoe"
+version = "26"
+darwin = 25

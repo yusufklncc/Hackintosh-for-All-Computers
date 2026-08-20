@@ -44,6 +44,17 @@ def load_table():
     return index
 
 
+def matched_kexts(pci, usb):
+    """The `match` kexts whose devices are present, for netkexts.entries()."""
+    index = load_table()
+    out = set()
+    for bus, ids in (('pci', pci), ('usb', usb)):
+        for i in ids:
+            for d in index.get((bus, i), []):
+                out.add(d['kext'])
+    return out
+
+
 def report(pci, usb, source):
     """Print what the given devices need. Shared with setup.py."""
     index = load_table()
@@ -80,8 +91,9 @@ def report(pci, usb, source):
                   f'  {DIM}{d["label"]}, v{d["version"]}{RESET}')
 
     if [r for r in hits if len({d['kext'] for _, d in hits[r]}) > 1]:
-        print(f'\n  {DIM}Some devices match more than one kext - they target different macOS\n'
-              f'  versions. The builder picks per target once that step exists.{RESET}')
+        print(f'\n  {DIM}Some devices match more than one kext, because they target different\n'
+              f'  macOS versions. setup.py can add them all with their version bounds, or\n'
+              f'  just the ones for a single release.{RESET}')
     print(f'\n  {DIM}This is a report. Nothing was added to any config.{RESET}')
 
 

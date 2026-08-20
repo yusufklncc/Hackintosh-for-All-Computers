@@ -125,6 +125,7 @@ def main():
     ap.add_argument('--out', default='build/EFI')
     ap.add_argument('--identity', choices=('generate', 'placeholder'), default='generate')
     ap.add_argument('--no-validate', action='store_true')
+    ap.add_argument('--add-kexts', help='JSON file of extra Kernel.Add entries to append')
     a = ap.parse_args()
 
     cat = {e['name']: e for e in
@@ -187,6 +188,16 @@ def main():
         if row[axis] and not (PROFILES / 'overlay' / f'{axis}.{row[axis]}.toml').exists():
             warn(f'no {axis} profile named {row[axis]!r}; it was ignored')
 
+    added = []
+    if a.add_kexts:
+        import json
+        with open(a.add_kexts) as fh:
+            added = json.load(fh)
+        have = {k['BundlePath'] for k in config['Kernel']['Add']}
+        # appended, not merged in: everything already there was ordered by a
+        # profile, and Lilu - which IntelBTPatcher needs - is always first
+        config['Kernel']['Add'] += [e for e in added if e['BundlePath'] not in have]
+
     serial = apply_identity(config, a.identity, warn)
 
     out = Path(a.out)
@@ -214,6 +225,8 @@ def main():
     print(f'  profiles     ' + ' -> '.join(p.stem for p in chain))
     print(f'  SMBIOS       {config["PlatformInfo"]["Generic"]["SystemProductName"]}'
           + (f'  {serial}' if serial else ''))
+    if added:
+        print(f'  added kexts  ' + ', '.join(e['BundlePath'] for e in added))
     print(f'  payload      {copied} items')
     print(f'  ocvalidate   {status}')
     print(f'  output       {out}')

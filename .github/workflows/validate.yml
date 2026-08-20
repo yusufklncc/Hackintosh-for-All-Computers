@@ -34,6 +34,13 @@ jobs:
           python3 tools/detect.py
           python3 tools/advise.py --ids 8086:15b8,8086:2723 --usb-ids 8087:0029
           python3 tools/advise.py --ids 10ec:c822
+          # both network kext modes, and declining
+          IDS='--ids 8086:15b8 --usb-ids 8087:0029'
+          printf '2\n10\n3\n1\n'     | python3 tools/setup.py $IDS --out /tmp/net-all/EFI
+          printf '2\n10\n3\n2\n10\n' | python3 tools/setup.py $IDS --out /tmp/net-sonoma/EFI
+          printf '2\n10\n3\n3\n'     | python3 tools/setup.py $IDS --out /tmp/net-none/EFI
+          python3 tools/hwtable.py EFI/OC/Kexts --out /tmp/hardware.toml
+          diff /tmp/hardware.toml data/hardware.toml
 
       - name: Release packaging works
         run: python3 tools/release.py --out /tmp/dist --limit 5

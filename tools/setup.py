@@ -20,6 +20,7 @@ from pathlib import Path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import advise
 import detect
+import netkexts
 import ocgen
 
 PROFILES = Path('profiles')
@@ -61,8 +62,11 @@ def ask(step, total, question, options, detected=None, allow_skip=False):
     overridable in the same glance."""
     # the first question runs before the total is known, since a laptop asks
     # fewer than a desktop; claiming a total there would only be wrong
-    counter = f'{step}/{total}' if total else f'{step}'
-    print(f'\n{BOLD}[{counter}] {question}{RESET}')
+    if not step:
+        print(f'\n{BOLD}{question}{RESET}')            # a follow-up, not a numbered step
+    else:
+        counter = f'{step}/{total}' if total else f'{step}'
+        print(f'\n{BOLD}[{counter}] {question}{RESET}')
     hint = dict(options).get(detected)
     if hint:
         print(f'      {GREEN}detected: {hint}{RESET}')
@@ -103,9 +107,14 @@ def main():
     ap.add_argument('--out', default='build/EFI')
     ap.add_argument('--no-detect', action='store_true',
                     help='skip hardware detection and just ask')
+    ap.add_argument('--ids', help='PCI ids to use instead of probing, comma separated')
+    ap.add_argument('--usb-ids', help='USB ids to use instead of probing, comma separated')
     a = ap.parse_args()
 
     hw = {} if a.no_detect else detect.probe()
+    if a.ids is not None or a.usb_ids is not None:
+        hw['pci_ids'] = [x.strip() for x in (a.ids or '').split(',') if x.strip()]
+        hw['usb_ids'] = [x.strip() for x in (a.usb_ids or '').split(',') if x.strip()]
     print(f'{BOLD}OpenCore EFI builder{RESET}')
     if hw.get('cpu'):
         print(f'  {DIM}this machine:{RESET} {hw["cpu"]}'
@@ -169,8 +178,39 @@ def main():
         print(f'\n  {DIM}no {oem} overlay for this combination; using the generic profile{RESET}')
         row['oem'] = None
 
+    # network hardware: only offered when something was actually recognised,
+    # so nobody is asked to decide about a device they do not have
+    extra_file = None
+    matched = advise.matched_kexts(hw.get('pci_ids', []), hw.get('usb_ids', []))
+    if matched:
+        print(f'\n{BOLD}Network kexts{RESET}')
+        advise.report(hw['pci_ids'], hw['usb_ids'], 'this machine')
+        mode = ask(0, 0, 'Add these to the EFI?',
+                   [('all', 'Yes, for every macOS version they support'),
+                    ('one', 'Yes, for one macOS version only'),
+                    ('no', 'No, leave them out')])
+        if mode != 'no':
+            darwin = None
+            if mode == 'one':
+                rels = netkexts.releases()
+                darwin = ask(0, 0, 'Which macOS are you installing?',
+                             [(r['darwin'], f"{r['name']} {r['version']}") for r in rels])
+            entries, chosen = netkexts.entries(matched, darwin)
+            netkexts.fill_executables(entries)
+            for s_, kexts in chosen:
+                print(f'      {GREEN}{s_["label"]}{RESET}  '
+                      + ', '.join(k['bundle'].replace('.kext', '') for k in kexts))
+            import json
+            import tempfile
+            fh = tempfile.NamedTemporaryFile('w', suffix='.json', delete=False)
+            json.dump(entries, fh)
+            fh.close()
+            extra_file = fh.name
+
     cmd = [sys.executable, 'tools/build.py', '--platform', plat, '--cpu', cpu,
            '--out', a.out]
+    if extra_file:
+        cmd += ['--add-kexts', extra_file]
     if vendor:
         cmd += ['--vendor', vendor]
     if cores:
@@ -184,7 +224,9 @@ def main():
     r = subprocess.run(cmd)
     if r.returncode != 0:
         return r.returncode
-    if hw.get('pci_ids') or hw.get('usb_ids'):
+    if extra_file:
+        os.unlink(extra_file)
+    elif hw.get('pci_ids') or hw.get('usb_ids'):
         print()
         advise.report(hw['pci_ids'], hw['usb_ids'], 'this machine')
 
