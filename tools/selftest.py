@@ -22,14 +22,16 @@ import ocgen
 FAILED = []
 
 
-def run(cmd):
+def run(cmd, may_fail=False):
     """Run a tool and, if it fails, say what it said.
 
     capture_output with check=True raises a CalledProcessError carrying only the
     command line, so a failure here used to reach CI as 'exit status 1' with the
-    reason discarded - which is worse than no test."""
+    reason discarded - which is worse than no test. may_fail is for the checks
+    whose point is that a tool refuses: printing that as a failure would put a
+    page of alarming output in a log where everything went right."""
     r = subprocess.run(cmd, capture_output=True, text=True)
-    if r.returncode != 0:
+    if r.returncode != 0 and not may_fail:
         print(f'\n  --- {" ".join(cmd)} exited {r.returncode} ---')
         for stream in (r.stdout, r.stderr):
             for line in (stream or '').strip().splitlines():
@@ -205,6 +207,37 @@ def other_machine():
                   not (out.parent / 'NEXT-STEPS.txt').exists())
 
 
+def scripted_answers():
+    """One answer string has to work whether the extra question appears or not.
+
+    The line in CI that builds from real detection cannot know what the runner
+    has, so it ends in a decline. That only works if a spare answer is harmless
+    when the question it was for never came - which is what this pins down. It
+    is checked here rather than left to whichever runner happens to be handed
+    out, since a runner with no NVMe drive proves nothing."""
+    fixture = 'tools/fixtures/no-hardware.json'
+    with tempfile.TemporaryDirectory() as tmp:
+        with_drive = Path(tmp) / 'with' / 'EFI'
+        without = Path(tmp) / 'without' / 'EFI'
+        a = run([sys.executable, 'tools/setup.py', '--machine', fixture,
+                 '--nvme', 'Samsung SSD 970 EVO',
+                 '--answers', '2,10,3,3', '--out', str(with_drive)])
+        b = run([sys.executable, 'tools/setup.py', '--machine', fixture,
+                 '--answers', '2,10,3,3', '--out', str(without)])
+        check('the same answers build with the extra question', a.returncode == 0)
+        check('and without it, the spare answer being harmless', b.returncode == 0)
+        if a.returncode == 0:
+            check('declining leaves the kext out',
+                  not (with_drive / 'OC' / 'Kexts' / 'NVMeFix.kext').exists())
+        short = run([sys.executable, 'tools/setup.py', '--machine', fixture,
+                     '--nvme', 'Samsung SSD 970 EVO',
+                     '--answers', '2,10,3', '--out', str(Path(tmp) / 'short' / 'EFI')],
+                    may_fail=True)
+        check('running out of answers says so instead of reading a closed stdin',
+              short.returncode != 0 and 'ran out' in (short.stdout + short.stderr),
+              short.returncode)
+
+
 def tables_match_sources():
     with tempfile.TemporaryDirectory() as tmp:
         gen = Path(tmp) / 'hardware.toml'
@@ -218,7 +251,7 @@ def tables_match_sources():
 
 if __name__ == '__main__':
     for section in (graphics, graphics_advice, audio_advice, storage, peripherals,
-                    trackpad, framebuffer, boot_args, other_machine,
+                    trackpad, framebuffer, boot_args, other_machine, scripted_answers,
                     tables_match_sources):
         print(f'\n{section.__name__}')
         section()
