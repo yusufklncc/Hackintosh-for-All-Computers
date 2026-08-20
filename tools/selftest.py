@@ -21,6 +21,22 @@ import ocgen
 FAILED = []
 
 
+def run(cmd):
+    """Run a tool and, if it fails, say what it said.
+
+    capture_output with check=True raises a CalledProcessError carrying only the
+    command line, so a failure here used to reach CI as 'exit status 1' with the
+    reason discarded - which is worse than no test."""
+    r = subprocess.run(cmd, capture_output=True, text=True)
+    if r.returncode != 0:
+        print(f'\n  --- {" ".join(cmd)} exited {r.returncode} ---')
+        for stream in (r.stdout, r.stderr):
+            for line in (stream or '').strip().splitlines():
+                print(f'  | {line}')
+        print('  ---')
+    return r
+
+
 def check(name, condition, detail=''):
     print(f'  {"ok  " if condition else "FAIL"}  {name}' + (f'   {detail}' if not condition else ''))
     if not condition:
@@ -74,9 +90,11 @@ def audio_advice():
 def boot_args():
     with tempfile.TemporaryDirectory() as tmp:
         out = Path(tmp) / 'EFI'
-        subprocess.run([sys.executable, 'tools/setup.py', '--hda-ids', '10ec:0255',
-                        '--answers', '2,10,3', '--out', str(out)],
-                       check=True, capture_output=True)
+        r = run([sys.executable, 'tools/setup.py', '--hda-ids', '10ec:0255',
+                 '--answers', '2,10,3', '--out', str(out)])
+        check('the guided build succeeds', r.returncode == 0)
+        if r.returncode != 0:
+            return
         cfg = ocgen.load_plist(out / 'OC' / 'config.plist')
         args = cfg['NVRAM']['Add']['7C436110-AB2A-4BBB-A880-FE41995C9F82']['boot-args']
         check('alcid replaces the one the profile ships',
@@ -141,8 +159,10 @@ def framebuffer():
 def tables_match_sources():
     with tempfile.TemporaryDirectory() as tmp:
         gen = Path(tmp) / 'hardware.toml'
-        subprocess.run([sys.executable, 'tools/hwtable.py', 'EFI/OC/Kexts', '--out', str(gen)],
-                       check=True, capture_output=True)
+        r = run([sys.executable, 'tools/hwtable.py', 'EFI/OC/Kexts', '--out', str(gen)])
+        if r.returncode != 0:
+            check('the hardware table regenerates', False)
+            return
         check('the hardware table still matches the kexts',
               gen.read_text() == Path('data/hardware.toml').read_text())
 
