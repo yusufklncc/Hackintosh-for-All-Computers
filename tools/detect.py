@@ -127,6 +127,9 @@ def _windows():
     out['pci'] = _ps(
         'Get-CimInstance Win32_PnPEntity | Where-Object { $_.PNPDeviceID -like "PCI*" } | '
         'ForEach-Object { "$($_.PNPDeviceID)|$($_.Name)" }')
+    out['usb'] = _ps(
+        'Get-CimInstance Win32_PnPEntity | Where-Object { $_.PNPDeviceID -like "USB*" } | '
+        'ForEach-Object { "$($_.PNPDeviceID)|$($_.Name)" }')
     return out
 
 
@@ -144,6 +147,7 @@ def _linux():
     out['pci'] = _run(['lspci', '-nn'])
     out['gpu'] = [l.split(': ', 1)[-1] for l in out['pci'].splitlines()
                   if 'VGA compatible controller' in l or '3D controller' in l]
+    out['usb'] = _run(['lsusb'])
     return out
 
 
@@ -157,9 +161,47 @@ def _macos():
         out['laptop'] = model.startswith(('MacBook',))
     out['vendor'] = ''
     out['pci'] = _run(['system_profiler', 'SPPCIDataType'])
+    out['usb'] = _run(['system_profiler', 'SPUSBDataType'])
     out['gpu'] = [m.strip() for m in re.findall(
         r'^\s*Chipset Model:\s*(.+)$',
         _run(['system_profiler', 'SPDisplaysDataType']), re.M)]
+    return out
+
+
+# --------------------------------------------------------------------------
+# Each OS words its device list differently; all three end up as vendor:device
+# in lower-case hex, which is what the kexts declare and what the table keys on.
+
+PCI_PATTERNS = [
+    re.compile(r'ven_([0-9a-f]{4})&dev_([0-9a-f]{4})', re.I),        # Windows PNPDeviceID
+    re.compile(r'\[([0-9a-f]{4}):([0-9a-f]{4})\]', re.I),            # Linux lspci -nn
+]
+USB_PATTERNS = [
+    re.compile(r'vid_([0-9a-f]{4})&pid_([0-9a-f]{4})', re.I),        # Windows
+    re.compile(r'\bID\s+([0-9a-f]{4}):([0-9a-f]{4})\b', re.I),       # Linux lsusb
+]
+
+
+def _pairs(text, patterns):
+    out = set()
+    for pat in patterns:
+        for a, b in pat.findall(text or ''):
+            out.add(f'{a.lower()}:{b.lower()}')
+    return out
+
+
+def _apple_pairs(text, vendor_key, device_key):
+    """system_profiler prints the two halves on separate lines within a block."""
+    out, vendor = set(), None
+    for line in (text or '').splitlines():
+        m = re.search(rf'{vendor_key}:\s*0x([0-9a-fA-F]{{1,4}})', line)
+        if m:
+            vendor = m.group(1).lower().zfill(4)
+            continue
+        m = re.search(rf'{device_key}:\s*0x([0-9a-fA-F]{{1,4}})', line)
+        if m and vendor:
+            out.add(f'{vendor}:{m.group(1).lower().zfill(4)}')
+            vendor = None
     return out
 
 
@@ -178,6 +220,12 @@ def probe():
         'oem_raw': (raw.get('vendor') or '').strip() or None,
         'gpu': raw.get('gpu') or [],
         'pci': raw.get('pci') or '',
+        'pci_ids': sorted(_pairs(raw.get('pci'), PCI_PATTERNS)
+                          | (_apple_pairs(raw.get('pci'), 'Vendor ID', 'Device ID')
+                             if system == 'Darwin' else set())),
+        'usb_ids': sorted(_pairs(raw.get('usb'), USB_PATTERNS)
+                          | (_apple_pairs(raw.get('usb'), 'Vendor ID', 'Product ID')
+                             if system == 'Darwin' else set())),
         'generation': cpu_generation(raw.get('cpu'), bool(laptop)),
     }
 
@@ -186,5 +234,7 @@ if __name__ == '__main__':
     for k, v in probe().items():
         if k == 'pci':
             print(f'  {k:10s} {len(v.splitlines())} lines')
+        elif k in ('pci_ids', 'usb_ids'):
+            print(f'  {k:10s} {len(v)}: ' + ', '.join(v[:8]) + (' ...' if len(v) > 8 else ''))
         else:
             print(f'  {k:10s} {v}')

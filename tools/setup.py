@@ -18,6 +18,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import advise
 import detect
 import ocgen
 
@@ -183,6 +184,10 @@ def main():
     r = subprocess.run(cmd)
     if r.returncode != 0:
         return r.returncode
+    if hw.get('pci_ids') or hw.get('usb_ids'):
+        print()
+        advise.report(hw['pci_ids'], hw['usb_ids'], 'this machine')
+
     print(f'\n  Copy the {BOLD}EFI{RESET} folder from {BOLD}{a.out}{RESET} to the EFI '
           f'partition of your USB drive.')
     print(f'  {DIM}ROM is still a placeholder - set it to your own MAC address, see the '
