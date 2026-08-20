@@ -59,6 +59,7 @@ and identity falls back to a placeholder, each with a warning.
 
 ## Commands
 
+    python3 tools/setup.py                                         # guided, start here
     python3 tools/build.py --catalogue                             # published configs
     python3 tools/build.py --name "Laptop/HP/009 - Laptop - Kaby Lake"
     python3 tools/build.py --list                                  # profile axes
@@ -80,6 +81,28 @@ changes stop being a manual migration.
 release tag as strings. Some projects number the bundle and the tag differently
 - SMCAMDProcessor ships bundle 1.0.1 in release 0.7.2f1 - so treat it as a
 prompt to look, not as a verdict.
+
+## The guided path
+
+`setup.py` asks a short series of numbered questions and calls `build.py` with
+the answers. Where the running system can say something useful - that this is a
+laptop, that the CPU is Kaby Lake, that the board is an HP - it appears beside
+the question as `detected` and marks its row in the list.
+
+It is never preselected. Detection can be wrong, and a wrong answer that arrives
+already ticked is one nobody rechecks, so the person always types a number.
+
+`detect.py` reads the machine through commands that ship with the OS -
+PowerShell CIM on Windows, `lspci` and sysfs on Linux, `system_profiler` and
+`sysctl` on macOS - so it needs no dependencies and no admin rights. Run it on
+its own to see what it found.
+
+Its CPU rule stays quiet unless it is sure. A four-digit Intel SKU normally
+names its generation with the first digit, so 2600K is 2nd generation; Ice Lake
+mobile breaks that, and 1065G7 is 10th. 10th generation mobile then covers two
+architectures, and the G suffix is what separates Ice Lake from Comet Lake.
+Everything outside the rules it knows - Xeon, Pentium, first generation Core,
+Core Ultra, Apple silicon - returns nothing rather than a guess.
 
 ## Building
 

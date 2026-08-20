@@ -27,5 +27,11 @@ jobs:
             --cpu ryzen-threadripper --cores 8 --chipset b550-a520 --out /tmp/b/EFI
           python3 tools/build.py --name 'Desktop/Intel/016 - Desktop - Raptor Lake' --out /tmp/c/EFI
 
+      - name: The interactive builder still runs
+        run: |
+          printf '2\n10\n3\n' | python3 tools/setup.py --out /tmp/setup-laptop/EFI
+          printf '1\n2\n2\n3\n6\n' | python3 tools/setup.py --out /tmp/setup-amd/EFI
+          python3 tools/detect.py
+
       - name: Release packaging works
         run: python3 tools/release.py --out /tmp/dist --limit 5
