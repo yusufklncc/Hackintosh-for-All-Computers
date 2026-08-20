@@ -14,47 +14,65 @@ jobs:
       - name: Make the vendored tools executable
         run: chmod +x vendor/opencore/*/Utilities/*/*.linux
 
+      - name: Workflows are valid YAML
+        run: |
+          python3 -m pip install --quiet pyyaml
+          python3 -c "import yaml,glob,sys; [yaml.safe_load(open(f)) for f in glob.glob('.github/workflows/*.yml')]; print('workflows parse')"
+
       - name: Kexts match the lock
         run: python3 tools/kexts.py check
 
       - name: Profiles still produce every published config
         run: python3 tools/verify.py --comments
 
+      - name: What the tools advise is still what they should
+        run: python3 tools/selftest.py
+
       - name: Representative builds come out clean
         run: |
-          python3 tools/build.py --platform laptop --cpu kaby-lake --oem hp --out /tmp/a/EFI
-          python3 tools/build.py --platform desktop --vendor amd \
-            --cpu ryzen-threadripper --cores 8 --chipset b550-a520 --out /tmp/b/EFI
-          python3 tools/build.py --name 'Desktop/Intel/016 - Desktop - Raptor Lake' --out /tmp/c/EFI
+          python3 tools/setup.py --answers 2,10,3 --out /tmp/laptop/EFI
+          python3 tools/setup.py --answers 1,2,2,3,6 --out /tmp/amd/EFI
+          python3 tools/build.py --name 'Desktop/Intel/016 - Desktop - Raptor Lake' --out /tmp/named/EFI
 
-      - name: The interactive builder still runs
+      - name: Storage advice
         run: |
-          python3 tools/setup.py --answers 2,10,3 --out /tmp/setup-laptop/EFI
-          python3 tools/setup.py --answers 1,2,2,3,6 --out /tmp/setup-amd/EFI
-          python3 tools/detect.py
-          python3 tools/advise.py --ids 8086:15b8,8086:2723 --usb-ids 8087:0029
-          python3 tools/advise.py --ids 10ec:c822
+          python3 tools/setup.py --nvme 'Samsung SSD 970 EVO' --answers 2,10,3,1 --out /tmp/nvme/EFI
+          python3 tools/setup.py --nvme 'APPLE SSD AP0512'    --answers 2,10,3   --out /tmp/apple-nvme/EFI
 
       - name: Network kexts, both modes and declining
         run: |
           IDS='--ids 8086:15b8 --usb-ids 8087:0029'
-          python3 tools/setup.py $IDS --answers 2,10,3,1   --out /tmp/net-all/EFI
+          python3 tools/setup.py $IDS --answers 2,10,3,1    --out /tmp/net-all/EFI
           python3 tools/setup.py $IDS --answers 2,10,3,2,10 --out /tmp/net-sonoma/EFI
-          python3 tools/setup.py $IDS --answers 2,10,3,3   --out /tmp/net-none/EFI
+          python3 tools/setup.py $IDS --answers 2,10,3,3    --out /tmp/net-none/EFI
 
       - name: Wi-Fi resolves to one build, or to none
         run: |
           python3 tools/setup.py --ids 8086:2723 --answers 2,10,3,2,10 --out /tmp/wifi-sonoma/EFI
           test -d /tmp/wifi-sonoma/EFI/OC/Kexts/AirportItlwm.kext
-          # v2.3.0 has no Sequoia build; shipping the wrong one would be worse
           python3 tools/setup.py --ids 8086:2723 --answers 2,10,3,2,11 --out /tmp/wifi-sequoia/EFI
           test ! -d /tmp/wifi-sequoia/EFI/OC/Kexts/AirportItlwm.kext
           python3 tools/itlwm.py
 
-      - name: The hardware table still matches the kexts
+      - name: Trackpad, framebuffer and a user-made USB map
         run: |
-          python3 tools/hwtable.py EFI/OC/Kexts --out /tmp/hardware.toml
-          diff /tmp/hardware.toml data/hardware.toml
+          python3 tools/setup.py --ids 8086:9d60 --answers 2,10,3,1 --out /tmp/i2c/EFI
+          python3 tools/setup.py --ids 8086:5912 --answers 2,10,3   --out /tmp/fb/EFI
+          cp -r EFI/OC/Kexts/UTBDefault.kext /tmp/UTBMap.kext
+          python3 tools/setup.py --ids 8086:2723 --usb-map /tmp/UTBMap.kext \
+            --answers 2,10,3,2,10 --out /tmp/usbmap/EFI
+          test -d /tmp/usbmap/EFI/OC/Kexts/UTBMap.kext
+          test ! -d /tmp/usbmap/EFI/OC/Kexts/UTBDefault.kext
+
+      - name: Detection and advice run standalone
+        run: |
+          python3 tools/detect.py
+          python3 tools/inputdev.py
+          python3 tools/igpu.py
+          python3 tools/advise.py --ids 8086:15b8,8086:2723 --usb-ids 8087:0029
+          python3 tools/advise.py --ids 10ec:c822
+          python3 tools/gpu.py
+          python3 tools/audio.py
 
       - name: Release packaging works
         run: python3 tools/release.py --out /tmp/dist --limit 5

@@ -97,6 +97,14 @@ PowerShell CIM on Windows, `lspci` and sysfs on Linux, `system_profiler` and
 `sysctl` on macOS - so it needs no dependencies and no admin rights. Run it on
 its own to see what it found.
 
+Graphics is read from the bus, not from the adapter list. Windows counts every
+display adapter as a video controller, including the virtual ones a remote
+desktop or dummy-monitor tool installs, and those can outnumber and outrank the
+real card - a machine with an Arc B580 reported a virtual driver instead.
+Adapters that enumerate under `ROOT` rather than `PCI` are therefore set aside,
+and named as ignored rather than dropped quietly, so someone who installed one
+can see it was recognised.
+
 Its CPU rule stays quiet unless it is sure. A four-digit Intel SKU normally
 names its generation with the first digit, so 2600K is 2nd generation; Ice Lake
 mobile breaks that, and 1065G7 is 10th. 10th generation mobile then covers two
@@ -124,6 +132,56 @@ entry there would be a confident wrong answer. Instead a device that no kext
 claims is reported as exactly that, with a link to Dortania's guide - which
 covers both cases honestly, since an unclaimed device may equally be one macOS
 supports with no kext at all.
+
+## Graphics
+
+`data/gpu.toml` is built by `tools/gputable.py` from Dortania's GPU Buyers
+Guide. The AMD pages state support card by card with the PCI device id beside
+each, so those tables are parsed - 59 cards, with the boot argument each family
+needs, `agdpmod=pikera` for Navi and `radpg=15` for the older ones. NVIDIA and
+Intel state support by family in prose, so those are family rules carrying the
+sentence they rest on.
+
+Intel integrated graphics are keyed on the **CPU generation**, not the adapter
+name. The guide writes "UHD Graphics for 12th Gen Intel Processors" where
+Windows reports "UHD Graphics 770", and bridging that gap by string matching is
+how a wrong answer gets stated confidently. Detection already works the
+generation out, so it is used instead.
+
+The advice then follows one rule:
+
+* supported card - say so, add the boot arguments its family needs
+* unsupported card - say so, and offer the integrated GPU **only if there is one
+  and it is itself supported**. Where there is an iGPU whose support could not
+  be determined, say that rather than claiming there is no fallback. Name a card
+  that would work either way.
+
+`tools/gpu.py` run on its own prints the verdict for a set of worked examples.
+
+## Audio
+
+`data/audio.toml` is read from AppleALC's own `Resources/<CODEC>/Info.plist` by
+`tools/audiotable.py`: 110 codecs, 697 layouts, 672 of which name the machine
+they were contributed for.
+
+That naming is the useful part. Which layout-id works depends on the machine
+rather than the codec, so there is no single answer to give - but a Lenovo can
+be told to start with the layout somebody contributed from a Lenovo:
+
+    Realtek ALC255  [10ec:0255]   27 layouts to try
+        alcid=28   Realtek ALC255 for Lenovo B470 - vusun123 <- starting with this one
+
+The order is: layouts naming this machine's brand, then layouts naming any
+machine, then the rest by id. That is a heuristic about where to start, not a
+claim about which is right, which is why every alternative is written to
+`NEXT-STEPS.txt` beside the EFI instead of being dropped.
+
+The codec is detected by its own HDA id, which is a device behind the audio
+controller and not the controller's PCI id - `HDAUDIO\FUNC_01&VEN_10EC&DEV_0255`
+on Windows, `Vendor Id: 0x10ec0255` from ALSA on Linux.
+
+`alcid` is written as a replacement rather than an addition, since most profiles
+already ship `alcid=1` and a second one would just be ignored.
 
 ## Adding the network kexts
 
@@ -278,6 +336,111 @@ have none either way, and keep the kext with the field record.
 use before you map, so that you can have all USB ports working before you map" -
 exactly the job a distributable install EFI needs. Neither mechanism patches the
 port limit, and neither does this repository: `XhciPortLimit` is false in all 179.
+
+## Self-test
+
+`tools/selftest.py` asserts what the advice should say - that an unsupported card
+offers a supported iGPU but not an unsupported one, that an unknown one is
+reported as unknown rather than as absent, that `alcid` replaces the value a
+profile ships rather than appending to it.
+
+They live in a file rather than inline in the workflow. They were inline once,
+and YAML around a shell around Python is three levels of quoting: one wrong
+escape made the whole workflow unparseable, so every run failed in zero seconds
+without executing a step. CI now also parses the workflow files as its first
+job, so that failure mode announces itself.
+
+## Storage, camera and card reader
+
+NVMeFix is offered when there is a non-Apple NVMe drive and not otherwise. Its
+README says it exists to "improve compatibility with non-Apple SSDs" and
+"requires at least Lilu 1.4.1 and at least 10.14 system version", so Apple's own
+NVMe is the case it is not for and a SATA-only machine gains nothing. The
+`MinKernel 18.0.0` comes from that sentence.
+
+Cameras and card readers are reported but nothing is claimed about them. Neither
+Dortania's guides nor any other source I could cite states which specific reader
+or sensor works, and this is not a place to substitute a guess: the only thing
+worth saying is the bus, because a USB camera is handled by the class driver
+macOS already has, while one that is not on USB is an IPU or MIPI sensor with no
+macOS driver at all.
+
+If you want a verdict for particular readers or sensors, that is knowledge to
+write down as data - the same shape as the AMD GPU rules - rather than something
+to derive.
+
+## Trackpad
+
+A trackpad does not announce how it is wired, but the controller it hangs off
+does. `data/input.toml` takes the 28 Intel I2C controller ids from VoodooI2C's
+README, so finding one on the PCI bus is the signal for offering VoodooI2C and
+VoodooI2CHID. Nothing decides the trackpad *is* I2C - plenty of machines have
+the controller and a PS/2 trackpad - so when a PS/2 device is present too, the
+report says so.
+
+The keyboard is left alone. Dortania is blunt about it - *"Most laptop keyboards
+are PS2! You will want to grab VoodooPS2 even if you have an I2C, USB, or SMBus
+trackpad"* - and the profiles here already decide that per machine, so the line
+is repeated as a warning rather than acted on.
+
+`NEXT-STEPS.txt` names the per-family plugins in the same release, the two SMBus
+paths for when it is not I2C at all, and the fact that some trackpads need an
+SSDT first - which is machine-specific and not something this can write.
+
+## Intel graphics framebuffer
+
+Dortania lists several `AAPL,ig-platform-id` per generation with a reason
+attached - default, recommended, headless, "1366x768 screens" - so this is a
+short list like the audio layouts, not an answer. The most likely goes in and
+the rest are written down. Headless is never the one to start with, since it
+means no display output.
+
+67 of the configs in this repository shipped `12345678` for this key, which is a
+placeholder rather than a real id, so replacing it is a fix; the replacement is
+reported as a warning so it is visible either way.
+
+What this deliberately does not write is framebuffer connector patches. A tuned
+laptop config carries twenty more properties - con0/con1 patches, stolenmem,
+fbmem - arrived at by trying. Generating those from a guess would look like
+configuration and behave like noise.
+
+## USB port map
+
+`--usb-map` takes a `UTBMap.kext` made with the USBToolBox tool, copies it in and
+drops `UTBDefault.kext`, which upstream is explicit about: *"it is not needed and
+must be removed if you choose to map"*. Producing the map is the tool's job, on
+Windows, against the real ports - not something to derive.
+
+## Keeping the tables current
+
+Three of the data files are snapshots of other people's work, and they go stale
+quietly - a card gains support, a codec gains a layout, and nothing here would
+notice:
+
+| file | source | regenerated by |
+|---|---|---|
+| `data/gpu.toml` | Dortania's GPU Buyers Guide | `tools/gputable.py` |
+| `data/audio.toml` | AppleALC, pinned to a release tag | `tools/audiotable.py` |
+| `data/hardware.toml` | the vendored kexts themselves | `tools/hwtable.py` |
+| `data/network.toml` | project documentation, in prose | by hand, each rule quoting its source |
+
+`.github/workflows/refresh.yml` runs the first two weekly, and opens a pull
+request if anything moved. It never merges: a change there is a change to what
+people are told about their own hardware, so the diff is the point.
+
+`hardware.toml` is different - it is checked on every run, because it is
+generated from kexts that live in this repository, so it can be held exactly in
+step. What that check cannot see is a kext gaining support upstream, so the
+refresh run also reports `kexts.py outdated` in the pull request body. Updating
+a kext stays a decision rather than something a schedule does.
+
+The generators refuse to write nonsense: `gputable.py` stops if it parses fewer
+than 40 cards and `audiotable.py` if it finds fewer than 80 codecs, so a page
+being restructured fails the run instead of quietly emptying a table.
+
+`network.toml` cannot be regenerated - which kext to use on which macOS lives in
+prose, and its rules carry the sentence they came from so they can be rechecked
+by hand.
 
 ## Continuous validation
 

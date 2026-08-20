@@ -18,8 +18,12 @@ from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import advise
+import audio
 import build
 import detect
+import gpu
+import igpu
+import inputdev
 import netkexts
 import ocgen
 
@@ -132,6 +136,9 @@ def main():
                     help='skip hardware detection and just ask')
     ap.add_argument('--ids', help='PCI ids to use instead of probing, comma separated')
     ap.add_argument('--usb-ids', help='USB ids to use instead of probing, comma separated')
+    ap.add_argument('--hda-ids', help='HD audio codec ids to use instead of probing')
+    ap.add_argument('--nvme', help='NVMe drive models to use instead of probing')
+    ap.add_argument('--usb-map', help='a UTBMap.kext made with the USBToolBox tool')
     ap.add_argument('--answers', help='answer the menus non-interactively, comma separated; '
                                       'for scripting and for CI')
     a = ap.parse_args()
@@ -147,13 +154,23 @@ def main():
     if a.ids is not None or a.usb_ids is not None:
         hw['pci_ids'] = [x.strip() for x in (a.ids or '').split(',') if x.strip()]
         hw['usb_ids'] = [x.strip() for x in (a.usb_ids or '').split(',') if x.strip()]
+    if a.hda_ids is not None:
+        hw['hda_ids'] = [x.strip() for x in a.hda_ids.split(',') if x.strip()]
+    if a.nvme is not None:
+        hw['nvme'] = [x.strip() for x in a.nvme.split(',') if x.strip()]
     print(f'{BOLD}OpenCore EFI builder{RESET}')
     if hw.get('cpu'):
         print(f'  {DIM}this machine:{RESET} {hw["cpu"]}'
               + (f', {hw["cores"]} cores' if hw.get('cores') else '')
               + (f', {hw["oem_raw"]}' if hw.get('oem_raw') else ''))
-        if hw.get('gpu'):
-            print(f'  {DIM}graphics:{RESET}     {", ".join(hw["gpu"][:2])}')
+        for g in hw.get('gpu_devices', [])[:3]:
+            print(f'  {DIM}graphics:{RESET}     {g["name"]}'
+                  + (f'  {DIM}[{g["id"]}]{RESET}' if g.get('id') else ''))
+        if hw.get('gpu_virtual'):
+            # named rather than dropped silently: someone who installed one of
+            # these should see that it was recognised and set aside
+            print(f'  {DIM}ignored:{RESET}      {", ".join(hw["gpu_virtual"])}'
+                  f'  {DIM}(virtual display adapters, not graphics hardware){RESET}')
     elif not a.no_detect:
         print(f'  {DIM}could not read this machine; every question is still answerable{RESET}')
 
@@ -212,18 +229,102 @@ def main():
 
     # network hardware: only offered when something was actually recognised,
     # so nobody is asked to decide about a device they do not have
-    extra_file = None
+    if hw.get('gpu_devices'):
+        print(f'\n{BOLD}Graphics{RESET}')
+        lines, gpu_args = gpu.report(hw['gpu_devices'], cpu)
+        print('\n'.join(lines))
+        if gpu_args:
+            print(f'\n      {GREEN}boot arguments needed: {" ".join(gpu_args)}{RESET}')
+            print(f'      {DIM}added to the config below{RESET}')
+
+    notes = []
+    boot_args = []
+
+    if hw.get('gpu_devices'):
+        boot_args += gpu.report(hw['gpu_devices'], cpu)[1]
+
+    if hw.get('hda_ids'):
+        print(f'\n{BOLD}Audio{RESET}')
+        alines, alcid, asteps = audio.report(hw['hda_ids'], oem or hw.get('oem_raw'))
+        print('\n'.join(alines))
+        if alcid is not None:
+            boot_args.append(f'alcid={alcid}')
+            notes.append(asteps)
+
+    queued = []
+    if a.usb_map:
+        mapped = Path(a.usb_map)
+        if not (mapped / 'Contents' / 'Info.plist').exists():
+            sys.exit(f'{mapped} does not look like a kext')
+        print(f'\n{BOLD}USB port map{RESET}')
+        print(f'  {mapped.name}')
+        print(f'      {DIM}goes in, and UTBDefault comes out - upstream: "it is not needed '
+              f'and must be removed if you choose to map"{RESET}')
+        queued.append({'Arch': 'x86_64', 'BundlePath': mapped.name,
+                        'Comment': 'USB port map', 'Enabled': True,
+                        'ExecutablePath': '', 'MaxKernel': '', 'MinKernel': '',
+                        'PlistPath': 'Contents/Info.plist',
+                        'SourcePath': str(mapped.resolve())})
+
+    device_props = {}
+    if hw.get('gpu_devices'):
+        state = gpu.igpu_verdict(cpu)[0]
+        ilines, iprops, isteps = igpu.report(cpu, plat == 'laptop', state == 'works')
+        if ilines:
+            print(f'\n{BOLD}Intel graphics framebuffer{RESET}')
+            print('\n'.join(ilines))
+            device_props.update(iprops)
+            notes.append(isteps)
+
+    input_lines, input_kexts = inputdev.entries(hw.get('pci_ids'), hw.get('ps2'))
+    if input_lines:
+        print(f'\n{BOLD}Trackpad{RESET}')
+        print('\n'.join(input_lines))
+        notes.append(inputdev.notes(hw.get('pci_ids')))
+
+    storage_kexts, storage_drives = netkexts.storage_entries(hw.get('nvme'))
+    if hw.get('nvme'):
+        print(f'\n{BOLD}Storage{RESET}')
+        for drive in hw['nvme']:
+            print(f'  {drive}')
+        if storage_drives:
+            print(f'      {GREEN}NVMeFix improves Apple\'s NVMe driver for '
+                  f'third-party SSDs; adding it{RESET}')
+        else:
+            print(f'      {DIM}Apple NVMe, which is the case NVMeFix is not for{RESET}')
+
+    if hw.get('peripherals'):
+        print(f'\n{BOLD}Camera and card reader{RESET}')
+        for dev in hw['peripherals']:
+            where = 'on USB' if dev['usb'] else 'not on USB'
+            print(f'  {dev["name"]}  {DIM}({dev["kind"]}, {where}){RESET}')
+        if any(d['kind'] == 'camera' and d['usb'] for d in hw['peripherals']):
+            print(f'      {DIM}a USB camera is handled by the class driver macOS already '
+                  f'has, so it usually needs nothing{RESET}')
+        if any(d['kind'] == 'camera' and not d['usb'] for d in hw['peripherals']):
+            print(f'      {YELLOW}a camera that is not on USB is an IPU or MIPI sensor, '
+                  f'which macOS has no driver for{RESET}')
+        print(f'      {DIM}beyond that this repository has no support data for these, '
+              f'so nothing is claimed or added{RESET}')
+
     matched = advise.matched_kexts(hw.get('pci_ids', []), hw.get('usb_ids', []))
-    if matched:
-        print(f'\n{BOLD}Network kexts{RESET}')
-        advise.report(hw['pci_ids'], hw['usb_ids'], 'this machine')
+    # storage has no version ambiguity, so it rides along with the same question
+    # rather than adding one - but it must not depend on there being network
+    # hardware to match, or a machine with neither gets nothing
+    # a real map replaces the catch-all; keeping both would have UTBDefault
+    # claim the controllers the map is for
+    cmd_extra_drop = ['UTBDefault.kext'] if a.usb_map else []
+    if matched or storage_kexts or input_kexts:
+        if matched:
+            print(f'\n{BOLD}Network kexts{RESET}')
+            advise.report(hw['pci_ids'], hw['usb_ids'], 'this machine')
         mode = ask(0, 0, 'Add these to the EFI?',
                    [('all', 'Yes, for every macOS version they support'),
                     ('one', 'Yes, for one macOS version only'),
                     ('no', 'No, leave them out')])
         if mode != 'no':
             darwin = None
-            if mode == 'one':
+            if mode == 'one' and matched:
                 rels = netkexts.releases()
                 darwin = ask(0, 0, 'Which macOS are you installing?',
                              [(r['darwin'], f"{r['name']} {r['version']}") for r in rels])
@@ -237,7 +338,8 @@ def main():
                 wifi_darwin = ask(0, 0, 'Which macOS for the Wi-Fi kext?',
                                   [(r['darwin'], f"{r['name']} {r['version']}") for r in rels],
                                   allow_skip=True)
-            entries, chosen = netkexts.entries(matched, darwin)
+            entries, chosen = netkexts.entries(matched, darwin) if matched else ([], [])
+            entries += storage_kexts + input_kexts
             if wifi_darwin is not None:
                 wifi, note = netkexts.wifi_entry(matched, wifi_darwin)
                 if wifi:
@@ -248,18 +350,40 @@ def main():
             for s_, kexts in chosen:
                 print(f'      {GREEN}{s_["label"]}{RESET}  '
                       + ', '.join(k['bundle'].replace('.kext', '') for k in kexts))
-            import json
-            import tempfile
-            fh = tempfile.NamedTemporaryFile('w', suffix='.json', delete=False)
-            json.dump(entries, fh)
-            fh.close()
-            extra_file = fh.name
+            queued += entries
 
     # build.main is called rather than spawned. sys.executable is this program
     # when frozen, not a Python interpreter, so a subprocess would re-invoke the
     # menus with build's arguments.
     cmd = ['--platform', plat, '--cpu', cpu, '--out', a.out]
-    if extra_file:
+    if boot_args:
+        cmd += ['--boot-args', ' '.join(boot_args)]
+    if cmd_extra_drop:
+        cmd += ['--drop-kexts', ','.join(cmd_extra_drop)]
+
+    import json
+    import tempfile
+
+    props_file = None
+    if device_props:
+        fh = tempfile.NamedTemporaryFile('w', suffix='.json', delete=False)
+        json.dump(device_props, fh)
+        fh.close()
+        props_file = fh.name
+        cmd += ['--device-props', props_file]
+    notes_file = None
+    if notes:
+        fh = tempfile.NamedTemporaryFile('w', suffix='.txt', delete=False, encoding='utf-8')
+        fh.write('Follow-up for this EFI\n' + '=' * 22 + '\n\n' + '\n'.join(notes))
+        fh.close()
+        notes_file = fh.name
+        cmd += ['--notes', notes_file]
+    extra_file = None
+    if queued:
+        fh = tempfile.NamedTemporaryFile('w', suffix='.json', delete=False)
+        json.dump(queued, fh)
+        fh.close()
+        extra_file = fh.name
         cmd += ['--add-kexts', extra_file]
     if vendor:
         cmd += ['--vendor', vendor]
@@ -279,6 +403,10 @@ def main():
         return rc
     if extra_file:
         os.unlink(extra_file)
+    if notes_file:
+        os.unlink(notes_file)
+    if props_file:
+        os.unlink(props_file)
     elif hw.get('pci_ids') or hw.get('usb_ids'):
         print()
         advise.report(hw['pci_ids'], hw['usb_ids'], 'this machine')

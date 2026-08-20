@@ -150,3 +150,16 @@ asset = "Sonoma14.4"
 min_darwin = 23
 max_darwin = 23
 note = "for 14.4 and later, and the copy vendored in this repository"
+
+# Storage. NVMeFix improves Apple's NVMe driver for third-party SSDs, so it is
+# offered when there is a non-Apple NVMe drive and not otherwise - a SATA-only
+# machine gains nothing from it, and Apple's own NVMe is the case it is not for.
+[[set]]
+role = "storage"
+match = "NVMeFix.kext"
+label = "Non-Apple NVMe"
+source = "acidanthera/NVMeFix README"
+[[set.kext]]
+bundle = "NVMeFix.kext"
+min_kernel = "18.0.0"
+note = "'requires at least Lilu 1.4.1 and at least 10.14 system version'"

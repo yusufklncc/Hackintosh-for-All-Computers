@@ -134,6 +134,10 @@ def main(argv=None):
     ap.add_argument('--identity', choices=('generate', 'placeholder'), default='generate')
     ap.add_argument('--no-validate', action='store_true')
     ap.add_argument('--add-kexts', help='JSON file of extra Kernel.Add entries to append')
+    ap.add_argument('--boot-args', help='extra boot arguments to append to the config')
+    ap.add_argument('--notes', help='file of follow-up notes to write beside the EFI')
+    ap.add_argument('--device-props', help='JSON of DeviceProperties to merge in')
+    ap.add_argument('--drop-kexts', help='bundle names to disable, comma separated')
     a = ap.parse_args(argv)
 
     cat = {e['name']: e for e in
@@ -207,6 +211,41 @@ def main(argv=None):
         config['Kernel']['Add'] += [{k: v for k, v in e.items() if k != 'SourcePath'}
                                     for e in added if e['BundlePath'] not in have]
 
+    guid = '7C436110-AB2A-4BBB-A880-FE41995C9F82'
+    if a.boot_args:
+        nv = config['NVRAM']['Add'][guid]
+        have = nv.get('boot-args', '').split()
+        for arg in a.boot_args.split():
+            key = arg.split('=')[0] + '=' if '=' in arg else None
+            if key:
+                # a key=value argument replaces one already set, since most
+                # profiles ship alcid=1 and appending a second would be ignored
+                have = [x for x in have if not x.startswith(key)]
+            if arg not in have:
+                have.append(arg)
+        nv['boot-args'] = ' '.join(have)
+
+    if a.device_props:
+        import json
+        with open(a.device_props) as fh:
+            props = json.load(fh)
+        add = config['DeviceProperties']['Add']
+        for path, values in props.items():
+            target = add.setdefault(path, {})
+            for k, v in values.items():
+                old = target.get(k)
+                target[k] = bytes.fromhex(v[4:]) if isinstance(v, str) and v.startswith('hex:') else v
+                if old is not None and old != target[k]:
+                    warn(f'{path} {k}: replaced {bytes(old).hex() if isinstance(old, bytes) else old}')
+
+    if a.drop_kexts:
+        drop = {x.strip() for x in a.drop_kexts.split(',') if x.strip()}
+        before = len(config['Kernel']['Add'])
+        config['Kernel']['Add'] = [k for k in config['Kernel']['Add']
+                                   if k['BundlePath'] not in drop]
+        if before != len(config['Kernel']['Add']):
+            print(f'  dropped      {", ".join(sorted(drop))}')
+
     serial = apply_identity(config, a.identity, warn)
 
     out = Path(a.out)
@@ -238,8 +277,14 @@ def main(argv=None):
           + (f'  {serial}' if serial else ''))
     if added:
         print(f'  added kexts  ' + ', '.join(e['BundlePath'] for e in added))
+    if a.boot_args:
+        print(f'  boot-args    {config["NVRAM"]["Add"][guid]["boot-args"]}')
     print(f'  payload      {copied} items')
     print(f'  ocvalidate   {status}')
+    if a.notes and Path(a.notes).exists():
+        target = out.parent / 'NEXT-STEPS.txt'
+        target.write_text(Path(a.notes).read_text(encoding='utf-8'), encoding='utf-8')
+        print(f'  notes        {target}')
     print(f'  output       {out}')
     for w in warnings:
         print(f'  warning      {w}')

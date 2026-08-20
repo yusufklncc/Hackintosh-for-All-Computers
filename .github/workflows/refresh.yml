@@ -1,0 +1,74 @@
+name: refresh
+
+# The generated tables are snapshots of other people's work: Dortania's GPU
+# guide, AppleALC's layouts, the kexts' own device lists. They go stale quietly
+# - a card gains support, a codec gains a layout, and nothing here notices.
+#
+# So once a week this regenerates them and, if anything moved, opens a pull
+# request with the diff. It never merges: the diff is the point, because a
+# change here is a change to what people are told about their hardware.
+
+on:
+  schedule:
+    - cron: '17 6 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Regenerate the tables from their sources
+        run: |
+          python3 tools/gputable.py --out data/gpu.toml
+          python3 tools/audiotable.py --out data/audio.toml
+
+      - name: Anything moved?
+        id: diff
+        run: |
+          {
+            echo "Regenerated from the upstream sources. Nothing here was decided by"
+            echo "the run - the diff is what moved."
+            echo
+            echo '```'
+            git diff --stat -- data
+            echo '```'
+            echo
+            echo "### Kexts against their upstream tags"
+            echo
+            echo "Not changed by this run: updating a kext is a decision, not a refresh."
+            echo
+            echo '```'
+            python3 tools/kexts.py outdated || true
+            echo '```'
+          } > pr-body.md
+          if git diff --quiet -- data; then
+            echo "changed=no" >> "$GITHUB_OUTPUT"
+            echo "the tables still match their sources"
+          else
+            echo "changed=yes" >> "$GITHUB_OUTPUT"
+            git diff --stat -- data
+          fi
+
+      - name: Still valid after the refresh
+        if: steps.diff.outputs.changed == 'yes'
+        run: |
+          chmod +x vendor/opencore/*/Utilities/*/*.linux
+          python3 tools/selftest.py
+          python3 tools/setup.py --hda-ids 10ec:0255 --answers 2,10,3 --out /tmp/refresh/EFI
+
+      - name: Open a pull request
+        if: steps.diff.outputs.changed == 'yes'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: refresh/hardware-tables
+          title: Hardware tables have moved upstream
+          commit-message: Refresh the generated hardware tables
+          body-path: pr-body.md
+          add-paths: data
+          delete-branch: true

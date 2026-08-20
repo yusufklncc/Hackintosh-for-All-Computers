@@ -1,0 +1,585 @@
+# GPU support, from Dortania's GPU Buyers Guide.
+#
+# The AMD entries are parsed from the guide's own tables, which give a
+# PCI device id per card - so a detected GPU is looked up rather than
+# matched by name. NVIDIA and Intel state support by family in prose,
+# so those are written as family rules carrying the sentence they rest
+# on. Regenerate with tools/gputable.py.
+# Source: https://dortania.github.io/GPU-Buyers-Guide/modern-gpus/amd-gpu.html
+[[card]]
+id = "1002:73ff"
+name = "RX 6600"
+family = "Navi 23 series"
+status = "works"
+boot_args = ["agdpmod=pikera"]
+
+[[card]]
+id = "1002:73ff"
+name = "RX 6600 XT"
+family = "Navi 23 series"
+status = "works"
+boot_args = ["agdpmod=pikera"]
+
+[[card]]
+id = "1002:73ef"
+name = "RX 6650 XT"
+family = "Navi 23 series"
+status = "works-spoofed"
+note = "Spoof to RX 6600 XT"
+boot_args = ["agdpmod=pikera"]
+
+[[card]]
+id = "1002:73e3"
+name = "Radeon Pro W6600"
+family = "Navi 23 series"
+status = "works"
+boot_args = ["agdpmod=pikera"]
+
+[[card]]
+id = "1002:73bf"
+name = "RX 6800"
+family = "Navi 21 series"
+status = "works"
+boot_args = ["agdpmod=pikera"]
+
+[[card]]
+id = "1002:73bf"
+name = "RX 6800 XT"
+family = "Navi 21 series"
+status = "works"
+boot_args = ["agdpmod=pikera"]
+
+[[card]]
+id = "1002:73bf"
+name = "RX 6900 XT"
+family = "Navi 21 series"
+status = "works"
+boot_args = ["agdpmod=pikera"]
+
+[[card]]
+id = "1002:73af"
+name = "RX 6900 XT (XTX/XTXH variant)"
+family = "Navi 21 series"
+status = "works-spoofed"
+note = "Spoof to RX 6900 XTThese cards are usually marketed as \"Extreme\" or \"Ultimate\" variants."
+boot_args = ["agdpmod=pikera"]
+
+[[card]]
+id = "1002:73a5"
+name = "RX 6950 XT"
+family = "Navi 21 series"
+status = "works-spoofed"
+note = "Spoof to RX 6900 XT"
+boot_args = ["agdpmod=pikera"]
+
+[[card]]
+id = "1002:73a3"
+name = "Radeon Pro W6800"
+family = "Navi 21 series"
+status = "works"
+boot_args = ["agdpmod=pikera"]
+
+[[card]]
+id = "1002:7340"
+name = "RX 5300 OEM"
+family = "Navi 10 series"
+status = "works"
+boot_args = ["agdpmod=pikera"]
+
+[[card]]
+id = "1002:7340"
+name = "RX 5500 OEM"
+family = "Navi 10 series"
+status = "untested"
+boot_args = ["agdpmod=pikera"]
+
+[[card]]
+id = "1002:7340"
+name = "RX 5500 XT"
+family = "Navi 10 series"
+status = "works"
+boot_args = ["agdpmod=pikera"]
+
+[[card]]
+id = "1002:731f"
+name = "RX 5600 OEM"
+family = "Navi 10 series"
+status = "works"
+boot_args = ["agdpmod=pikera"]
+
+[[card]]
+id = "1002:731f"
+name = "RX 5600 XT"
+family = "Navi 10 series"
+status = "works"
+boot_args = ["agdpmod=pikera"]
+
+[[card]]
+id = "1002:731f"
+name = "RX 5700"
+family = "Navi 10 series"
+status = "works"
+boot_args = ["agdpmod=pikera"]
+
+[[card]]
+id = "1002:731f"
+name = "RX 5700 XT"
+family = "Navi 10 series"
+status = "works"
+boot_args = ["agdpmod=pikera"]
+
+[[card]]
+id = "1002:731f"
+name = "RX 5700 XT 50th Anniversary Edition"
+family = "Navi 10 series"
+status = "works"
+boot_args = ["agdpmod=pikera"]
+
+[[card]]
+id = "1002:7341"
+name = "Radeon Pro W5500"
+family = "Navi 10 series"
+status = "works"
+boot_args = ["agdpmod=pikera"]
+
+[[card]]
+id = "1002:7312"
+name = "Radeon Pro W5700"
+family = "Navi 10 series"
+status = "works"
+boot_args = ["agdpmod=pikera"]
+
+[[card]]
+id = "1002:66af"
+name = "Radeon VII"
+family = "Vega 20 series"
+status = "works"
+
+[[card]]
+id = "1002:66a1"
+name = "Radeon Pro VII"
+family = "Vega 20 series"
+status = "untested"
+
+[[card]]
+id = "1002:687f"
+name = "RX Vega 56"
+family = "Vega 10 series"
+status = "works"
+
+[[card]]
+id = "1002:687f"
+name = "RX Vega 64"
+family = "Vega 10 series"
+status = "works"
+
+[[card]]
+id = "1002:687f"
+name = "RX Vega 64 Limited Edition"
+family = "Vega 10 series"
+status = "works"
+
+[[card]]
+id = "1002:687f"
+name = "RX Vega 64 Liquid Cooling"
+family = "Vega 10 series"
+status = "untested"
+
+[[card]]
+id = "1002:6868"
+name = "Radeon Pro WX 8100"
+family = "Vega 10 series"
+status = "untested"
+
+[[card]]
+id = "1002:6868"
+name = "Radeon Pro WX 8200"
+family = "Vega 10 series"
+status = "works"
+
+[[card]]
+id = "1002:6861"
+name = "Radeon Pro WX 9100"
+family = "Vega 10 series"
+status = "works"
+
+[[card]]
+id = "1002:6863"
+name = "Radeon Vega Frontier Edition"
+family = "Vega 10 series"
+status = "works"
+
+[[card]]
+id = "1002:6863"
+name = "Radeon Vega Frontier Edition Watercooled"
+family = "Vega 10 series"
+status = "untested"
+
+[[card]]
+id = "1002:67ef"
+name = "RX 460"
+family = "Polaris 10 and 20 series"
+status = "works"
+
+[[card]]
+id = "1002:67df"
+name = "RX 470"
+family = "Polaris 10 and 20 series"
+status = "works"
+
+[[card]]
+id = "1002:67df"
+name = "RX 470D"
+family = "Polaris 10 and 20 series"
+status = "untested"
+
+[[card]]
+id = "1002:67df"
+name = "RX 480"
+family = "Polaris 10 and 20 series"
+status = "works"
+
+[[card]]
+id = "1002:699f"
+name = "Radeon 540"
+family = "Polaris 10 and 20 series"
+status = "untested"
+note = "Spoof to RX 550 (Baffin), may need no-gfx-spoof."
+
+[[card]]
+id = "1002:699f"
+name = "Radeon 550"
+family = "Polaris 10 and 20 series"
+status = "untested"
+note = "Spoof to RX 550 (Baffin), may need no-gfx-spoof."
+
+[[card]]
+id = "1002:6987"
+name = "Radeon 550X"
+family = "Polaris 10 and 20 series"
+status = "untested"
+note = "Spoof to RX 550 (Baffin), may need no-gfx-spoof."
+
+[[card]]
+id = "1002:699f"
+name = "RX 550"
+family = "Polaris 10 and 20 series"
+status = "works-spoofed"
+note = "Spoof to RX 550 (Baffin), may need no-gfx-spoof.Has 512SP variant only"
+
+[[card]]
+id = "1002:699f"
+name = "RX 550X"
+family = "Polaris 10 and 20 series"
+status = "untested"
+note = "Spoof to RX 550 (Baffin), may need no-gfx-spoof."
+
+[[card]]
+id = "1002:67ef"
+name = "RX 560"
+family = "Polaris 10 and 20 series"
+status = "works"
+
+[[card]]
+id = "1002:67ef"
+name = "RX 560D"
+family = "Polaris 10 and 20 series"
+status = "untested"
+
+[[card]]
+id = "1002:67ef"
+name = "RX 560X"
+family = "Polaris 10 and 20 series"
+status = "untested"
+
+[[card]]
+id = "1002:67df"
+name = "RX 560 XT"
+family = "Polaris 10 and 20 series"
+status = "untested"
+
+[[card]]
+id = "1002:67df"
+name = "RX 570"
+family = "Polaris 10 and 20 series"
+status = "works"
+
+[[card]]
+id = "1002:67df"
+name = "RX 570X"
+family = "Polaris 10 and 20 series"
+status = "untested"
+
+[[card]]
+id = "1002:67df"
+name = "RX 580"
+family = "Polaris 10 and 20 series"
+status = "works"
+
+[[card]]
+id = "1002:6fdf"
+name = "RX 580 2048SP"
+family = "Polaris 10 and 20 series"
+status = "unsupported"
+note = "Some have reported success with modifying the VBIOS  (opens new window) or flashing an RX 570 VBIOS."
+
+[[card]]
+id = "1002:67df"
+name = "RX 580X"
+family = "Polaris 10 and 20 series"
+status = "untested"
+
+[[card]]
+id = "1002:67df"
+name = "RX 590"
+family = "Polaris 10 and 20 series"
+status = "works"
+
+[[card]]
+id = "1002:6fdf"
+name = "RX 590 GME"
+family = "Polaris 10 and 20 series"
+status = "unsupported"
+note = "Some have reported success with flashing a RX 580 BIOS  (opens new window)."
+
+[[card]]
+id = "1002:6987"
+name = "RX 640"
+family = "Polaris 10 and 20 series"
+status = "untested"
+note = "Spoof to RX 550 (Baffin), may need no-gfx-spoof."
+
+[[card]]
+id = "1002:67c4"
+name = "Radeon Pro Duo Polaris"
+family = "Polaris 10 and 20 series"
+status = "untested"
+
+[[card]]
+id = "1002:6995"
+name = "Radeon Pro WX 2100"
+family = "Polaris 10 and 20 series"
+status = "untested"
+note = "Spoof to WX 4100, may need no-gfx-spoof."
+
+[[card]]
+id = "1002:6985"
+name = "Radeon Pro WX 3100"
+family = "Polaris 10 and 20 series"
+status = "works"
+note = "Spoof to RX 550 (Baffin) or WX 4100, may need no-gfx-spoof."
+
+[[card]]
+id = "1002:6981"
+name = "Radeon Pro WX 3200"
+family = "Polaris 10 and 20 series"
+status = "works"
+note = "Spoof to RX 550 (Baffin) or WX 4100, may need no-gfx-spoof."
+
+[[card]]
+id = "1002:67e3"
+name = "Radeon Pro WX 4100"
+family = "Polaris 10 and 20 series"
+status = "works"
+
+[[card]]
+id = "1002:67c7"
+name = "Radeon Pro WX 5100"
+family = "Polaris 10 and 20 series"
+status = "works"
+
+[[card]]
+id = "1002:67c4"
+name = "Radeon Pro WX 7100"
+family = "Polaris 10 and 20 series"
+status = "works"
+
+[[igpu]]
+section = "Ivy Bridge 3XXX"
+status = "works"
+profiles = ["ivy-bridge"]
+models = ["HD 2500 (Quicksync only)", "HD 4000", "HD P4000"]
+
+[[igpu.desktop_platform_id]]
+value = "0x0166000a"
+data = "0a006601"
+label = "default"
+
+[[igpu.desktop_platform_id]]
+value = "0x01620005"
+data = "05006201"
+label = ""
+
+[[igpu.laptop_platform_id]]
+value = "0x01660004"
+data = "04006601"
+label = "Recommended, 1600x900 screens or higher"
+
+[[igpu.laptop_platform_id]]
+value = "0x01660009"
+data = "09006601"
+label = "Alternative, eDP or autodetect"
+
+[[igpu.laptop_platform_id]]
+value = "0x01660003"
+data = "03006601"
+label = "1366x768 screens"
+
+[[igpu]]
+section = "Haswell 4XXX"
+status = "works"
+profiles = ["haswell"]
+models = ["HD 4200", "HD 4400 (HD 4600 Fake ID required for this iGPU)", "HD 4600", "HD 5000", "HD 5100", "HD P4600 (Theoretically)", "HD P4700 (Theoretically)"]
+
+[[igpu.desktop_platform_id]]
+value = "0x0d220003"
+data = "0300220d"
+label = "default"
+
+[[igpu.laptop_platform_id]]
+value = "0x0a160000"
+data = "0000160a"
+label = "default"
+
+[[igpu.laptop_platform_id]]
+value = "0x0a260005"
+data = "0500260a"
+label = "recommended"
+
+[[igpu]]
+section = "Broadwell 5XXX"
+status = "works"
+profiles = ["broadwell"]
+models = ["HD 5300", "HD 5500", "HD 5600", "HD 6000", "HD 6100", "HD 6200", "HD P5700 (Theoretically)", "Iris Pro P6300"]
+
+[[igpu.desktop_platform_id]]
+value = "0x16220007"
+data = "07002216"
+label = "default"
+
+[[igpu.laptop_platform_id]]
+value = "0x16260006"
+data = "06002616"
+label = "default"
+
+[[igpu]]
+section = "Skylake 6XXX"
+status = "works"
+profiles = ["sky-lake"]
+models = ["HD 515", "HD 520", "HD 530", "HD P530", "Iris 540", "Iris 550", "Iris Pro 580", "Iris Pro P555", "Iris Pro P580"]
+
+[[igpu.desktop_platform_id]]
+value = "0x19120000"
+data = "00001219"
+label = "default"
+
+[[igpu.desktop_platform_id]]
+value = "0x19120001"
+data = "01001219"
+label = "Headless"
+
+[[igpu.laptop_platform_id]]
+value = "0x19160000"
+data = "00001619"
+label = "default"
+
+[[igpu]]
+section = "Kaby Lake 7XXX"
+status = "works"
+profiles = ["kaby-lake"]
+models = ["HD 615", "HD 620", "HD 630", "Iris Plus 640", "Iris Plus 650"]
+
+[[igpu.desktop_platform_id]]
+value = "0x59160000"
+data = "00001659"
+label = "default"
+
+[[igpu.desktop_platform_id]]
+value = "0x59120003"
+data = "03001259"
+label = "Headless"
+
+[[igpu.laptop_platform_id]]
+value = "0x591b0000"
+data = "00001b59"
+label = "default"
+
+[[igpu]]
+section = "Kaby Lake Refresh/Coffee Lake/Coffee Lake Refresh/Whiskey Lake/Comet Lake 8XXX/9XXX/10XXX"
+status = "works"
+profiles = ["coffe-lake", "coffe-lake-plus", "coffee-lake-whiskey-lake", "comet-lake"]
+models = ["UHD 615", "UHD 617", "UHD 620", "UHD 630", "Iris Plus 645", "Iris Plus 655"]
+
+[[igpu.desktop_platform_id]]
+value = "0x3ea50000"
+data = "0000a53e"
+label = "default"
+
+[[igpu.desktop_platform_id]]
+value = "0x3e9b0007"
+data = "07009b3e"
+label = "desktop, recommended"
+
+[[igpu.desktop_platform_id]]
+value = "0x3e920003"
+data = "0300923e"
+label = "Headless"
+
+[[igpu.laptop_platform_id]]
+value = "0x3ea50009"
+data = "0900a53e"
+label = "default"
+
+[[igpu]]
+section = "Ice Lake 10XXX"
+status = "works"
+profiles = ["ice-lake"]
+models = ["Iris Plus G7", "Iris Plus G4"]
+
+[[igpu]]
+section = "Kaby Lake Refresh/Coffee Lake/Coffee Lake Refresh/Whiskey Lake/Comet Lake 8XXX/9XXX/10XXX"
+status = "unsupported"
+profiles = ["coffe-lake", "coffe-lake-plus", "coffee-lake-whiskey-lake", "comet-lake"]
+models = ["UHD 610"]
+
+[[igpu]]
+section = "Ice Lake 10XXX"
+status = "unsupported"
+profiles = ["ice-lake"]
+models = ["UHD Graphics (G1)"]
+
+[[igpu]]
+section = "Tiger Lake/Rocket Lake"
+status = "unsupported"
+profiles = ["rocket-lake"]
+models = ["UHD Graphics for 11th Gen Intel Processors", "Intel Xe Graphics"]
+
+[[igpu]]
+section = "Alder Lake/Rocket Lake"
+status = "unsupported"
+profiles = ["alder-lake"]
+models = ["UHD Graphics for 12th Gen Intel Processors", "Intel Xe Graphics", "Intel UHD Graphics"]
+
+[[igpu]]
+section = "Raptor Lake"
+status = "unsupported"
+profiles = ["raptor-lake"]
+models = ["UHD Graphics for 13th Gen Intel Processors", "UHD Graphics for 14th Gen Intel Processors", "Intel Graphics", "Intel Xe Graphics"]
+
+[[family]]
+vendor = "10de"
+match = "nvidia"
+name = "NVIDIA, every series"
+status = "unsupported"
+quote = "There are no currently supported NVIDIA GPUs."
+source = "https://dortania.github.io/GPU-Buyers-Guide/modern-gpus/nvidia-gpu.html"
+note = "Kepler was the last supported family and it ended with Big Sur; Maxwell and Pascal stop at High Sierra; Turing and newer never had a driver."
+
+[[family]]
+vendor = "8086"
+match = "arc"
+name = "Intel Arc, discrete"
+status = "unsupported"
+quote = "So Intel finally made a discrete GPU. Lmao. All of them are unsupported."
+source = "https://dortania.github.io/GPU-Buyers-Guide/modern-gpus/intel-gpu.html"
+note = "The page names the Alchemist cards; Battlemage is not listed individually but falls under the same statement."

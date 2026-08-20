@@ -106,45 +106,45 @@ def _is_table_array(v):
 
 
 def dumps(tree, header=''):
+    """Serialise a dict of scalars, tables and table-arrays, at any depth.
+
+    Table arrays nest: an entry of [[audio]] may itself hold [[audio.layout]].
+    The header path is carried down rather than assumed to be one level deep."""
     out = [header] if header else []
 
-    def emit(node, path):
-        scalars = {k: v for k, v in node.items() if not _is_table(v) and not _is_table_array(v)}
-        if scalars:
-            if path:
-                out.append(f'[{".".join(_key(p) for p in path)}]')
-            for k, v in scalars.items():
-                out.append(f'{_key(k)} = {_scalar(v)}')
+    def scalars_of(node):
+        return {k: v for k, v in node.items()
+                if not _is_table(v) and not _is_table_array(v)}
+
+    def emit(node, path, force_header=False):
+        scalars = scalars_of(node)
+        head = '.'.join(_key(p) for p in path)
+        if path and (scalars or force_header):
+            out.append(f'[{head}]')
+        for k, v in scalars.items():
+            out.append(f'{_key(k)} = {_scalar(v)}')
+        if scalars or (path and force_header):
             out.append('')
         for k, v in node.items():
             if _is_table(v):
-                if not v:
-                    out.append(f'[{".".join(_key(p) for p in path + [k])}]')
-                    out.append('')
-                else:
-                    emit(v, path + [k])
+                emit(v, path + [k], force_header=not v)
             elif _is_table_array(v):
                 for entry in v:
                     out.append(f'[[{".".join(_key(p) for p in path + [k])}]]')
-                    for ek, ev in entry.items():
+                    for ek, ev in scalars_of(entry).items():
                         out.append(f'{_key(ek)} = {_scalar(ev)}')
                     out.append('')
+                    for ek, ev in entry.items():
+                        if _is_table(ev):
+                            emit(ev, path + [k, ek], force_header=not ev)
+                        elif _is_table_array(ev):
+                            for sub in ev:
+                                out.append(f'[[{".".join(_key(p) for p in path + [k, ek])}]]')
+                                for sk, sv in scalars_of(sub).items():
+                                    out.append(f'{_key(sk)} = {_scalar(sv)}')
+                                out.append('')
 
-    # a table with only sub-tables must still print its own header first
-    if any(not _is_table(v) and not _is_table_array(v) for v in tree.values()):
-        emit(tree, [])
-    else:
-        for k, v in tree.items():
-            if _is_table(v):
-                emit(v, [k]) if v else out.extend([f'[{_key(k)}]', ''])
-            elif _is_table_array(v):
-                for entry in v:
-                    out.append(f'[[{_key(k)}]]')
-                    for ek, ev in entry.items():
-                        out.append(f'{_key(ek)} = {_scalar(ev)}')
-                    out.append('')
-            else:
-                out.append(f'{_key(k)} = {_scalar(v)}')
+    emit(tree, [])
     return '\n'.join(out).rstrip() + '\n'
 
 

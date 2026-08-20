@@ -97,6 +97,11 @@ version = "1.2.3"
 sha256 = "1e7e9724848511b671a2b7d8254620b7c74ab8f171777dffa85f79f7fe08a262"
 upstream = "Mieze/LucyRTL8125Ethernet"
 
+[kext."NVMeFix.kext"]
+version = "1.1.3"
+sha256 = "6dd3324cb666168188dae517b0d9a966bba0af149c4e47bae1dae920aafcec0f"
+upstream = "acidanthera/NVMeFix"
+
 [kext."RealtekRTL8111.kext"]
 version = "3.0.0"
 sha256 = "599ee36479dcb708d58927b72da5a1b6ce647e9a46c2ebe4a1d34c9546b03a22"
@@ -147,10 +152,45 @@ version = "1.3.7"
 sha256 = "c40719bd8a5ba3c6bcb06c5d46cb556b03a9d908ccd60257a0b24ad5ce1a8f49"
 upstream = "acidanthera/VirtualSMC"
 
+[kext."VoodooI2C.kext"]
+version = "2.9.1"
+sha256 = "a659c88e3162d21bcf368d94a9b278098bc767a992ad1989e579e221859190e3"
+upstream = "VoodooI2C/VoodooI2C"
+
+[kext."VoodooI2CELAN.kext"]
+version = "1.0"
+sha256 = "c9f04dd1bc46324956803b9fb0843d998f4a905c683c764b7e50394650ac09ab"
+upstream = "VoodooI2C/VoodooI2C"
+
+[kext."VoodooI2CFTE.kext"]
+version = "1.0"
+sha256 = "ef35c4e8dc6813843369ad59740d0977ef2eeaae90ecae2f712d4bae55a2f02a"
+upstream = "VoodooI2C/VoodooI2C"
+
+[kext."VoodooI2CHID.kext"]
+version = "1.0"
+sha256 = "1ac43111d72d2bdc20302fd38dd13ade3245293189f26693667e79b6792bb7d0"
+upstream = "VoodooI2C/VoodooI2C"
+
+[kext."VoodooI2CSynaptics.kext"]
+version = "1.0"
+sha256 = "962e19c759f5eba30c0c031eea935461d3475eccbc0400590638ed4bf5650fb1"
+upstream = "VoodooI2C/VoodooI2C"
+
 [kext."VoodooPS2Controller.kext"]
 version = "2.3.7"
 sha256 = "726a5b56b19df8f9914af1d034dc566206405f0caee202cecd240d0443e4961d"
 upstream = "acidanthera/VoodooPS2"
+
+[kext."VoodooRMI.kext"]
+version = "1.4.3"
+sha256 = "706cf00015cfb5e5ee70d9fad372504770c134fc3bf5b90857b10f76f296c840"
+upstream = "VoodooSMBus/VoodooRMI"
+
+[kext."VoodooSMBus.kext"]
+version = "3.0"
+sha256 = "79e04a6450e081699642d9f108844a1b2b59db6052e495aa9e604fe83961f72b"
+upstream = "VoodooSMBus/VoodooRMI"
 
 [kext."WhateverGreen.kext"]
 version = "1.7.0"

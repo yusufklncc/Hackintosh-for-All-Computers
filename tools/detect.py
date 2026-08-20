@@ -121,14 +121,34 @@ def _windows():
     if types:
         # 8-14 and 30-32 are the portable chassis codes in the DMTF table
         out['laptop'] = bool(types & {8, 9, 10, 11, 12, 14, 18, 21, 30, 31, 32})
+    # Win32_VideoController lists every display adapter, including virtual ones
+    # a remote desktop or a dummy-monitor tool installs. Those enumerate under
+    # ROOT rather than PCI, so the bus is what separates the graphics card from
+    # a driver pretending to be one.
     out['gpu'] = [l.strip() for l in
-                  _ps('Get-CimInstance Win32_VideoController | '
-                      'ForEach-Object { $_.Name }').splitlines() if l.strip()]
+                  _ps('Get-CimInstance Win32_VideoController | ForEach-Object '
+                      '{ "$($_.PNPDeviceID)|$($_.Name)" }').splitlines() if l.strip()]
     out['pci'] = _ps(
         'Get-CimInstance Win32_PnPEntity | Where-Object { $_.PNPDeviceID -like "PCI*" } | '
         'ForEach-Object { "$($_.PNPDeviceID)|$($_.Name)" }')
     out['usb'] = _ps(
         'Get-CimInstance Win32_PnPEntity | Where-Object { $_.PNPDeviceID -like "USB*" } | '
+        'ForEach-Object { "$($_.PNPDeviceID)|$($_.Name)" }')
+    out['peripherals'] = _ps(
+        'Get-CimInstance Win32_PnPEntity | Where-Object '
+        '{ $_.PNPClass -in @("Camera","Image","SDHost","MTD","Mouse","Keyboard") } '
+        '| ForEach-Object '
+        '{ "$($_.PNPClass)|$($_.PNPDeviceID)|$($_.Name)" }')
+    # BusType 17 is NVMe in the storage WMI classes, which is a cleaner answer
+    # than guessing from a PCI class code or a model string.
+    out['storage'] = _ps(
+        'Get-CimInstance -Namespace root/Microsoft/Windows/Storage '
+        '-ClassName MSFT_PhysicalDisk | ForEach-Object '
+        '{ "$($_.BusType)|$($_.FriendlyName)" }')
+    # The HD Audio codec is a device behind the controller and carries its own
+    # VEN/DEV, which is what AppleALC keys its layouts on.
+    out['hda'] = _ps(
+        'Get-CimInstance Win32_PnPEntity | Where-Object { $_.PNPDeviceID -like "HDAUDIO*" } | '
         'ForEach-Object { "$($_.PNPDeviceID)|$($_.Name)" }')
     return out
 
@@ -145,9 +165,17 @@ def _linux():
     if chassis.isdigit():
         out['laptop'] = int(chassis) in {8, 9, 10, 11, 12, 14, 18, 21, 30, 31, 32}
     out['pci'] = _run(['lspci', '-nn'])
-    out['gpu'] = [l.split(': ', 1)[-1] for l in out['pci'].splitlines()
+    out['gpu'] = [f"PCI|{l.split(': ', 1)[-1]}" for l in out['pci'].splitlines()
                   if 'VGA compatible controller' in l or '3D controller' in l]
     out['usb'] = _run(['lsusb'])
+    # ALSA prints the codec's full HDA id as one 8-digit word
+    out['hda'] = ''.join(_read(p) for p in
+                         __import__('glob').glob('/proc/asound/card*/codec#*'))
+    out['peripherals'] = '\n'.join(
+        f'Camera|{l}' for l in (out.get('usb') or '').splitlines() if 'cam' in l.lower())
+    import glob as _glob
+    out['storage'] = '\n'.join(
+        f'17|{_read(p + "/model")}' for p in sorted(_glob.glob('/sys/class/nvme/nvme*')))
     return out
 
 
@@ -162,7 +190,10 @@ def _macos():
     out['vendor'] = ''
     out['pci'] = _run(['system_profiler', 'SPPCIDataType'])
     out['usb'] = _run(['system_profiler', 'SPUSBDataType'])
-    out['gpu'] = [m.strip() for m in re.findall(
+    out['storage'] = '\n'.join(
+        f'17|{m}' for m in re.findall(r'^\s{6}(\S.*?):$',
+                                      _run(['system_profiler', 'SPNVMeDataType']), re.M))
+    out['gpu'] = [f'PCI|{m.strip()}' for m in re.findall(
         r'^\s*Chipset Model:\s*(.+)$',
         _run(['system_profiler', 'SPDisplaysDataType']), re.M)]
     return out
@@ -179,6 +210,12 @@ PCI_PATTERNS = [
 USB_PATTERNS = [
     re.compile(r'vid_([0-9a-f]{4})&pid_([0-9a-f]{4})', re.I),        # Windows
     re.compile(r'\bID\s+([0-9a-f]{4}):([0-9a-f]{4})\b', re.I),       # Linux lsusb
+]
+
+
+HDA_PATTERNS = [
+    re.compile(r'hdaudio\\func_\d+&ven_([0-9a-f]{4})&dev_([0-9a-f]{4})', re.I),  # Windows
+    re.compile(r'Vendor Id:\s*0x([0-9a-f]{4})([0-9a-f]{4})', re.I),               # ALSA
 ]
 
 
@@ -205,6 +242,60 @@ def _apple_pairs(text, vendor_key, device_key):
     return out
 
 
+def split_graphics(entries):
+    """(real graphics cards, virtual adapters) from "bus-or-id|name" strings.
+
+    Reporting a virtual adapter as the graphics card is worse than reporting
+    nothing: it is the kind of wrong answer that looks right, and someone would
+    configure an EFI around it."""
+    real, virtual = [], []
+    for e in entries or []:
+        ident, _, name = e.partition('|')
+        name = (name or ident).strip()
+        if not name:
+            continue
+        pci = _pairs(e, PCI_PATTERNS)   # the id may sit in either half
+        if ident.upper().startswith('PCI') or pci:
+            real.append({'name': name, 'id': next(iter(sorted(pci)), None)})
+        else:
+            virtual.append({'name': name, 'id': None})
+    return real, virtual
+
+
+def peripherals(text):
+    """Cameras and card readers, with the bus each is on.
+
+    The bus is the only part worth reporting: a USB camera is handled by the
+    class driver macOS already has, while one that is not on USB is an IPU or
+    MIPI sensor with no macOS driver at all. Which specific reader or sensor
+    works is not something this repository has data for, so it is not claimed."""
+    out = []
+    for line in (text or '').splitlines():
+        parts = line.split('|')
+        if len(parts) < 2:
+            continue
+        kind, ident = parts[0].strip(), parts[1]
+        name = parts[2].strip() if len(parts) > 2 else ident
+        if not name:
+            continue
+        out.append({'kind': 'camera' if kind.lower() in ('camera', 'image') else 'card reader',
+                    'name': name, 'usb': ident.upper().startswith('USB')})
+    return out
+
+
+def nvme_drives(text):
+    """Model names of the NVMe drives, from "bustype|model" lines.
+
+    Apple's own NVMe is named as such and is the one case NVMeFix is not for,
+    so the name is kept rather than just a count."""
+    out = []
+    for line in (text or '').splitlines():
+        bus, _, model = line.partition('|')
+        if bus.strip() == '17' and model.strip():
+            out.append(model.strip())
+    return out
+
+
 def probe():
     """Everything the machine will tell us, with the gaps left as None."""
     system = platform.system()
@@ -218,7 +309,9 @@ def probe():
         'laptop': laptop,
         'oem': normalise_oem(raw.get('vendor')),
         'oem_raw': (raw.get('vendor') or '').strip() or None,
-        'gpu': raw.get('gpu') or [],
+        'gpu': [g['name'] for g in split_graphics(raw.get('gpu'))[0]],
+        'gpu_devices': split_graphics(raw.get('gpu'))[0],
+        'gpu_virtual': [g['name'] for g in split_graphics(raw.get('gpu'))[1]],
         'pci': raw.get('pci') or '',
         'pci_ids': sorted(_pairs(raw.get('pci'), PCI_PATTERNS)
                           | (_apple_pairs(raw.get('pci'), 'Vendor ID', 'Device ID')
@@ -226,6 +319,11 @@ def probe():
         'usb_ids': sorted(_pairs(raw.get('usb'), USB_PATTERNS)
                           | (_apple_pairs(raw.get('usb'), 'Vendor ID', 'Product ID')
                              if system == 'Darwin' else set())),
+        'hda_ids': sorted(_pairs(raw.get('hda'), HDA_PATTERNS)),
+        'nvme': nvme_drives(raw.get('storage')),
+        'peripherals': peripherals(raw.get('peripherals')),
+        'ps2': 'PNP0F13' in (raw.get('peripherals') or '').upper()
+               or 'PNP0303' in (raw.get('peripherals') or '').upper(),
         'generation': cpu_generation(raw.get('cpu'), bool(laptop)),
     }
 
@@ -234,7 +332,10 @@ if __name__ == '__main__':
     for k, v in probe().items():
         if k == 'pci':
             print(f'  {k:10s} {len(v.splitlines())} lines')
-        elif k in ('pci_ids', 'usb_ids'):
+        elif k in ('gpu_devices',):
+            for g in v:
+                print(f'  {k:10s} {g["name"]}' + (f'  [{g["id"]}]' if g['id'] else ''))
+        elif k in ('pci_ids', 'usb_ids', 'hda_ids'):
             print(f'  {k:10s} {len(v)}: ' + ', '.join(v[:8]) + (' ...' if len(v) > 8 else ''))
         else:
             print(f'  {k:10s} {v}')
