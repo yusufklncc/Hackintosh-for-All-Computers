@@ -1,5 +1,3 @@
-# Work is in progress for this repository.
-
 # macOS on All Computers
 
 <p align="center">
@@ -11,13 +9,14 @@ Hello everyone. This repository contains the RAW macOS installation files and gl
 ## Table of contents
 
 - [Find Hardware Information](#find-hardware-information)
-- [Check Compability](#check-compability)
-- [Download macOS Image](#download-macOS-image)
+- [Check Compatibility](#check-compatibility)
+- [Download macOS Image](#download-macos-image)
 - [Write macOS Image](#write-macos-image)
-- [Set the EFI folder](#set-efi-folder)
+- [Set the EFI Folder](#set-the-efi-folder)
 - [Adjust BIOS settings](#adjust-bios-settings)
 - [Editing EFI](#editing-efi)
 - [macOS Installation Steps](#macos-installation-steps)
+- [Post Installation](#post-installation)
 
 ### Find Hardware Information
 
@@ -49,7 +48,7 @@ I took the screenshots from my current computer. According to this guide, here a
 
 <br>
 
-### Check Compability
+### Check Compatibility
 
 - [Anti-Hackintosh Buyers](https://dortania.github.io/Anti-Hackintosh-Buyers-Guide/)
 
@@ -102,9 +101,12 @@ To check if your hardware is incompatible, I leave links below.
 
 - When you plug-in USB back, you can see EFI partition in "My Computer"
 - Open EFI partition.
-- Copy your EFI folder to EFI partititon.
+- Copy your EFI folder to EFI partition.
   - If you don't have EFI. You can use my global EFI.
   - Download from `Releases` and copy the EFI folder to EFI partition.
+> [!IMPORTANT]
+> Every config in this repository ships with a **placeholder SMBIOS**: the serial numbers, MLB, UUID and `ROM` (`11:22:33:44:55:66`) values are shared by many users. Leaving them as-is will break iCloud, iMessage and FaceTime. After the installation finishes, generate your own values with the [Post Installation](#post-installation) steps before signing in to any Apple service.
+
 - Open EFI/OC/config folder, find compatible config for your hardware. Copy it to EFI/OC and set your file name config. Example:
   - my CPU is `i5-7200U`. It is `Kaby Lake Mobile (Laptop)` cpu.
   - Go EFI/OC/config/Laptop and copy `Kaby Lake.plist` to EFI/OC and rename `config.plist`
@@ -185,10 +187,9 @@ Note: Most of these options may not be present in your firmware, we recommend th
 - Download the kext we need and put it in EFI/OC/Kexts. Next is to add this kext to the config. We will do this with `Notepad/Notepad++`. I will use `AirportBrcmFixUp.kext` which is required for Broadcom card.
 - Right click on our `config.plist` file and open it with `notepad/notepad++`. Search `Kernel` with the Ctrl+F key combination. The result will be:
 
-  - <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/config:kernel.png">
+  - <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/config-kernel.png">
 
-- Now come to the bottom of the `Add` section and add our kext. For that, follow this video:
-  - [Add kext to config]()
+- Now come to the bottom of the `Add` section and add our kext.
 
 <br>
 
@@ -218,7 +219,7 @@ Note: Most of these options may not be present in your firmware, we recommend th
 - If you are going to install macOS `next to windows`, create a partition with the video guide below.
 
   - [Splitting the disk in HFS+ format](https://vk.com/video749455540_456239018)
-  - After doing this, right-click created volume name on left sida from Disk Utility and click Convert APFS. You can select your disk on the installation screen and start the installation.
+  - After doing this, right-click created volume name on left side from Disk Utility and click Convert APFS. You can select your disk on the installation screen and start the installation.
 
 - Give your disk a name, set Format to APFS and Scheme to GUID. Click Erase.
   - <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/Installation/name-format-scheme.png">
@@ -318,16 +319,16 @@ Note: Most of these options may not be present in your firmware, we recommend th
   - Search `boot-args` and delete `-v` argument.
 - Now we have to set our serial numbers and ROM value.
   - Download [GenSMBIOS](https://github.com/corpnewt/GenSMBIOS/archive/refs/heads/master.zip) and open .command file. If program asks `Download Python` download it. After that select option 3.
-  - <img src="https://github.com/yusufklncc/Lenovo-Thinkpad-E570-Hackintosh/blob/main/Resources/GenSMBIOS/GenSMBIOS%201.png">
+  - <img src="https://raw.githubusercontent.com/yusufklncc/Lenovo-Thinkpad-E570-Hackintosh/main/src/GenSMBIOS/GenSMBIOS%201.png">
   - Now list 5 SMBIOS first. `MacBookPro14,1` (Compatible SMBIOS with your hardware)
     - If your hardware compatible SMBIOS doesn't support installed macOS version, add `-no_compat_check` to `boot-args`.
-  - <img src="https://github.com/yusufklncc/Lenovo-Thinkpad-E570-Hackintosh/blob/main/Resources/GenSMBIOS/GenSMBIOS%202.png">
+  - <img src="https://raw.githubusercontent.com/yusufklncc/Lenovo-Thinkpad-E570-Hackintosh/main/src/GenSMBIOS/GenSMBIOS%202.png">
   - Select and copy first Serial.
-  - <img src="https://github.com/yusufklncc/Lenovo-Thinkpad-E570-Hackintosh/blob/main/Resources/GenSMBIOS/GenSMBIOS%203.png">
+  - <img src="https://raw.githubusercontent.com/yusufklncc/Lenovo-Thinkpad-E570-Hackintosh/main/src/GenSMBIOS/GenSMBIOS%203.png">
   - Go [check](https://checkcoverage.apple.com/) serial number. Your serial should be like this. If not, try second serial.
-  - <img src="https://github.com/yusufklncc/Lenovo-Thinkpad-E570-Hackintosh/blob/main/Resources/GenSMBIOS/Check%20Serial.png">
-  - Search MacBookPro15,1 and replace `Type > SystemProductName, Serial > SystemSerialNumber, Board Serial > MLB and SmUUID > SystemUUID` values. Now we will set our ROM value.
-  - Go `System Setting > Netwotk > Ethernet > Details > Hardware`. If our MAC adress is `54:1A:AF:43:70:CA` remove `:` characters = `541AAF4370CA`. Convert it to [Base64](https://base64.guru/converter/encode/hex).
+  - <img src="https://raw.githubusercontent.com/yusufklncc/Lenovo-Thinkpad-E570-Hackintosh/main/src/GenSMBIOS/Check%20Serial.png">
+  - Search MacBookPro14,1 and replace `Type > SystemProductName, Serial > SystemSerialNumber, Board Serial > MLB and SmUUID > SystemUUID` values. Now we will set our ROM value.
+  - Go `System Setting > Network > Ethernet > Details > Hardware`. If our MAC address is `54:1A:AF:43:70:CA` remove `:` characters = `541AAF4370CA`. Convert it to [Base64](https://base64.guru/converter/encode/hex).
   - Now we have `VBqvQ3DK`. Replace this with ROM value and save config file.
   - Restart computer and press `Space` key on OpenCore menu. Then enter `ResetNVRAM`. After that BIOS settings may change. Check it and boot macOS.
   - Now you can login iCloud, iMessage or other apple services and you can use macOS.
