@@ -1,0 +1,7 @@
+# 35 configs, identical delta.
+
+[Kernel.Quirks]
+LapicKernelPanic = true
+
+[UEFI.Quirks]
+UnblockFsConnect = true

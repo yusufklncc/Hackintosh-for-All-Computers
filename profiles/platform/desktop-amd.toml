@@ -1,0 +1,103 @@
+# 11 cpu profiles build on this.
+
+[ACPI]
+Delete = []
+Patch = []
+
+[[ACPI.Add]]
+Comment = ""
+Enabled = true
+Path = "SSDT-EC-USBX-DESKTOP.aml"
+
+[Kernel.Emulate]
+DummyPowerManagement = true
+
+[Kernel.Quirks]
+ProvideCurrentCpuInfo = true
+
+[Kernel.Scheme]
+KernelArch = "x86_64"
+
+[Misc.Serial.Custom]
+LineControl = 7
+
+[[Misc.Tools]]
+Arguments = ""
+Auxiliary = true
+Comment = ""
+Enabled = true
+Flavour = "Auto"
+FullNvramAccess = false
+Name = "OpenShell"
+Path = "OpenShell.efi"
+RealPath = false
+TextMode = false
+
+[NVRAM.Add.4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102]
+rtc-blacklist = ""
+
+[NVRAM.Add.7C436110-AB2A-4BBB-A880-FE41995C9F82]
+boot-args = "-v keepsyms=1 debug=0x100 alcid=1"
+"prev-lang:kbd" = "hex:"
+
+[NVRAM.Delete]
+4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102 = ["rtc-blacklist"]
+7C436110-AB2A-4BBB-A880-FE41995C9F82 = ["boot-args"]
+
+[NVRAM.LegacySchema]
+7C436110-AB2A-4BBB-A880-FE41995C9F82 = ["EFILoginHiDPI", "EFIBluetoothDelay", "LocationServicesEnabled", "SystemAudioVolume", "SystemAudioVolumeDB", "SystemAudioVolumeSaved", "bluetoothActiveControllerInfo", "bluetoothInternalControllerInfo", "flagstate", "fmm-computer-name", "nvda_drv", "prev-lang:kbd"]
+
+[PlatformInfo.Generic]
+SystemProductName = "iMacPro1,1"
+
+[UEFI.APFS]
+MinDate = -1
+MinVersion = -1
+
+[UEFI.AppleInput]
+AppleEvent = "Auto"
+GraphicsInputMirroring = false
+
+[[UEFI.Drivers]]
+Arguments = ""
+Comment = ""
+Enabled = true
+LoadEarly = false
+Path = "HfsPlus.efi"
+
+[[UEFI.Drivers]]
+Arguments = ""
+Comment = ""
+Enabled = true
+LoadEarly = false
+Path = "OpenCanopy.efi"
+
+[[UEFI.Drivers]]
+Arguments = ""
+Comment = ""
+Enabled = true
+LoadEarly = false
+Path = "OpenRuntime.efi"
+
+[[UEFI.Drivers]]
+Arguments = ""
+Comment = ""
+Enabled = true
+LoadEarly = false
+Path = "ToggleSipEntry.efi"
+
+[[UEFI.Drivers]]
+Arguments = ""
+Comment = ""
+Enabled = true
+LoadEarly = false
+Path = "ResetNvramEntry.efi"
+
+[UEFI.Output]
+UIScale = -1
+
+[UEFI.ProtocolOverrides]
+FirmwareVolume = false
+
+[UEFI.Quirks]
+EnableVectorAcceleration = false

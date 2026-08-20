@@ -1,0 +1,4 @@
+# 8 configs, identical delta.
+
+[Booter.Quirks]
+SetupVirtualMap = false

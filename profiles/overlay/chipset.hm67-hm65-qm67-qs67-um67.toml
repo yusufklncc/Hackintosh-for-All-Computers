@@ -1,0 +1,24 @@
+# 1 configs, identical delta.
+
+[[ACPI.Add]]
+Comment = ""
+Enabled = true
+Path = "SSDT-EC-LAPTOP.aml"
+
+[[ACPI.Add]]
+Comment = ""
+Enabled = true
+Path = "SSDT-IMEI.aml"
+
+[[ACPI.Add]]
+Comment = ""
+Enabled = true
+Path = "SSDT-PNLF.aml"
+
+[[ACPI.Add]]
+Comment = ""
+Enabled = true
+Path = "SSDT-XOSI.aml"
+
+[DeviceProperties.Add."PciRoot(0x0)/Pci(0x16,0x0)"]
+device-id = "hex:3a1e0000"

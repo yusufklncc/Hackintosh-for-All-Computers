@@ -1,0 +1,7 @@
+# 22 configs, identical delta.
+
+[Kernel.Quirks]
+CustomSMBIOSGuid = true
+
+[PlatformInfo]
+UpdateSMBIOSMode = "Custom"

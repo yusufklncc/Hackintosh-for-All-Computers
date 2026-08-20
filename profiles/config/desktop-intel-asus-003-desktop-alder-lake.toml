@@ -1,0 +1,156 @@
+# Exception: EFI/OC/config/Desktop/Intel/ASUS/003 - Desktop - Alder Lake.plist
+
+"# BASE EFI INTEL 11th ROCKET LAKE (doest not support iGPU) - RELEASE Version" = ""
+"# BY: https://luchina.com.br" = ""
+"# DISCORD: https://discord.universohackintosh.com" = ""
+
+[[ACPI.Add]]
+Comment = ""
+Enabled = true
+Path = "SSDT-AWAC.aml"
+
+[[ACPI.Add]]
+Comment = ""
+Enabled = true
+Path = "SSDT-EC-USBX-DESKTOP.aml"
+
+[[ACPI.Add]]
+Comment = ""
+Enabled = true
+Path = "SSDT-PLUG-ALT.aml"
+
+[[ACPI.Add]]
+Comment = ""
+Enabled = true
+Path = "SSDT-RHUB.aml"
+
+[[ACPI.Patch]]
+Base = ""
+BaseSkip = 0
+Comment = "Change MC__ to MCHC"
+Count = 0
+Enabled = false
+Find = "hex:4d435f5f"
+Limit = 0
+Mask = "hex:"
+OemTableId = "hex:"
+Replace = "hex:4d434843"
+ReplaceMask = "hex:"
+Skip = 0
+TableLength = 0
+TableSignature = "hex:44534454"
+
+[[ACPI.Patch]]
+Base = ""
+BaseSkip = 0
+Comment = "Change MC__ to MCHC"
+Count = 0
+Enabled = true
+Find = "hex:4d435f5f"
+Limit = 0
+Mask = "hex:"
+OemTableId = "hex:"
+Replace = "hex:4d434843"
+ReplaceMask = "hex:"
+Skip = 0
+TableLength = 0
+TableSignature = "hex:53534454"
+
+[[ACPI.Patch]]
+Base = ""
+BaseSkip = 0
+Comment = "Change ADBG to XDBG"
+Count = 1
+Enabled = false
+Find = "hex:4303141941444247"
+Limit = 0
+Mask = "hex:"
+OemTableId = "hex:"
+Replace = "hex:4303141958444247"
+ReplaceMask = "hex:"
+Skip = 0
+TableLength = 0
+TableSignature = "hex:53534454"
+
+[[Kernel.Add]]
+Arch = "x86_64"
+BundlePath = "Lilu.kext"
+Comment = ""
+Enabled = true
+ExecutablePath = "Contents/MacOS/Lilu"
+MaxKernel = ""
+MinKernel = "8.0.0"
+PlistPath = "Contents/Info.plist"
+
+[[Kernel.Add]]
+Arch = "x86_64"
+BundlePath = "VirtualSMC.kext"
+Comment = ""
+Enabled = true
+ExecutablePath = "Contents/MacOS/VirtualSMC"
+MaxKernel = ""
+MinKernel = "8.0.0"
+PlistPath = "Contents/Info.plist"
+
+[[Kernel.Add]]
+Arch = "x86_64"
+BundlePath = "SMCProcessor.kext"
+Comment = ""
+Enabled = true
+ExecutablePath = "Contents/MacOS/SMCProcessor"
+MaxKernel = ""
+MinKernel = "11.0.0"
+PlistPath = "Contents/Info.plist"
+
+[[Kernel.Add]]
+Arch = "x86_64"
+BundlePath = "SMCSuperIO.kext"
+Comment = ""
+Enabled = true
+ExecutablePath = "Contents/MacOS/SMCSuperIO"
+MaxKernel = ""
+MinKernel = "10.0.0"
+PlistPath = "Contents/Info.plist"
+
+[[Kernel.Add]]
+Arch = "x86_64"
+BundlePath = "WhateverGreen.kext"
+Comment = ""
+Enabled = true
+ExecutablePath = "Contents/MacOS/WhateverGreen"
+MaxKernel = ""
+MinKernel = "10.0.0"
+PlistPath = "Contents/Info.plist"
+
+[[Kernel.Add]]
+Arch = "x86_64"
+BundlePath = "AppleALC.kext"
+Comment = ""
+Enabled = true
+ExecutablePath = "Contents/MacOS/AppleALC"
+MaxKernel = ""
+MinKernel = "8.0.0"
+PlistPath = "Contents/Info.plist"
+
+[[Kernel.Add]]
+Arch = "x86_64"
+BundlePath = "USBInjectAll.kext"
+Comment = ""
+Enabled = true
+ExecutablePath = "Contents/MacOS/USBInjectAll"
+MaxKernel = ""
+MinKernel = "15.0.0"
+PlistPath = "Contents/Info.plist"
+
+[[Kernel.Add]]
+Arch = "x86_64"
+BundlePath = "XHCI-unsupported.kext"
+Comment = ""
+Enabled = true
+ExecutablePath = ""
+MaxKernel = ""
+MinKernel = "15.0.0"
+PlistPath = "Contents/Info.plist"
+
+[NVRAM.Delete]
+7C436110-AB2A-4BBB-A880-FE41995C9F82 = ["boot-args"]

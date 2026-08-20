@@ -1,0 +1,332 @@
+# Derived from EFI/OC/config/Desktop/AMD/004 - Desktop - Ryzen ve Threadripper 4 Core.plist
+
+[Booter.Quirks]
+EnableWriteUnprotector = false
+RebuildAppleMemoryMap = true
+SyncRuntimePermissions = true
+
+[[Kernel.Add]]
+Arch = "x86_64"
+BundlePath = "AppleMCEReporterDisabler.kext"
+Comment = "V1.2"
+Enabled = true
+ExecutablePath = ""
+MaxKernel = ""
+MinKernel = ""
+PlistPath = "Contents/Info.plist"
+
+[[Kernel.Add]]
+Arch = "x86_64"
+BundlePath = "Lilu.kext"
+Comment = "V1.5.9"
+Enabled = true
+ExecutablePath = "Contents/MacOS/Lilu"
+MaxKernel = ""
+MinKernel = "8.0.0"
+PlistPath = "Contents/Info.plist"
+
+[[Kernel.Add]]
+Arch = "x86_64"
+BundlePath = "VirtualSMC.kext"
+Comment = "V1.2.8"
+Enabled = true
+ExecutablePath = "Contents/MacOS/VirtualSMC"
+MaxKernel = ""
+MinKernel = "8.0.0"
+PlistPath = "Contents/Info.plist"
+
+[[Kernel.Add]]
+Arch = "x86_64"
+BundlePath = "WhateverGreen.kext"
+Comment = "V1.5.6"
+Enabled = true
+ExecutablePath = "Contents/MacOS/WhateverGreen"
+MaxKernel = ""
+MinKernel = "10.0.0"
+PlistPath = "Contents/Info.plist"
+
+[[Kernel.Add]]
+Arch = "x86_64"
+BundlePath = "AppleALC.kext"
+Comment = "V1.6.8"
+Enabled = true
+ExecutablePath = "Contents/MacOS/AppleALC"
+MaxKernel = ""
+MinKernel = "8.0.0"
+PlistPath = "Contents/Info.plist"
+
+[[Kernel.Add]]
+Arch = "x86_64"
+BundlePath = "AMDRyzenCPUPowerManagement.kext"
+Comment = ""
+Enabled = false
+ExecutablePath = "Contents/MacOS/AMDRyzenCPUPowerManagement"
+MaxKernel = ""
+MinKernel = "17.0.0"
+PlistPath = "Contents/Info.plist"
+
+[[Kernel.Add]]
+Arch = "x86_64"
+BundlePath = "SMCAMDProcessor.kext"
+Comment = ""
+Enabled = false
+ExecutablePath = "Contents/MacOS/SMCAMDProcessor"
+MaxKernel = ""
+MinKernel = "17.0.0"
+PlistPath = "Contents/Info.plist"
+
+[[Kernel.Patch]]
+Arch = "x86_64"
+Base = "_cpuid_set_info"
+Comment = "algrey - Force cpuid_cores_per_package 10.13,10.14"
+Count = 1
+Enabled = true
+Find = "hex:c1e81a000000"
+Identifier = "kernel"
+Limit = 0
+Mask = "hex:fffdff000000"
+MaxKernel = "18.99.99"
+MinKernel = "17.0.0"
+Replace = "hex:b80400000000"
+ReplaceMask = "hex:ffffffffff00"
+Skip = 0
+
+[[Kernel.Patch]]
+Arch = "x86_64"
+Base = "_cpuid_set_info"
+Comment = "algrey - Force cpuid_cores_per_package 10.15,11.0"
+Count = 1
+Enabled = true
+Find = "hex:c1e81a000000"
+Identifier = "kernel"
+Limit = 0
+Mask = "hex:fffdff000000"
+MaxKernel = "20.99.99"
+MinKernel = "19.0.0"
+Replace = "hex:ba0400000000"
+ReplaceMask = "hex:ffffffffff00"
+Skip = 0
+
+[[Kernel.Patch]]
+Arch = "x86_64"
+Base = "_cpuid_set_info"
+Comment = "algrey - Force cpuid_cores_per_package 12.0"
+Count = 1
+Enabled = true
+Find = "hex:c1e81a000000"
+Identifier = "kernel"
+Limit = 0
+Mask = "hex:fffdff000000"
+MaxKernel = "22.99.99"
+MinKernel = "21.0.0"
+Replace = "hex:ba0400000090"
+ReplaceMask = "hex:ffffffffffff"
+Skip = 0
+
+[[Kernel.Patch]]
+Arch = "x86_64"
+Base = ""
+Comment = "algrey - _commpage_populate - Remove rdmsr - 10.13/10.14/10.15/11.0/12.0"
+Count = 1
+Enabled = true
+Find = "hex:b9a00100000f32"
+Identifier = "kernel"
+Limit = 0
+Mask = "hex:"
+MaxKernel = "22.99.99"
+MinKernel = "17.0.0"
+Replace = "hex:0f1f8000000000"
+ReplaceMask = "hex:"
+Skip = 0
+
+[[Kernel.Patch]]
+Arch = "x86_64"
+Base = ""
+Comment = "algrey - _cpuid_set_cache_info - Set cpuid to 0x8000001D instead 4 - 10.13/10.14/10.15/11.0/12.0"
+Count = 1
+Enabled = true
+Find = "hex:b8040000004489f14489"
+Identifier = "kernel"
+Limit = 0
+Mask = "hex:"
+MaxKernel = "22.99.99"
+MinKernel = "17.0.0"
+Replace = "hex:b81d0000804489f14489"
+ReplaceMask = "hex:"
+Skip = 0
+
+[[Kernel.Patch]]
+Arch = "x86_64"
+Base = ""
+Comment = "algrey - _cpuid_set_generic_info - Remove wrmsr - 10.13/10.14/10.15/11.0/12.0"
+Count = 1
+Enabled = true
+Find = "hex:b98b00000031c031d20f30"
+Identifier = "kernel"
+Limit = 0
+Mask = "hex:"
+MaxKernel = "22.99.99"
+MinKernel = "17.0.0"
+Replace = "hex:660f1f8400000000006690"
+ReplaceMask = "hex:"
+Skip = 0
+
+[[Kernel.Patch]]
+Arch = "x86_64"
+Base = ""
+Comment = "algrey - _cpuid_set_generic_info - Set microcode=186 - 10.13/10.14/10.15/11.0/12.0"
+Count = 1
+Enabled = true
+Find = "hex:b98b0000000f32"
+Identifier = "kernel"
+Limit = 0
+Mask = "hex:"
+MaxKernel = "22.99.99"
+MinKernel = "17.0.0"
+Replace = "hex:baba0000006690"
+ReplaceMask = "hex:"
+Skip = 0
+
+[[Kernel.Patch]]
+Arch = "x86_64"
+Base = ""
+Comment = "algrey - _cpuid_set_generic_info - Set flag=1 - 10.13/10.14/10.15/11.0/12.0"
+Count = 1
+Enabled = true
+Find = "hex:b9170000000f32c1ea1280e207"
+Identifier = "kernel"
+Limit = 0
+Mask = "hex:"
+MaxKernel = "22.99.99"
+MinKernel = "17.0.0"
+Replace = "hex:b201660f1f8400000000006690"
+ReplaceMask = "hex:"
+Skip = 0
+
+[[Kernel.Patch]]
+Arch = "x86_64"
+Base = ""
+Comment = "algrey - _cpuid_set_info - GenuineIntel to AuthenticAMD - 10.13/10.14/10.15/11.0"
+Count = 1
+Enabled = true
+Find = "hex:47656e75696e65496e74656c00"
+Identifier = "kernel"
+Limit = 0
+Mask = "hex:"
+MaxKernel = "20.99.99"
+MinKernel = "17.0.0"
+Replace = "hex:41757468656e746963414d4400"
+ReplaceMask = "hex:"
+Skip = 0
+
+[[Kernel.Patch]]
+Arch = "x86_64"
+Base = ""
+Comment = "Goldfish64 - Bypass GenuineIntel check panic - 12.0"
+Count = 1
+Enabled = true
+Find = "hex:b96e0000000fbec039c1000000000000"
+Identifier = "kernel"
+Limit = 0
+Mask = "hex:ffffffffffffffffffff000000000000"
+MaxKernel = "22.99.99"
+MinKernel = "21.0.0"
+Replace = "hex:b96e0000000fbec039c1909090909090"
+ReplaceMask = "hex:"
+Skip = 0
+
+[[Kernel.Patch]]
+Arch = "x86_64"
+Base = ""
+Comment = "algrey - _cpuid_set_cpufamily - Force CPUFAMILY_INTEL_PENRYN - 10.13/10.14/10.15/11.2"
+Count = 1
+Enabled = true
+Find = "hex:31db803d00000000067500"
+Identifier = "kernel"
+Limit = 0
+Mask = "hex:ffffffff000000ffffff00"
+MaxKernel = "20.3.0"
+MinKernel = "17.0.0"
+Replace = "hex:bbbc4fea78e95d00000090"
+ReplaceMask = "hex:"
+Skip = 0
+
+[[Kernel.Patch]]
+Arch = "x86_64"
+Base = "_cpuid_set_info"
+Comment = "algrey - _cpuid_set_cpufamily - Force CPUFAMILY_INTEL_PENRYN - 11.3 + / 12.0"
+Count = 1
+Enabled = true
+Find = "hex:803d000000000675"
+Identifier = "kernel"
+Limit = 0
+Mask = "hex:ffff00000000ffff"
+MaxKernel = "22.99.99"
+MinKernel = "20.4.0"
+Replace = "hex:babc4fea7831dbeb"
+ReplaceMask = "hex:"
+Skip = 0
+
+[[Kernel.Patch]]
+Arch = "x86_64"
+Base = ""
+Comment = "algrey - _i386_init - Remove rdmsr (x3) - 10.13/10.14/10.15/11.0/12.0"
+Count = 0
+Enabled = true
+Find = "hex:b9990100000f3248c1e22089c64809d6b9980100000f3248c1e22089c04809c2bf5802310531c94531c0"
+Identifier = "kernel"
+Limit = 0
+Mask = "hex:"
+MaxKernel = "22.99.99"
+MinKernel = "17.0.0"
+Replace = "hex:660f1f840000000000660f1f840000000000660f1f840000000000660f1f840000000000660f1f440000"
+ReplaceMask = "hex:"
+Skip = 0
+
+[[Kernel.Patch]]
+Arch = "x86_64"
+Base = ""
+Comment = "algrey/XLNC - Remove version check and panic"
+Count = 1
+Enabled = true
+Find = "hex:25fc00000083f813"
+Identifier = "kernel"
+Limit = 0
+Mask = "hex:"
+MaxKernel = "22.99.99"
+MinKernel = "17.0.0"
+Replace = "hex:25fc0000000f1f00"
+ReplaceMask = "hex:"
+Skip = 0
+
+[[Kernel.Patch]]
+Arch = "x86_64"
+Base = ""
+Comment = "algrey - _mtrr_update_action fix PAT - 10.13/10.14/10.15/11.0/12.0"
+Count = 0
+Enabled = true
+Find = "hex:89c081e2ffff00ff81ca00000100b977020000"
+Identifier = "kernel"
+Limit = 0
+Mask = "hex:ffffffffffff0fffffffffffffffffffffffff"
+MaxKernel = "22.99.99"
+MinKernel = "17.0.0"
+Replace = "hex:b977020000b806010700ba060107000f1f4000"
+ReplaceMask = "hex:"
+Skip = 0
+
+[[Kernel.Patch]]
+Arch = "x86_64"
+Base = ""
+Comment = "Shaneee - _mtrr_update_action fix PAT - 10.13/10.14/10.15/11.0/12.0"
+Count = 0
+Enabled = false
+Find = "hex:89c081e2ffff00ff81ca00000100b977020000"
+Identifier = "kernel"
+Limit = 0
+Mask = "hex:ffffffffffff0fffffffffffffffffffffffff"
+MaxKernel = "22.99.99"
+MinKernel = "17.0.0"
+Replace = "hex:b977020000b806060606ba060606060f300f09"
+ReplaceMask = "hex:"
+Skip = 0

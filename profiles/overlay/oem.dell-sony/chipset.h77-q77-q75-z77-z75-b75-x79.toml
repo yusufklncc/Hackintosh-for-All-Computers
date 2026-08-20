@@ -1,0 +1,23 @@
+# 2 configs, identical delta.
+
+[[ACPI.Add]]
+Comment = ""
+Enabled = true
+Path = "SSDT-PLUG-DRTNIA.aml"
+
+[[ACPI.Add]]
+Comment = ""
+Enabled = true
+Path = "SSDT-IMEI.aml"
+
+[DeviceProperties.Add."PciRoot(0x0)/Pci(0x16,0x0)"]
+device-id = "hex:3a1c0000"
+
+[Kernel.Quirks]
+CustomSMBIOSGuid = true
+
+[NVRAM.Add.7C436110-AB2A-4BBB-A880-FE41995C9F82]
+boot-args = "-v keepsyms=1 debug=0x100"
+
+[PlatformInfo]
+UpdateSMBIOSMode = "Custom"

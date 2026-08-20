@@ -1,0 +1,14 @@
+# 8 configs, identical delta.
+
+[[ACPI.Add]]
+Comment = ""
+Enabled = true
+Path = "SSDT-EC-USBX-DESKTOP.aml"
+
+[[ACPI.Add]]
+Comment = ""
+Enabled = true
+Path = "SSDT-CPUR.aml"
+
+[Booter.Quirks]
+SetupVirtualMap = false

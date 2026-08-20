@@ -1,0 +1,5 @@
+# 8 configs, identical delta.
+
+[Booter.Quirks]
+DevirtualiseMmio = true
+SetupVirtualMap = false
