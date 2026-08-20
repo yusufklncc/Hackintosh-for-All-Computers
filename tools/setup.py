@@ -49,9 +49,9 @@ CPU_LABELS = {
     'bulldozer-jaguar': 'Bulldozer / Jaguar', 'ryzen-threadripper': 'Ryzen / Threadripper',
 }
 
-BOLD, DIM, GREEN, RESET = '\033[1m', '\033[2m', '\033[32m', '\033[0m'
+BOLD, DIM, GREEN, YELLOW, RESET = '\033[1m', '\033[2m', '\033[32m', '\033[33m', '\033[0m'
 if os.environ.get('NO_COLOR') or not sys.stdout.isatty():
-    BOLD = DIM = GREEN = RESET = ''
+    BOLD = DIM = GREEN = YELLOW = RESET = ''
 
 
 def ask(step, total, question, options, detected=None, allow_skip=False):
@@ -195,7 +195,23 @@ def main():
                 rels = netkexts.releases()
                 darwin = ask(0, 0, 'Which macOS are you installing?',
                              [(r['darwin'], f"{r['name']} {r['version']}") for r in rels])
+            # Intel Wi-Fi resolves to one build, so the every-version mode has
+            # to ask which macOS after all - but only when such a card is there
+            wifi_darwin = darwin
+            if netkexts.wifi_entry(matched, 0)[1] and wifi_darwin is None:
+                print(f'\n      {DIM}Intel Wi-Fi is built separately for each macOS release, '
+                      f'so it needs one.{RESET}')
+                rels = netkexts.releases()
+                wifi_darwin = ask(0, 0, 'Which macOS for the Wi-Fi kext?',
+                                  [(r['darwin'], f"{r['name']} {r['version']}") for r in rels],
+                                  allow_skip=True)
             entries, chosen = netkexts.entries(matched, darwin)
+            if wifi_darwin is not None:
+                wifi, note = netkexts.wifi_entry(matched, wifi_darwin)
+                if wifi:
+                    entries.append(wifi)
+                if note:
+                    print(f'      {GREEN if wifi else YELLOW}{note}{RESET}')
             netkexts.fill_executables(entries)
             for s_, kexts in chosen:
                 print(f'      {GREEN}{s_["label"]}{RESET}  '

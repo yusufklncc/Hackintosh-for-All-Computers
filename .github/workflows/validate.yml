@@ -39,6 +39,13 @@ jobs:
           printf '2\n10\n3\n1\n'     | python3 tools/setup.py $IDS --out /tmp/net-all/EFI
           printf '2\n10\n3\n2\n10\n' | python3 tools/setup.py $IDS --out /tmp/net-sonoma/EFI
           printf '2\n10\n3\n3\n'     | python3 tools/setup.py $IDS --out /tmp/net-none/EFI
+          # Wi-Fi resolves to one build; the vendored one needs no network
+          printf '2\n10\n3\n2\n10\n' | python3 tools/setup.py --ids 8086:2723 --out /tmp/wifi-sonoma/EFI
+          test -d /tmp/wifi-sonoma/EFI/OC/Kexts/AirportItlwm.kext
+          # a release with no build must decline rather than ship the wrong one
+          printf '2\n10\n3\n2\n11\n' | python3 tools/setup.py --ids 8086:2723 --out /tmp/wifi-sequoia/EFI
+          test ! -d /tmp/wifi-sequoia/EFI/OC/Kexts/AirportItlwm.kext
+          python3 tools/itlwm.py
           python3 tools/hwtable.py EFI/OC/Kexts --out /tmp/hardware.toml
           diff /tmp/hardware.toml data/hardware.toml
 

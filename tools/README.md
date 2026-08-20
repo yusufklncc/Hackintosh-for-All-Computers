@@ -146,9 +146,25 @@ from macOS 12 where it takes over.
 cross-checked by `coverage.py --names`, which recovers the same mapping from
 this repository's own patch comments without being told.
 
-Wi-Fi is not covered yet: `AirportItlwm` ships a separate 15 MB build per macOS
-release, so vendoring all eight would add about 126 MB to a repository whose
-entire release is currently 7 MB.
+### Intel Wi-Fi
+
+`AirportItlwm` is compiled against each macOS release's AirPort interface and
+published as a separate 15 MB download, eight of them for v2.3.0. Carrying all
+eight would add about 126 MB, and an EFI can only hold one anyway - so it is the
+one device that always resolves to a single build:
+
+* the newest, `Sonoma14.4`, is vendored and needs no network
+* any other release is fetched once into `.itlwm-cache/` and copied into the
+  build from there
+* nothing is fetched unless a card that needs it was actually detected
+
+This is also why the every-macOS mode asks which release after all when an Intel
+Wi-Fi card is present. It is the honest answer: there is no build that covers
+them all.
+
+v2.3.0 publishes nothing for Sequoia or Tahoe. Targeting those, the builder says
+so and leaves Wi-Fi out rather than shipping a kext built for a different
+release.
 
 ## Building
 

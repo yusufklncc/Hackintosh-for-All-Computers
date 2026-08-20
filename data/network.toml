@@ -92,3 +92,61 @@ note = "required by BrcmPatchRAM3, and never with 12 or newer where BlueToolFixu
 bundle = "BlueToolFixup.kext"
 min_kernel = "21.0.0"
 note = "'Required for macOS 12 or newer'"
+
+# Intel Wi-Fi is the one device where a single kext cannot serve every macOS.
+# AirportItlwm is built against each release's AirPort interface and published as
+# a separate 15 MB download per version, so exactly one of them belongs in an
+# EFI. The newest is vendored here; tools/itlwm.py fetches and caches another
+# when a different release is targeted.
+[[variant_set]]
+role = "wifi"
+match = "AirportItlwm.kext"
+label = "Intel Wi-Fi"
+bundle = "AirportItlwm.kext"
+project = "OpenIntelWireless/itlwm"
+release = "v2.3.0"
+vendored = "Sonoma14.4"
+source = "github.com/OpenIntelWireless/itlwm/releases"
+note = "v2.3.0 publishes no build for Sequoia or Tahoe"
+
+[[variant_set.variant]]
+asset = "HighSierra"
+min_darwin = 17
+max_darwin = 17
+
+[[variant_set.variant]]
+asset = "Mojave"
+min_darwin = 18
+max_darwin = 18
+
+[[variant_set.variant]]
+asset = "Catalina"
+min_darwin = 19
+max_darwin = 19
+
+[[variant_set.variant]]
+asset = "BigSur"
+min_darwin = 20
+max_darwin = 20
+
+[[variant_set.variant]]
+asset = "Monterey"
+min_darwin = 21
+max_darwin = 21
+
+[[variant_set.variant]]
+asset = "Ventura"
+min_darwin = 22
+max_darwin = 22
+
+[[variant_set.variant]]
+asset = "Sonoma14.0"
+min_darwin = 23
+max_darwin = 23
+note = "for 14.0 to 14.3; 14.4 raised the interface again"
+
+[[variant_set.variant]]
+asset = "Sonoma14.4"
+min_darwin = 23
+max_darwin = 23
+note = "for 14.4 and later, and the copy vendored in this repository"

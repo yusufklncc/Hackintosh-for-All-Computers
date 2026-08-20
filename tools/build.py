@@ -73,13 +73,21 @@ def apply_identity(config, mode, warn):
     return serial
 
 
-def copy_payload(config, out, warn):
-    """Copy only what the config references, plus the two mandatory binaries."""
+def copy_payload(config, out, warn, overrides=None):
+    """Copy only what the config references, plus the two mandatory binaries.
+
+    overrides maps a bundle name to a path outside EFI/OC/Kexts, which is how a
+    downloaded AirportItlwm variant reaches the build without the repository
+    having to carry all eight of them."""
     n = 0
+    overrides = overrides or {}
 
     def take(rel, dest_rel=None):
         nonlocal n
         src, dst = SRC / rel, out / (dest_rel or rel)
+        bundle = rel.split('/')[-1]
+        if bundle in overrides:
+            src = Path(overrides[bundle])
         if not src.exists():
             warn(f'referenced but missing from the repository: {rel}')
             return
@@ -196,7 +204,8 @@ def main():
         have = {k['BundlePath'] for k in config['Kernel']['Add']}
         # appended, not merged in: everything already there was ordered by a
         # profile, and Lilu - which IntelBTPatcher needs - is always first
-        config['Kernel']['Add'] += [e for e in added if e['BundlePath'] not in have]
+        config['Kernel']['Add'] += [{k: v for k, v in e.items() if k != 'SourcePath'}
+                                    for e in added if e['BundlePath'] not in have]
 
     serial = apply_identity(config, a.identity, warn)
 
@@ -204,7 +213,9 @@ def main():
     if out.exists():
         shutil.rmtree(out)
     out.mkdir(parents=True)
-    copied = copy_payload(config, out, warn)
+    copied = copy_payload(config, out, warn,
+                          {e['BundlePath']: e['SourcePath']
+                           for e in added if e.get('SourcePath')})
     cfg = out / 'OC' / 'config.plist'
     cfg.parent.mkdir(parents=True, exist_ok=True)
     with open(cfg, 'wb') as fh:

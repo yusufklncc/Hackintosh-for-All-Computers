@@ -55,6 +55,7 @@ UPSTREAM = {
     'BrcmBluetoothInjector.kext': 'acidanthera/BrcmPatchRAM',
     'BlueToolFixup.kext': 'acidanthera/BrcmPatchRAM',
     'AirportBrcmFixup.kext': 'acidanthera/AirportBrcmFixup',
+    'AirportItlwm.kext': 'OpenIntelWireless/itlwm',
     'UTBDefault.kext': 'USBToolBox/kext',
     'AMDRyzenCPUPowerManagement.kext': 'trulyspinach/SMCAMDProcessor',
     'SMCAMDProcessor.kext': 'trulyspinach/SMCAMDProcessor',

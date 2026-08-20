@@ -12,6 +12,11 @@ version = "2.2.0"
 sha256 = "94002ff668071e6dacc998041132e8c0c2386747dd795695bf3fc1ff4d8923ce"
 upstream = "acidanthera/AirportBrcmFixup"
 
+[kext."AirportItlwm.kext"]
+version = "2.3.0"
+sha256 = "03460f6187462f9805b17c4ab47808a056a315645429b88765f7db36efdcd61e"
+upstream = "OpenIntelWireless/itlwm"
+
 [kext."AppleALC.kext"]
 version = "1.9.5"
 sha256 = "aa6675f2ae14e1325a37caac4a78770736110a37603f538db112d98e35cd7f9f"

@@ -17,6 +17,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import itlwm
 import ocgen
 
 DATA = Path('data')
@@ -42,6 +43,28 @@ def covers(kext, darwin):
     if hi and darwin > hi[0]:
         return False
     return True
+
+
+def variant_sets():
+    return ocgen.read_toml(DATA / 'network.toml').get('variant_set', [])
+
+
+def wifi_entry(matched_kexts, darwin, minor=None, allow_download=True):
+    """(entry, note) for Intel Wi-Fi, which resolves to exactly one build."""
+    for s in variant_sets():
+        if s['match'] not in matched_kexts:
+            continue
+        if darwin is None:
+            return None, (f"{s['label']} needs a build for one specific macOS, so it "
+                          f"cannot be added in the every-version mode")
+        path, note = itlwm.resolve(darwin, minor, allow_download)
+        if not path:
+            return None, f'{s["label"]}: {note}'
+        e = {'Arch': 'x86_64', 'BundlePath': s['bundle'], 'Comment': s['label'],
+             'Enabled': True, 'ExecutablePath': '', 'MaxKernel': '', 'MinKernel': '',
+             'PlistPath': 'Contents/Info.plist', 'SourcePath': str(path)}
+        return e, f'{s["label"]}: {note}'
+    return None, None
 
 
 def entries(matched_kexts, darwin=None):
