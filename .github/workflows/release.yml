@@ -11,25 +11,7 @@ on:
 
 jobs:
   windows-exe:
-    # Built on Windows because that is where it will be run: the EFI is almost
-    # always prepared from the machine being converted, and that machine has no
-    # Python on it.
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-      - run: pip install pyinstaller
-      - run: pyinstaller --clean --noconfirm --distpath dist tools/pyinstaller.spec
-      - name: It builds an EFI from the bundle alone
-        run: |
-          dist/HackintoshEFIBuilder.exe --no-detect --answers 2,10,3 --out smoke/EFI
-          if (-not (Test-Path smoke/EFI/OC/config.plist)) { exit 1 }
-      - uses: actions/upload-artifact@v4
-        with:
-          name: windows-exe
-          path: dist/HackintoshEFIBuilder.exe
+    uses: ./.github/workflows/windows-exe.yml
 
   build:
     needs: windows-exe
