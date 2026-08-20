@@ -116,7 +116,7 @@ def copy_payload(config, out, warn, overrides=None):
     return n
 
 
-def main():
+def main(argv=None):
     ap = argparse.ArgumentParser()
     ap.add_argument('--list', action='store_true', help='show available profiles and exit')
     ap.add_argument('--catalogue', action='store_true',
@@ -134,7 +134,7 @@ def main():
     ap.add_argument('--identity', choices=('generate', 'placeholder'), default='generate')
     ap.add_argument('--no-validate', action='store_true')
     ap.add_argument('--add-kexts', help='JSON file of extra Kernel.Add entries to append')
-    a = ap.parse_args()
+    a = ap.parse_args(argv)
 
     cat = {e['name']: e for e in
            ocgen.read_toml(PROFILES / 'catalogue.toml')['config']} \

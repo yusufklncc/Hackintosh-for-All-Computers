@@ -311,6 +311,12 @@ is allowed to pass.
 `--answers 2,10,3` replays a menu run non-interactively. That is what CI uses,
 on both platforms, instead of piping keystrokes.
 
+Two things the frozen build gets wrong if written the obvious way, both fixed:
+a relative script path in the spec resolves against the spec's own directory, so
+`tools/setup.py` in a spec that lives in `tools/` looks for `tools/tools/`; and
+`sys.executable` is the executable itself rather than an interpreter, so
+`setup.py` calls `build.main()` in process instead of spawning it.
+
 ## The gate
 
 `verify.py` rebuilds every published config from the profiles and compares it
