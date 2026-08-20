@@ -4,9 +4,6 @@
 MmioWhitelist = []
 Patch = []
 
-[Booter.Quirks]
-FixupAppleEfiImages = false
-
 [Kernel]
 Block = []
 Force = []

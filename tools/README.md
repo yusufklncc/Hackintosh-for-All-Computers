@@ -100,12 +100,11 @@ built against.
 profile against each OpenCore release's own `Sample.plist` and validates it with
 that release's own `ocvalidate`:
 
-    OC_CACHE=.oc-cache python3 tools/matrix.py 0.9.6 0.9.9 1.0.0 1.0.5 1.0.7 --write
+    OC_CACHE=.oc-cache python3 tools/matrix.py 0.8.7 0.9.0 1.0.0 1.0.5 1.0.7 --write
 
-All 37 profiles validate on every release from **0.9.6 to 1.0.7** - 370 of 370
-combinations. 0.9.5 is the floor, for one reason: `Booter.Quirks.FixupAppleEfiImages`
-did not exist before 0.9.6, and every config here sets it. No upper bound was
-found, so `oc_max` is empty.
+All 37 profiles validate on every release from **0.8.7 to 1.0.7** - 592 of 592
+combinations. The floor is set by `Misc.Boot.HibernateSkipsPicker`, which does
+not exist before 0.8.7. No upper bound was found, so `oc_max` is empty.
 
 `extract.py` never rewrites this file, so a range you widen by testing survives
 regeneration. `build.py` warns when the requested version falls outside it.
@@ -127,13 +126,21 @@ stylistic:
   cannot be used."* This EFI injects community kexts, and the AMD configs patch
   the kernel.
 
-Worth knowing: because `SecureBootModel` is `Disabled`, `FixupAppleEfiImages`
-becomes relevant. The manual says that quirk *"is required to load Mac OS X 10.4
-to macOS 10.12, and is required for all newer macOS when SecureBootModel is set
-to Disabled"* - on stricter image loaders, which explicitly includes OpenDuet,
-the Legacy BIOS path this repository supports. All 179 configs set it to `false`,
-while OpenCore's own 1.0.5 `Sample.plist` sets it to `true`. Not changed; recorded
-so the choice can be a deliberate one.
+Because `SecureBootModel` is `Disabled`, `FixupAppleEfiImages` matters. The
+manual: that quirk *"is required to load Mac OS X 10.4 to macOS 10.12, and is
+required for all newer macOS when SecureBootModel is set to Disabled"* - on
+stricter image loaders, a list that explicitly includes OpenDuet, the Legacy BIOS
+path this repository supports. It is now `true` in all 179 configs, matching
+OpenCore's own `Sample.plist`.
+
+Its Note 3 - pre-processing in memory is incompatible with UEFI Secure Boot -
+does not apply here: the BIOS section of the main README already has users turn
+UEFI Secure Boot off, on both Intel and AMD.
+
+Enabling it also lowered the OpenCore floor. The key now matches Sample.plist and
+so leaves `base.toml` entirely, which is what a version-portable profile set is
+supposed to do: the floor moved from 0.9.6 to 0.8.7 without anyone editing a
+version number.
 
 ## The gate
 
