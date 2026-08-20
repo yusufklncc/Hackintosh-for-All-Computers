@@ -128,6 +128,15 @@ trace.
 `--no-detect` is the scripting primitive and skips all of it: no detection, no
 scope question and no hardware questions, just the profile menus.
 
+A test that detects the machine it runs on is a test whose questions change with
+the machine, and `--answers` is positional. A CI runner that happens to have an
+NVMe drive gets asked one more question than one that does not, so the same
+answer string builds a different EFI on the two - and until `--answers` learned
+to say it had run out, it fell through to a closed stdin and failed as an
+unexplained flake instead. `tools/fixtures/no-hardware.json` is a report of
+nothing; passing it and then `--ids`, `--hda-ids` or `--nvme` puts in exactly the
+hardware a test is about and nothing else.
+
 `detect.py` reads the machine through commands that ship with the OS -
 PowerShell CIM on Windows, `lspci` and sysfs on Linux, `system_profiler` and
 `sysctl` on macOS - so it needs no dependencies and no admin rights. Run it on
@@ -507,7 +516,8 @@ workflow rather than repeating it, so what gets published is the build that was
 tested. Either way it has to produce an EFI from its own bundle before the run
 is allowed to pass.
 
-`--answers 1,2,10,3` replays a menu run non-interactively. That is what CI uses,
+`--answers 2,10,3` replays a menu run non-interactively, alongside
+`--machine tools/fixtures/no-hardware.json`. That is what CI uses,
 on both platforms, instead of piping keystrokes.
 
 Two things the frozen build gets wrong if written the obvious way, both fixed:

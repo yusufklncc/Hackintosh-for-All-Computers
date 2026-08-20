@@ -91,8 +91,12 @@ def audio_advice():
 def boot_args():
     with tempfile.TemporaryDirectory() as tmp:
         out = Path(tmp) / 'EFI'
-        r = run([sys.executable, 'tools/setup.py', '--hda-ids', '10ec:0255',
-                 '--answers', '1,2,10,3', '--out', str(out)])
+        # from the fixture, so the questions do not depend on whether the
+        # machine running the test happens to have an NVMe drive
+        r = run([sys.executable, 'tools/setup.py',
+                 '--machine', 'tools/fixtures/no-hardware.json',
+                 '--hda-ids', '10ec:0255',
+                 '--answers', '2,10,3', '--out', str(out)])
         check('the guided build succeeds', r.returncode == 0)
         if r.returncode != 0:
             return

@@ -30,7 +30,7 @@ jobs:
           if (-not (Test-Path smoke/EFI/OC/config.plist)) { exit 1 }
 
       - name: And detection runs without throwing
-        run: dist/HackintoshEFIBuilder.exe --answers 1,2,10,3 --out smoke2/EFI
+        run: dist/HackintoshEFIBuilder.exe --answers 1,2,10,3,3 --out smoke2/EFI
 
       - uses: actions/upload-artifact@v4
         with:

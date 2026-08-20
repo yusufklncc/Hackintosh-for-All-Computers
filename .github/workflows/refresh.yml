@@ -60,7 +60,8 @@ jobs:
         run: |
           chmod +x vendor/opencore/*/Utilities/*/*.linux
           python3 tools/selftest.py
-          python3 tools/setup.py --hda-ids 10ec:0255 --answers 1,2,10,3 --out /tmp/refresh/EFI
+          python3 tools/setup.py --machine tools/fixtures/no-hardware.json \
+            --hda-ids 10ec:0255 --answers 2,10,3 --out /tmp/refresh/EFI
 
       - name: Open a pull request
         if: steps.diff.outputs.changed == 'yes'
