@@ -20,6 +20,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import advise
 import build
 import detect
+import gpu
 import netkexts
 import ocgen
 
@@ -212,6 +213,14 @@ def main():
 
     # network hardware: only offered when something was actually recognised,
     # so nobody is asked to decide about a device they do not have
+    if hw.get('gpu_devices'):
+        print(f'\n{BOLD}Graphics{RESET}')
+        lines, gpu_args = gpu.report(hw['gpu_devices'], cpu)
+        print('\n'.join(lines))
+        if gpu_args:
+            print(f'\n      {GREEN}boot arguments needed: {" ".join(gpu_args)}{RESET}')
+            print(f'      {DIM}added to the config below{RESET}')
+
     extra_file = None
     matched = advise.matched_kexts(hw.get('pci_ids', []), hw.get('usb_ids', []))
     if matched:
@@ -259,6 +268,10 @@ def main():
     # when frozen, not a Python interpreter, so a subprocess would re-invoke the
     # menus with build's arguments.
     cmd = ['--platform', plat, '--cpu', cpu, '--out', a.out]
+    if hw.get('gpu_devices'):
+        args = gpu.report(hw['gpu_devices'], cpu)[1]
+        if args:
+            cmd += ['--boot-args', ' '.join(args)]
     if extra_file:
         cmd += ['--add-kexts', extra_file]
     if vendor:

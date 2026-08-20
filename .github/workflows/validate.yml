@@ -51,6 +51,27 @@ jobs:
           test ! -d /tmp/wifi-sequoia/EFI/OC/Kexts/AirportItlwm.kext
           python3 tools/itlwm.py
 
+      - name: Graphics advice
+        run: |
+          python3 tools/gpu.py
+          python3 -c "
+import sys; sys.path.insert(0,'tools'); import gpu
+arc = {'name': 'Intel Arc B580', 'id': '8086:e20b'}
+# an unsupported card with a supported iGPU may fall back
+out = ' '.join(gpu.report([arc, {'name':'Intel HD Graphics 630','id':'8086:5912'}], 'kaby-lake')[0])
+assert 'you can disable it and use' in out, out
+# with an unsupported iGPU it must say so, not offer a fallback
+out = ' '.join(gpu.report([arc, {'name':'Intel UHD Graphics 770','id':'8086:4680'}], 'alder-lake')[0])
+assert 'not supported either' in out and 'you can disable' not in out, out
+# with no iGPU at all, neither claim
+out = ' '.join(gpu.report([arc], None)[0])
+assert 'no integrated GPU here' in out, out
+# a supported card carries its family boot argument
+lines, args = gpu.report([{'name':'RX 6600','id':'1002:73ff'}], None)
+assert args == ['agdpmod=pikera'], args
+print('  gpu advice ok')
+"
+
       - name: The hardware table still matches the kexts
         run: |
           python3 tools/hwtable.py EFI/OC/Kexts --out /tmp/hardware.toml

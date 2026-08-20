@@ -125,6 +125,31 @@ claims is reported as exactly that, with a link to Dortania's guide - which
 covers both cases honestly, since an unclaimed device may equally be one macOS
 supports with no kext at all.
 
+## Graphics
+
+`data/gpu.toml` is built by `tools/gputable.py` from Dortania's GPU Buyers
+Guide. The AMD pages state support card by card with the PCI device id beside
+each, so those tables are parsed - 59 cards, with the boot argument each family
+needs, `agdpmod=pikera` for Navi and `radpg=15` for the older ones. NVIDIA and
+Intel state support by family in prose, so those are family rules carrying the
+sentence they rest on.
+
+Intel integrated graphics are keyed on the **CPU generation**, not the adapter
+name. The guide writes "UHD Graphics for 12th Gen Intel Processors" where
+Windows reports "UHD Graphics 770", and bridging that gap by string matching is
+how a wrong answer gets stated confidently. Detection already works the
+generation out, so it is used instead.
+
+The advice then follows one rule:
+
+* supported card - say so, add the boot arguments its family needs
+* unsupported card - say so, and offer the integrated GPU **only if there is one
+  and it is itself supported**. Where there is an iGPU whose support could not
+  be determined, say that rather than claiming there is no fallback. Name a card
+  that would work either way.
+
+`tools/gpu.py` run on its own prints the verdict for a set of worked examples.
+
 ## Adding the network kexts
 
 `setup.py` offers two ways to add what it found, because both are reasonable:

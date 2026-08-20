@@ -134,6 +134,7 @@ def main(argv=None):
     ap.add_argument('--identity', choices=('generate', 'placeholder'), default='generate')
     ap.add_argument('--no-validate', action='store_true')
     ap.add_argument('--add-kexts', help='JSON file of extra Kernel.Add entries to append')
+    ap.add_argument('--boot-args', help='extra boot arguments to append to the config')
     a = ap.parse_args(argv)
 
     cat = {e['name']: e for e in
@@ -207,6 +208,12 @@ def main(argv=None):
         config['Kernel']['Add'] += [{k: v for k, v in e.items() if k != 'SourcePath'}
                                     for e in added if e['BundlePath'] not in have]
 
+    if a.boot_args:
+        guid = '7C436110-AB2A-4BBB-A880-FE41995C9F82'
+        nv = config['NVRAM']['Add'][guid]
+        have = nv.get('boot-args', '').split()
+        nv['boot-args'] = ' '.join(have + [x for x in a.boot_args.split() if x not in have])
+
     serial = apply_identity(config, a.identity, warn)
 
     out = Path(a.out)
@@ -238,6 +245,8 @@ def main(argv=None):
           + (f'  {serial}' if serial else ''))
     if added:
         print(f'  added kexts  ' + ', '.join(e['BundlePath'] for e in added))
+    if a.boot_args:
+        print(f'  boot-args    {config["NVRAM"]["Add"][guid]["boot-args"]}')
     print(f'  payload      {copied} items')
     print(f'  ocvalidate   {status}')
     print(f'  output       {out}')
