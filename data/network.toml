@@ -1,0 +1,152 @@
+# Which kexts a network device needs, and on which macOS versions.
+#
+# Unlike data/hardware.toml, this cannot be read out of the kexts: the rule for
+# which of several kexts to use on which macOS lives in their documentation, in
+# prose. So each set quotes its source, and every bound is a Darwin range
+# derived from the macOS versions that source names.
+#
+# min_kernel and max_kernel are written straight into the generated config, so
+# selecting "every supported macOS" is a matter of adding them all and letting
+# OpenCore load the right one.
+
+[[set]]
+role = "ethernet"
+match = "IntelMausi.kext"
+label = "Intel Ethernet"
+source = "acidanthera/IntelMausi"
+[[set.kext]]
+bundle = "IntelMausi.kext"
+
+[[set]]
+role = "ethernet"
+match = "RealtekRTL8111.kext"
+label = "Realtek Gigabit Ethernet"
+source = "Mieze/RTL8111_driver_for_OS_X"
+[[set.kext]]
+bundle = "RealtekRTL8111.kext"
+
+[[set]]
+role = "ethernet"
+match = "LucyRTL8125Ethernet.kext"
+label = "Realtek 2.5G Ethernet"
+source = "Mieze/LucyRTL8125Ethernet"
+[[set.kext]]
+bundle = "LucyRTL8125Ethernet.kext"
+
+[[set]]
+role = "ethernet"
+match = "AtherosE2200Ethernet.kext"
+label = "Atheros / Killer Ethernet"
+source = "Mieze/AtherosE2200Ethernet"
+[[set.kext]]
+bundle = "AtherosE2200Ethernet.kext"
+
+[[set]]
+role = "bluetooth"
+match = "IntelBluetoothFirmware.kext"
+label = "Intel Bluetooth"
+source = "openintelwireless.github.io/IntelBluetoothFirmware/FAQ.html"
+[[set.kext]]
+bundle = "IntelBluetoothFirmware.kext"
+note = "the firmware uploader itself, every version"
+[[set.kext]]
+bundle = "IntelBluetoothInjector.kext"
+max_kernel = "20.99.99"
+note = "Big Sur and older. 'Do NOT use this Kext on macOS Monterey and newer.'"
+[[set.kext]]
+bundle = "IntelBTPatcher.kext"
+min_kernel = "21.0.0"
+note = "Monterey and newer, needs Lilu 1.6.2 or later"
+[[set.kext]]
+bundle = "BlueToolFixup.kext"
+min_kernel = "21.0.0"
+note = "Monterey and newer"
+
+[[set]]
+role = "bluetooth"
+match = "BrcmPatchRAM3.kext"
+label = "Broadcom Bluetooth"
+source = "acidanthera/BrcmPatchRAM README"
+[[set.kext]]
+bundle = "BrcmFirmwareData.kext"
+note = "'Most appropriate for bootloader injection. This is the preferred configuration'"
+[[set.kext]]
+bundle = "BrcmPatchRAM.kext"
+max_kernel = "14.99.99"
+note = "'for 10.10 or earlier'"
+[[set.kext]]
+bundle = "BrcmPatchRAM2.kext"
+min_kernel = "15.0.0"
+max_kernel = "18.99.99"
+note = "'for 10.11 - 10.14'"
+[[set.kext]]
+bundle = "BrcmPatchRAM3.kext"
+min_kernel = "19.0.0"
+note = "'for 10.15 or later'"
+[[set.kext]]
+bundle = "BrcmBluetoothInjector.kext"
+min_kernel = "19.0.0"
+max_kernel = "20.99.99"
+note = "required by BrcmPatchRAM3, and never with 12 or newer where BlueToolFixup takes over"
+[[set.kext]]
+bundle = "BlueToolFixup.kext"
+min_kernel = "21.0.0"
+note = "'Required for macOS 12 or newer'"
+
+# Intel Wi-Fi is the one device where a single kext cannot serve every macOS.
+# AirportItlwm is built against each release's AirPort interface and published as
+# a separate 15 MB download per version, so exactly one of them belongs in an
+# EFI. The newest is vendored here; tools/itlwm.py fetches and caches another
+# when a different release is targeted.
+[[variant_set]]
+role = "wifi"
+match = "AirportItlwm.kext"
+label = "Intel Wi-Fi"
+bundle = "AirportItlwm.kext"
+project = "OpenIntelWireless/itlwm"
+release = "v2.3.0"
+vendored = "Sonoma14.4"
+source = "github.com/OpenIntelWireless/itlwm/releases"
+note = "v2.3.0 publishes no build for Sequoia or Tahoe"
+
+[[variant_set.variant]]
+asset = "HighSierra"
+min_darwin = 17
+max_darwin = 17
+
+[[variant_set.variant]]
+asset = "Mojave"
+min_darwin = 18
+max_darwin = 18
+
+[[variant_set.variant]]
+asset = "Catalina"
+min_darwin = 19
+max_darwin = 19
+
+[[variant_set.variant]]
+asset = "BigSur"
+min_darwin = 20
+max_darwin = 20
+
+[[variant_set.variant]]
+asset = "Monterey"
+min_darwin = 21
+max_darwin = 21
+
+[[variant_set.variant]]
+asset = "Ventura"
+min_darwin = 22
+max_darwin = 22
+
+[[variant_set.variant]]
+asset = "Sonoma14.0"
+min_darwin = 23
+max_darwin = 23
+note = "for 14.0 to 14.3; 14.4 raised the interface again"
+
+[[variant_set.variant]]
+asset = "Sonoma14.4"
+min_darwin = 23
+max_darwin = 23
+note = "for 14.4 and later, and the copy vendored in this repository"

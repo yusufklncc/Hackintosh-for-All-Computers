@@ -73,13 +73,21 @@ def apply_identity(config, mode, warn):
     return serial
 
 
-def copy_payload(config, out, warn):
-    """Copy only what the config references, plus the two mandatory binaries."""
+def copy_payload(config, out, warn, overrides=None):
+    """Copy only what the config references, plus the two mandatory binaries.
+
+    overrides maps a bundle name to a path outside EFI/OC/Kexts, which is how a
+    downloaded AirportItlwm variant reaches the build without the repository
+    having to carry all eight of them."""
     n = 0
+    overrides = overrides or {}
 
     def take(rel, dest_rel=None):
         nonlocal n
         src, dst = SRC / rel, out / (dest_rel or rel)
+        bundle = rel.split('/')[-1]
+        if bundle in overrides:
+            src = Path(overrides[bundle])
         if not src.exists():
             warn(f'referenced but missing from the repository: {rel}')
             return
@@ -125,6 +133,7 @@ def main():
     ap.add_argument('--out', default='build/EFI')
     ap.add_argument('--identity', choices=('generate', 'placeholder'), default='generate')
     ap.add_argument('--no-validate', action='store_true')
+    ap.add_argument('--add-kexts', help='JSON file of extra Kernel.Add entries to append')
     a = ap.parse_args()
 
     cat = {e['name']: e for e in
@@ -187,13 +196,26 @@ def main():
         if row[axis] and not (PROFILES / 'overlay' / f'{axis}.{row[axis]}.toml').exists():
             warn(f'no {axis} profile named {row[axis]!r}; it was ignored')
 
+    added = []
+    if a.add_kexts:
+        import json
+        with open(a.add_kexts) as fh:
+            added = json.load(fh)
+        have = {k['BundlePath'] for k in config['Kernel']['Add']}
+        # appended, not merged in: everything already there was ordered by a
+        # profile, and Lilu - which IntelBTPatcher needs - is always first
+        config['Kernel']['Add'] += [{k: v for k, v in e.items() if k != 'SourcePath'}
+                                    for e in added if e['BundlePath'] not in have]
+
     serial = apply_identity(config, a.identity, warn)
 
     out = Path(a.out)
     if out.exists():
         shutil.rmtree(out)
     out.mkdir(parents=True)
-    copied = copy_payload(config, out, warn)
+    copied = copy_payload(config, out, warn,
+                          {e['BundlePath']: e['SourcePath']
+                           for e in added if e.get('SourcePath')})
     cfg = out / 'OC' / 'config.plist'
     cfg.parent.mkdir(parents=True, exist_ok=True)
     with open(cfg, 'wb') as fh:
@@ -214,6 +236,8 @@ def main():
     print(f'  profiles     ' + ' -> '.join(p.stem for p in chain))
     print(f'  SMBIOS       {config["PlatformInfo"]["Generic"]["SystemProductName"]}'
           + (f'  {serial}' if serial else ''))
+    if added:
+        print(f'  added kexts  ' + ', '.join(e['BundlePath'] for e in added))
     print(f'  payload      {copied} items')
     print(f'  ocvalidate   {status}')
     print(f'  output       {out}')

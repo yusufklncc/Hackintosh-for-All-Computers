@@ -19,3 +19,6 @@ Desktop.ini
 
 # Generated EFI folders
 build/
+
+# AirportItlwm variants fetched by tools/itlwm.py
+.itlwm-cache/

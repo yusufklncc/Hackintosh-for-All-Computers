@@ -7,6 +7,16 @@ version = "0.7.1"
 sha256 = "1a9fb557747afe810b2179a741b5b60200cc84c41d7facd724e6bbbb73479bb0"
 upstream = "trulyspinach/SMCAMDProcessor"
 
+[kext."AirportBrcmFixup.kext"]
+version = "2.2.0"
+sha256 = "94002ff668071e6dacc998041132e8c0c2386747dd795695bf3fc1ff4d8923ce"
+upstream = "acidanthera/AirportBrcmFixup"
+
+[kext."AirportItlwm.kext"]
+version = "2.3.0"
+sha256 = "03460f6187462f9805b17c4ab47808a056a315645429b88765f7db36efdcd61e"
+upstream = "OpenIntelWireless/itlwm"
+
 [kext."AppleALC.kext"]
 version = "1.9.5"
 sha256 = "aa6675f2ae14e1325a37caac4a78770736110a37603f538db112d98e35cd7f9f"
@@ -17,15 +27,80 @@ version = "1.2"
 sha256 = "2b7beb7c3194842f03d57fc80da9c8a3bbf90151ac082dbf4609d9c43325ea47"
 upstream = ""
 
+[kext."AtherosE2200Ethernet.kext"]
+version = "2.4.0"
+sha256 = "0506fb374d24e3deb6c0718c88498d7470ecb65476f182b21c7cf7223daa63dd"
+upstream = "Mieze/AtherosE2200Ethernet"
+
+[kext."BlueToolFixup.kext"]
+version = "2.7.2"
+sha256 = "77708bf3004bec871264772deb03e25a88d6d4c953c57f6477546572924137d2"
+upstream = "acidanthera/BrcmPatchRAM"
+
+[kext."BrcmBluetoothInjector.kext"]
+version = "2.7.2"
+sha256 = "5177351a03c579246c7f3f4a1027a59ea0075d08125aa6523042de60ade6d8a1"
+upstream = "acidanthera/BrcmPatchRAM"
+
+[kext."BrcmFirmwareData.kext"]
+version = "2.7.2"
+sha256 = "1d36c68819f134eaecfabee586ca9dfdcbbb6527f3e269361968b01f940eadf7"
+upstream = "acidanthera/BrcmPatchRAM"
+
+[kext."BrcmPatchRAM.kext"]
+version = "2.7.2"
+sha256 = "00c27007b157c4c96fdd70e5e87303a211b00a2cf539908f0762585e4926d3cb"
+upstream = "acidanthera/BrcmPatchRAM"
+
+[kext."BrcmPatchRAM2.kext"]
+version = "2.7.2"
+sha256 = "71b089b804eff606097c18b65683aca16491cc2c09fb7061c7fe72c54bb22688"
+upstream = "acidanthera/BrcmPatchRAM"
+
+[kext."BrcmPatchRAM3.kext"]
+version = "2.7.2"
+sha256 = "b097ccee8e3dd1040229369775aa3f5babc073e587f9d3444d08c7168c627be5"
+upstream = "acidanthera/BrcmPatchRAM"
+
 [kext."ECEnabler.kext"]
 version = "1.0.6"
 sha256 = "7c556f9d59f2d4e689dde53ece0805dc123bbebf3adb4e451bd4dc7eabca316c"
 upstream = "1Revenger1/ECEnabler"
 
+[kext."IntelBTPatcher.kext"]
+version = "2.4.0"
+sha256 = "e88b63b3a6951e9a617e903f9e83c58130d6e4353a43547a05a6eacd8f7bf6cf"
+upstream = "OpenIntelWireless/IntelBluetoothFirmware"
+
+[kext."IntelBluetoothFirmware.kext"]
+version = "2.4.0"
+sha256 = "f7ae93e3a7fbf839bb6daeccc2a18e0f3c2155be204e30b09d3f49781beb1817"
+upstream = "OpenIntelWireless/IntelBluetoothFirmware"
+
+[kext."IntelBluetoothInjector.kext"]
+version = "2.4.0"
+sha256 = "53a81b68842d16dabbb64a4242b456cc29774bb92280b3d535efa312486d9824"
+upstream = "OpenIntelWireless/IntelBluetoothFirmware"
+
+[kext."IntelMausi.kext"]
+version = "1.0.8"
+sha256 = "a8b016e05ae290f06d83f682580b32c0e633dab1cd3a5643f99deddba0ecf9c7"
+upstream = "acidanthera/IntelMausi"
+
 [kext."Lilu.kext"]
 version = "1.7.1"
 sha256 = "bcc22f3066b1d059036e6ca8670699d768e498b4315e9c608cf54642dac4b6ae"
 upstream = "acidanthera/Lilu"
+
+[kext."LucyRTL8125Ethernet.kext"]
+version = "1.2.3"
+sha256 = "1e7e9724848511b671a2b7d8254620b7c74ab8f171777dffa85f79f7fe08a262"
+upstream = "Mieze/LucyRTL8125Ethernet"
+
+[kext."RealtekRTL8111.kext"]
+version = "3.0.0"
+sha256 = "599ee36479dcb708d58927b72da5a1b6ce647e9a46c2ebe4a1d34c9546b03a22"
+upstream = "Mieze/RTL8111_driver_for_OS_X"
 
 [kext."SMCAMDProcessor.kext"]
 version = "1.0.1"

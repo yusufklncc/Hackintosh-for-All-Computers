@@ -4,47 +4,94 @@
   <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/All%20macOS.png">
 </p>
 
-Hello everyone. This repository contains the RAW macOS installation files and global EFI needed to install macOS on your `compatible` computer. I am going to share with you my own OpenCore bootloader folder and macOS installation files. If you send me the problems you encounter, we can work together to solve them. I will update it externally with the image every month as there is no EFI folder in the installation file. What you need to do is to place the EFI folder in the EFI partition that will be created after you have written the installation file to your USB flash drive. I hope you all have a smooth hackintosh.
+This repository installs macOS on PC hardware. It holds ready macOS images, and
+it builds the OpenCore EFI folder your particular machine needs - reading your
+CPU, board and network cards to work out what to put in it.
+
+There are three ways to get that EFI, from least to most effort:
+
+| | |
+|---|---|
+| **`HackintoshEFIBuilder.exe`** | Windows, nothing to install. Download from [Releases](../../releases), run it, answer a few questions. |
+| **`python3 tools/setup.py`** | Same thing from a clone, on Windows, Linux or macOS. Needs Python 3.11. |
+| **`EFI-base.zip` + `configs.zip`** | No script at all: unzip the EFI, copy in the `config.plist` matching your machine. |
+
+All three produce the same thing, and none of them need an internet connection
+for the common path - everything they use is in the repository.
+
+If you hit a problem, open an issue with what you have and what happened.
 
 ## Table of contents
 
-- [Find Hardware Information](#find-hardware-information)
+- [Get your EFI](#get-your-efi)
 - [Check Compatibility](#check-compatibility)
 - [Download macOS Image](#download-macos-image)
 - [Write macOS Image](#write-macos-image)
-- [Set the EFI Folder](#set-the-efi-folder)
+- [Put the EFI on the USB drive](#put-the-efi-on-the-usb-drive)
 - [Adjust BIOS settings](#adjust-bios-settings)
-- [Editing EFI](#editing-efi)
+- [First boot](#first-boot)
 - [macOS Installation Steps](#macos-installation-steps)
 - [Post Installation](#post-installation)
+- [Adding a kext by hand](#adding-a-kext-by-hand)
+- [Finding your hardware yourself](#finding-your-hardware-yourself)
 
-### Find Hardware Information
+### Get your EFI
 
-- Download and install [AIDA64 Extreme](https://www.aida64.com/downloads).
-- Open `AIDA64 Extreme` and double click `Summary`
-- We can see our CPU, motherboard, GPU and Audio Adapter. Make a note of these.
-  - Desktop
-  - <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/aida64-summary.png">
-  - Laptop
-  - <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/aida64-summary-2.png">
-- Disk model, network cards, and the touchpad model (if we have one), are all we need to know.
-  - Go to Storage > Physical Drives.
-  - <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/aida64-storage.png">
-  - Go to Network > Windows Network.
-  - <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/aida64-network.png">
-  - Go to Devices > PCI Devices (Touchpad). It is usually PS2 or I2C.
-  - <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/aida64-devices-pci.png">
+The builder asks a handful of questions and writes the folder. Where it can read
+the answer off your machine it says so next to the question, but it never picks
+for you - detection can be wrong, and a wrong answer that arrives already ticked
+is one nobody rechecks.
 
-I took the screenshots from my current computer. According to this guide, here are the specifications of the computer on which I will install macOS.
+```
+[1] What kind of machine is this?
+      detected: Laptop
+       1) Desktop
+       2) Laptop <- detected
+      > 2
 
-- Specifications
-  - Model: Lenovo Thinkpad E570
-  - CPU: Intel(R) Core(TM) i5-7200U
-  - iGPU: Intel(R) HD Graphics 620
-  - Audio: Conexant CX20753/4
-  - Disk: KBG40ZNV256G KIOXIA NVMe 256GB & SAMSUNG SSD 860 EVO 250GB
-  - Network Devices: Dell Wireless 1820A Wi-Fi & BT , Realtek RTL8111/8168/8411 Ethernet
-  - Touchpad: SynPS/2 Synaptics TouchPad
+[2/3] Which CPU generation?
+      detected: Kaby Lake
+      ...
+      10) Kaby Lake <- detected
+      > 10
+
+[3/3] Board or laptop brand?
+      detected: hp
+       3) HP <- detected
+      > 3
+```
+
+It then looks at your network hardware and offers to add the kexts it needs:
+
+```
+  Ethernet
+      8086:15b8  needs IntelMausi.kext        Intel Ethernet, v1.0.8
+  Wi-Fi
+      8086:2723  needs AirportItlwm.kext      Intel Wi-Fi, v2.3.0
+
+Add these to the EFI?
+   1) Yes, for every macOS version they support
+   2) Yes, for one macOS version only
+   3) No, leave them out
+```
+
+Choosing *every version* puts each kext in with the macOS range it applies to and
+lets OpenCore load the right one, so one EFI boots any of them. Choosing *one
+version* puts in only what that release needs. Intel Wi-Fi is the exception: it
+is built separately for each macOS, so it always asks which.
+
+Run it from a clone with:
+
+```
+python3 tools/setup.py
+```
+
+Or download `HackintoshEFIBuilder.exe` from [Releases](../../releases) and
+double-click it - it carries everything inside, so there is nothing else to get.
+
+If you would rather not run anything, `EFI-base.zip` and `configs.zip` in the
+same release are the manual route, described under
+[Put the EFI on the USB drive](#put-the-efi-on-the-usb-drive).
 
 <br>
 
@@ -97,12 +144,13 @@ To check if your hardware is incompatible, I leave links below.
 
 <br>
 
-### Set the EFI Folder
+### Put the EFI on the USB drive
 
 - When you plug-in USB back, you can see EFI partition in "My Computer"
 - Open EFI partition.
-- If you already have an EFI folder for your machine, copy it there and you are done.
-- Otherwise go to `Releases` and download the two files there:
+- If you built one with `HackintoshEFIBuilder.exe` or `tools/setup.py`, copy that
+  `EFI` folder there and you are done.
+- Otherwise go to `Releases` and take the two files:
   - `EFI-base.zip` - the EFI folder itself, the same for every machine.
   - `configs.zip` - one `config.plist` per supported machine.
 - Extract `EFI-base.zip`. You get an `EFI` folder.
@@ -189,7 +237,7 @@ Note: Most of these options may not be present in your firmware, we recommend th
 
 <br>
 
-### Editing EFI
+### First boot
 
 `NOTE`: If you have `LEGACY BIOS`. Try to boot already without touching the default "boot" file that comes in the EFI partition. If you can't boot, come back and change the name of the "boot" file to "boot-default". Change the name of the "bootx64 or bootx32" file to "boot" according to the architecture of your processor. it does not matter. If you still can't boot, try the "boot6", "boot7" and "boot9" files.
 
@@ -199,22 +247,6 @@ Note: Most of these options may not be present in your firmware, we recommend th
   - <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/Installation/change-smbios.png">
 - Texts will start to flow on the screen, this is `verbose` mode. Here, the processes that occur while your computer is booting are displayed as text.
 - If the text stops after waiting for a while, you are unfortunately a bit unlucky. But if the text doesn't stop, after a while you will see the Apple logo and the macOS installation screen. We have no problems so far. Now it's time to install our `Network/Ethernet` card's kext, which is our important hardware after installation.
-- Click the Apple logo on the top left and `Shutdown` the computer. Boot the Windows operating system.
-  - Kexts for possible Network card models:
-    - [Intel Wi-Fi](https://github.com/OpenIntelWireless/itlwm/releases)
-    - [Intel Ethernet](https://github.com/acidanthera/IntelMausi/releases)
-    - Realtek Ethernet
-      - [RTL8111](https://github.com/Mieze/RTL8111_driver_for_OS_X/releases)
-      - [RTL810x](https://www.insanelymac.com/forum/files/file/259-realtekrtl8100-binary/)
-      - [RTL8125](https://github.com/Mieze/LucyRTL8125Ethernet)
-    - [Broadcom Wi-Fi](https://github.com/acidanthera/airportbrcmfixup/releases)
-    - [Atheros Wi-Fi](https://dortania.github.io/Wireless-Buyers-Guide/Kext.html#atheros)
-- Download the kext we need and put it in EFI/OC/Kexts. Next is to add this kext to the config. We will do this with `Notepad/Notepad++`. I will use `AirportBrcmFixUp.kext` which is required for Broadcom card.
-- Right click on our `config.plist` file and open it with `notepad/notepad++`. Search `Kernel` with the Ctrl+F key combination. The result will be:
-
-  - <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/config-kernel.png">
-
-- Now come to the bottom of the `Add` section and add our kext.
 
 <br>
 
@@ -337,26 +369,127 @@ Note: Most of these options may not be present in your firmware, we recommend th
 
 <br>
 
-- Open config file with `Text Edit`.
-  - Search `HideAuxiliary` and change `false` value to `true`.
-  - Search `SecureBootModel` and change `Disabled` value to `Default`. (Big Sur+)
-    - If you have patched your system with `OCLP`, do not do this step.
-  - Search `boot-args` and delete `-v` argument.
-- Now we have to set our serial numbers and ROM value.
-  - Download [GenSMBIOS](https://github.com/corpnewt/GenSMBIOS/archive/refs/heads/master.zip) and open .command file. If program asks `Download Python` download it. After that select option 3.
+Two tidy-ups, then the one thing that actually has to be done.
+
+- Open `config.plist` with `Text Edit`.
+  - Search `HideAuxiliary` and change `false` to `true` - hides the extra boot entries.
+  - Search `boot-args` and delete `-v` - stops the verbose text on every boot.
+
+Leave `SecureBootModel` at `Disabled`. Guides for other setups tell you to raise
+it, and for those setups they are right, but not here: any other value refuses
+to boot macOS released before that Mac model, and this repository ships images
+back to Yosemite. From macOS 12 the value also has to match the SMBIOS, and 101
+of the configs here use a Mac model that predates the T2 chip and has no Secure
+Boot model at all. Apple Secure Boot additionally rejects unsigned kernel
+extensions, which is most of what this EFI injects.
+
+<br>
+
+**Set `ROM` to your own MAC address.** Every build ships it as a placeholder, and
+no builder can know yours in advance. iCloud, iMessage and FaceTime will not work
+until you do this.
+
+  - Go `System Settings > Network > Ethernet > Details > Hardware`. If your MAC
+    address is `54:1A:AF:43:70:CA`, strip the colons to get `541AAF4370CA` and
+    convert it to [Base64](https://base64.guru/converter/encode/hex).
+  - That gives `VBqvQ3DK`. Put it in `ROM` and save.
+  - Restart, press `Space` at the OpenCore menu, choose `ResetNVRAM`. Your BIOS
+    settings may reset, so check them, then boot macOS.
+
+<br>
+
+**Your serial number.** A build generates its own serial, MLB and UUID, so you
+are not sharing one with the whole repository - but everyone who downloads the
+same release file does share it. If you want one nobody else has, generate it:
+
+  - Download [GenSMBIOS](https://github.com/corpnewt/GenSMBIOS/archive/refs/heads/master.zip)
+    and open the `.command` file. If it offers to download Python, let it. Then
+    pick option 3.
   - <img src="https://raw.githubusercontent.com/yusufklncc/Lenovo-Thinkpad-E570-Hackintosh/main/src/GenSMBIOS/GenSMBIOS%201.png">
-  - Now list 5 SMBIOS first. `MacBookPro14,1` (Compatible SMBIOS with your hardware)
-    - If your hardware compatible SMBIOS doesn't support installed macOS version, add `-no_compat_check` to `boot-args`.
+  - Enter the SMBIOS your config already uses - the builder printed it, and it is
+    in `SystemProductName`.
+    - If that model does not support the macOS you installed, add `-no_compat_check` to `boot-args`.
   - <img src="https://raw.githubusercontent.com/yusufklncc/Lenovo-Thinkpad-E570-Hackintosh/main/src/GenSMBIOS/GenSMBIOS%202.png">
-  - Select and copy first Serial.
+  - Copy the first serial.
   - <img src="https://raw.githubusercontent.com/yusufklncc/Lenovo-Thinkpad-E570-Hackintosh/main/src/GenSMBIOS/GenSMBIOS%203.png">
-  - Go [check](https://checkcoverage.apple.com/) serial number. Your serial should be like this. If not, try second serial.
+  - [Check it](https://checkcoverage.apple.com/) - it should come back as an
+    invalid or unpurchased serial. If Apple recognises it, use the next one.
   - <img src="https://raw.githubusercontent.com/yusufklncc/Lenovo-Thinkpad-E570-Hackintosh/main/src/GenSMBIOS/Check%20Serial.png">
-  - Search MacBookPro14,1 and replace `Type > SystemProductName, Serial > SystemSerialNumber, Board Serial > MLB and SmUUID > SystemUUID` values. Now we will set our ROM value.
-  - Go `System Setting > Network > Ethernet > Details > Hardware`. If our MAC address is `54:1A:AF:43:70:CA` remove `:` characters = `541AAF4370CA`. Convert it to [Base64](https://base64.guru/converter/encode/hex).
-  - Now we have `VBqvQ3DK`. Replace this with ROM value and save config file.
-  - Restart computer and press `Space` key on OpenCore menu. Then enter `ResetNVRAM`. After that BIOS settings may change. Check it and boot macOS.
+  - Replace `SystemSerialNumber`, `MLB` and `SystemUUID` with the `Serial`,
+    `Board Serial` and `SmUUID` it produced, then reset NVRAM as above.
   - Now you can login iCloud, iMessage or other apple services and you can use macOS.
+
+### Adding a kext by hand
+
+The builder does this for you, and it knows 475 device ids and which kext
+drives each. This is the route if you are working from the release zips, or
+if you have hardware it does not cover.
+
+Shut down, boot back into Windows, and:
+  - Kexts for possible Network card models:
+    - [Intel Wi-Fi](https://github.com/OpenIntelWireless/itlwm/releases)
+    - [Intel Ethernet](https://github.com/acidanthera/IntelMausi/releases)
+    - Realtek Ethernet
+      - [RTL8111](https://github.com/Mieze/RTL8111_driver_for_OS_X/releases)
+      - [RTL810x](https://www.insanelymac.com/forum/files/file/259-realtekrtl8100-binary/)
+      - [RTL8125](https://github.com/Mieze/LucyRTL8125Ethernet)
+    - [Broadcom Wi-Fi](https://github.com/acidanthera/airportbrcmfixup/releases)
+    - [Atheros Wi-Fi](https://dortania.github.io/Wireless-Buyers-Guide/Kext.html#atheros)
+- Download the kext we need and put it in EFI/OC/Kexts. Next is to add this kext to the config. We will do this with `Notepad/Notepad++`. I will use `AirportBrcmFixUp.kext` which is required for Broadcom card.
+- Right click on our `config.plist` file and open it with `notepad/notepad++`. Search `Kernel` with the Ctrl+F key combination. The result will be:
+
+  - <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/config-kernel.png">
+
+- Now come to the bottom of the `Add` section and add our kext.
+
+<br>
+
+
+<br>
+
+### Finding your hardware yourself
+
+The builder reads all of this for you, so this section is only needed if you
+want to check a machine before starting - or before buying one.
+
+- Download and install [AIDA64 Extreme](https://www.aida64.com/downloads).
+- Open `AIDA64 Extreme` and double click `Summary`
+- We can see our CPU, motherboard, GPU and Audio Adapter. Make a note of these.
+  - Desktop
+  - <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/aida64-summary.png">
+  - Laptop
+  - <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/aida64-summary-2.png">
+- Disk model, network cards, and the touchpad model (if we have one), are all we need to know.
+  - Go to Storage > Physical Drives.
+  - <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/aida64-storage.png">
+  - Go to Network > Windows Network.
+  - <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/aida64-network.png">
+  - Go to Devices > PCI Devices (Touchpad). It is usually PS2 or I2C.
+  - <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/aida64-devices-pci.png">
+
+I took the screenshots from my current computer. According to this guide, here are the specifications of the computer on which I will install macOS.
+
+- Specifications
+  - Model: Lenovo Thinkpad E570
+  - CPU: Intel(R) Core(TM) i5-7200U
+  - iGPU: Intel(R) HD Graphics 620
+  - Audio: Conexant CX20753/4
+  - Disk: KBG40ZNV256G KIOXIA NVMe 256GB & SAMSUNG SSD 860 EVO 250GB
+  - Network Devices: Dell Wireless 1820A Wi-Fi & BT , Realtek RTL8111/8168/8411 Ethernet
+  - Touchpad: SynPS/2 Synaptics TouchPad
+
+<br>
+
+
+<br>
+### Working on this repository
+
+The configs are generated from a small set of profiles rather than stored, and
+the tooling that does it - the builder, the hardware table, the equivalence gate
+that proves a profile change did not alter what anyone downloads - is documented
+in [tools/README.md](tools/README.md).
+
+<br>
 
 # macOS Sonoma
 
