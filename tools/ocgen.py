@@ -329,7 +329,10 @@ def layer_chain(row, profiles):
     tag = overlay_tag(row)
     if tag:
         chain.append(profiles / 'overlay' / 'combo' / f'{tag}.toml')
-        chain.append(profiles / 'config' / f'{exception_name(row)}.toml')
+        # a per-config residual belongs to one file in EFI/OC/config; a build
+        # from bare coordinates has no such file and therefore no residual
+        if row.get('path'):
+            chain.append(profiles / 'config' / f'{exception_name(row)}.toml')
     return [p for p in chain if p.exists()]
 
 
@@ -361,7 +364,31 @@ def assemble(sample, chain, params=None):
     return tree
 
 
-VENDOR_OC = Path = None  # placeholder, see vendored_sample()
+VENDOR_OC = 'vendor/opencore'
+
+
+def vendored_versions():
+    import pathlib
+    return sorted(p.name for p in pathlib.Path(VENDOR_OC).glob('*')
+                  if (p / 'Sample.plist').exists())
+
+
+def vendored_tool(name, version=None):
+    """ocvalidate / macserial for the host platform, from the vendored release.
+
+    Returns None when the binary is absent or does not match the host, in which
+    case the caller degrades instead of failing: both tools improve a build
+    rather than being required for one."""
+    import pathlib, platform
+    suffix = {'Darwin': '', 'Linux': '.linux', 'Windows': '.exe'}.get(platform.system())
+    if suffix is None:
+        return None
+    versions = [version] if version else list(reversed(vendored_versions()))
+    for v in versions:
+        p = pathlib.Path(VENDOR_OC) / v / 'Utilities' / name / (name + suffix)
+        if p.exists():
+            return p
+    return None
 
 
 def vendored_sample(version=None):

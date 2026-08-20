@@ -45,16 +45,22 @@ A clone contains everything a build needs. Nothing here reaches the network
 unless asked, because the EFI is usually prepared on a different machine from
 the one being installed, and often on one that is not online.
 
-    vendor/opencore/<version>/Sample.plist   pinned template, 51 KB
-    vendor/kexts.lock                        sha256 + upstream for every kext
-    EFI/OC/Kexts/                            the kexts themselves
+    vendor/opencore/<version>/Sample.plist    pinned config template
+    vendor/opencore/<version>/Utilities/      ocvalidate + macserial, all 3 hosts
+    vendor/kexts.lock                         sha256 + upstream for every kext
+    EFI/                                      kexts, ACPI, drivers, resources
 
-`ocvalidate` and `macserial` are deliberately *not* vendored: 4 MB per OpenCore
-version, and each only improves a build rather than being required for one. When
-they are absent, validation is skipped and identity falls back to a placeholder,
-both with a warning.
+`ocvalidate` and `macserial` are vendored for macOS, Windows and Linux, so a
+build validates itself and mints a fresh serial without ever fetching anything.
+If a host has no matching binary the build still succeeds: validation is skipped
+and identity falls back to a placeholder, each with a warning.
 
 ## Commands
+
+    python3 tools/build.py --list                                  # what can be built
+    python3 tools/build.py --platform laptop --cpu kaby-lake --oem hp
+    python3 tools/build.py --platform desktop --vendor amd \
+                           --cpu ryzen-threadripper --cores 8 --chipset b550-a520
 
     python3 tools/extract.py --out profiles   # profiles from the current tree
     python3 tools/verify.py  --comments       # equivalence gate
@@ -72,6 +78,21 @@ changes stop being a manual migration.
 release tag as strings. Some projects number the bundle and the tag differently
 - SMCAMDProcessor ships bundle 1.0.1 in release 0.7.2f1 - so treat it as a
 prompt to look, not as a verdict.
+
+## Building
+
+`build.py` writes an EFI folder holding only what the generated config actually
+references - the ACPI tables it lists, the kexts it enables, the drivers it
+loads - so the output is one machine's EFI rather than the whole catalogue. A
+laptop build comes out around 11 MB against the 18 MB tree.
+
+Identity is minted per build with `macserial`, which is what stops many installs
+from sharing one serial. `ROM` is left at its placeholder because it has to be
+this machine's primary MAC address and nothing offline can know it; the README's
+post-installation section covers setting it.
+
+Every build is checked with the `ocvalidate` matching the OpenCore version it was
+built against.
 
 ## The gate
 

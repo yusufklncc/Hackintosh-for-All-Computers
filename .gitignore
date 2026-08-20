@@ -16,3 +16,6 @@ Desktop.ini
 
 # OpenCore release cache used by tools/fetch_oc.py
 .oc-cache/
+
+# Generated EFI folders
+build/
