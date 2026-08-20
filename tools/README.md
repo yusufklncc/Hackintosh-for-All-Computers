@@ -301,8 +301,12 @@ data files, `EFI/` and `vendor/` into it, and `setup.py` chdirs into the
 unpacked bundle at startup. The frozen build therefore runs the same code down
 the same paths as a checkout, with no second branch to keep working.
 
-It is built on a Windows runner by `.github/workflows/release.yml`, which then
-makes it build an EFI from the bundle alone before the release is published.
+`.github/workflows/windows-exe.yml` builds it and can be run on its own from the
+Actions tab, which puts the executable in the run's artifacts - so it can be
+tried on a real machine before any tag exists. `release.yml` calls that same
+workflow rather than repeating it, so what gets published is the build that was
+tested. Either way it has to produce an EFI from its own bundle before the run
+is allowed to pass.
 
 `--answers 2,10,3` replays a menu run non-interactively. That is what CI uses,
 on both platforms, instead of piping keystrokes.
