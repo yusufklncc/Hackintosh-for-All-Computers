@@ -40,6 +40,8 @@ UPSTREAM = {
     'AppleALC.kext': 'acidanthera/AppleALC',
     'VoodooPS2Controller.kext': 'acidanthera/VoodooPS2',
     'ECEnabler.kext': '1Revenger1/ECEnabler',
+    'USBToolBox.kext': 'USBToolBox/kext',
+    'UTBDefault.kext': 'USBToolBox/kext',
     'AMDRyzenCPUPowerManagement.kext': 'trulyspinach/SMCAMDProcessor',
     'SMCAMDProcessor.kext': 'trulyspinach/SMCAMDProcessor',
     'AppleMCEReporterDisabler.kext': None,

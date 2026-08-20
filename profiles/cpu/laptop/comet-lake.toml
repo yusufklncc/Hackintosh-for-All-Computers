@@ -1,5 +1,4 @@
 # 1 config
-
 [ACPI]
 Delete = []
 
@@ -169,8 +168,28 @@ BundlePath = "USBInjectAll.kext"
 Comment = ""
 Enabled = true
 ExecutablePath = "Contents/MacOS/USBInjectAll"
-MaxKernel = ""
+MaxKernel = "16.99.99"
 MinKernel = "15.0.0"
+PlistPath = "Contents/Info.plist"
+
+[[Kernel.Add]]
+Arch = "x86_64"
+BundlePath = "USBToolBox.kext"
+Comment = "V1.2.0"
+Enabled = true
+ExecutablePath = "Contents/MacOS/USBToolBox"
+MaxKernel = ""
+MinKernel = "17.0.0"
+PlistPath = "Contents/Info.plist"
+
+[[Kernel.Add]]
+Arch = "x86_64"
+BundlePath = "UTBDefault.kext"
+Comment = "V1.2.0"
+Enabled = true
+ExecutablePath = ""
+MaxKernel = ""
+MinKernel = "17.0.0"
 PlistPath = "Contents/Info.plist"
 
 [[Kernel.Add]]

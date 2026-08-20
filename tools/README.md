@@ -165,6 +165,35 @@ This is also the honest answer to "should there be a `--macos` axis". Measured
 against the tree, macOS targeting only ever varied for AMD, and there it was a
 stale patch set rather than a profile dimension.
 
+## USB injection is split by kernel
+
+89 configs inject USB ports. They carry two mechanisms, each bounded to the range
+where there is evidence for it:
+
+    USBInjectAll   MinKernel 15.0.0  MaxKernel 16.99.99    El Capitan, Sierra
+    USBToolBox
+    + UTBDefault   MinKernel 17.0.0                        High Sierra and up
+
+USBInjectAll is RehabMan's, abandoned upstream; the bundle here is a community
+fork at 0.8.1 whose origin could not be traced. It matches on the SMBIOS `model`
+key and knows 87 Mac models, which covers 86 of the 89 configs - `iMac14,4` is
+not among them, so three configs get nothing from it today.
+
+USBToolBox attaches to the controller instead, so it needs no model identifier
+and no controller rename, and it is still maintained (1.2.0, June 2025). Its
+README says it "supports El Capitan and up, although only Catalina and up have
+been tested" - but that line dates from May 2021 and was never revisited. Within
+weeks of it being written, issues #2 and #3 were filed and fixed for High Sierra
+10.13.6 and Mojave, both confirmed working by the reporters, and the 1.2.0
+bundle's `OSBundleLibraries` reflects those fixes: `kpi.iokit 15.0.0`, no
+`kpi.bsd` dependency. So High Sierra upward has evidence; El Capitan and Sierra
+have none either way, and keep the kext with the field record.
+
+`UTBDefault.kext` is the codeless half, which upstream describes as being "for
+use before you map, so that you can have all USB ports working before you map" -
+exactly the job a distributable install EFI needs. Neither mechanism patches the
+port limit, and neither does this repository: `XhciPortLimit` is false in all 179.
+
 ## Continuous validation
 
 `.github/workflows/validate.yml` runs on every push and pull request:

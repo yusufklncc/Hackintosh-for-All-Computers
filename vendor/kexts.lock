@@ -57,6 +57,16 @@ version = "0.8.1"
 sha256 = "c8573896edeed2220c2ccc53bcf942f5d1475bc4161b0bf4a8e7ead301a0dd06"
 upstream = ""
 
+[kext."USBToolBox.kext"]
+version = ""
+sha256 = "34d9eb658cef34ed58173676ef266b0869021ab50836526423bb341859fb8a65"
+upstream = "USBToolBox/kext"
+
+[kext."UTBDefault.kext"]
+version = "1.0"
+sha256 = "0b789ececabb65959e9d2f560603b62f25ee3de92d9883e822680ed3de6a9860"
+upstream = "USBToolBox/kext"
+
 [kext."VirtualSMC.kext"]
 version = "1.3.7"
 sha256 = "c40719bd8a5ba3c6bcb06c5d46cb556b03a9d908ccd60257a0b24ad5ce1a8f49"
