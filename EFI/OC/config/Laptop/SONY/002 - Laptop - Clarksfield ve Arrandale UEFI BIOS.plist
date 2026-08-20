@@ -414,7 +414,7 @@
                 <key>CustomPciSerialDevice</key>
                 <false/>
                 <key>CustomSMBIOSGuid</key>
-                <false/>
+                <true/>
                 <key>DisableIoMapper</key>
                 <true/>
                 <key>DisableIoMapperMapping</key>
@@ -502,7 +502,7 @@
             <key>Debug</key>
             <dict>
                 <key>AppleDebug</key>
-                <true/>
+                <false/>
                 <key>ApplePanic</key>
                 <true/>
                 <key>DisableWatchDog</key>
@@ -516,7 +516,7 @@
                 <key>SysReport</key>
                 <false/>
                 <key>Target</key>
-                <integer>67</integer>
+                <integer>3</integer>
             </dict>
             <key>Entries</key>
             <array/>
@@ -719,7 +719,7 @@
             <key>UpdateSMBIOS</key>
             <true/>
             <key>UpdateSMBIOSMode</key>
-            <string>Create</string>
+            <string>Custom</string>
             <key>UseRawUuidEncoding</key>
             <false/>
         </dict>

@@ -2,12 +2,6 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
     <dict>
-        <key># BASE EFI INTEL 11th ROCKET LAKE (doest not support iGPU) - RELEASE Version</key>
-        <string></string>
-        <key># BY: https://luchina.com.br</key>
-        <string></string>
-        <key># DISCORD: https://discord.universohackintosh.com</key>
-        <string></string>
         <key>ACPI</key>
         <dict>
             <key>Add</key>
@@ -250,7 +244,7 @@
                     <key>ExecutablePath</key>
                     <string>Contents/MacOS/USBInjectAll</string>
                     <key>MaxKernel</key>
-                    <string></string>
+                    <string>19.9.9</string>
                     <key>MinKernel</key>
                     <string>15.0.0</string>
                     <key>PlistPath</key>
@@ -395,7 +389,7 @@
             <key>Debug</key>
             <dict>
                 <key>AppleDebug</key>
-                <true/>
+                <false/>
                 <key>ApplePanic</key>
                 <true/>
                 <key>DisableWatchDog</key>
@@ -409,7 +403,7 @@
                 <key>SysReport</key>
                 <false/>
                 <key>Target</key>
-                <integer>67</integer>
+                <integer>3</integer>
             </dict>
             <key>Entries</key>
             <array/>
@@ -428,7 +422,7 @@
                 <key>EnablePassword</key>
                 <false/>
                 <key>ExposeSensitiveData</key>
-                <integer>15</integer>
+                <integer>6</integer>
                 <key>HaltLevel</key>
                 <integer>2147483648</integer>
                 <key>PasswordHash</key>

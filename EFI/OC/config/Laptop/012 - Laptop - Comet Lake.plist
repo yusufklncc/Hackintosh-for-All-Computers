@@ -405,7 +405,7 @@
                     <key>ExecutablePath</key>
                     <string>Contents/MacOS/USBInjectAll</string>
                     <key>MaxKernel</key>
-                    <string></string>
+                    <string>19.9.9</string>
                     <key>MinKernel</key>
                     <string>15.0.0</string>
                     <key>PlistPath</key>
@@ -550,7 +550,7 @@
             <key>Debug</key>
             <dict>
                 <key>AppleDebug</key>
-                <true/>
+                <false/>
                 <key>ApplePanic</key>
                 <true/>
                 <key>DisableWatchDog</key>
@@ -564,7 +564,7 @@
                 <key>SysReport</key>
                 <false/>
                 <key>Target</key>
-                <integer>67</integer>
+                <integer>3</integer>
             </dict>
             <key>Entries</key>
             <array/>
