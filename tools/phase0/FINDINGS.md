@@ -1,10 +1,12 @@
 # Phase 0 findings
 
-Analysis of the 178 configs under `EFI/OC/config/`, run with the scripts in this
-directory. Question: can these be generated from layered profiles instead of
-maintained by hand?
+Analysis of the 178 configs that used to live under `EFI/OC/config/`, run with
+the scripts in this directory. Question: can these be generated from layered
+profiles instead of maintained by hand?
 
-Answer: yes. The tree is already layered, the layers are just materialised.
+Answer: yes. The tree was already layered, the layers were just materialised.
+It has since been replaced by `profiles/`, and this document is the record of
+why that was thought safe before it was done.
 
 ## Layer coordinates
 

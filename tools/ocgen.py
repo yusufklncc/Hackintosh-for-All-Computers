@@ -257,6 +257,8 @@ def load_plist(path):
 import os as _os
 import re as _re
 
+# The tree this once pointed at is gone; the prefix survives as the naming
+# scheme for catalogue entries, which is what resolves per-config residuals.
 CONFIG_ROOT = 'EFI/OC/config'
 OEM_DIRS = {'HP', 'ASUS', 'MSI', 'DELL', 'SONY', 'DELL - SONY'}
 VARIANT_DIRS = {'BIOS (v3006+)'}

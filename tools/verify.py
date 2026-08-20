@@ -1,15 +1,17 @@
 """Equivalence gate.
 
-Regenerates every config under EFI/OC/config from the profile set and compares
-it against the file on disk. Generated identity (serial, MLB, UUID, ROM) is
-excluded because a profile never stores it; Comment strings are excluded by
-default because they carry no runtime meaning.
+Regenerates every published config from the profile set and compares it against
+the hash recorded in profiles/catalogue.toml. Generated identity (serial, MLB,
+UUID, ROM) is excluded because a profile never stores it; Comment strings are
+excluded by default because they carry no runtime meaning.
+
+If a checkout still has the old EFI/OC/config tree, the files there are used as
+the reference instead. That is how the profiles were proven faithful before the
+tree was removed.
 
 The comparison is done on canonical XML bytes, not on decoded Python values:
 True == 1 == 1.0 in Python, while <true/>, <integer>1</integer> and <real>1</real>
 are three different things to OpenCore.
-
-Nothing in EFI/OC/config may be deleted until this reports 179/179.
 
     python3 tools/verify.py <Sample.plist> [--profiles profiles] [--comments]
 """

@@ -13,7 +13,7 @@ sha256 = "aa6675f2ae14e1325a37caac4a78770736110a37603f538db112d98e35cd7f9f"
 upstream = "acidanthera/AppleALC"
 
 [kext."AppleMCEReporterDisabler.kext"]
-version = ""
+version = "1.2"
 sha256 = "2b7beb7c3194842f03d57fc80da9c8a3bbf90151ac082dbf4609d9c43325ea47"
 upstream = ""
 
@@ -58,7 +58,7 @@ sha256 = "c8573896edeed2220c2ccc53bcf942f5d1475bc4161b0bf4a8e7ead301a0dd06"
 upstream = ""
 
 [kext."USBToolBox.kext"]
-version = ""
+version = "1.2.0"
 sha256 = "34d9eb658cef34ed58173676ef266b0869021ab50836526423bb341859fb8a65"
 upstream = "USBToolBox/kext"
 
@@ -88,7 +88,7 @@ sha256 = "2ce4c164e83022f940fcb83baf0709f5cd499d0b78f52d8ea881ce5282beef08"
 upstream = ""
 
 [kext."XLNCUSBFix.kext"]
-version = ""
+version = "1.2"
 sha256 = "c89a8ae4f61fc2118ce7bb87682ed7be9feccf4358f180e2ab6a3408fdce981f"
 upstream = ""
 

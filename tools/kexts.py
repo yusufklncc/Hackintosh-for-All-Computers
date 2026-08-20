@@ -63,11 +63,13 @@ def digest(bundle):
 
 
 def version(bundle):
+    """Some kexts set only CFBundleVersion, so fall back rather than report blank."""
     info = bundle / 'Contents' / 'Info.plist'
     if not info.exists():
         return ''
     with open(info, 'rb') as fh:
-        return plistlib.load(fh).get('CFBundleShortVersionString', '')
+        d = plistlib.load(fh)
+    return d.get('CFBundleShortVersionString') or d.get('CFBundleVersion') or ''
 
 
 def scan():
@@ -124,10 +126,13 @@ def main():
             print(f'  {name:{width}s} {info["version"]:10s} vendored only')
             continue
         up = latest(repo) or '?'
-        mark = '' if up in ('?', info['version']) else '  <- newer upstream'
+        # tags and bundle versions are numbered differently by some projects, so
+        # this is a prompt to look rather than a verdict
+        same = up in ('?', info['version']) or up.lstrip('v') == info['version']
+        mark = '' if same else '  <- differs from upstream tag'
         stale += bool(mark)
         print(f'  {name:{width}s} {info["version"]:10s} {repo} {up}{mark}')
-    print(f'\n  {stale} kext(s) behind upstream')
+    print(f'\n  {stale} kext(s) differ from their upstream tag; check each before updating')
     return 0
 
 
