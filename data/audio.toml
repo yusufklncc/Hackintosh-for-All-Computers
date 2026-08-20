@@ -1,0 +1,3428 @@
+# Audio codecs and the layout-ids AppleALC ships for each.
+#
+# Read from AppleALC's own Resources/<CODEC>/Info.plist by
+# tools/audiotable.py. A codec usually has several layouts, each
+# contributed for a particular machine and named as such - the right
+# one is found by trying, so the whole set is kept rather than a guess.
+[[audio]]
+codec = "AD1884"
+vendor = "AnalogDevices"
+hda_id = "11d4:1884"
+codec_id = 6276
+
+[[audio.layout]]
+id = 11
+note = "Goldfish64 - AD1884 - Panasonic Toughbook CF-30"
+
+[[audio]]
+codec = "AD1984"
+vendor = "AnalogDevices"
+hda_id = "11d4:1984"
+codec_id = 6532
+
+[[audio.layout]]
+id = 11
+note = "MacPeet - AD1984 - for_IBM_Lenovo_ThinkPad_T61_T61p"
+
+[[audio]]
+codec = "AD1984A"
+vendor = "AnalogDevices"
+hda_id = "11d4:194a"
+codec_id = 6474
+
+[[audio.layout]]
+id = 11
+note = "MacPeet - AD1984A"
+
+[[audio.layout]]
+id = 13
+note = "MacPeet - AD1984A -Version2"
+
+[[audio.layout]]
+id = 44
+note = "AD1984A - giesteira"
+
+[[audio]]
+codec = "AD1988A"
+vendor = "AnalogDevices"
+hda_id = "11d4:1988"
+codec_id = 6536
+
+[[audio.layout]]
+id = 12
+note = "AD1988a"
+
+[[audio]]
+codec = "AD1988B"
+vendor = "AnalogDevices"
+hda_id = "11d4:198b"
+codec_id = 6539
+
+[[audio.layout]]
+id = 5
+note = "Mirone - AD1988B 3 ports"
+
+[[audio.layout]]
+id = 7
+note = "Mirone - AD1988B 5/6 ports"
+
+[[audio.layout]]
+id = 12
+note = "Custom AD1988B by Rodion"
+
+[[audio]]
+codec = "AD2000B"
+vendor = "AnalogDevices"
+hda_id = "11d4:989b"
+codec_id = 39067
+
+[[audio.layout]]
+id = 5
+note = "Mirone - AD2000B"
+
+[[audio.layout]]
+id = 7
+note = "Mirone - AD2000B"
+
+[[audio]]
+codec = "ALC1150"
+vendor = "Realtek"
+hda_id = "10ec:0900"
+codec_id = 2304
+
+[[audio.layout]]
+id = 1
+note = "Toleda - ALC1150, 5/6 audio ports, native: 2 inputs, 3/4 outputs+front panel+SPDIF/Optical"
+
+[[audio.layout]]
+id = 2
+note = "Toleda - ALC1150, 3 audio ports, repurposed to 5.1: 0 inputs, 3 outputs+front panel+SPDIF/Optical"
+
+[[audio.layout]]
+id = 3
+note = "Toleda - ALC1150, 3 audio ports, native: 2 inputs, 1 output+front panel+SPDIF/Optical"
+
+[[audio.layout]]
+id = 5
+note = "Mirone 3 ports (Pink, Green, Blue)"
+
+[[audio.layout]]
+id = 7
+note = "Mirone 5/6 ports (Gray, Black, Orange, Pink, Green, Blue)"
+
+[[audio.layout]]
+id = 11
+note = "Mirone 5/6 ports (Gray, Black, Orange, Pink, Green, Blue) and mic boost"
+
+[[audio.layout]]
+id = 99
+note = "ALC1150 for Gigabyte GA-Z97X-UD5H by DalianSky"
+
+[[audio]]
+codec = "ALC1220"
+vendor = "Realtek"
+hda_id = "10ec:1220"
+codec_id = 4640
+
+[[audio.layout]]
+id = 1
+note = "Toleda - Realtek ALC1220, 5/6 audio ports, native: 2 inputs, 3/4 outputs+front panel+SPDIF/Optical"
+
+[[audio.layout]]
+id = 2
+note = "Toleda - Realtek ALC1220, 3 audio ports, repurposed to 5.1: 0 inputs, 3 outputs+front panel+SPDIF/Optical"
+
+[[audio.layout]]
+id = 3
+note = "Toleda - Realtek ALC1220, 3 audio ports, native: 2 inputs, 1 output+front panel+SPDIF/Optical"
+
+[[audio.layout]]
+id = 5
+note = "Mirone - Realtek ALC1220"
+
+[[audio.layout]]
+id = 7
+note = "Mirone - Realtek ALC1220"
+
+[[audio.layout]]
+id = 11
+note = "Custom Realtek ALC1220 by truesoldier"
+
+[[audio.layout]]
+id = 13
+note = "MacPeet - ALC1220 for Clevo P950HR"
+
+[[audio.layout]]
+id = 15
+note = "fleaplus - ALC1220 for MSI WT75"
+
+[[audio.layout]]
+id = 16
+note = "MacPeet - ALC1220 for Gigabyte Z390"
+
+[[audio.layout]]
+id = 17
+note = "NIBLIZE - ALC1220 for Gigabyte Z490 Vision G manual SP/HP"
+
+[[audio.layout]]
+id = 18
+note = "hgsshaanxi - ALC1220 for Gigabyte Z490 Aorus Master"
+
+[[audio.layout]]
+id = 20
+note = "CaseySJ - ALC1220 for Gigabyte B550 Vision D"
+
+[[audio.layout]]
+id = 21
+note = "ALC1220 for MSI GE63 Raider RGB 8RF"
+
+[[audio.layout]]
+id = 25
+note = "MSI GE 73 RAIDER RGB 8RF"
+
+[[audio.layout]]
+id = 27
+note = "lostwolf - ALC1220 for Gigabyte Z370-HD3P"
+
+[[audio.layout]]
+id = 28
+note = "MacPeet- ALC1220 for Z390 Aorus Ultra - Output SP/HP Manualmode "
+
+[[audio.layout]]
+id = 29
+note = "MacPeet- ALC1220 for Z390 Aorus Ultra - Output SP/HP SwitchMode"
+
+[[audio.layout]]
+id = 30
+note = "MacPeet- ALC1220 for Z370 AORUS Gaming 7 - Output SP/HP SwitchMode"
+
+[[audio.layout]]
+id = 34
+note = "Custom ALC1220 for MSI P65 Creator by CleverCoder"
+
+[[audio.layout]]
+id = 35
+note = "Custom ALC1220 for MSI GP75 9SD by Win7GM"
+
+[[audio.layout]]
+id = 69
+note = "Lorys89 ALC1220 for AMD B450/B550 - SwitchMode"
+
+[[audio.layout]]
+id = 98
+note = "Custom ALC1220 for Mi Gaming Notebook Creator by Xsixu"
+
+[[audio.layout]]
+id = 99
+note = "ALC1220 for MiBook 2019 by Dynamix1997"
+
+[[audio.layout]]
+id = 100
+note = "Hasee_G8-CU7PK"
+
+[[audio]]
+codec = "ALC215"
+vendor = "Realtek"
+hda_id = "10ec:0215"
+codec_id = 533
+
+[[audio.layout]]
+id = 18
+note = "ALC215 for HP 830 G6 for 965987400abc"
+
+[[audio]]
+codec = "ALC221"
+vendor = "Realtek"
+hda_id = "10ec:0221"
+codec_id = 545
+
+[[audio.layout]]
+id = 11
+note = "Goldfish64 - ALC221 for HP Compaq Pro 4300/Pro 6300/Elite 8300/EliteDesk 800 G2 TWR"
+
+[[audio.layout]]
+id = 15
+note = "MacPeet - ALC221 for HP ELITE DESK 800 G1"
+
+[[audio.layout]]
+id = 88
+note = "ALC221 for HP ProDesk 400 G2 Desktop Mini PC by dragonbbc"
+
+[[audio]]
+codec = "ALC222"
+vendor = "Realtek"
+hda_id = "10ec:0222"
+codec_id = 546
+
+[[audio.layout]]
+id = 11
+note = "ALC222 aka ALC3205-CG for HP EliteDesk 800 G6 Mini"
+
+[[audio.layout]]
+id = 12
+note = "ALC222 for Lenovo Tianyi 510s-07IMB Desktop PC by hgs v1"
+
+[[audio]]
+codec = "ALC225"
+vendor = "Realtek"
+hda_id = "10ec:0225"
+codec_id = 549
+
+[[audio.layout]]
+id = 28
+note = "ALC225/ALC3253 Credit vusun123"
+
+[[audio.layout]]
+id = 30
+note = "Custom ALC225/ALC3253 for Dell Inspiron 17-7779 by Constanta"
+
+[[audio.layout]]
+id = 33
+note = "Custom ALC225/ALC3253 by ChalesYu"
+
+[[audio.layout]]
+id = 90
+note = "Custom ALC225/ALC3253 for Dell Inspiron 13-5379 by fast900"
+
+[[audio]]
+codec = "ALC230"
+vendor = "Realtek"
+hda_id = "10ec:0230"
+codec_id = 560
+
+[[audio.layout]]
+id = 13
+note = "Andres Laptop Patch ALC230 Lenovo 310-14ISK"
+
+[[audio.layout]]
+id = 20
+note = "ALC 230 for Lenovo Ideapad 320 by maiconjs"
+
+[[audio]]
+codec = "ALC233"
+vendor = "Realtek"
+hda_id = "10ec:0233"
+codec_id = 563
+
+[[audio.layout]]
+id = 3
+note = "Mirone Laptop Patch ALC233"
+
+[[audio.layout]]
+id = 4
+note = "Custom ALC233 (3236)"
+
+[[audio.layout]]
+id = 5
+note = "Mirone Laptop Patch ALC3236"
+
+[[audio.layout]]
+id = 13
+note = "InsanelyDeepak - Realtek ALC233 for Asus X550LC"
+
+[[audio.layout]]
+id = 21
+note = "Andres ZeroCross - Realtek ALC233 for Asus A451LB-WX076D"
+
+[[audio.layout]]
+id = 27
+note = "Custom for Realtek ALC233 for SONY VAIO Fit 14E(SVF14316SCW) by SquallATF"
+
+[[audio.layout]]
+id = 28
+note = "Custom for Realtek ALC3236 for Asus TP500LN by Mohamed Khairy"
+
+[[audio.layout]]
+id = 29
+note = "Custom for Realtek ALC233 (ALC3236) for Asus X550LDV by Mirone"
+
+[[audio.layout]]
+id = 32
+note = "MacPeet - ALC233 (ALC3236) for ASUS VIVOBOOK S301LA "
+
+[[audio.layout]]
+id = 33
+note = "MacPeet - ALC233 (ALC3236) for ASUS VIVOBOOK S451LA "
+
+[[audio]]
+codec = "ALC235"
+vendor = "Realtek"
+hda_id = "10ec:0235"
+codec_id = 565
+
+[[audio.layout]]
+id = 3
+note = "Mirone Laptop Patch ALC235"
+
+[[audio.layout]]
+id = 8
+note = "Intel NUC8"
+
+[[audio.layout]]
+id = 11
+note = "ALC235 for Lenovo by soto2080"
+
+[[audio.layout]]
+id = 12
+note = "ALC235 for Lenovo Rescuer 15ISK by Z39"
+
+[[audio.layout]]
+id = 13
+note = "Deskmini H470 ALC235 by dumk1217"
+
+[[audio.layout]]
+id = 14
+note = "the-braveknight - Realtek ALC235 for Lenovo Legion Y520"
+
+[[audio.layout]]
+id = 15
+note = "qiuchenly - Realtek ALC235 for ASUS FX53VD"
+
+[[audio.layout]]
+id = 16
+note = "MacPeet - Realtek ALC235 for ASUS GL553VD"
+
+[[audio.layout]]
+id = 17
+note = "ALC235 for Lenovo ThinkCentre Tiny M720q"
+
+[[audio.layout]]
+id = 18
+note = "ALC235 for Asrock_bb_310 by_vio"
+
+[[audio.layout]]
+id = 20
+note = "ALC235 for Lenovo ThinkCentre M920x-N000 by Xezun"
+
+[[audio.layout]]
+id = 21
+note = "ALC235 for Lenovo C530 Desktop PC by Andres ZeroCross"
+
+[[audio.layout]]
+id = 22
+note = "ALC235 for Asus ROG GL553VD-FY380 by Andres ZeroCross"
+
+[[audio.layout]]
+id = 24
+note = "ALC235 for Asus TUF FX705GM by TheRealGudv1n"
+
+[[audio.layout]]
+id = 28
+note = "vusun123 - Realtek ALC235 for Lenovo Legion Y520"
+
+[[audio.layout]]
+id = 29
+note = "hla63 - Realtek ALC235 for Msi Moder 15 A10M"
+
+[[audio.layout]]
+id = 33
+note = "Custom by fuzzyrock for ALC235 Lenovo A340-22IWL"
+
+[[audio.layout]]
+id = 35
+note = "Realtek ALC235(Display as ALC233) for Lenovo Qitian M420-D046(C) by Cryse Hillmes"
+
+[[audio.layout]]
+id = 36
+note = "ALC235 for Lenovo Tianyi 510 pro-18ICB Desktop PC by hgs v1"
+
+[[audio.layout]]
+id = 37
+note = "Realtek ALC235(Display as ALC233) for Lenovo IdeaCentre Mini 5"
+
+[[audio.layout]]
+id = 55
+note = "Lenovo Yoga 500-14IBD ALC235 by gabimariz"
+
+[[audio.layout]]
+id = 72
+note = "Lenovo M920x ALC235 by meloay"
+
+[[audio.layout]]
+id = 88
+note = "frozenzero123 - NUC8I5BEH JUST MIC ALC235"
+
+[[audio.layout]]
+id = 99
+note = "ALC235 for Lenovo TianYi 510s Mini by DalianSky"
+
+[[audio]]
+codec = "ALC236"
+vendor = "Realtek"
+hda_id = "10ec:0236"
+codec_id = 566
+
+[[audio.layout]]
+id = 3
+note = "Mirone - ALC236"
+
+[[audio.layout]]
+id = 11
+note = "Jake Lo - ALC236"
+
+[[audio.layout]]
+id = 12
+note = "ALC236 for Lenovo Xiaoxin Air 14IKBR by AlexanderLake"
+
+[[audio.layout]]
+id = 13
+note = "Custom - ALC236 for Lenovo Air 13 Pro by rexx0520"
+
+[[audio.layout]]
+id = 14
+note = "erinviegas - ALC236 for Lenovo Ideapad 330S"
+
+[[audio.layout]]
+id = 15
+note = "MacPeet - ALC236 for Lenovo Ideapad 500-15ISK"
+
+[[audio.layout]]
+id = 16
+note = "RodionS - ALC236 for Lenovo Ideapad 320s 14ikb"
+
+[[audio.layout]]
+id = 17
+note = "ALC236 for Lenovo IdeaPad 330S-14IKB by Ab2774"
+
+[[audio.layout]]
+id = 18
+note = "ALC236 for Lenovo LEGION Y7000/Y530 by xiaoM"
+
+[[audio.layout]]
+id = 19
+note = "wolf606 - ALC236 for Lenovo Ideapad 500-14ISK"
+
+[[audio.layout]]
+id = 23
+note = "JudySL - ALC236 for Lenovo Air 13 IML(S530-13IML)"
+
+[[audio.layout]]
+id = 36
+note = "volcbs - ALC236 for Lenovo Ideapad 510s 14isk (modified from MacPeet's)"
+
+[[audio.layout]]
+id = 54
+note = "ALC236 for DELL-5488 by Daggeryu"
+
+[[audio.layout]]
+id = 55
+note = "ALC236 for HP-240G8 by 8DireZ3"
+
+[[audio.layout]]
+id = 68
+note = "ALC236 for Dell Vostro 5401 for Lorys89"
+
+[[audio.layout]]
+id = 69
+note = "ALC236 for Dell ICL for Lorys89 by Vorshim"
+
+[[audio.layout]]
+id = 99
+note = "ALC236 for Lenovo Air 13 IWL by DalianSky"
+
+[[audio]]
+codec = "ALC245"
+vendor = "Realtek"
+hda_id = "10ec:0245"
+codec_id = 581
+
+[[audio.layout]]
+id = 11
+note = "ALC235 for Lenovo by soto2080"
+
+[[audio.layout]]
+id = 12
+note = "ALC245 for Lenovo "
+
+[[audio.layout]]
+id = 13
+note = "lunjielee - Realtek ALC245 for HP Omen 2020"
+
+[[audio]]
+codec = "ALC255"
+vendor = "Realtek"
+hda_id = "10ec:0255"
+codec_id = 597
+
+[[audio.layout]]
+id = 3
+note = "Mirone Laptop Patch ALC255"
+
+[[audio.layout]]
+id = 11
+note = "Realtek ALC255(3234) for Dell Optiplex series by Heporis"
+
+[[audio.layout]]
+id = 12
+note = "ALC255 Optiplex"
+
+[[audio.layout]]
+id = 13
+note = "InsanelyDeepak - Realtek ALC255_v1"
+
+[[audio.layout]]
+id = 15
+note = "Realtek ALC255 Gigabyte Brix BRI5(H) by Najdanovic Ivan"
+
+[[audio.layout]]
+id = 17
+note = "InsanelyDeepak - Realtek ALC255_v2"
+
+[[audio.layout]]
+id = 18
+note = "DuNe - Realtek ALC255 for Aorus X5V7"
+
+[[audio.layout]]
+id = 20
+note = "Realtek ALC255 for Dell 7447 by was3912734"
+
+[[audio.layout]]
+id = 21
+note = "ALC255 for Asus X441UA-WX096D by Andres ZeroCross"
+
+[[audio.layout]]
+id = 22
+note = "Realtek ALC255(3234) for Asus N752VX by Feartech"
+
+[[audio.layout]]
+id = 23
+note = "Realtek ALC255 for Acer Aspire A515-54G"
+
+[[audio.layout]]
+id = 27
+note = "ALC255 for Asus X556UA m-dudarev"
+
+[[audio.layout]]
+id = 28
+note = "Realtek ALC255 for Lenovo B470 - vusun123"
+
+[[audio.layout]]
+id = 29
+note = "dhinakg - Realtek ALC255 for Acer Predator G3-571"
+
+[[audio.layout]]
+id = 30
+note = "HongyuS - Realtek ALC255 for XiaoMiAir 13.3"
+
+[[audio.layout]]
+id = 31
+note = "cowpod - Realtek ALC255 for UX360CA"
+
+[[audio.layout]]
+id = 37
+note = "Imoize - Realtek ALC255 for Acer Nitro 5 AN515-52-73Y8"
+
+[[audio.layout]]
+id = 66
+note = "ALC255 for Dell Optiplex7060/7070MT(Separate LineOut)"
+
+[[audio.layout]]
+id = 69
+note = "juniorcaesar Acer Aspire A315-56-327T ALC255"
+
+[[audio.layout]]
+id = 71
+note = "DoctorStrange96 - Realtek ALC255 for Acer Aspire A51x"
+
+[[audio.layout]]
+id = 80
+note = "Realtek ALC255 for Acer Aspire 7 A715-42G AMD by Long"
+
+[[audio.layout]]
+id = 82
+note = "Realtek ALC255 for minisforum U820 by DalianSky"
+
+[[audio.layout]]
+id = 86
+note = "Armênio - Realtek ALC255/ALC3234 - Dell 7348"
+
+[[audio.layout]]
+id = 96
+note = "Bhavin dell 5559 alc255"
+
+[[audio.layout]]
+id = 99
+note = "DalianSky - Realtek ALC255 XiaoMi Air"
+
+[[audio.layout]]
+id = 100
+note = "DalianSky - Realtek ALC255 alienware alpha r2"
+
+[[audio.layout]]
+id = 255
+note = "Realtek ALC255(3234) for Dell Inspiron 5548 by CynCYX"
+
+[[audio]]
+codec = "ALC256 (3246)"
+vendor = "Realtek"
+hda_id = "10ec:0256"
+codec_id = 598
+
+[[audio.layout]]
+id = 5
+note = "Realtek ALC256"
+
+[[audio.layout]]
+id = 11
+note = "Rockjesus - Realtek ALC256 (3246) - dell 7559"
+
+[[audio.layout]]
+id = 12
+note = "HafidzRadhival - DELL Vostro 5468 ALC256 (3246)"
+
+[[audio.layout]]
+id = 13
+note = "Insanelydeepak - Realtek ALC256 (3246) for Dell Series"
+
+[[audio.layout]]
+id = 14
+note = "Insanelydeepak - Realtek ALC256 (3246) for Dell Series with Subwoofer"
+
+[[audio.layout]]
+id = 16
+note = "VicQ - Realtek ALC256 (3246) for Dell 7000 Series with 2.1Ch"
+
+[[audio.layout]]
+id = 17
+note = "hjmmc - Realtek ALC256 (3246) for Magicbook 2018 with 4CH"
+
+[[audio.layout]]
+id = 19
+note = "Wanwu - Realtek ALC256 (3246) for MateBook X Pro 2019"
+
+[[audio.layout]]
+id = 20
+note = "Andres ZeroCross for Asus AIO PC V222UAK-WA541T"
+
+[[audio.layout]]
+id = 21
+note = "Andres ZeroCross for Dell 5570"
+
+[[audio.layout]]
+id = 22
+note = "Andres ZeroCross for Asus VivoBook Pro 17  N705UDR"
+
+[[audio.layout]]
+id = 23
+note = "Andres ZeroCross for Razer Blade 15 RZ09-02705E75"
+
+[[audio.layout]]
+id = 24
+note = "Andres ZeroCross - Intel NUC NUC10i5FNH"
+
+[[audio.layout]]
+id = 28
+note = "vusun123 - ALC256 for Asus X555UJ"
+
+[[audio.layout]]
+id = 33
+note = "insanelyme - ALC256 for Huawei Matebook D15 2018 (MRC-W10)"
+
+[[audio.layout]]
+id = 38
+note = "lshbluesky - Realtek ALC256 for Samsung Galaxy Book NT750XDA-KF59U"
+
+[[audio.layout]]
+id = 41
+note = "auq3l - Realtek ALC256 for ASUS X412FAG"
+
+[[audio.layout]]
+id = 48
+note = "nikich768 - Realtek ALC256 ASUS-X515JF-EJ012 var1"
+
+[[audio.layout]]
+id = 49
+note = "nikich768 - Realtek ALC256 ASUS-X515JF-EJ012 var2"
+
+[[audio.layout]]
+id = 56
+note = "DalianSky Realtek ALC256 (3246) for Dell Series"
+
+[[audio.layout]]
+id = 57
+note = "Kk Realtek ALC256 (3246) for magicbook"
+
+[[audio.layout]]
+id = 66
+note = "lgs3137 - Realtek ALC256 for ASUS Y5000U X507UBR"
+
+[[audio.layout]]
+id = 67
+note = "Realtek ALC256 for Dell OptiPlex 7080"
+
+[[audio.layout]]
+id = 68
+note = "Littlesum - Realtek ALC256 (3246) for Nuc9"
+
+[[audio.layout]]
+id = 69
+note = "agasecond - Realtek ALC256 (3246) for Xiaomi Pro Enhanced 2019"
+
+[[audio.layout]]
+id = 70
+note = "b0ltun/agasecond - Realtek ALC256 (3246) for Hasee KingBook X57S1"
+
+[[audio.layout]]
+id = 76
+note = "Durian - Realtek ALC256 (3246) for MateBook X Pro 2019（4CH）"
+
+[[audio.layout]]
+id = 77
+note = "Asus x430_s4300FN by fangf2018"
+
+[[audio.layout]]
+id = 88
+note = "Asus x430_s4300FN by fangf2018 (mic in and line in  mic in separated)"
+
+[[audio.layout]]
+id = 95
+note = "Floron - Realtek ALC256 (3246) for Honor MagicBook Pro HBB-WAH9"
+
+[[audio.layout]]
+id = 97
+note = "DalianSky - Realtek ALC256 (3246) for MateBook X Pro 2019"
+
+[[audio.layout]]
+id = 99
+note = "Hoping - Realtek ALC256 (3246) for XiaoMiPro Enhanced 2019"
+
+[[audio.layout]]
+id = 100
+note = "nikich768 - Realtek ALC256 Dell Latitude 5490 var1"
+
+[[audio]]
+codec = "ALC257"
+vendor = "Realtek"
+hda_id = "10ec:0257"
+codec_id = 599
+
+[[audio.layout]]
+id = 11
+note = "MacPeet - Realtek ALC257 for Lenovo T480"
+
+[[audio.layout]]
+id = 18
+note = "Realtek ALC257 for Lenovo Legion Y540 and Y7000-2019"
+
+[[audio.layout]]
+id = 86
+note = "Armênio - Realtek ALC257 - Lenovo T480"
+
+[[audio.layout]]
+id = 96
+note = "antoniomcr96 - Realtek ALC257 for Lenovo Thinkpad L390"
+
+[[audio.layout]]
+id = 97
+note = "savvamitrofanov - Realtek ALC257 for Lenovo Thinkpad T490"
+
+[[audio.layout]]
+id = 99
+note = "Realtek ALC257 for Lenovo XiaoXin Pro 2019(81XB/81XD) by DalianSky"
+
+[[audio.layout]]
+id = 100
+note = "Realtek ALC257 for Lenovo XiaoXin Pro 2019(81XB/81XD) by DalianSky"
+
+[[audio.layout]]
+id = 101
+note = "Hoping - Realtek ALC257 for Lenovo XiaoXin Air14ALC"
+
+[[audio]]
+codec = "ALC260"
+vendor = "Realtek"
+hda_id = "10ec:0260"
+codec_id = 608
+
+[[audio.layout]]
+id = 11
+note = "MacPeet ALC260 for Fujitsu Celsius M 450"
+
+[[audio.layout]]
+id = 12
+note = "Custom ALC260"
+
+[[audio]]
+codec = "ALC262"
+vendor = "Realtek"
+hda_id = "10ec:0262"
+codec_id = 610
+
+[[audio.layout]]
+id = 7
+note = "DalianSky- ALC262 for MS-7480N1"
+
+[[audio.layout]]
+id = 11
+note = "MacPeet - ALC262"
+
+[[audio.layout]]
+id = 12
+note = "Goldfish64 - ALC262 for HP Compaq dc7700 SFF"
+
+[[audio.layout]]
+id = 13
+note = "MacPeet - ALC262 for Fujitsu Celsius H270"
+
+[[audio.layout]]
+id = 14
+note = "Goldfish64 - ALC262 for Dell Studio One 19 1909"
+
+[[audio.layout]]
+id = 28
+note = "MacPeet - ALC262 for HP Z800-Z600 series"
+
+[[audio.layout]]
+id = 66
+note = "ALC262 for MS-7847"
+
+[[audio]]
+codec = "ALC268"
+vendor = "Realtek"
+hda_id = "10ec:0268"
+codec_id = 616
+
+[[audio.layout]]
+id = 3
+note = "Mirone Laptop Patch ALC268"
+
+[[audio.layout]]
+id = 11
+note = "Goldfish64 - ALC268 for Dell Inspiron Mini 9"
+
+[[audio]]
+codec = "ALC269"
+vendor = "Realtek"
+hda_id = "10ec:0269"
+codec_id = 617
+
+[[audio.layout]]
+id = 1
+note = "Mirone Laptop patch ALC269 Asus N53J"
+
+[[audio.layout]]
+id = 2
+note = "Mirone Laptop patch ALC269-VB v1"
+
+[[audio.layout]]
+id = 3
+note = "Mirone Laptop patch ALC269 Asus K53SJ, Asus G73s"
+
+[[audio.layout]]
+id = 4
+note = "Mirone Laptop patch ALC269-VB v2"
+
+[[audio.layout]]
+id = 5
+note = "Mirone Laptop patch ALC269-VB v3"
+
+[[audio.layout]]
+id = 6
+note = "Mirone Laptop patch ALC269-VC v1"
+
+[[audio.layout]]
+id = 7
+note = "Mirone Laptop patch ALC269-VC v2"
+
+[[audio.layout]]
+id = 8
+note = "Mirone Laptop patch ALC269-VC v3"
+
+[[audio.layout]]
+id = 9
+note = "Mirone Laptop patch ALC269-VB v4"
+
+[[audio.layout]]
+id = 10
+note = "Toleda ALC269 for Brix by ttimasdf"
+
+[[audio.layout]]
+id = 11
+note = "Custom ALC269VB for Dell Precision Workstation T1600 - Mosser"
+
+[[audio.layout]]
+id = 12
+note = "Asus Vivobook S200CE by chunnann"
+
+[[audio.layout]]
+id = 13
+note = "InsanelyDeepak - Realtek ALC269VC for Samsung NP350V5C-S08IT"
+
+[[audio.layout]]
+id = 14
+note = "Custom ALC269VC for Samsung NT550P7C-S65 with subwoofer 2.1ch by Rockjesus"
+
+[[audio.layout]]
+id = 15
+note = "MacPeet - ALC269VB for Dell Optiplex 790"
+
+[[audio.layout]]
+id = 16
+note = "MacPeet - ALC269VB for Dell Optiplex 790 Version2"
+
+[[audio.layout]]
+id = 17
+note = "MacPeet - Latte Panda"
+
+[[audio.layout]]
+id = 18
+note = "Hypereitan - ALC269VC for Thinkpad X230 i7"
+
+[[audio.layout]]
+id = 19
+note = "Asus Vivobook S300CA by chunnann"
+
+[[audio.layout]]
+id = 20
+note = "Custom ALC269 Sony Vaio VPCEB3M1R by Rodion"
+
+[[audio.layout]]
+id = 21
+note = "Goldfish64 - ALC269VB for Dell Optiplex 7010"
+
+[[audio.layout]]
+id = 22
+note = "Andres ZeroCross - ALC269VC for Acer Veriton Z4640G"
+
+[[audio.layout]]
+id = 23
+note = "Custom ALC269VD ThinkPad T430"
+
+[[audio.layout]]
+id = 24
+note = "ALC269VC for Hasee U45S1 by zero816"
+
+[[audio.layout]]
+id = 25
+note = "hua0512 - Realtek ALC269 for Medium Akoya P6653"
+
+[[audio.layout]]
+id = 26
+note = "Andres ZeroCross - ALC269 for Infinix X1 XL11"
+
+[[audio.layout]]
+id = 27
+note = "Custom ALC269 Acer Aspire by Andrey1970"
+
+[[audio.layout]]
+id = 28
+note = "Custom ALC269VC Lenovo Z580 by John"
+
+[[audio.layout]]
+id = 29
+note = "Custom ALC269VC Lenovo V580 by ar4er"
+
+[[audio.layout]]
+id = 30
+note = "ALC269VC for Hasee Z6SL7R3 by HF"
+
+[[audio.layout]]
+id = 31
+note = "Custom ALC271X Acer Aspire S3-951"
+
+[[audio.layout]]
+id = 32
+note = "Custom ALC269 Samsung np880z5e-x01ru by Constanta"
+
+[[audio.layout]]
+id = 33
+note = "Custom ALC269VC for Samsung NP530U3C-A0F by BblDE3HAP"
+
+[[audio.layout]]
+id = 34
+note = "Custom ALC269-VC Samsung np540U4E by majonez"
+
+[[audio.layout]]
+id = 35
+note = "Custom ALC269VC for Samsung NP350V5C-S0URU by Mirone"
+
+[[audio.layout]]
+id = 36
+note = "ALC269"
+
+[[audio.layout]]
+id = 37
+note = "Ar4eR07 - ALC269VB for Tecno T1 IceLake"
+
+[[audio.layout]]
+id = 38
+note = "jayveeballesteros - ALC269 for Fujitsu Esprimo D552"
+
+[[audio.layout]]
+id = 39
+note = "5T33Z0 - Lenovo T530 with Dock 4337/4338"
+
+[[audio.layout]]
+id = 40
+note = "vusun123 - RealtekALC269VC for Lenovo W530"
+
+[[audio.layout]]
+id = 44
+note = "Laptop patch ALC269VC Samsung _NP350V5C - Giesteira"
+
+[[audio.layout]]
+id = 45
+note = "maiconjs (Wolfield) - Asus A45A 269VB1"
+
+[[audio.layout]]
+id = 47
+note = "ALC269VC for Hasee K790s"
+
+[[audio.layout]]
+id = 55
+note = "ALC269VC for Thinkpad X230 with dock4338"
+
+[[audio.layout]]
+id = 58
+note = "HASEE Z6-i78154S2 ALC269 by lianny "
+
+[[audio.layout]]
+id = 66
+note = "ALC269VC for Clevo N155RD by DalianSky"
+
+[[audio.layout]]
+id = 69
+note = "Vorshim92 - Realtek ALC269 - GF63 Thin 9SEXR"
+
+[[audio.layout]]
+id = 76
+note = "Custom ALC269VB ENZ C16B by jimmy19990"
+
+[[audio.layout]]
+id = 77
+note = "ALC269 for Thunderobot-G7000S-9300H by Phoenix-L"
+
+[[audio.layout]]
+id = 88
+note = "ALC269 for MECHREVO X8Ti Plus by DalianSky"
+
+[[audio.layout]]
+id = 89
+note = "Talha - Realtek ALC269VC for Acer Aspire Z3-715"
+
+[[audio.layout]]
+id = 91
+note = "Custom ALC269 for Chuwi CoreBox by Luca91"
+
+[[audio.layout]]
+id = 93
+note = "ALC269 Asus K53SJ, Asus G73s Mod by Andrey1970 (No input boost - no noise in Siri)"
+
+[[audio.layout]]
+id = 99
+note = "ALC269-VB v4 Mod by Andrey1970 (No input boost - no noise in Siri)"
+
+[[audio.layout]]
+id = 100
+note = "ALC269 for GPD P2 Max by DalianSky"
+
+[[audio.layout]]
+id = 111
+note = "ALC269 for minisforum NAG6 by DalianSky"
+
+[[audio.layout]]
+id = 127
+note = "Custom ALC269 Acer Aspire by Andrey1970 (No input boost - no noise in Siri)"
+
+[[audio.layout]]
+id = 128
+note = "Custom ALC269 by ryahpalma for Laptop NS4SL01"
+
+[[audio.layout]]
+id = 138
+note = "aa820t - Realtek ALC269VC for Lenovo G480"
+
+[[audio.layout]]
+id = 188
+note = "ALC269VC for Lenovo Y500 by BaoStorm"
+
+[[audio]]
+codec = "ALC270"
+vendor = "Realtek"
+hda_id = "10ec:0270"
+codec_id = 624
+
+[[audio.layout]]
+id = 3
+note = "Mirone Laptop Patch ALC270 v1"
+
+[[audio.layout]]
+id = 4
+note = "Mirone Laptop Patch ALC270 v2"
+
+[[audio.layout]]
+id = 21
+note = "Andres ALC270 Asus A46CB-WX024D by Andres ZeroCross"
+
+[[audio.layout]]
+id = 27
+note = "Custom by m-dudarev"
+
+[[audio.layout]]
+id = 28
+note = "Custom by m-dudarev"
+
+[[audio]]
+codec = "ALC272"
+vendor = "Realtek"
+hda_id = "10ec:0272"
+codec_id = 626
+
+[[audio.layout]]
+id = 3
+note = "Mirone Laptop Patch ALC272"
+
+[[audio.layout]]
+id = 11
+note = "ALC272 - Lenovo B470 - Sam Chen"
+
+[[audio.layout]]
+id = 12
+note = "Realtek ALC 272 for Lenovo Y470 by amu_1680c"
+
+[[audio.layout]]
+id = 18
+note = "Sniki - Realtek ALC 272 for Lenovo B570 and B570e"
+
+[[audio.layout]]
+id = 21
+note = "Andres ZeroCross - Lenovo All In One PC C440"
+
+[[audio]]
+codec = "ALC274"
+vendor = "Realtek"
+hda_id = "10ec:0274"
+codec_id = 628
+
+[[audio.layout]]
+id = 11
+note = "Realtek ALC274"
+
+[[audio.layout]]
+id = 21
+note = "Andres ZeroCross - Realtek ALC274 for Dell Inspiron 27-7777 AIO Series"
+
+[[audio.layout]]
+id = 28
+note = "343iChurch - Realtek ALC274 for Tongfang 17 Barebone (Maingear Element 3 and Eluktronics Max 17)"
+
+[[audio.layout]]
+id = 35
+note = "jackjack1-su Realtek ALC274 for Microsoft Surface Pro 7"
+
+[[audio.layout]]
+id = 39
+note = "Harahi - Realtek ALC274 for Mechrevo UmiiPro3 (Tongfang GM5MG0Y)"
+
+[[audio]]
+codec = "ALC275"
+vendor = "Realtek"
+hda_id = "10ec:0275"
+codec_id = 629
+
+[[audio.layout]]
+id = 3
+note = "Mirone Laptop Patch ALC275"
+
+[[audio.layout]]
+id = 13
+note = "InsanelyDeepak - Realtek ALC275"
+
+[[audio.layout]]
+id = 15
+note = "Piscean - ALC275 for Sony Vaio SVD11225PXB"
+
+[[audio.layout]]
+id = 28
+note = "Custom ALC275 for Sony Vaio - vusun123"
+
+[[audio]]
+codec = "ALC280"
+vendor = "Realtek"
+hda_id = "10ec:0280"
+codec_id = 640
+
+[[audio.layout]]
+id = 3
+note = "Mirone Laptop patch ALC280"
+
+[[audio.layout]]
+id = 4
+note = "Mirone Laptop patch ALC280 - Combo Jack Support"
+
+[[audio.layout]]
+id = 11
+note = "Alienware alpha patch ALC280"
+
+[[audio.layout]]
+id = 13
+note = "MacPeet - Realtek ALC280 - Dell T20 - Version1 - ManualMode"
+
+[[audio.layout]]
+id = 15
+note = "MacPeet - Realtek ALC280 - Dell T20 - Version2 - SwitchMode"
+
+[[audio.layout]]
+id = 16
+note = "cowpod - Realtek ALC280 - Optiplex 9020SFF"
+
+[[audio.layout]]
+id = 17
+note = "Realtek ALC280 - Optiplex 9020SFF - ManualMode"
+
+[[audio.layout]]
+id = 18
+note = "Dell OptiPlex 9020 AIO ALC280 by james090500"
+
+[[audio.layout]]
+id = 21
+note = "Dell Precision ﻿T7610 ﻿Workstation﻿ ALC280 by Andres ZeroCross"
+
+[[audio]]
+codec = "ALC282"
+vendor = "Realtek"
+hda_id = "10ec:0282"
+codec_id = 642
+
+[[audio.layout]]
+id = 3
+note = "Mirone Laptop patch ALC282 v1"
+
+[[audio.layout]]
+id = 4
+note = "Mirone Laptop patch ALC282 v2"
+
+[[audio.layout]]
+id = 13
+note = "InsanelyDeepak Laptop patch ALC282"
+
+[[audio.layout]]
+id = 21
+note = "ALC282 for TinyMonster ECO by DalianSky"
+
+[[audio.layout]]
+id = 22
+note = "Custom ALC282 lenovo y430p by loverto"
+
+[[audio.layout]]
+id = 27
+note = "Skvo ALC282 Acer Aspire on IvyBridge by Andrey1970"
+
+[[audio.layout]]
+id = 28
+note = "Custom ALC282 Acer Aspire E1-572G"
+
+[[audio.layout]]
+id = 29
+note = "Custom ALC282 Dell Inspirion 3521 by Generation88"
+
+[[audio.layout]]
+id = 30
+note = "Custom ALC282 Soarsea S210H by Jokerman1991"
+
+[[audio.layout]]
+id = 41
+note = "Custom ALC282 Lenovo Y410P by yunsur"
+
+[[audio.layout]]
+id = 43
+note = "Custom ALC282 Lenovo Y430P by yunsur"
+
+[[audio.layout]]
+id = 51
+note = "Custom ALC282 Lenovo Y510P by yunsur"
+
+[[audio.layout]]
+id = 69
+note = "Custom ALC282 Lenovo-IdeaPad-Z510 by hoseinrez"
+
+[[audio.layout]]
+id = 76
+note = "Custom ALC282 Hasee K580C by YM2008"
+
+[[audio.layout]]
+id = 86
+note = "Custom ALC282 Asus x200LA by S.Mitrofanov"
+
+[[audio.layout]]
+id = 127
+note = "No input boost ALC282 Acer Aspire on IvyBridge by Andrey1970"
+
+[[audio]]
+codec = "ALC283"
+vendor = "Realtek"
+hda_id = "10ec:0283"
+codec_id = 643
+
+[[audio.layout]]
+id = 1
+note = "Toleda NUC/BRIX patch ALC283"
+
+[[audio.layout]]
+id = 3
+note = "Mirone Laptop patch ALC283"
+
+[[audio.layout]]
+id = 11
+note = "Custom by Slbomber (Acer Aspire V3-371)"
+
+[[audio.layout]]
+id = 12
+note = "ThinkCentre M73(10AX) ALC283 by dumk1217"
+
+[[audio.layout]]
+id = 13
+note = "ALC283 for AlldoCube/Cube Mix Plus by Aldo97"
+
+[[audio.layout]]
+id = 15
+note = "MacPeet - alc283 for LENOVO IDEAPAD 14"
+
+[[audio.layout]]
+id = 44
+note = "Realtek ALC283 for ThinkCentre M93z 10AF ALC283 by giesteira"
+
+[[audio.layout]]
+id = 45
+note = "Realtek ALC283 for NUC by mikes"
+
+[[audio.layout]]
+id = 66
+note = "ASRock DeskMini 110(H110M-STX) ALC283 by licheedev"
+
+[[audio.layout]]
+id = 73
+note = "UHDbits - Realtek ALC283/ALC3239 for the Lenovo ThinkCentre M73 Tiny"
+
+[[audio.layout]]
+id = 88
+note = "Realtek ALC283 for DELL R14 3437 by Zoran"
+
+[[audio]]
+codec = "ALC284"
+vendor = "Realtek"
+hda_id = "10ec:0284"
+codec_id = 644
+
+[[audio.layout]]
+id = 3
+note = "Mirone Laptop patch ALC284"
+
+[[audio]]
+codec = "ALC285"
+vendor = "Realtek"
+hda_id = "10ec:0285"
+codec_id = 645
+
+[[audio.layout]]
+id = 11
+note = "Rover Realtek ALC285 for X1C6th"
+
+[[audio.layout]]
+id = 21
+note = "Andres - Realtek ALC285 for  Lenovo X1 Carbon 6th "
+
+[[audio.layout]]
+id = 31
+note = "Flymin Realtek ALC285 for X1E"
+
+[[audio.layout]]
+id = 33
+note = "PIut02 - Realtek ALC285 for ROG-Zephyrus-G14"
+
+[[audio.layout]]
+id = 52
+note = "Z Realtek ALC285 for thinkpad p52"
+
+[[audio.layout]]
+id = 61
+note = "Realtek ALC285 for Yoga C740 by Fewtarius"
+
+[[audio.layout]]
+id = 66
+note = "Realtek ALC285 for Lenovo Legion S740 15-IRH (Y9000X 2020) by R-a-s-c-a-l"
+
+[[audio.layout]]
+id = 71
+note = "jpuxdev - Realtek ALC285 for Spectre x360 13-ap0xxx"
+
+[[audio.layout]]
+id = 88
+note = "Realtek ALC285 for Yoga S740 by frozenzero123"
+
+[[audio]]
+codec = "0x10ec0286"
+vendor = "Realtek"
+hda_id = "10ec:0286"
+codec_id = 646
+
+[[audio.layout]]
+id = 3
+
+[[audio.layout]]
+id = 11
+
+[[audio.layout]]
+id = 69
+note = "HP-Pavilion-Wave-600-A058cn"
+
+[[audio]]
+codec = "ALC287"
+vendor = "Realtek"
+hda_id = "10ec:0287"
+codec_id = 647
+
+[[audio.layout]]
+id = 11
+
+[[audio.layout]]
+id = 13
+note = "ALC287 for Legion 5 Pro(R9000p)"
+
+[[audio.layout]]
+id = 21
+note = "Custom ALC287 for Lenovo Yoga Slim 7-14IIL05 by Andres ZeroCross"
+
+[[audio]]
+codec = "ALC288"
+vendor = "Realtek"
+hda_id = "10ec:0288"
+codec_id = 648
+
+[[audio.layout]]
+id = 3
+note = "Mirone Laptop patch ALC288"
+
+[[audio.layout]]
+id = 13
+note = "InsanelyDeepak - Realtek ALC288 for Dell XPS 9343"
+
+[[audio.layout]]
+id = 23
+note = "yyfn - Realtek ALC288 for Dell XPS 9343"
+
+[[audio]]
+codec = "ALC289"
+vendor = "Realtek"
+hda_id = "10ec:0289"
+codec_id = 649
+
+[[audio.layout]]
+id = 11
+note = "leeoem - Realtek ALC289 for Alienware m17r2"
+
+[[audio.layout]]
+id = 12
+note = "ALC289 for XPS 13 9300"
+
+[[audio.layout]]
+id = 13
+note = "ALC289 for XPS 15 9500"
+
+[[audio.layout]]
+id = 15
+note = "MacPeet - ALC289 for Dell 7730 Precision CM240 "
+
+[[audio.layout]]
+id = 23
+note = "Realtek ALC289 for Acer PT515-51 By Bugprogrammer and Rover"
+
+[[audio.layout]]
+id = 33
+note = "PIut02 - Realtek ALC289 for ROG-Zephyrus-G14"
+
+[[audio.layout]]
+id = 68
+note = "ALC289 for Dell XPS 7390 ICL 2in1 By Lorys89"
+
+[[audio.layout]]
+id = 69
+note = "ALC289 for Dell XPS 2in1 7390 Vorshim"
+
+[[audio.layout]]
+id = 87
+note = "naufalkharits - Realtek ALC289 for Alienware m15"
+
+[[audio.layout]]
+id = 93
+note = "sweet3c - Realtek ALC289 for XPS 9500 4K"
+
+[[audio.layout]]
+id = 99
+note = "Realtek ALC289 for Dell XPS 13 9300 by DalianSky"
+
+[[audio]]
+codec = "ALC290"
+vendor = "Realtek"
+hda_id = "10ec:0290"
+codec_id = 656
+
+[[audio.layout]]
+id = 3
+note = "Mirone Laptop patch ALC290"
+
+[[audio.layout]]
+id = 4
+note = "ALC290 aka ALC3241"
+
+[[audio.layout]]
+id = 10
+note = "ALC3241 - HP Envy 15t-k200 Beats Audio 2.1"
+
+[[audio.layout]]
+id = 15
+note = "MacPeet - ALC290 for HP m6 n015dx"
+
+[[audio.layout]]
+id = 28
+note = "vusun123 - ALC 290 for Dell Vostro 5480"
+
+[[audio]]
+codec = "ALC292"
+vendor = "Realtek"
+hda_id = "10ec:0292"
+codec_id = 658
+
+[[audio.layout]]
+id = 12
+note = "Custom ALC292"
+
+[[audio.layout]]
+id = 15
+note = "MacPeet - alc292 for LENOVO THINKPAD T450_T450s_X240 - ManualMode"
+
+[[audio.layout]]
+id = 18
+note = "vanquybn - ALC 292 for Dell M4800"
+
+[[audio.layout]]
+id = 28
+note = "vusun123 - ALC 292 for Lenovo T440"
+
+[[audio.layout]]
+id = 32
+note = "ALC292 for Lenovo T450s By Echo"
+
+[[audio.layout]]
+id = 55
+note = "e6540 alc292 with dock"
+
+[[audio.layout]]
+id = 59
+note = "Hans - ALC 292 for Dell M4800 with Dock"
+
+[[audio]]
+codec = "ALC293"
+vendor = "Realtek"
+hda_id = "10ec:0293"
+codec_id = 659
+
+[[audio.layout]]
+id = 11
+note = "ALC293 Dell E7450 by Andres ZeroCross"
+
+[[audio.layout]]
+id = 28
+note = "ALC 293 for Lenovo T460/T560 - extra LineOut on Dock"
+
+[[audio.layout]]
+id = 29
+note = "ALC 293 for Lenovo T460/T560"
+
+[[audio.layout]]
+id = 30
+note = "ALC 293 for Hasee ZX8-CT5DA/Clevo N9x0TD_TF by RushiaBoingBoing"
+
+[[audio.layout]]
+id = 31
+note = "ALC 293 for Hasee Z7-CT7NA by lgh07711"
+
+[[audio]]
+codec = "ALC294"
+vendor = "Realtek"
+hda_id = "10ec:0294"
+codec_id = 660
+
+[[audio.layout]]
+id = 11
+note = "Custom by Rover - Realtek ALC294 for Asus FL8000U"
+
+[[audio.layout]]
+id = 12
+note = "MacPeet - Realtek ALC294 for Lenovo M710Q"
+
+[[audio.layout]]
+id = 13
+note = "insanelydeepak - Realtek ALC294"
+
+[[audio.layout]]
+id = 15
+note = "Realtek ALC294, UX434"
+
+[[audio.layout]]
+id = 21
+note = "Andres ZeroCross"
+
+[[audio.layout]]
+id = 22
+note = "cowpod - Realtek ALC294 for ASUS ROG GL504GW"
+
+[[audio.layout]]
+id = 24
+note = "Theroadw - Realtek ALC294 for Asus rog strix g512li"
+
+[[audio.layout]]
+id = 28
+note = "Ayat Kyo - Realtek ALC294 for Asus ROG G531GD"
+
+[[audio.layout]]
+id = 44
+note = "narcyzzo - Realtek ALC294 for ASUS UX534FAC"
+
+[[audio.layout]]
+id = 66
+note = "KKKIIINNN - Realtek ALC294 for ASUS X542UQR"
+
+[[audio.layout]]
+id = 99
+note = "hoping - Realtek ALC294 for ASUS ROG GU502LV"
+
+[[audio]]
+codec = "ALC295"
+vendor = "Realtek"
+hda_id = "10ec:0295"
+codec_id = 661
+
+[[audio.layout]]
+id = 1
+note = "Damon - Realtek ALC 295 for HP Envy x360 15-bp107tx"
+
+[[audio.layout]]
+id = 3
+note = "Mirone - Realtek ALC295/ALC3254"
+
+[[audio.layout]]
+id = 11
+note = "Realtek ALC295 ZenBook UX581"
+
+[[audio.layout]]
+id = 13
+note = "DalianSky - Realtek ALC295/ALC3254 Dell7570"
+
+[[audio.layout]]
+id = 14
+note = "InsanelyDeepak - Realtek ALC295 v2 Asus UX430UA"
+
+[[audio.layout]]
+id = 15
+note = "InsanelyDeepak - Realtek ALC295/3254"
+
+[[audio.layout]]
+id = 21
+note = "Andres - ALC295 Acer Nitro 5 Spin (NP515-51)"
+
+[[audio.layout]]
+id = 22
+note = "aleixjf — Realtek ALC295 for HP Spectre x360 13-ac0XX and 13-w0XX models"
+
+[[audio.layout]]
+id = 23
+note = "Lancet-X—Realtek ALC295/ALC3254 for HP OMEN 15-AX000"
+
+[[audio.layout]]
+id = 24
+note = "zty199 - ALC295 for HP Pavilion / OMEN-2"
+
+[[audio.layout]]
+id = 28
+note = "vusun123 - ALC 295 for Skylake HP Pavilion"
+
+[[audio.layout]]
+id = 33
+note = "Lorys89 - Realtek ALC295/ALC3254 for Dell Latitude 7210 2-in-1"
+
+[[audio.layout]]
+id = 69
+note = "Baio77 - ALC295 Lenovo_X1_Tablet_3°Gen"
+
+[[audio.layout]]
+id = 75
+note = "Lorys89 - Realtek ALC295/ALC3254 for Dell Indpiron 7590"
+
+[[audio.layout]]
+id = 77
+note = "Unbelievable9 - Realtek ALC295/ALC3254 for Dell Latitude 5290"
+
+[[audio]]
+codec = "ALC298"
+vendor = "Realtek"
+hda_id = "10ec:0298"
+codec_id = 664
+
+[[audio.layout]]
+id = 3
+note = "Mirone - Realtek ALC298"
+
+[[audio.layout]]
+id = 11
+note = "Rockjesus.cn - Realtek ALC298 for Alienware 17 R4 2.1ch"
+
+[[audio.layout]]
+id = 13
+note = "InsanelyDeepak - Realtek ALC298"
+
+[[audio.layout]]
+id = 15
+note = "Piscean - Realtek ALC298 for Dell Precision 5540"
+
+[[audio.layout]]
+id = 16
+note = "Ping - Realtek ALC298 for Dell Precision 5520"
+
+[[audio.layout]]
+id = 17
+note = "skyfever - Realtek ALC298 for SAMSUNG NT950SBE"
+
+[[audio.layout]]
+id = 21
+note = "Lenovo 720S-15IKB ALC298 by Andres ZeroCross"
+
+[[audio.layout]]
+id = 22
+note = "Razer Blade 14 2017 ALC298 by Andres ZeroCross"
+
+[[audio.layout]]
+id = 25
+note = "hoaug - ALC295 - Razer Blade 15 2018 Advanced"
+
+[[audio.layout]]
+id = 28
+note = "vusun123 - Realtek ALC298 for Dell XPS 9x50"
+
+[[audio.layout]]
+id = 29
+note = "vusun123 - Realtek ALC298 for Lenovo X270"
+
+[[audio.layout]]
+id = 30
+note = "Constanta - Realtek ALC298 for Xiaomi Mi Notebook Air 13.3 Fingerprint 2018"
+
+[[audio.layout]]
+id = 32
+note = "smallssnow xps 9570 - Realtek ALC298"
+
+[[audio.layout]]
+id = 33
+note = "RockJesus.cn - Realtek ALC298 for surface laptop 1gen"
+
+[[audio.layout]]
+id = 47
+note = "Daliansky - Realtek ALC298 ThinkPad T470p"
+
+[[audio.layout]]
+id = 66
+note = "lgs3137 - Realtek ALC298 MECHREVO S1"
+
+[[audio.layout]]
+id = 69
+note = "mbarbierato - Realtek ALC298 for Microsoft Surface GO 2"
+
+[[audio.layout]]
+id = 72
+note = "Custom - Realtek ALC298 for Dell XPS 9560 by KNNSpeed"
+
+[[audio.layout]]
+id = 94
+note = "Custom - Realtek ALC298 for Lenovo Yoga C940 by idalin"
+
+[[audio.layout]]
+id = 99
+note = "Daliansky - Realtek ALC298 XiaoMi Pro"
+
+[[audio]]
+codec = "ALC299"
+vendor = "Realtek"
+hda_id = "10ec:0299"
+codec_id = 665
+
+[[audio.layout]]
+id = 21
+note = "Andres ZeroCross - Acer Helios 500"
+
+[[audio.layout]]
+id = 22
+note = "Andres ZeroCross - Dell XPS13"
+
+[[audio]]
+codec = "ALC623"
+vendor = "Realtek"
+hda_id = "10ec:0623"
+codec_id = 1571
+
+[[audio.layout]]
+id = 13
+note = "Pinokyo-H - Lenovo ThinkCentre SFF M720e"
+
+[[audio.layout]]
+id = 21
+note = "Andres ZeroCross - Lenovo M70T"
+
+[[audio]]
+codec = "ALC662"
+vendor = "Realtek"
+hda_id = "10ec:0662"
+codec_id = 1634
+
+[[audio.layout]]
+id = 5
+note = "Mirone 3 ports (Pink, Green, Blue)"
+
+[[audio.layout]]
+id = 7
+note = "Mirone 5/6 ports (Gray, Black, Orange, Pink, Green, Blue)"
+
+[[audio.layout]]
+id = 11
+note = "5 ports (Green, Pink, Green, Pink, Blue) - Irving23"
+
+[[audio.layout]]
+id = 12
+note = "Custom ALC662 by stich86 for Lenovo ThinkCentre M800"
+
+[[audio.layout]]
+id = 13
+note = "Custom ALC662 by Vandroiy for Asus X66Ic"
+
+[[audio.layout]]
+id = 15
+note = "MacPeet - ALC662 for Acer Aspire A7600U All in One"
+
+[[audio.layout]]
+id = 16
+note = "phucnguyen.2411 - ALC662v3 for Lenovo ThinkCentre M92P SFF"
+
+[[audio.layout]]
+id = 17
+note = "Custom ALC662 by aloha_cn for HP Compaq Elite 8000 SFF"
+
+[[audio.layout]]
+id = 18
+note = "Custom ALC662 by ryahpalma for MP67-DI/Esprimo Q900"
+
+[[audio.layout]]
+id = 19
+note = "Custom ALC662 for MSI X79A-GD65"
+
+[[audio.layout]]
+id = 66
+note = "ALC662v3 for Lenovo M415-D339 by Eric"
+
+[[audio]]
+codec = "ALC663"
+vendor = "Realtek"
+hda_id = "10ec:0663"
+codec_id = 1635
+
+[[audio.layout]]
+id = 3
+note = "Mirone Laptop Patches ALC663"
+
+[[audio.layout]]
+id = 4
+note = "Mirone Laptop Patches ALC663 v2"
+
+[[audio.layout]]
+id = 15
+note = "MacPeet - ALC663 for Fujitsu Celsius r670"
+
+[[audio.layout]]
+id = 28
+note = "Custom by m-dudarev"
+
+[[audio.layout]]
+id = 99
+note = "Custom by alex1960 for ASUS N71J"
+
+[[audio]]
+codec = "ALC665"
+vendor = "Realtek"
+hda_id = "10ec:0665"
+codec_id = 1637
+
+[[audio.layout]]
+id = 12
+note = "Custom by insanelydeepak ALC665"
+
+[[audio.layout]]
+id = 13
+note = "Custom by insanelydeepak ALC665"
+
+[[audio]]
+codec = "ALC668"
+vendor = "Realtek"
+hda_id = "10ec:0668"
+codec_id = 1640
+
+[[audio.layout]]
+id = 3
+
+[[audio.layout]]
+id = 20
+note = "Custom by lazzy for laptop ASUS G551JM"
+
+[[audio.layout]]
+id = 27
+
+[[audio.layout]]
+id = 28
+note = "Custom by m-dudarev for laptop Asus N750Jk"
+
+[[audio.layout]]
+id = 29
+note = "Custom for laptop Asus N750JV"
+
+[[audio]]
+codec = "ALC670"
+vendor = "Realtek"
+hda_id = "10ec:0670"
+codec_id = 1648
+
+[[audio.layout]]
+id = 12
+
+[[audio]]
+codec = "ALC671"
+vendor = "Realtek"
+hda_id = "10ec:0671"
+codec_id = 1649
+
+[[audio.layout]]
+id = 12
+
+[[audio.layout]]
+id = 15
+
+[[audio.layout]]
+id = 16
+
+[[audio.layout]]
+id = 88
+
+[[audio]]
+codec = "ALC700"
+vendor = "Realtek"
+hda_id = "10ec:0700"
+codec_id = 1792
+
+[[audio.layout]]
+id = 11
+note = "Custom by osy - Realtek ALC700 for NUC HC"
+
+[[audio.layout]]
+id = 22
+note = "Baio77 - Realtek ALC700 for NUC HC"
+
+[[audio]]
+codec = "ALC882"
+vendor = "Realtek"
+hda_id = "10ec:0882"
+codec_id = 2178
+
+[[audio.layout]]
+id = 5
+note = "Mirone 3 ports (Pink, Green, Blue)"
+
+[[audio.layout]]
+id = 7
+note = "Mirone 5/6 ports (Gray, Black, Orange, Pink, Green, Blue)"
+
+[[audio]]
+codec = "ALC883"
+vendor = "Realtek"
+hda_id = "10ec:0883"
+codec_id = 2179
+
+[[audio.layout]]
+id = 7
+note = "Mirone 5/6 ports (Gray, Black, Orange, Pink, Green, Blue)"
+
+[[audio.layout]]
+id = 20
+note = "Realtek ALC883 for Atermiter X79G by SamCabral"
+
+[[audio]]
+codec = "ALC885"
+vendor = "Realtek"
+hda_id = "10ec:0885"
+codec_id = 2181
+
+[[audio.layout]]
+id = 1
+note = "Toleda ALC885"
+
+[[audio.layout]]
+id = 12
+note = "Custom by alex1960"
+
+[[audio.layout]]
+id = 13
+note = "Khronokernel - ALC885 - MacPro3,1"
+
+[[audio.layout]]
+id = 15
+note = "MacPeet - ALC885 for GA-G33M-DS2R"
+
+[[audio.layout]]
+id = 48
+note = "Khronokernel - ALC885 - iMac7,1 20\""
+
+[[audio.layout]]
+id = 50
+note = "Khronokernel - ALC885 - iMac7,1 24\""
+
+[[audio.layout]]
+id = 53
+note = "Khronokernel - ALC885 - MacBookAir2,1"
+
+[[audio.layout]]
+id = 56
+note = "Khronokernel - ALC885 - MacBookPro4,1 15\""
+
+[[audio.layout]]
+id = 58
+note = "Khronokernel - ALC885 - MacBookPro4,1 17\""
+
+[[audio.layout]]
+id = 60
+note = "Khronokernel - ALC885 - iMac8,1 20\""
+
+[[audio.layout]]
+id = 62
+note = "Khronokernel - ALC885 - iMac8,1 24\""
+
+[[audio.layout]]
+id = 63
+note = "Khronokernel - ALC885 - MacBook5,1"
+
+[[audio.layout]]
+id = 64
+note = "Khronokernel - ALC885 - MacBookPro5,1"
+
+[[audio.layout]]
+id = 65
+note = "Khronokernel - ALC885 - Macmini3,1"
+
+[[audio.layout]]
+id = 67
+note = "Khronokernel - ALC885 - iMac9,1 20"
+
+[[audio.layout]]
+id = 70
+note = "Khronokernel - ALC885 - MacBookPro5,2"
+
+[[audio.layout]]
+id = 73
+note = "Khronokernel - ALC885 - iMac9,1 24"
+
+[[audio.layout]]
+id = 74
+note = "Khronokernel - ALC885 - MacBook5,2"
+
+[[audio]]
+codec = "ALC887"
+vendor = "Realtek"
+hda_id = "10ec:0887"
+codec_id = 2183
+
+[[audio.layout]]
+id = 1
+note = "Toleda ALC887, 5/6 audio ports, native: 2 inputs, 3/4 outputs+front panel+SPDIF/Optical"
+
+[[audio.layout]]
+id = 2
+note = "Toleda ALC887 3 audio ports, repurposed to 5.1: 0 inputs, 3 outputs+front panel+SPDIF/Optical"
+
+[[audio.layout]]
+id = 3
+note = "Toleda ALC887, 3 audio ports, native: 2 inputs, 1 output+front panel+SPDIF/Optical"
+
+[[audio.layout]]
+id = 5
+note = "Mirone 3 ports (Pink, Green, Blue)"
+
+[[audio.layout]]
+id = 7
+note = "Mirone 5/6 ports (Gray, Black, Orange, Pink, Green, Blue)"
+
+[[audio.layout]]
+id = 11
+note = "InsanelyDeepak - Realtek ALC887VD"
+
+[[audio.layout]]
+id = 12
+note = "Realtek ALC887-VD for ASUS H81M-D by VictorXu"
+
+[[audio.layout]]
+id = 13
+note = "InsanelyDeepak - Realtek ALC887VD"
+
+[[audio.layout]]
+id = 17
+note = "InsanelyDeepak - Realtek ALC887VD"
+
+[[audio.layout]]
+id = 18
+note = "InsanelyDeepak - Realtek ALC887VD"
+
+[[audio.layout]]
+id = 20
+note = "Realtek 887-VD AD0 for Asus Z97M-PLUS/BR by maiconjs"
+
+[[audio.layout]]
+id = 33
+note = "Custom by klblk for GA-Q87TN"
+
+[[audio.layout]]
+id = 40
+note = "Realtek 887-VD for Asus B85-ME by maiconjs"
+
+[[audio.layout]]
+id = 50
+note = "0th3r ALC887 for PRIME B250-PLUS"
+
+[[audio.layout]]
+id = 52
+note = "ALC887 for Asus PRIME Z270-P (full Rear and Front, non auto-switch) by ctich"
+
+[[audio.layout]]
+id = 53
+note = "ALC887 for Asus PRIME Z270-P (Rear LineOut1, Mic - LineOut2, LineIn - LineOut3 - 5.1 and Front, non auto-switch) by ctich"
+
+[[audio.layout]]
+id = 87
+note = "Realtek ALC887-VD GA-Z97 HD3 ver2.1 by varrtix"
+
+[[audio.layout]]
+id = 99
+note = "Custom by Constanta"
+
+[[audio]]
+codec = "ALC888"
+vendor = "Realtek"
+hda_id = "10ec:0888"
+codec_id = 2184
+
+[[audio.layout]]
+id = 1
+note = "Toleda ALC888"
+
+[[audio.layout]]
+id = 2
+note = "Toleda ALC888"
+
+[[audio.layout]]
+id = 3
+note = "Toleda ALC888"
+
+[[audio.layout]]
+id = 4
+note = "Mirone ALC888 for Laptop"
+
+[[audio.layout]]
+id = 5
+note = "Mirone 3 ports (Pink, Green, Blue)"
+
+[[audio.layout]]
+id = 7
+note = "Mirone 5/6 ports (Gray, Black, Orange, Pink, Green, Blue)"
+
+[[audio.layout]]
+id = 11
+note = "ALC888S-VD Version1 for MedionP9614 by MacPeet"
+
+[[audio.layout]]
+id = 27
+note = "ALC888 for Acer Aspire 7738G by MacPeet"
+
+[[audio.layout]]
+id = 28
+note = "ALC888S-VD Version2 for MedionE7216 by MacPeet"
+
+[[audio.layout]]
+id = 29
+note = "ALC888S-VD Version3 for MedionP8610 by MacPeet"
+
+[[audio]]
+codec = "ALC889"
+vendor = "Realtek"
+hda_id = "10ec:0889"
+codec_id = 2185
+
+[[audio.layout]]
+id = 1
+note = "Toleda resources by Ukr55, 3/5/6 audio ports, native: 2 inputs, 1/3/4 outputs+front panel+SPDIF/Optical"
+
+[[audio.layout]]
+id = 2
+note = "Toleda resources, 3 audio ports, repurposed to 5.1: 0 inputs, 3 outputs+front panel+SPDIF/Optical\n"
+
+[[audio.layout]]
+id = 3
+note = "Toleda resources, 3/5/6 audio ports, HD3000/HD4000 HDMI audio, 2 inputs, 2 outputs+front panel+SPDIF/Optical"
+
+[[audio.layout]]
+id = 11
+note = "MacPeet ALC889 Medion P4020 D"
+
+[[audio.layout]]
+id = 12
+note = "Custom by Sergey_Galan"
+
+[[audio]]
+codec = "ALC891"
+vendor = "Realtek"
+hda_id = "10ec:0867"
+codec_id = 2151
+
+[[audio.layout]]
+id = 11
+note = "MacPeet - ALC891 for HP Pavilion Power 580-030ng"
+
+[[audio.layout]]
+id = 13
+note = "InsanelyDeepak - Realtek ALC891"
+
+[[audio]]
+codec = "ALC892"
+vendor = "Realtek"
+hda_id = "10ec:0892"
+codec_id = 2194
+
+[[audio.layout]]
+id = 1
+note = "Toleda Resources by FredWst, m-dudarev, 5/6 audio ports, native: 2 inputs, 3/4 outputs+front panel+SPDIF/Optical"
+
+[[audio.layout]]
+id = 2
+note = "Toleda Resources by FredWst, m-dudarev, 3 audio ports, repurposed to 5.1: 0 inputs, 3 outputs+front panel+SPDIF/Optical"
+
+[[audio.layout]]
+id = 3
+note = "Toleda Resources by FredWst, m-dudarev, 3 audio ports, native: 2 inputs, 1 output+front panel+SPDIF/Optical"
+
+[[audio.layout]]
+id = 4
+note = "Mirone - ALC892 for Laptop"
+
+[[audio.layout]]
+id = 5
+note = "Mirone Resources by cecekpawon"
+
+[[audio.layout]]
+id = 7
+note = "Mirone Resources by cecekpawon"
+
+[[audio.layout]]
+id = 11
+note = "MSI GF72-8RE"
+
+[[audio.layout]]
+id = 12
+note = "MSI GP70/CR70 by Slava77"
+
+[[audio.layout]]
+id = 15
+note = "MacPeet - alc892 for MSi Z97S SLI Krait Edition"
+
+[[audio.layout]]
+id = 16
+note = "MacPeet - alc892 for MSI GL73-8RD"
+
+[[audio.layout]]
+id = 17
+note = "MacPeet - alc892 for MSI B150M MORTAR - SwitchMode"
+
+[[audio.layout]]
+id = 18
+note = "MacPeet - alc892 for MSI B150M MORTAR - ManualMode"
+
+[[audio.layout]]
+id = 20
+note = "Custom ALC892 for GIGABYTE Z390M GAMING - Manual - by Bokey"
+
+[[audio.layout]]
+id = 21
+note = "Custom ALC892 for GIGABYTE B365M AORUS ELITE"
+
+[[audio.layout]]
+id = 22
+note = "ASRock Z390m-ITX/ac by imEgo"
+
+[[audio.layout]]
+id = 23
+note = "ALC892 for ASRock B365 Pro4 By TheHackGuy"
+
+[[audio.layout]]
+id = 28
+note = "ALC892 for Clevo P751DMG by Cryse Hillmes"
+
+[[audio.layout]]
+id = 31
+note = "ALC892 for Clevo P65xSE/SA by Derek Zhu"
+
+[[audio.layout]]
+id = 32
+note = "Custom ALC892 for G4/G5mod by ATL"
+
+[[audio.layout]]
+id = 66
+note = "MSI GE60 2OC/2OE/2OD"
+
+[[audio.layout]]
+id = 90
+note = "Custom ALC892 for GIGABYTE B360 M AORUS PRO"
+
+[[audio.layout]]
+id = 92
+note = "Custom ALC892 for GA-Z87-HD3 by BIM167"
+
+[[audio.layout]]
+id = 97
+note = "Custom ALC892 for HASEE K770e i7 D1 by gitawake"
+
+[[audio.layout]]
+id = 98
+note = "Custom ALC892 with working SPDIF"
+
+[[audio.layout]]
+id = 99
+note = "Custom ALC892 for DNS P150EM by Constanta"
+
+[[audio.layout]]
+id = 100
+note = "GeorgeWan - ALC892 for MSI-Z370-A PRO"
+
+[[audio]]
+codec = "ALC897"
+vendor = "Realtek"
+hda_id = "10ec:0897"
+codec_id = 2199
+
+[[audio.layout]]
+id = 11
+note = "Custom ALC897 by Sergey_Galan  for GIGABYTE Z590M"
+
+[[audio.layout]]
+id = 12
+note = "Custom ALC897 by Sergey_Galan  for GIGABYTE Z590 Gaming X"
+
+[[audio.layout]]
+id = 13
+note = "GeorgeWan - ALC897 for MSI-Z590-A-PRO"
+
+[[audio.layout]]
+id = 21
+note = "OPS Computer ALC897 by Andres ZeroCross"
+
+[[audio.layout]]
+id = 22
+note = "Asus VivoBook 15 OLED M513UA by Andres ZeroCross"
+
+[[audio.layout]]
+id = 23
+note = "ALC897 for Chuwi-CoreBookX14 by weachy"
+
+[[audio.layout]]
+id = 31
+note = "Msi X670E GAMING WIFI ALC897 by ycg31"
+
+[[audio.layout]]
+id = 66
+note = "Asus_PRIME_B460M-K_ALC897"
+
+[[audio.layout]]
+id = 69
+note = "MSI_Z490-A-PRO_ALC897"
+
+[[audio.layout]]
+id = 77
+note = "ONDA H510D4 IPC ALC897"
+
+[[audio.layout]]
+id = 98
+note = "liangyi - ALC897 for MSI PRO B760M-P DDR4"
+
+[[audio.layout]]
+id = 99
+note = "Custom ALC897 by Marcos_Vinicios  for HUANANZHI QD4"
+
+[[audio]]
+codec = "ALC898"
+vendor = "Realtek"
+hda_id = "10ec:0899"
+codec_id = 2201
+
+[[audio.layout]]
+id = 1
+note = "Toleda Resources by Andrey1970"
+
+[[audio.layout]]
+id = 2
+note = "Toleda Resources by Andrey1970"
+
+[[audio.layout]]
+id = 3
+note = "Toleda Resources by Andrey1970"
+
+[[audio.layout]]
+id = 5
+note = "Mirone Resources ALC898"
+
+[[audio.layout]]
+id = 7
+note = "Mirone Resources ALC898"
+
+[[audio.layout]]
+id = 11
+note = "Ivring23 Resources"
+
+[[audio.layout]]
+id = 13
+note = "InsanelyDeepak - Realtek ALC898 for MSI GS40"
+
+[[audio.layout]]
+id = 28
+note = "Custom - Realtek ALC898 (Autodetect disabled)"
+
+[[audio.layout]]
+id = 64
+note = "Realtek ALC898 for ASRock Z77 Fatal1ty Professional with Front Panel by AndrewK2685"
+
+[[audio.layout]]
+id = 65
+note = "Realtek ALC898 for Clevo P65xRS(-G) by datasone"
+
+[[audio.layout]]
+id = 66
+note = "Realtek ALC898 for Clevo P750DM2-G"
+
+[[audio.layout]]
+id = 98
+note = "Realtek ALC898 for MSI GE62 7RE Apache Pro by spectra"
+
+[[audio.layout]]
+id = 99
+note = "Realtek ALC898 for MSI GP62 Leopard Pro by edward-p"
+
+[[audio.layout]]
+id = 101
+note = "4 Line Out by Andrey1970"
+
+[[audio]]
+codec = "ALCS1200A"
+vendor = "Realtek"
+hda_id = "10ec:0b00"
+codec_id = 2816
+
+[[audio.layout]]
+id = 1
+note = "toleda - ALCS1200A, 5/6 audio ports, native: 2 inputs, 3/4 outputs+front panel+SPDIF/Optical"
+
+[[audio.layout]]
+id = 2
+note = "toleda - ALCS1200A, 3 audio ports, repurposed to 5.1: 0 inputs, 3 outputs+front panel+SPDIF/Optical"
+
+[[audio.layout]]
+id = 3
+note = "toleda - ALCS1200A, 3 audio ports, native: 2 inputs, 1 output+front panel+SPDIF/Optical"
+
+[[audio.layout]]
+id = 7
+note = "ALCS1200A for B550M Gaming Carbon WIFI by Kila2"
+
+[[audio.layout]]
+id = 11
+note = "ALCS1200A for msi-MAG-Z490-TOMAHAWK by owen0o0"
+
+[[audio.layout]]
+id = 12
+note = "ALCS1200A for ASUS-TUF-Z390M-Gaming by mobilestebu"
+
+[[audio.layout]]
+id = 23
+note = "ALCS1200A for MSI B460I GAMING EDGE WIFI by VictorXu"
+
+[[audio.layout]]
+id = 31
+note = "ALCS1200A for Asus B550M Plus by ycg31"
+
+[[audio.layout]]
+id = 49
+note = "ALCS1200A for Asrock Z490M-ITX by VictorXu"
+
+[[audio.layout]]
+id = 50
+note = "VictorXu - ALCS1200A for Gigabyte B460M Aorus Pro"
+
+[[audio.layout]]
+id = 51
+note = "GeorgeWan - ALCS1200A for ASROCK-Z490-Steel-Legend"
+
+[[audio.layout]]
+id = 52
+note = "GeorgeWan - ALCS1200A for MSI-Mortar-B460M"
+
+[[audio.layout]]
+id = 69
+note = "Lorys89 and Vorshim92 - ALCS1200A for ASROCK Z490M ITX AC"
+
+[[audio]]
+codec = "ALCS1220A"
+vendor = "Realtek"
+hda_id = "10ec:1168"
+codec_id = 4456
+
+[[audio.layout]]
+id = 1
+note = "Toleda - Realtek ALC S1220A, 5/6 audio ports, native: 2 inputs, 3/4 outputs+front panel+SPDIF/Optical"
+
+[[audio.layout]]
+id = 2
+note = "Toleda - Realtek ALC S1220A, 3 audio ports, repurposed to 5.1: 0 inputs, 3 outputs+front panel+SPDIF/Optical"
+
+[[audio.layout]]
+id = 3
+note = "Toleda - Realtek ALC S1220A, 3 audio ports, repurposed to 5.1: 0 inputs, 3 outputs+front panel+SPDIF/Optical"
+
+[[audio.layout]]
+id = 5
+note = "Mirone - Realtek ALC S1220A"
+
+[[audio.layout]]
+id = 7
+note = "Mirone - Realtek ALC S1220A"
+
+[[audio.layout]]
+id = 8
+note = "Realtek ALC S1220A _MSI_z490i_unify_by_vio"
+
+[[audio.layout]]
+id = 11
+note = "Realtek ALC S1220A Kushamot for Asus Z270G mb (based on Mirone's layout 7)"
+
+[[audio.layout]]
+id = 13
+note = "Realtek ALC S1220A for Asus ProArt Z690-Creator WiFi (CaseySJ)"
+
+[[audio.layout]]
+id = 15
+note = "Realtek ALC S1220A for Asus ROG Strix X570-F Gaming (CaseySJ)"
+
+[[audio.layout]]
+id = 20
+note = "Realtek ALC S1220A RodionS, Nacho 2.0 outputs(green)+2 inputs+front panel+SPDIF/Optical"
+
+[[audio.layout]]
+id = 21
+note = "Realtek ALC S1220A RodionS, Nacho 5.1 outputs(green, black, orange)+2 inputs+front panel+SPDIF/Optical "
+
+[[audio.layout]]
+id = 89
+note = "Realtek ALC S1220A for Asus Z890 ProArt Creator WiFi (caley13)"
+
+[[audio.layout]]
+id = 99
+note = "Realtek ALC S1220A for MSI X470 Gaming Pro Carbon"
+
+[[audio]]
+codec = "CA0132"
+vendor = "Creative"
+hda_id = "1102:0011"
+codec_id = 17
+
+[[audio.layout]]
+id = 0
+note = "Wern Apfel - 2.0 default"
+
+[[audio.layout]]
+id = 1
+note = "Wern Apfel - 2.0 Alienware 15 R2 "
+
+[[audio.layout]]
+id = 2
+note = "Wern Apfel - Alienware 17"
+
+[[audio.layout]]
+id = 3
+note = "Wern Apfel - 2.0 + rear line-out"
+
+[[audio.layout]]
+id = 4
+note = "Wern Apfel - 5.1 with C/Sub"
+
+[[audio.layout]]
+id = 5
+note = "Wern Apfel - 2.0 front + rear HP, simultaneously + front Mic"
+
+[[audio.layout]]
+id = 6
+note = "Wern Apfel - 5.1 with front HP"
+
+[[audio.layout]]
+id = 7
+note = "Wern Apfel - ZxRi"
+
+[[audio.layout]]
+id = 9
+note = "Andres ZeroCross - No Volume Control"
+
+[[audio.layout]]
+id = 10
+note = "Andres ZeroCross - No Volume Control"
+
+[[audio.layout]]
+id = 11
+note = "Custom Creative CA0132 5.1 channel"
+
+[[audio.layout]]
+id = 12
+note = "Custom Creative CA0132"
+
+[[audio.layout]]
+id = 99
+note = "Creative CA0132 5.1 channel for Alienware-M17X-R4 by DalianSky"
+
+[[audio]]
+codec = "CS4206"
+vendor = "CirrusLogic"
+hda_id = "1013:4206"
+codec_id = 16902
+
+[[audio.layout]]
+id = 1
+note = "Khronokernel - Cirrus Logic CS4206 - MacBook6,1"
+
+[[audio.layout]]
+id = 3
+note = "Khronokernel - Cirrus Logic CS4206 - Macmini4,1"
+
+[[audio.layout]]
+id = 9
+note = "Khronokernel - Cirrus Logic CS4206 - iMac12,1"
+
+[[audio.layout]]
+id = 11
+note = "Khronokernel - Cirrus Logic CS4206 - MacBookPro6,2"
+
+[[audio.layout]]
+id = 13
+note = "Khronokernel - Cirrus Logic CS4206 - MacBookPro7,1"
+
+[[audio.layout]]
+id = 18
+note = "Khronokernel - Cirrus Logic CS4206 - iMac11,2"
+
+[[audio.layout]]
+id = 24
+note = "Khronokernel - Cirrus Logic CS4206 - iMac11,3"
+
+[[audio.layout]]
+id = 28
+note = "Khronokernel - Cirrus Logic CS4206 - MacBookPro8,1"
+
+[[audio.layout]]
+id = 29
+note = "Khronokernel - Cirrus Logic CS4206 - MacBookPro8,2"
+
+[[audio.layout]]
+id = 31
+note = "Khronokernel - Cirrus Logic CS4206 - MacBook7,1"
+
+[[audio.layout]]
+id = 32
+note = "Khronokernel - Cirrus Logic CS4206 - iMac12,2"
+
+[[audio.layout]]
+id = 33
+note = "Khronokernel - Cirrus Logic CS4206 - Macmini5,1"
+
+[[audio.layout]]
+id = 35
+note = "Khronokernel - Cirrus Logic CS4206 - Macmini5,2"
+
+[[audio.layout]]
+id = 39
+note = "Khronokernel - Cirrus Logic CS4206 - MacBookPro8,3"
+
+[[audio.layout]]
+id = 61
+note = "Khronokernel - Cirrus Logic CS4206 - MacBookAir3,2"
+
+[[audio.layout]]
+id = 71
+note = "Khronokernel - Cirrus Logic CS4206 - MacBookPro6,1"
+
+[[audio.layout]]
+id = 75
+note = "Khronokernel - Cirrus Logic CS4206 - MacBookPro5,3"
+
+[[audio.layout]]
+id = 76
+note = "Khronokernel - Cirrus Logic CS4206 - MacBookPro5,4"
+
+[[audio.layout]]
+id = 77
+note = "Khronokernel - Cirrus Logic CS4206 - MacBookPro5,5"
+
+[[audio.layout]]
+id = 78
+note = "Khronokernel - Cirrus Logic CS4206 - iMac10,1 21.5"
+
+[[audio.layout]]
+id = 79
+note = "Khronokernel - Cirrus Logic CS4206 - iMac10,1 27"
+
+[[audio.layout]]
+id = 81
+note = "Khronokernel - Cirrus Logic CS4206 - iMac11,1"
+
+[[audio.layout]]
+id = 84
+note = "Khronokernel - Cirrus Logic CS4206 - MacBook6,1"
+
+[[audio.layout]]
+id = 91
+note = "Khronokernel - Cirrus Logic CS4206 - MacBookAir4,2"
+
+[[audio.layout]]
+id = 98
+note = "Khronokernel - Cirrus Logic CS4206 - MacBookAir4,1"
+
+[[audio.layout]]
+id = 99
+note = "Khronokernel - Cirrus Logic CS4206 - MacBookAir3,1"
+
+[[audio]]
+codec = "CS4210"
+vendor = "CirrusLogic"
+hda_id = "1013:4210"
+codec_id = 16912
+
+[[audio.layout]]
+id = 13
+note = "InsanelyDeepak - Cirrus Logic CS4210"
+
+[[audio]]
+codec = "CS4213"
+vendor = "CirrusLogic"
+hda_id = "1013:4213"
+codec_id = 16915
+
+[[audio.layout]]
+id = 28
+note = "Custom CirrusLogic CS4213 by InsanelyDeepak"
+
+[[audio]]
+codec = "CX20561"
+vendor = "Conexant"
+hda_id = "14f1:5051"
+codec_id = 20561
+
+[[audio.layout]]
+id = 11
+
+[[audio]]
+codec = "CX20583"
+vendor = "Conexant"
+hda_id = "14f1:5067"
+codec_id = 20583
+
+[[audio.layout]]
+id = 3
+note = "Mirone Laptop Patch"
+
+[[audio]]
+codec = "CX20585"
+vendor = "Conexant"
+hda_id = "14f1:5069"
+codec_id = 20585
+
+[[audio.layout]]
+id = 3
+note = "Mirone Laptop Patch"
+
+[[audio.layout]]
+id = 13
+note = "Constanta custom for Toshiba L755-16R"
+
+[[audio]]
+codec = "CX20588"
+vendor = "Conexant"
+hda_id = "14f1:506c"
+codec_id = 20588
+
+[[audio.layout]]
+id = 3
+note = "Mirone Laptop Patch"
+
+[[audio]]
+codec = "CX20590"
+vendor = "Conexant"
+hda_id = "14f1:506e"
+codec_id = 20590
+
+[[audio.layout]]
+id = 3
+note = "Mirone Laptop Patch"
+
+[[audio.layout]]
+id = 12
+note = "Custom for Lenovo Yoga 13 by usr-sse2"
+
+[[audio.layout]]
+id = 13
+note = "Custom for Lenovo T420 with dock by tluck (Additional ports for use with a Docking Station)"
+
+[[audio.layout]]
+id = 14
+note = "Custom for Lenovo T420 by tluck (Standard Laptop)"
+
+[[audio.layout]]
+id = 28
+note = "Custom for Dell Vostro 3x60 by vusun123"
+
+[[audio]]
+codec = "CX20632"
+vendor = "Conexant"
+hda_id = "14f1:5098"
+codec_id = 20632
+
+[[audio.layout]]
+id = 20
+note = "phucnguyen2411 - HP Elitedesk 800 G5 mini"
+
+[[audio.layout]]
+id = 21
+note = "Andres ZeroCross - Axioo MyPC One Pro H5"
+
+[[audio.layout]]
+id = 23
+note = "frankiezdh - Conexant CX20632 for HP ProDesk 480 G4"
+
+[[audio.layout]]
+id = 28
+note = "Daniel"
+
+[[audio]]
+codec = "CX20641"
+vendor = "Conexant"
+hda_id = "14f1:50a1"
+codec_id = 20641
+
+[[audio.layout]]
+id = 11
+note = "MacPeet - Dell OptiPlex 3010 - ManualMode"
+
+[[audio.layout]]
+id = 13
+note = "MacPeet - Dell OptiPlex 3010 - SwitchMode"
+
+[[audio]]
+codec = "CX20642"
+vendor = "Conexant"
+hda_id = "14f1:50a2"
+codec_id = 20642
+
+[[audio.layout]]
+id = 11
+note = "MacPeet - Fujitsu ESPRIMO E910 E90+ Desktop - ManualMode"
+
+[[audio.layout]]
+id = 13
+note = "MacPeet - Fujitsu ESPRIMO E910 E90+ Desktop - SwitchMode"
+
+[[audio]]
+codec = "CX20722"
+vendor = "Conexant"
+hda_id = "14f1:50f2"
+codec_id = 20722
+
+[[audio.layout]]
+id = 3
+note = "Mirone Laptop Patch"
+
+[[audio]]
+codec = "CX20724"
+vendor = "Conexant"
+hda_id = "14f1:50f4"
+codec_id = 20724
+
+[[audio.layout]]
+id = 3
+note = "Mirone Laptop Patch. Mute fixed by Human7900 "
+
+[[audio.layout]]
+id = 13
+note = "InsanelyDeepak Patch. Mute fixed by Human7900"
+
+[[audio]]
+codec = "CX20751_2"
+vendor = "Conexant"
+hda_id = "14f1:510f"
+codec_id = 20751
+
+[[audio.layout]]
+id = 3
+note = "Mirone - Conexant 20752"
+
+[[audio.layout]]
+id = 21
+note = "Andres ZeroCross - Asus A455LF - WX039D"
+
+[[audio.layout]]
+id = 28
+note = "Custom Conexant 20751"
+
+[[audio]]
+codec = "CX20753_4"
+vendor = "Conexant"
+hda_id = "14f1:5111"
+codec_id = 20753
+
+[[audio.layout]]
+id = 3
+note = "Mirone - Conexant 20753_4"
+
+[[audio.layout]]
+id = 14
+note = "InsanelyDeepak - Conexant 20753_4"
+
+[[audio.layout]]
+id = 15
+note = "MacPeet - CX20753/4 for Lenovo Thinkpad E580"
+
+[[audio.layout]]
+id = 21
+note = "Andres ZeroCross - LG gram 15ZD960-GX5BK"
+
+[[audio]]
+codec = "CX20755"
+vendor = "Conexant"
+hda_id = "14f1:5113"
+codec_id = 20755
+
+[[audio.layout]]
+id = 3
+note = "Mirone Laptop Patch"
+
+[[audio]]
+codec = "CX20756"
+vendor = "Conexant"
+hda_id = "14f1:5114"
+codec_id = 20756
+
+[[audio.layout]]
+id = 3
+note = "Mirone Laptop Patch"
+
+[[audio.layout]]
+id = 13
+note = "InsanelyDeepak Laptop Patch"
+
+[[audio]]
+codec = "CX20757"
+vendor = "Conexant"
+hda_id = "14f1:5115"
+codec_id = 20757
+
+[[audio.layout]]
+id = 3
+note = "Mirone Laptop Patch"
+
+[[audio.layout]]
+id = 28
+note = "Custom CX20757 Lenovo G510 by Z39"
+
+[[audio]]
+codec = "CX8050"
+vendor = "Conexant"
+hda_id = "14f1:1f72"
+codec_id = 8050
+
+[[audio.layout]]
+id = 3
+note = "Mirone Laptop Patch"
+
+[[audio.layout]]
+id = 13
+note = "Conexant CX8050 for ASUS X411UN by cowpod"
+
+[[audio]]
+codec = "CX8070"
+vendor = "Conexant"
+hda_id = "14f1:1f86"
+codec_id = 8070
+
+[[audio.layout]]
+id = 15
+note = "MacPeet - Conexant CX8070 (CX11880) for Lenovo ThinkPad E590"
+
+[[audio.layout]]
+id = 21
+note = "Andres ZeroCross - Conexant CX8070 for Lenovo ThinkPad E14"
+
+[[audio]]
+codec = "CX8150"
+vendor = "Conexant"
+hda_id = "14f1:1fd6"
+codec_id = 8150
+
+[[audio.layout]]
+id = 21
+note = "Asus VivoBook Pro 15 CX8150 by Andres ZeroCross"
+
+[[audio.layout]]
+id = 22
+note = "ASUS VivoBook S405UA-EB906T - CX8150 by Andres ZeroCross"
+
+[[audio]]
+codec = "CX8200"
+vendor = "Conexant"
+hda_id = "14f1:2008"
+codec_id = 8200
+
+[[audio.layout]]
+id = 3
+note = "Mirone Laptop Patch"
+
+[[audio.layout]]
+id = 15
+note = "MacPeet - Conexant CX8200 for HP ZbooK 15UG4"
+
+[[audio.layout]]
+id = 21
+note = "Andres ZeroCross for HP Spectre 13-V130NG"
+
+[[audio.layout]]
+id = 23
+note = "frankiezdh - Conexant CX8200 for HP Probook 440 G5"
+
+[[audio.layout]]
+id = 80
+note = "Conexant CX8200 for LG Gram Z990/Z90N"
+
+[[audio]]
+codec = "CX8400"
+vendor = "Conexant"
+hda_id = "14f1:20d0"
+codec_id = 8400
+
+[[audio.layout]]
+id = 12
+note = "CX8400 for Elitebook 1050 G1 by tyufhl & kuque"
+
+[[audio.layout]]
+id = 13
+note = "Conexant CX11970 (CX8400) for Acer Swift 3 SF313 (Ice Lake) by b0ltun"
+
+[[audio.layout]]
+id = 14
+note = "Conexant (CX8400) for Zbook G5 by theroadw"
+
+[[audio]]
+codec = "IDT92HD66C3_65"
+vendor = "IDT"
+hda_id = "111d:76f3"
+codec_id = 30451
+
+[[audio.layout]]
+id = 3
+
+[[audio]]
+codec = "IDT92HD71B7X"
+vendor = "IDT"
+hda_id = "111d:76b2"
+codec_id = 30386
+
+[[audio.layout]]
+id = 3
+
+[[audio]]
+codec = "IDT92HD73C1X5"
+vendor = "IDT"
+hda_id = "111d:7675"
+codec_id = 30325
+
+[[audio.layout]]
+id = 19
+note = "Dell Studio 1535 - IDT 92HD73C1X5 by chunnann"
+
+[[audio.layout]]
+id = 21
+note = "Andres ZeroCross - Alienware M17X R2"
+
+[[audio]]
+codec = "IDT92HD73E1X5"
+vendor = "IDT"
+hda_id = "111d:7676"
+codec_id = 30326
+
+[[audio.layout]]
+id = 15
+note = "MacPeet - IDT92HD73E1X5 for HP Envy h8 1425eg"
+
+[[audio]]
+codec = "IDT92HD75B2X5"
+vendor = "IDT"
+hda_id = "111d:7608"
+codec_id = 30216
+
+[[audio.layout]]
+id = 3
+
+[[audio]]
+codec = "IDT92HD75B3X5"
+vendor = "IDT"
+hda_id = "111d:7603"
+codec_id = 30211
+
+[[audio.layout]]
+id = 3
+
+[[audio.layout]]
+id = 11
+note = "Custom pinconfig by olderst"
+
+[[audio]]
+codec = "IDT92HD81B1C5"
+vendor = "IDT"
+hda_id = "111d:76d5"
+codec_id = 30421
+
+[[audio.layout]]
+id = 3
+
+[[audio.layout]]
+id = 11
+note = "Goldfish64 - IDT 92HD81B1C5 for Dell Latitude E6410"
+
+[[audio]]
+codec = "IDT92HD81B1X5"
+vendor = "IDT"
+hda_id = "111d:7605"
+codec_id = 30213
+
+[[audio.layout]]
+id = 3
+
+[[audio.layout]]
+id = 11
+note = "Custom IDT 92HD81B1X by Andres ZeroCross"
+
+[[audio.layout]]
+id = 12
+note = "IDT 92HD81B1X5 by RehabMan"
+
+[[audio.layout]]
+id = 20
+note = "IDT 92HD81B1X5 by Sergey_Galan for HP ProBook 4520s"
+
+[[audio.layout]]
+id = 21
+note = "IDT 92HD81B1X5 by Sergey_Galan for HP DV6-6169er"
+
+[[audio.layout]]
+id = 28
+note = "IDT 92HD81B1X5 by Gujiangjiang for HP Pavilion g4 1000 series"
+
+[[audio.layout]]
+id = 76
+note = "IDT 92HD81B1X5 by SkyrilHD for HP Elitebook 8x70 series"
+
+[[audio]]
+codec = "IDT92HD87B1"
+vendor = "IDT"
+hda_id = "111d:7605"
+codec_id = 30213
+
+[[audio.layout]]
+id = 3
+
+[[audio]]
+codec = "IDT92HD87B1_3"
+vendor = "IDT"
+hda_id = "111d:76d1"
+codec_id = 30417
+
+[[audio.layout]]
+id = 12
+
+[[audio.layout]]
+id = 13
+note = "InsanelyDeepak - IDT92HD87B1/3"
+
+[[audio]]
+codec = "IDT92HD87B2_4"
+vendor = "IDT"
+hda_id = "111d:76d9"
+codec_id = 30425
+
+[[audio.layout]]
+id = 13
+
+[[audio]]
+codec = "IDT92HD90BXX"
+vendor = "IDT"
+hda_id = "111d:76e7"
+codec_id = 30439
+
+[[audio.layout]]
+id = 3
+note = "Mirone laptop patch IDT 92HD90BXX"
+
+[[audio.layout]]
+id = 12
+note = "vusun123's IDT 92HD90BXX for Dell Latitude E6x20/Dell Precision Mx600"
+
+[[audio]]
+codec = "IDT92HD91BXX"
+vendor = "IDT"
+hda_id = "111d:76e0"
+codec_id = 30432
+
+[[audio.layout]]
+id = 3
+
+[[audio.layout]]
+id = 12
+note = "RehabMan - IDT 92HD91BXX for HP Envy"
+
+[[audio.layout]]
+id = 13
+note = "MacPeet - IDT92HD91BXX for HP Envy 6 1171-SG"
+
+[[audio.layout]]
+id = 33
+note = "jl4c - IDT 92HD91BXX for HP Envy"
+
+[[audio.layout]]
+id = 84
+note = "macish - IDT 92HD91BXX for HP Elitebook G1"
+
+[[audio]]
+codec = "IDT92HD93BXX"
+vendor = "IDT"
+hda_id = "111d:76df"
+codec_id = 30431
+
+[[audio.layout]]
+id = 12
+note = "Custom for Dell Latitude E6430"
+
+[[audio]]
+codec = "IDT92HD95"
+vendor = "IDT"
+hda_id = "111d:7695"
+codec_id = 30357
+
+[[audio.layout]]
+id = 11
+
+[[audio.layout]]
+id = 12
+
+[[audio.layout]]
+id = 14
+
+[[audio]]
+codec = "IDT92HD99BXX"
+vendor = "IDT"
+hda_id = "111d:76e5"
+codec_id = 30437
+
+[[audio.layout]]
+id = 3
+
+[[audio]]
+codec = "STAC9200"
+vendor = "SigmaTel"
+hda_id = "8384:7690"
+codec_id = 30352
+
+[[audio.layout]]
+id = 11
+note = "Goldfish64 - STAC9200 for Dell Precision 390, Latitude D520"
+
+[[audio]]
+codec = "STAC9205"
+vendor = "SigmaTel"
+hda_id = "8384:76a0"
+codec_id = 30368
+
+[[audio.layout]]
+id = 11
+note = "Goldfish64 - STAC9205 for Dell Inspiron 1520, Latitude D630"
+
+[[audio]]
+codec = "STAC9872AK"
+vendor = "SigmaTel"
+hda_id = "8384:7662"
+codec_id = 30306
+
+[[audio.layout]]
+id = 12
+note = "STAC9872AK for Sony VGN-FZ11MR by ctich"
+
+[[audio]]
+codec = "VT1705"
+vendor = "VIA"
+hda_id = "1106:4760"
+codec_id = 18272
+
+[[audio.layout]]
+id = 21
+note = "VIA VT1705 ECS H81H3-M4 (1.0A) by Andres ZeroCross"
+
+[[audio]]
+codec = "VT1802"
+vendor = "VIA"
+hda_id = "1106:8446"
+codec_id = 33862
+
+[[audio.layout]]
+id = 3
+note = "VIA VT1802 Mirone Laptop Patches"
+
+[[audio.layout]]
+id = 33
+note = "VT1802P for asus s400ca by ChalesYu"
+
+[[audio.layout]]
+id = 35
+note = "VT1802 for Vit P2402 by nickleby92"
+
+[[audio.layout]]
+id = 65
+note = "VT1802 for hasee K650D"
+
+[[audio]]
+codec = "VT2020/2021"
+vendor = "VIA"
+hda_id = "1106:0441"
+codec_id = 1089
+
+[[audio.layout]]
+id = 5
+note = "VIA VT2020/2021 Mirone"
+
+[[audio.layout]]
+id = 7
+note = "VIA VT2020/2021 Mirone"
+
+[[audio.layout]]
+id = 9
+note = "SonicBSV - VIA VT2020/2021"
+
+[[audio.layout]]
+id = 13
+note = "Enrico - GA-Z77X-D3Hrev1.0 - VIA VT2020/2021"

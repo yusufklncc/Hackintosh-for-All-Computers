@@ -18,6 +18,7 @@ from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import advise
+import audio
 import build
 import detect
 import gpu
@@ -133,6 +134,7 @@ def main():
                     help='skip hardware detection and just ask')
     ap.add_argument('--ids', help='PCI ids to use instead of probing, comma separated')
     ap.add_argument('--usb-ids', help='USB ids to use instead of probing, comma separated')
+    ap.add_argument('--hda-ids', help='HD audio codec ids to use instead of probing')
     ap.add_argument('--answers', help='answer the menus non-interactively, comma separated; '
                                       'for scripting and for CI')
     a = ap.parse_args()
@@ -148,6 +150,8 @@ def main():
     if a.ids is not None or a.usb_ids is not None:
         hw['pci_ids'] = [x.strip() for x in (a.ids or '').split(',') if x.strip()]
         hw['usb_ids'] = [x.strip() for x in (a.usb_ids or '').split(',') if x.strip()]
+    if a.hda_ids is not None:
+        hw['hda_ids'] = [x.strip() for x in a.hda_ids.split(',') if x.strip()]
     print(f'{BOLD}OpenCore EFI builder{RESET}')
     if hw.get('cpu'):
         print(f'  {DIM}this machine:{RESET} {hw["cpu"]}'
@@ -221,6 +225,19 @@ def main():
             print(f'\n      {GREEN}boot arguments needed: {" ".join(gpu_args)}{RESET}')
             print(f'      {DIM}added to the config below{RESET}')
 
+    notes = []
+    boot_args = []
+    if hw.get('gpu_devices'):
+        boot_args += gpu.report(hw['gpu_devices'], cpu)[1]
+
+    if hw.get('hda_ids'):
+        print(f'\n{BOLD}Audio{RESET}')
+        alines, alcid, asteps = audio.report(hw['hda_ids'], oem or hw.get('oem_raw'))
+        print('\n'.join(alines))
+        if alcid is not None:
+            boot_args.append(f'alcid={alcid}')
+            notes.append(asteps)
+
     extra_file = None
     matched = advise.matched_kexts(hw.get('pci_ids', []), hw.get('usb_ids', []))
     if matched:
@@ -268,10 +285,16 @@ def main():
     # when frozen, not a Python interpreter, so a subprocess would re-invoke the
     # menus with build's arguments.
     cmd = ['--platform', plat, '--cpu', cpu, '--out', a.out]
-    if hw.get('gpu_devices'):
-        args = gpu.report(hw['gpu_devices'], cpu)[1]
-        if args:
-            cmd += ['--boot-args', ' '.join(args)]
+    if boot_args:
+        cmd += ['--boot-args', ' '.join(boot_args)]
+    notes_file = None
+    if notes:
+        import tempfile
+        fh = tempfile.NamedTemporaryFile('w', suffix='.txt', delete=False, encoding='utf-8')
+        fh.write('Follow-up for this EFI\n' + '=' * 22 + '\n\n' + '\n'.join(notes))
+        fh.close()
+        notes_file = fh.name
+        cmd += ['--notes', notes_file]
     if extra_file:
         cmd += ['--add-kexts', extra_file]
     if vendor:
@@ -292,6 +315,8 @@ def main():
         return rc
     if extra_file:
         os.unlink(extra_file)
+    if notes_file:
+        os.unlink(notes_file)
     elif hw.get('pci_ids') or hw.get('usb_ids'):
         print()
         advise.report(hw['pci_ids'], hw['usb_ids'], 'this machine')

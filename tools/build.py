@@ -135,6 +135,7 @@ def main(argv=None):
     ap.add_argument('--no-validate', action='store_true')
     ap.add_argument('--add-kexts', help='JSON file of extra Kernel.Add entries to append')
     ap.add_argument('--boot-args', help='extra boot arguments to append to the config')
+    ap.add_argument('--notes', help='file of follow-up notes to write beside the EFI')
     a = ap.parse_args(argv)
 
     cat = {e['name']: e for e in
@@ -208,11 +209,19 @@ def main(argv=None):
         config['Kernel']['Add'] += [{k: v for k, v in e.items() if k != 'SourcePath'}
                                     for e in added if e['BundlePath'] not in have]
 
+    guid = '7C436110-AB2A-4BBB-A880-FE41995C9F82'
     if a.boot_args:
-        guid = '7C436110-AB2A-4BBB-A880-FE41995C9F82'
         nv = config['NVRAM']['Add'][guid]
         have = nv.get('boot-args', '').split()
-        nv['boot-args'] = ' '.join(have + [x for x in a.boot_args.split() if x not in have])
+        for arg in a.boot_args.split():
+            key = arg.split('=')[0] + '=' if '=' in arg else None
+            if key:
+                # a key=value argument replaces one already set, since most
+                # profiles ship alcid=1 and appending a second would be ignored
+                have = [x for x in have if not x.startswith(key)]
+            if arg not in have:
+                have.append(arg)
+        nv['boot-args'] = ' '.join(have)
 
     serial = apply_identity(config, a.identity, warn)
 
@@ -249,6 +258,10 @@ def main(argv=None):
         print(f'  boot-args    {config["NVRAM"]["Add"][guid]["boot-args"]}')
     print(f'  payload      {copied} items')
     print(f'  ocvalidate   {status}')
+    if a.notes and Path(a.notes).exists():
+        target = out.parent / 'NEXT-STEPS.txt'
+        target.write_text(Path(a.notes).read_text(encoding='utf-8'), encoding='utf-8')
+        print(f'  notes        {target}')
     print(f'  output       {out}')
     for w in warnings:
         print(f'  warning      {w}')

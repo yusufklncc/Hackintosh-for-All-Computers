@@ -72,6 +72,30 @@ assert args == ['agdpmod=pikera'], args
 print('  gpu advice ok')
 "
 
+      - name: Audio layout advice
+        run: |
+          python3 tools/audio.py
+          python3 -c "
+import sys; sys.path.insert(0,'tools'); import audio
+# the brand a contributor named is what decides where to start
+lines, alcid, steps = audio.report(['10ec:0255'], 'lenovo')
+assert alcid == 28, alcid
+assert 'Lenovo' in steps
+# without a brand it is the lowest id, not a guess dressed up as a match
+assert audio.report(['10ec:0255'], None)[1] == 3
+# every layout ends up in the notes, not just the three shown
+assert steps.count('alcid=') >= 27, steps.count('alcid=')
+# a codec AppleALC does not carry must say so rather than pick something
+assert audio.report(['8086:2809'], None)[1] is None
+print('  audio advice ok')
+"
+          python3 tools/setup.py --hda-ids 10ec:0255 --answers 2,10,3 --out /tmp/audio/EFI
+          grep -q 'alcid=3' /tmp/audio/EFI/OC/config.plist || \
+            python3 -c "import plistlib,sys; d=plistlib.load(open('/tmp/audio/EFI/OC/config.plist','rb')); \
+              a=d['NVRAM']['Add']['7C436110-AB2A-4BBB-A880-FE41995C9F82']['boot-args']; \
+              sys.exit(0 if 'alcid=3' in a and a.count('alcid=')==1 else f'boot-args wrong: {a}')"
+          test -f /tmp/audio/NEXT-STEPS.txt
+
       - name: The hardware table still matches the kexts
         run: |
           python3 tools/hwtable.py EFI/OC/Kexts --out /tmp/hardware.toml

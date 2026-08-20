@@ -150,6 +150,31 @@ The advice then follows one rule:
 
 `tools/gpu.py` run on its own prints the verdict for a set of worked examples.
 
+## Audio
+
+`data/audio.toml` is read from AppleALC's own `Resources/<CODEC>/Info.plist` by
+`tools/audiotable.py`: 110 codecs, 697 layouts, 672 of which name the machine
+they were contributed for.
+
+That naming is the useful part. Which layout-id works depends on the machine
+rather than the codec, so there is no single answer to give - but a Lenovo can
+be told to start with the layout somebody contributed from a Lenovo:
+
+    Realtek ALC255  [10ec:0255]   27 layouts to try
+        alcid=28   Realtek ALC255 for Lenovo B470 - vusun123 <- starting with this one
+
+The order is: layouts naming this machine's brand, then layouts naming any
+machine, then the rest by id. That is a heuristic about where to start, not a
+claim about which is right, which is why every alternative is written to
+`NEXT-STEPS.txt` beside the EFI instead of being dropped.
+
+The codec is detected by its own HDA id, which is a device behind the audio
+controller and not the controller's PCI id - `HDAUDIO\FUNC_01&VEN_10EC&DEV_0255`
+on Windows, `Vendor Id: 0x10ec0255` from ALSA on Linux.
+
+`alcid` is written as a replacement rather than an addition, since most profiles
+already ship `alcid=1` and a second one would just be ignored.
+
 ## Adding the network kexts
 
 `setup.py` offers two ways to add what it found, because both are reasonable:

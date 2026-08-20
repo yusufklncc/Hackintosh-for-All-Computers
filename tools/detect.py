@@ -130,6 +130,11 @@ def _windows():
     out['usb'] = _ps(
         'Get-CimInstance Win32_PnPEntity | Where-Object { $_.PNPDeviceID -like "USB*" } | '
         'ForEach-Object { "$($_.PNPDeviceID)|$($_.Name)" }')
+    # The HD Audio codec is a device behind the controller and carries its own
+    # VEN/DEV, which is what AppleALC keys its layouts on.
+    out['hda'] = _ps(
+        'Get-CimInstance Win32_PnPEntity | Where-Object { $_.PNPDeviceID -like "HDAUDIO*" } | '
+        'ForEach-Object { "$($_.PNPDeviceID)|$($_.Name)" }')
     return out
 
 
@@ -148,6 +153,9 @@ def _linux():
     out['gpu'] = [l.split(': ', 1)[-1] for l in out['pci'].splitlines()
                   if 'VGA compatible controller' in l or '3D controller' in l]
     out['usb'] = _run(['lsusb'])
+    # ALSA prints the codec's full HDA id as one 8-digit word
+    out['hda'] = ''.join(_read(p) for p in
+                         __import__('glob').glob('/proc/asound/card*/codec#*'))
     return out
 
 
@@ -179,6 +187,12 @@ PCI_PATTERNS = [
 USB_PATTERNS = [
     re.compile(r'vid_([0-9a-f]{4})&pid_([0-9a-f]{4})', re.I),        # Windows
     re.compile(r'\bID\s+([0-9a-f]{4}):([0-9a-f]{4})\b', re.I),       # Linux lsusb
+]
+
+
+HDA_PATTERNS = [
+    re.compile(r'hdaudio\\func_\d+&ven_([0-9a-f]{4})&dev_([0-9a-f]{4})', re.I),  # Windows
+    re.compile(r'Vendor Id:\s*0x([0-9a-f]{4})([0-9a-f]{4})', re.I),               # ALSA
 ]
 
 
@@ -226,6 +240,7 @@ def probe():
         'usb_ids': sorted(_pairs(raw.get('usb'), USB_PATTERNS)
                           | (_apple_pairs(raw.get('usb'), 'Vendor ID', 'Product ID')
                              if system == 'Darwin' else set())),
+        'hda_ids': sorted(_pairs(raw.get('hda'), HDA_PATTERNS)),
         'generation': cpu_generation(raw.get('cpu'), bool(laptop)),
     }
 
@@ -234,7 +249,7 @@ if __name__ == '__main__':
     for k, v in probe().items():
         if k == 'pci':
             print(f'  {k:10s} {len(v.splitlines())} lines')
-        elif k in ('pci_ids', 'usb_ids'):
+        elif k in ('pci_ids', 'usb_ids', 'hda_ids'):
             print(f'  {k:10s} {len(v)}: ' + ', '.join(v[:8]) + (' ...' if len(v) > 8 else ''))
         else:
             print(f'  {k:10s} {v}')
