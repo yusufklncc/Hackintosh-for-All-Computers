@@ -337,6 +337,19 @@ use before you map, so that you can have all USB ports working before you map" -
 exactly the job a distributable install EFI needs. Neither mechanism patches the
 port limit, and neither does this repository: `XhciPortLimit` is false in all 179.
 
+## Self-test
+
+`tools/selftest.py` asserts what the advice should say - that an unsupported card
+offers a supported iGPU but not an unsupported one, that an unknown one is
+reported as unknown rather than as absent, that `alcid` replaces the value a
+profile ships rather than appending to it.
+
+They live in a file rather than inline in the workflow. They were inline once,
+and YAML around a shell around Python is three levels of quoting: one wrong
+escape made the whole workflow unparseable, so every run failed in zero seconds
+without executing a step. CI now also parses the workflow files as its first
+job, so that failure mode announces itself.
+
 ## Continuous validation
 
 `.github/workflows/validate.yml` runs on every push and pull request:

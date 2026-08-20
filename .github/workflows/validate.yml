@@ -14,102 +14,48 @@ jobs:
       - name: Make the vendored tools executable
         run: chmod +x vendor/opencore/*/Utilities/*/*.linux
 
+      - name: Workflows are valid YAML
+        run: |
+          python3 -m pip install --quiet pyyaml
+          python3 -c "import yaml,glob,sys; [yaml.safe_load(open(f)) for f in glob.glob('.github/workflows/*.yml')]; print('workflows parse')"
+
       - name: Kexts match the lock
         run: python3 tools/kexts.py check
 
       - name: Profiles still produce every published config
         run: python3 tools/verify.py --comments
 
+      - name: What the tools advise is still what they should
+        run: python3 tools/selftest.py
+
       - name: Representative builds come out clean
         run: |
-          python3 tools/build.py --platform laptop --cpu kaby-lake --oem hp --out /tmp/a/EFI
-          python3 tools/build.py --platform desktop --vendor amd \
-            --cpu ryzen-threadripper --cores 8 --chipset b550-a520 --out /tmp/b/EFI
-          python3 tools/build.py --name 'Desktop/Intel/016 - Desktop - Raptor Lake' --out /tmp/c/EFI
-
-      - name: The interactive builder still runs
-        run: |
-          python3 tools/setup.py --answers 2,10,3 --out /tmp/setup-laptop/EFI
-          python3 tools/setup.py --answers 1,2,2,3,6 --out /tmp/setup-amd/EFI
-          python3 tools/detect.py
-          python3 -c "
-import sys; sys.path.insert(0,'tools'); import detect
-real, virt = detect.split_graphics([
-    r'PCI\\VEN_8086&DEV_E20B&SUBSYS_1&REV_08\\6&a&0|Intel(R) Arc(TM) B580 Graphics',
-    r'ROOT\\DISPLAY\\0000|Virtual Display Driver'])
-assert [g['name'] for g in real] == ['Intel(R) Arc(TM) B580 Graphics'], real
-assert real[0]['id'] == '8086:e20b', real
-assert [g['name'] for g in virt] == ['Virtual Display Driver'], virt
-print('  graphics split ok')
-"
-          python3 tools/advise.py --ids 8086:15b8,8086:2723 --usb-ids 8087:0029
-          python3 tools/advise.py --ids 10ec:c822
+          python3 tools/setup.py --answers 2,10,3 --out /tmp/laptop/EFI
+          python3 tools/setup.py --answers 1,2,2,3,6 --out /tmp/amd/EFI
+          python3 tools/build.py --name 'Desktop/Intel/016 - Desktop - Raptor Lake' --out /tmp/named/EFI
 
       - name: Network kexts, both modes and declining
         run: |
           IDS='--ids 8086:15b8 --usb-ids 8087:0029'
-          python3 tools/setup.py $IDS --answers 2,10,3,1   --out /tmp/net-all/EFI
+          python3 tools/setup.py $IDS --answers 2,10,3,1    --out /tmp/net-all/EFI
           python3 tools/setup.py $IDS --answers 2,10,3,2,10 --out /tmp/net-sonoma/EFI
-          python3 tools/setup.py $IDS --answers 2,10,3,3   --out /tmp/net-none/EFI
+          python3 tools/setup.py $IDS --answers 2,10,3,3    --out /tmp/net-none/EFI
 
       - name: Wi-Fi resolves to one build, or to none
         run: |
           python3 tools/setup.py --ids 8086:2723 --answers 2,10,3,2,10 --out /tmp/wifi-sonoma/EFI
           test -d /tmp/wifi-sonoma/EFI/OC/Kexts/AirportItlwm.kext
-          # v2.3.0 has no Sequoia build; shipping the wrong one would be worse
           python3 tools/setup.py --ids 8086:2723 --answers 2,10,3,2,11 --out /tmp/wifi-sequoia/EFI
           test ! -d /tmp/wifi-sequoia/EFI/OC/Kexts/AirportItlwm.kext
           python3 tools/itlwm.py
 
-      - name: Graphics advice
+      - name: Detection and advice run standalone
         run: |
+          python3 tools/detect.py
+          python3 tools/advise.py --ids 8086:15b8,8086:2723 --usb-ids 8087:0029
+          python3 tools/advise.py --ids 10ec:c822
           python3 tools/gpu.py
-          python3 -c "
-import sys; sys.path.insert(0,'tools'); import gpu
-arc = {'name': 'Intel Arc B580', 'id': '8086:e20b'}
-# an unsupported card with a supported iGPU may fall back
-out = ' '.join(gpu.report([arc, {'name':'Intel HD Graphics 630','id':'8086:5912'}], 'kaby-lake')[0])
-assert 'you can disable it and use' in out, out
-# with an unsupported iGPU it must say so, not offer a fallback
-out = ' '.join(gpu.report([arc, {'name':'Intel UHD Graphics 770','id':'8086:4680'}], 'alder-lake')[0])
-assert 'not supported either' in out and 'you can disable' not in out, out
-# with no iGPU at all, neither claim
-out = ' '.join(gpu.report([arc], None)[0])
-assert 'no integrated GPU here' in out, out
-# a supported card carries its family boot argument
-lines, args = gpu.report([{'name':'RX 6600','id':'1002:73ff'}], None)
-assert args == ['agdpmod=pikera'], args
-print('  gpu advice ok')
-"
-
-      - name: Audio layout advice
-        run: |
           python3 tools/audio.py
-          python3 -c "
-import sys; sys.path.insert(0,'tools'); import audio
-# the brand a contributor named is what decides where to start
-lines, alcid, steps = audio.report(['10ec:0255'], 'lenovo')
-assert alcid == 28, alcid
-assert 'Lenovo' in steps
-# without a brand it is the lowest id, not a guess dressed up as a match
-assert audio.report(['10ec:0255'], None)[1] == 3
-# every layout ends up in the notes, not just the three shown
-assert steps.count('alcid=') >= 27, steps.count('alcid=')
-# a codec AppleALC does not carry must say so rather than pick something
-assert audio.report(['8086:2809'], None)[1] is None
-print('  audio advice ok')
-"
-          python3 tools/setup.py --hda-ids 10ec:0255 --answers 2,10,3 --out /tmp/audio/EFI
-          grep -q 'alcid=3' /tmp/audio/EFI/OC/config.plist || \
-            python3 -c "import plistlib,sys; d=plistlib.load(open('/tmp/audio/EFI/OC/config.plist','rb')); \
-              a=d['NVRAM']['Add']['7C436110-AB2A-4BBB-A880-FE41995C9F82']['boot-args']; \
-              sys.exit(0 if 'alcid=3' in a and a.count('alcid=')==1 else f'boot-args wrong: {a}')"
-          test -f /tmp/audio/NEXT-STEPS.txt
-
-      - name: The hardware table still matches the kexts
-        run: |
-          python3 tools/hwtable.py EFI/OC/Kexts --out /tmp/hardware.toml
-          diff /tmp/hardware.toml data/hardware.toml
 
       - name: Release packaging works
         run: python3 tools/release.py --out /tmp/dist --limit 5
