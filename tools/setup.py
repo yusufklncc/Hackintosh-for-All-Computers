@@ -13,12 +13,12 @@ Standard library only, no network.
 """
 import argparse
 import os
-import subprocess
 import sys
 from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import advise
+import build
 import detect
 import netkexts
 import ocgen
@@ -255,8 +255,10 @@ def main():
             fh.close()
             extra_file = fh.name
 
-    cmd = [sys.executable, 'tools/build.py', '--platform', plat, '--cpu', cpu,
-           '--out', a.out]
+    # build.main is called rather than spawned. sys.executable is this program
+    # when frozen, not a Python interpreter, so a subprocess would re-invoke the
+    # menus with build's arguments.
+    cmd = ['--platform', plat, '--cpu', cpu, '--out', a.out]
     if extra_file:
         cmd += ['--add-kexts', extra_file]
     if vendor:
@@ -267,11 +269,14 @@ def main():
         cmd += ['--oem', row['oem']]
 
     print(f'\n{BOLD}Building{RESET}')
-    print(f'  {DIM}{" ".join(cmd)}{RESET}\n')
+    print(f'  {DIM}build {" ".join(cmd)}{RESET}\n')
     sys.stdout.flush()
-    r = subprocess.run(cmd)
-    if r.returncode != 0:
-        return r.returncode
+    try:
+        rc = build.main(cmd)
+    except SystemExit as exc:
+        rc = exc.code or 0
+    if rc:
+        return rc
     if extra_file:
         os.unlink(extra_file)
     elif hw.get('pci_ids') or hw.get('usb_ids'):
