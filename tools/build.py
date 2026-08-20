@@ -150,6 +150,12 @@ def main():
     version = Path(sample_path).parent.name
 
     row = row_from_args(a)
+    key = f"{row['platform']}-{row['vendor'] or ''}/{row['cpu']}"
+    lo, hi, tested = ocgen.support_range(PROFILES, key)
+    why = ocgen.version_supported(version, lo, hi)
+    if why:
+        warn(f'OpenCore {version} is {why} for this profile'
+             + (f' (tested: {", ".join(tested)})' if tested else ''))
     chain = ocgen.layer_chain(row, PROFILES)
     config = ocgen.assemble(ocgen.load_plist(sample_path), chain, ocgen.build_params(row))
 
@@ -180,7 +186,7 @@ def main():
             if status == 'ISSUES':
                 print(r.stdout)
 
-    print(f'  OpenCore     {version}')
+    print(f'  OpenCore     {version}' + (f'   tested {lo}-{tested[-1] if tested else "?"}' if lo else ''))
     print(f'  profiles     ' + ' -> '.join(p.stem for p in chain))
     print(f'  SMBIOS       {config["PlatformInfo"]["Generic"]["SystemProductName"]}'
           + (f'  {serial}' if serial else ''))

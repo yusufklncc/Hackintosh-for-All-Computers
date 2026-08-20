@@ -405,3 +405,32 @@ def vendored_sample(version=None):
         return p if p.exists() else None
     found = sorted(root.glob('*/Sample.plist'))
     return found[-1] if found else None
+
+
+SUPPORT = 'support.toml'
+
+
+def _ver(v):
+    return tuple(int(x) for x in v.split('.')) if v else ()
+
+
+def support_range(profiles, key):
+    """(oc_min, oc_max, tested) for a profile, from profiles/support.toml.
+
+    Kept in its own file because extract.py rewrites every profile it generates,
+    and a tested version range is knowledge that must outlive regeneration."""
+    p = profiles / SUPPORT
+    if not p.exists():
+        return '', '', []
+    d = read_toml(p)
+    e = {**d.get('default', {}), **d.get('profile', {}).get(key, {})}
+    return e.get('oc_min', ''), e.get('oc_max', ''), e.get('tested', [])
+
+
+def version_supported(version, oc_min, oc_max):
+    v = _ver(version)
+    if oc_min and v < _ver(oc_min):
+        return f'below the tested minimum {oc_min}'
+    if oc_max and v > _ver(oc_max):
+        return f'above the tested maximum {oc_max}'
+    return ''

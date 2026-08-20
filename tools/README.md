@@ -94,6 +94,47 @@ post-installation section covers setting it.
 Every build is checked with the `ocvalidate` matching the OpenCore version it was
 built against.
 
+## OpenCore version support
+
+`profiles/support.toml` is measured, not asserted. `tools/matrix.py` builds every
+profile against each OpenCore release's own `Sample.plist` and validates it with
+that release's own `ocvalidate`:
+
+    OC_CACHE=.oc-cache python3 tools/matrix.py 0.9.6 0.9.9 1.0.0 1.0.5 1.0.7 --write
+
+All 37 profiles validate on every release from **0.9.6 to 1.0.7** - 370 of 370
+combinations. 0.9.5 is the floor, for one reason: `Booter.Quirks.FixupAppleEfiImages`
+did not exist before 0.9.6, and every config here sets it. No upper bound was
+found, so `oc_max` is empty.
+
+`extract.py` never rewrites this file, so a range you widen by testing survives
+regeneration. `build.py` warns when the requested version falls outside it.
+
+## SecureBootModel stays Disabled
+
+All 179 configs set `Misc.Security.SecureBootModel = Disabled`, against a failsafe
+of `Default`. That is correct here, for reasons that are documented rather than
+stylistic:
+
+* The OpenCore manual: *"Specifying this value defines which operating systems
+  will be bootable. Operating systems shipped before the specified model was
+  released will not boot."* Every named model needs at least macOS 10.13.2, and
+  `x86legacy` needs 11.0.1. This repository distributes images down to Yosemite.
+* *"Starting with macOS 12 SecureBootModel must match the SMBIOS Mac model."*
+  101 of the 179 configs use one of 15 pre-T2 SMBIOS models, which have no Apple
+  Secure Boot model at all.
+* Dortania's Apple Secure Boot page: *"Unsigned and several signed kernel drivers
+  cannot be used."* This EFI injects community kexts, and the AMD configs patch
+  the kernel.
+
+Worth knowing: because `SecureBootModel` is `Disabled`, `FixupAppleEfiImages`
+becomes relevant. The manual says that quirk *"is required to load Mac OS X 10.4
+to macOS 10.12, and is required for all newer macOS when SecureBootModel is set
+to Disabled"* - on stricter image loaders, which explicitly includes OpenDuet,
+the Legacy BIOS path this repository supports. All 179 configs set it to `false`,
+while OpenCore's own 1.0.5 `Sample.plist` sets it to `true`. Not changed; recorded
+so the choice can be a deliberate one.
+
 ## The gate
 
 `verify.py` rebuilds every config from the profiles and compares it against the
