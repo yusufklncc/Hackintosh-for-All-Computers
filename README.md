@@ -101,16 +101,37 @@ To check if your hardware is incompatible, I leave links below.
 
 - When you plug-in USB back, you can see EFI partition in "My Computer"
 - Open EFI partition.
-- Copy your EFI folder to EFI partition.
-  - If you don't have EFI. You can use my global EFI.
-  - Download from `Releases` and copy the EFI folder to EFI partition.
-> [!IMPORTANT]
-> Every config in this repository ships with a **placeholder SMBIOS**: the serial numbers, MLB, UUID and `ROM` (`11:22:33:44:55:66`) values are shared by many users. Leaving them as-is will break iCloud, iMessage and FaceTime. After the installation finishes, generate your own values with the [Post Installation](#post-installation) steps before signing in to any Apple service.
-
-- Open EFI/OC/config folder, find compatible config for your hardware. Copy it to EFI/OC and set your file name config. Example:
-  - my CPU is `i5-7200U`. It is `Kaby Lake Mobile (Laptop)` cpu.
-  - Go EFI/OC/config/Laptop and copy `Kaby Lake.plist` to EFI/OC and rename `config.plist`
+- If you already have an EFI folder for your machine, copy it there and you are done.
+- Otherwise go to `Releases` and download the zip matching your hardware. Each zip
+  is a ready EFI folder, already carrying the right `config.plist`. Example:
+  - my CPU is `i5-7200U`. It is `Kaby Lake Mobile (Laptop)` cpu, and the laptop is an HP.
+  - so I download `Laptop - HP - 009 - Laptop - Kaby Lake.zip`.
+  - if there is no entry for your brand, take the plain one - `Laptop - 009 - Laptop - Kaby Lake.zip`.
+- Extract it and copy the `EFI` folder to the EFI partition.
 - Now you can boot from USB.
+
+<br>
+
+Each release zip is generated with a serial number, MLB and UUID of its own, so
+you are not sharing an identity with everyone else who downloaded it.
+
+> [!IMPORTANT]
+> `ROM` is still a placeholder (`11:22:33:44:55:66`), because it has to be your own machine's MAC address and no build can know it in advance. Set it with the [Post Installation](#post-installation) steps before signing in to iCloud, iMessage or FaceTime.
+
+<br>
+
+If you would rather build it yourself - to pick a different OpenCore version, or
+because your combination is not in the list - the repository generates these
+folders from a small set of profiles:
+
+```
+python3 tools/build.py --catalogue                 # list every published config
+python3 tools/build.py --name "Laptop/HP/009 - Laptop - Kaby Lake"
+python3 tools/build.py --platform laptop --cpu kaby-lake --oem hp
+```
+
+It needs nothing but Python 3.11 and a clone - no downloads, no dependencies.
+See [tools/README.md](tools/README.md).
 
 <br>
 

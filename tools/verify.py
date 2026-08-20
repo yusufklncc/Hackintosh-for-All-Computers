@@ -23,6 +23,31 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import ocgen
 
 
+def against_catalogue(sample, profiles, comments):
+    """Once EFI/OC/config is gone, the catalogue's hashes are the reference."""
+    import hashlib
+    entries = ocgen.read_toml(profiles / 'catalogue.toml')['config']
+    ok, bad = 0, []
+    for e in entries:
+        # a catalogue entry *is* a published config, so it must pick up its
+        # per-config residual; the name is what resolves that file
+        row = {'path': f"{ocgen.CONFIG_ROOT}/{e['name']}.plist",
+               'platform': e['platform'], 'vendor': e.get('vendor'),
+               'cpu': e['cpu'], 'chipset': e.get('chipset'), 'oem': e.get('oem'),
+               'variant': e.get('variant'), 'cores': e.get('cores')}
+        built = ocgen.assemble(sample, ocgen.layer_chain(row, profiles),
+                               ocgen.build_params(row))
+        got = hashlib.sha256(ocgen.canonical_bytes(built, True)).hexdigest()
+        if got == e['sha256']:
+            ok += 1
+        else:
+            bad.append((e['name'], e['sha256'][:12], got[:12]))
+    for name, want, got in bad:
+        print(f'CHANGED {name}\n    catalogue {want}  built {got}')
+    print(f'\n  {ok}/{len(entries)} catalogue configs match their recorded hash')
+    return 1 if bad else 0
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('sample', nargs='?',
@@ -38,6 +63,8 @@ def main():
     profiles = Path(a.profiles)
     sample = ocgen.load_plist(a.sample)
     paths = sorted(glob.glob(f'{ocgen.CONFIG_ROOT}/**/*.plist', recursive=True))
+    if not paths:
+        return against_catalogue(sample, profiles, a.comments)
     ok, bad = 0, []
     for p in paths:
         row = ocgen.classify(p)

@@ -111,6 +111,9 @@ def copy_payload(config, out, warn):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--list', action='store_true', help='show available profiles and exit')
+    ap.add_argument('--catalogue', action='store_true',
+                    help='list the published configs by name and exit')
+    ap.add_argument('--name', help='build a published config by its catalogue name')
     ap.add_argument('--platform', choices=('desktop', 'laptop'))
     ap.add_argument('--vendor', choices=('intel', 'amd'))
     ap.add_argument('--cpu')
@@ -124,6 +127,16 @@ def main():
     ap.add_argument('--no-validate', action='store_true')
     a = ap.parse_args()
 
+    cat = {e['name']: e for e in
+           ocgen.read_toml(PROFILES / 'catalogue.toml')['config']} \
+        if (PROFILES / 'catalogue.toml').exists() else {}
+
+    if a.catalogue:
+        for name in cat:
+            print(f'  {name}')
+        print(f'\n  {len(cat)} published configs; build one with --name "<name>"')
+        return 0
+
     if a.list:
         for plat, cpus in available().items():
             print(f'  {plat}')
@@ -135,8 +148,17 @@ def main():
             if names:
                 print(f'  --{kind}: {", ".join(names)}')
         return 0
+    if a.name:
+        e = cat.get(a.name)
+        if not e:
+            near = [n for n in cat if a.name.lower() in n.lower()][:8]
+            sys.exit(f'no catalogue entry named {a.name!r}'
+                     + (f'; did you mean:\n  ' + '\n  '.join(near) if near else
+                        '; use --catalogue to list them'))
+        for k in ('platform', 'vendor', 'cpu', 'chipset', 'oem', 'variant', 'cores'):
+            setattr(a, k, e.get(k))
     if not (a.platform and a.cpu):
-        ap.error('--platform and --cpu are required (or use --list)')
+        ap.error('--platform and --cpu are required (or --name, or --list)')
     if a.platform == 'desktop' and not a.vendor:
         ap.error('--vendor is required for desktop (intel or amd)')
 
@@ -150,6 +172,8 @@ def main():
     version = Path(sample_path).parent.name
 
     row = row_from_args(a)
+    if a.name:
+        row['path'] = f'{ocgen.CONFIG_ROOT}/{a.name}.plist'   # picks up its residual
     key = f"{row['platform']}-{row['vendor'] or ''}/{row['cpu']}"
     lo, hi, tested = ocgen.support_range(PROFILES, key)
     why = ocgen.version_supported(version, lo, hi)

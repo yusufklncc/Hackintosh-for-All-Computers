@@ -1,8 +1,13 @@
-"""Derive the layered profile set from the existing configs under EFI/OC/config.
+"""Derive the layered profile set from a tree of configs under EFI/OC/config.
 
-Nothing here is hand-authored: every profile is computed from the tree that is
-already in the repository, so the result reproduces it by construction. The
-equivalence gate in verify.py is what proves it.
+This is the migration tool. It built the profiles that now live in profiles/,
+computing every one of them from the static tree so the result reproduced it by
+construction rather than by hand. That tree has since been removed, so this
+script only runs against a checkout old enough to still have it, or against a
+restored copy.
+
+Day to day, profiles are edited directly and verify.py checks the result against
+profiles/catalogue.toml.
 
     python3 tools/extract.py <path-to-Sample.plist> [--out profiles]
 """
@@ -87,6 +92,8 @@ def main():
     ap.add_argument('sample', nargs='?',
                     help='Sample.plist to build on; defaults to the vendored one')
     ap.add_argument('--out', default='profiles')
+    ap.add_argument('--catalogue', action='store_true',
+                    help='also rewrite profiles/catalogue.toml from the config tree')
     a = ap.parse_args()
     a.sample = a.sample or ocgen.vendored_sample()
     if not a.sample:
@@ -201,6 +208,29 @@ def main():
                     emit(f'config/{ocgen.exception_name(r)}.toml', res[r['path']],
                          f'Residual specific to {r["path"]}')
                     leaves.append(r['path'])
+
+    if a.catalogue:
+        import hashlib
+        entries = []
+        for r in rows:
+            e = {'name': r['path'][len(ROOT) + 1:-6], 'platform': r['platform'], 'cpu': r['cpu']}
+            for k in ('vendor', 'chipset', 'oem', 'variant'):
+                if r[k]:
+                    e[k] = r[k]
+            if r['cores']:
+                e['cores'] = r['cores']
+            # hash the config as published, so a later profile edit that changes
+            # any of them shows up as a diff in this file rather than silently
+            e['sha256'] = hashlib.sha256(
+                ocgen.canonical_bytes(ocgen.load_plist(r['path']), True)).hexdigest()
+            entries.append(e)
+        ocgen.write_toml(out / 'catalogue.toml', {'config': entries},
+                         '# Every config this repository publishes, as profile coordinates.\n'
+                         '# sha256 is over the canonical form with identity excluded, so it is\n'
+                         '# what the equivalence gate compares against once the static tree is\n'
+                         '# gone. Regenerate deliberately: a change here is a change to what\n'
+                         '# users get.\n')
+        print(f'  catalogue      {len(entries)}')
 
     print(f'  base              1')
     for k in ('platform', 'cpu', 'overlay', 'config'):

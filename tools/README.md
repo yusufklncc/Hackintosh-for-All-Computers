@@ -1,10 +1,12 @@
 # Config generator
 
-The 179 files under `EFI/OC/config/` are highly repetitive: 35 of them differ
-from the generic ones by exactly two quirks, and applying a single OpenCore
-default to the tree means editing 179 files by hand. These tools replace that
-tree with a layered profile set, and prove the replacement is faithful before
-anything is removed.
+`EFI/OC/config/` used to hold 179 hand-maintained plists. They were highly
+repetitive - 35 of them differed from the generic ones by exactly two quirks -
+and applying a single OpenCore default meant editing 179 files by hand. They are
+now generated from 62 profiles, and the tree is gone.
+
+`profiles/catalogue.toml` lists all 179 published configs with the hash of each,
+so nothing can change what users get without that file changing too.
 
 Python 3.11+, standard library only.
 
@@ -57,13 +59,13 @@ and identity falls back to a placeholder, each with a warning.
 
 ## Commands
 
-    python3 tools/build.py --list                                  # what can be built
+    python3 tools/build.py --catalogue                             # published configs
+    python3 tools/build.py --name "Laptop/HP/009 - Laptop - Kaby Lake"
+    python3 tools/build.py --list                                  # profile axes
     python3 tools/build.py --platform laptop --cpu kaby-lake --oem hp
-    python3 tools/build.py --platform desktop --vendor amd \
-                           --cpu ryzen-threadripper --cores 8 --chipset b550-a520
 
-    python3 tools/extract.py --out profiles   # profiles from the current tree
-    python3 tools/verify.py  --comments       # equivalence gate
+    python3 tools/verify.py   --comments      # every published config still matches
+    python3 tools/release.py  --out dist      # one zip per published config
     python3 tools/kexts.py   check            # tree matches vendor/kexts.lock
     python3 tools/kexts.py   outdated         # ask GitHub what is newer (network)
     python3 tools/fetch_oc.py 1.0.5           # cache another OpenCore release (network)
@@ -178,9 +180,14 @@ nothing beyond a checkout and Python.
 
 ## The gate
 
-`verify.py` rebuilds every config from the profiles and compares it against the
-file on disk. Identity fields are excluded because a profile never stores them;
-`--comments` additionally requires `Comment` strings to match.
+`verify.py` rebuilds every published config from the profiles and compares it
+against the hash recorded in `profiles/catalogue.toml`. Identity fields are
+excluded because a profile never stores them; `--comments` additionally requires
+`Comment` strings to match.
+
+While `EFI/OC/config/` still existed, the same command compared against the files
+directly, and that is how the profiles were proven faithful before the tree was
+removed: 179 of 179, byte for byte, `Comment` strings included.
 
 The comparison is on canonical XML bytes, not on decoded Python values. That
 distinction matters: in Python `True == 1 == 1.0`, while `<true/>`,
@@ -191,9 +198,16 @@ differences cannot pass.
 
     179/179 configs reproduced (Comment strings included)
 
-Nothing under `EFI/OC/config/` may be deleted while that number is short of
-179. It is the precondition for the generator replacing the static tree, not a
-report about it.
+A change to a hash in `catalogue.toml` is a change to what users download. It is
+meant to show up in review, so regenerate it deliberately.
+
+## Releases
+
+`release.py` builds every catalogue entry and writes one zip per published
+config, each holding only what that config references. `.github/workflows/release.yml`
+runs it on a `v*` tag and uploads the result. Expect roughly 6 MB per zip and
+about 1 GB in total; 164 of the 179 are distinct, the rest are entries whose
+coordinates produce identical output.
 
 ## Known non-minimality
 
@@ -228,4 +242,6 @@ have; its patches stop at MaxKernel 22.99.99.
 
 This has not been changed. It is recorded here so the decision is deliberate.
 
-`phase0/` holds the read-only analysis that established the layer structure.
+`extract.py` is the migration tool that computed these profiles from the old
+tree. It only runs against a checkout that still has one. `phase0/` holds the
+read-only analysis that established the layer structure in the first place.
