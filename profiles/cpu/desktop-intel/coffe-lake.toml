@@ -1,4 +1,4 @@
-# Derived from EFI/OC/config/Desktop/Intel/012 - Desktop - Coffe Lake.plist
+# 1 config
 
 [ACPI]
 Delete = []

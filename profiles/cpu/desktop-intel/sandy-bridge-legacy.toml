@@ -1,4 +1,4 @@
-# Derived from EFI/OC/config/Desktop/Intel/005 - Desktop - Sandy Bridge Legacy.plist
+# 1 config
 
 [ACPI]
 Patch = []

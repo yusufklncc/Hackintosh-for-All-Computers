@@ -1,4 +1,4 @@
-# Derived from EFI/OC/config/Laptop/004 - Laptop - Sandy Bridge UEFI BIOS.plist
+# 1 config
 
 [[ACPI.Add]]
 Comment = ""

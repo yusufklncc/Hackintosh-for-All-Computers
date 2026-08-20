@@ -1,4 +1,4 @@
-# Derived from EFI/OC/config/Laptop/002 - Laptop - Clarksfield ve Arrandale UEFI BIOS.plist
+# 1 config
 
 [ACPI]
 Delete = []

@@ -1,4 +1,4 @@
-# Derived from EFI/OC/config/Laptop/012 - Laptop - Comet Lake.plist
+# 1 config
 
 [ACPI]
 Delete = []

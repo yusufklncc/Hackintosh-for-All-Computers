@@ -1,4 +1,4 @@
-# Derived from EFI/OC/config/Desktop/Intel/019 - Desktop - Sandy Bridge E ve Ivy Bridge-E.plist
+# 1 config
 
 [ACPI]
 Delete = []

@@ -1,4 +1,4 @@
-# Derived from EFI/OC/config/Desktop/Intel/001 - Desktop - Yonah, Conroe ve Penryn Legacy BIOS.plist
+# 1 config
 
 [ACPI]
 Delete = []

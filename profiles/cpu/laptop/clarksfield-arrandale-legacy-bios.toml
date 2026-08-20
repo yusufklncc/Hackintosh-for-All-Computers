@@ -1,4 +1,4 @@
-# Derived from EFI/OC/config/Laptop/001 - Laptop - Clarksfield ve Arrandale Legacy BIOS.plist
+# 1 config
 
 [ACPI]
 Delete = []

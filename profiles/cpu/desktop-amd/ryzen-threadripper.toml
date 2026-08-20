@@ -1,4 +1,4 @@
-# Derived from EFI/OC/config/Desktop/AMD/009 - Desktop - Ryzen ve Threadripper 24 Core.plist
+# 8 config, 8 core counts
 
 [Booter.Quirks]
 EnableWriteUnprotector = false
@@ -87,7 +87,7 @@ Limit = 0
 Mask = "hex:fffdff000000"
 MaxKernel = "18.99.99"
 MinKernel = "17.0.0"
-Replace = "hex:b81800000000"
+Replace = "hex:b8{cores:02x}00000000"
 ReplaceMask = "hex:ffffffffff00"
 Skip = 0
 
@@ -103,7 +103,7 @@ Limit = 0
 Mask = "hex:fffdff000000"
 MaxKernel = "20.99.99"
 MinKernel = "19.0.0"
-Replace = "hex:b81800000000"
+Replace = "hex:b8{cores:02x}00000000"
 ReplaceMask = "hex:ffffffffff00"
 Skip = 0
 
@@ -119,7 +119,7 @@ Limit = 0
 Mask = "hex:fffdff000000"
 MaxKernel = "22.99.99"
 MinKernel = "21.0.0"
-Replace = "hex:b81800000000"
+Replace = "hex:b8{cores:02x}00000000"
 ReplaceMask = "hex:ffffffffffff"
 Skip = 0
 

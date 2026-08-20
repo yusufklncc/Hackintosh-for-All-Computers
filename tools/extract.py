@@ -46,6 +46,38 @@ def common_diff(ref, targets):
     return intersect([ocgen.diff(ref, t) or {} for t in targets])
 
 
+def templatize(ref, variants):
+    """Turn byte leaves that encode the core count into {cores:02x} placeholders.
+
+    A leaf qualifies only if every variant's bytes are identical to the
+    reference except at positions holding that variant's own core count. Bytes
+    that differ for any other reason are left alone and land in a per-core
+    override, so nothing is normalised away."""
+    def walk(node, others):
+        if isinstance(node, dict):
+            return {k: walk(v, [o[k] for o in others]) for k, v in node.items()}
+        if isinstance(node, list):
+            return [walk(v, [o[i] for o in others]) for i, v in enumerate(node)]
+        if not isinstance(node, bytes) or all(o == node for _, o in
+                                              zip(range(len(others)), others)):
+            return node
+        vals = [(c, o) for (c, _), o in zip(variants, others)]
+        if any(not isinstance(o, bytes) or len(o) != len(node) for _, o in vals):
+            return node
+        # template a position only where every variant holds its own core count;
+        # positions that differ for any other reason stay at the reference value
+        # and the variants that disagree get an override of their own
+        pos = [i for i in range(len(node))
+               if all(o[i] == c for c, o in vals) and any(o[i] != node[i] for _, o in vals)]
+        if not pos:
+            return node
+        out = ocgen.HEX + node.hex()
+        for i in sorted(pos, reverse=True):
+            out = out[:len(ocgen.HEX) + 2 * i] + '{cores:02x}' + out[len(ocgen.HEX) + 2 * i + 2:]
+        return out
+    return walk(ref, [t for _, t in variants])
+
+
 def key_of(r):
     return (r['platform'], r['vendor'], r['cpu'], r['cores'])
 
@@ -84,15 +116,42 @@ def main():
         emit(f'platform/{name}.toml', layer, f'{len(rs)} cpu profiles build on this.')
         lvl1[(plat, vend)] = ocgen.merge(lvl0, layer)
 
-    # ---- level 2: one profile per cpu generation (per core count for AMD)
+    # ---- level 2: one profile per cpu generation. Core-count variants of the
+    #      same generation collapse into a single templated profile.
     cpu_ref = {}
+    fams = collections.defaultdict(list)
     for r in canon:
-        key = key_of(r)
-        name = r['cpu'] + (f'-{r["cores"]}core' if r['cores'] else '')
-        plat = f'{r["platform"]}-{r["vendor"]}' if r['vendor'] else r['platform']
-        prof = ocgen.diff(lvl1[(r['platform'], r['vendor'])], tree[r['path']]) or {}
-        emit(f'cpu/{plat}/{name}.toml', prof, f'Derived from {r["path"]}')
-        cpu_ref[key] = ocgen.merge(lvl1[(r['platform'], r['vendor'])], prof)
+        fams[(r['platform'], r['vendor'], r['cpu'])].append(r)
+    for (plat, vend, cpu), rs in sorted(fams.items()):
+        pname = f'{plat}-{vend}' if vend else plat
+        profs = {r['cores']: (ocgen.diff(lvl1[(plat, vend)], tree[r['path']]) or {}) for r in rs}
+        rs.sort(key=lambda r: r['cores'] or 0)
+        tpl = profs[rs[0]['cores']]
+        if len(rs) > 1:
+            # try every variant as the template source and keep the one that
+            # needs the fewest overrides, so an outlier stays an outlier instead
+            # of becoming the norm every sibling has to correct
+            def overrides_for(cand):
+                t = templatize(profs[cand], sorted(profs.items()))
+                n = 0
+                for r in rs:
+                    exp = ocgen.decode(ocgen.expand(ocgen.encode(t), ocgen.build_params(r)))
+                    if ocgen.diff(ocgen.merge(lvl1[(plat, vend)], exp), tree[r['path']]):
+                        n += 1
+                return n, t
+            _, tpl = min((overrides_for(r['cores']) for r in rs), key=lambda x: x[0])
+        emit(f'cpu/{pname}/{cpu}.toml',
+             tpl, f'{len(rs)} config' + (f', {len(rs)} core counts' if len(rs) > 1 else ''))
+        for r in rs:
+            params = ocgen.build_params(r)
+            expanded = ocgen.decode(ocgen.expand(ocgen.encode(tpl), params))
+            built = ocgen.merge(lvl1[(plat, vend)], expanded)
+            over = ocgen.diff(built, tree[r['path']])
+            if over:
+                emit(f'cpu/{pname}/{cpu}.{r["cores"]}core.toml', over,
+                     f'{r["cores"]}-core deviates from the templated profile.')
+                built = ocgen.merge(built, over)
+            cpu_ref[key_of(r)] = built
 
     # ---- level 3a: single-axis overlays, learned from configs where that axis
     #      is the only one active, so a combination cannot contaminate them.

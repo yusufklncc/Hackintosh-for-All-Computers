@@ -1,4 +1,4 @@
-# Derived from EFI/OC/config/Laptop/011 - Laptop - Coffe Lake Plus.plist
+# 1 config
 
 [ACPI]
 Delete = []

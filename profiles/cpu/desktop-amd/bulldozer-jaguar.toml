@@ -1,4 +1,4 @@
-# Derived from EFI/OC/config/Desktop/AMD/002 - Desktop - Bulldozer ve Jaguar 6 Core.plist
+# 3 config, 3 core counts
 
 [[Kernel.Add]]
 Arch = "x86_64"
@@ -92,7 +92,7 @@ Limit = 0
 Mask = "hex:fffdff000000"
 MaxKernel = "18.99.99"
 MinKernel = "17.0.0"
-Replace = "hex:b80600000000"
+Replace = "hex:b8{cores:02x}00000000"
 ReplaceMask = "hex:ffffffffff00"
 Skip = 0
 
@@ -108,7 +108,7 @@ Limit = 0
 Mask = "hex:fffdff000000"
 MaxKernel = "20.99.99"
 MinKernel = "19.0.0"
-Replace = "hex:ba0600000000"
+Replace = "hex:ba{cores:02x}00000000"
 ReplaceMask = "hex:ffffffffff00"
 Skip = 0
 
@@ -124,7 +124,7 @@ Limit = 0
 Mask = "hex:fffdff000000"
 MaxKernel = "22.99.99"
 MinKernel = "21.0.0"
-Replace = "hex:ba0600000090"
+Replace = "hex:ba{cores:02x}00000090"
 ReplaceMask = "hex:ffffffffffff"
 Skip = 0
 

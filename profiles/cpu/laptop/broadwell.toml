@@ -1,4 +1,4 @@
-# Derived from EFI/OC/config/Laptop/007 - Laptop - Broadwell.plist
+# 1 config
 
 [ACPI]
 Delete = []

@@ -37,7 +37,8 @@ def main():
     ok, bad = 0, []
     for p in paths:
         row = ocgen.classify(p)
-        built = ocgen.assemble(sample, ocgen.layer_chain(row, profiles))
+        built = ocgen.assemble(sample, ocgen.layer_chain(row, profiles),
+                               ocgen.build_params(row))
         disk = ocgen.load_plist(p)
         if ocgen.canonical_bytes(disk, a.comments) == ocgen.canonical_bytes(built, a.comments):
             ok += 1

@@ -1,4 +1,4 @@
-# Derived from EFI/OC/config/Desktop/Intel/009 - Desktop - Broadwell.plist
+# 1 config
 
 [ACPI]
 Delete = []

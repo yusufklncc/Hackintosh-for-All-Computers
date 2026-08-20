@@ -1,4 +1,4 @@
-# Derived from EFI/OC/config/Desktop/Intel/018 - Desktop - Nehalem ve Westmere UEFI.plist
+# 1 config
 
 [ACPI]
 Patch = []

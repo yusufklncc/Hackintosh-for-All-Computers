@@ -1,4 +1,4 @@
-# Derived from EFI/OC/config/Desktop/Intel/008 - Desktop - Haswell.plist
+# 1 config
 
 [ACPI]
 Delete = []

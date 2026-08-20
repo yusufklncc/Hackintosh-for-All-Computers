@@ -1,4 +1,4 @@
-# Derived from EFI/OC/config/Desktop/Intel/010 - Desktop - Sky Lake.plist
+# 1 config
 
 [ACPI]
 Delete = []

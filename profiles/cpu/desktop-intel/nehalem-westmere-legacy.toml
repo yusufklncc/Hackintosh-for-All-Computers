@@ -1,4 +1,4 @@
-# Derived from EFI/OC/config/Desktop/Intel/017 - Desktop - Nehalem ve Westmere Legacy.plist
+# 1 config
 
 [ACPI]
 Patch = []

@@ -1,4 +1,4 @@
-# Derived from EFI/OC/config/Laptop/008 - Laptop - Sky Lake.plist
+# 1 config
 
 [ACPI]
 Delete = []

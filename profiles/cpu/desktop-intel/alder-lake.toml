@@ -1,4 +1,4 @@
-# Derived from EFI/OC/config/Desktop/Intel/015 - Desktop - Alder Lake.plist
+# 1 config
 
 [ACPI]
 Delete = []

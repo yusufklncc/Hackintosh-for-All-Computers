@@ -1,4 +1,4 @@
-# Derived from EFI/OC/config/Desktop/Intel/011 - Desktop - Kaby Lake.plist
+# 1 config
 
 [ACPI]
 Delete = []

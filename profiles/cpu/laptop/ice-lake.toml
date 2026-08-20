@@ -1,4 +1,4 @@
-# Derived from EFI/OC/config/Laptop/013 - Laptop - Ice Lake.plist
+# 1 config
 
 [ACPI]
 Delete = []

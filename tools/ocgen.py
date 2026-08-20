@@ -40,6 +40,23 @@ def encode(v):
     return v
 
 
+PARAM = _re_param = None  # set below
+
+
+def expand(v, params):
+    """Substitute {name} placeholders in strings using params, e.g. the AMD
+    core count that appears as one byte inside a kernel patch."""
+    if not params:
+        return v
+    if isinstance(v, str):
+        return v.format(**params) if '{' in v else v
+    if isinstance(v, dict):
+        return {k: expand(x, params) for k, x in v.items()}
+    if isinstance(v, list):
+        return [expand(x, params) for x in v]
+    return v
+
+
 def decode(v):
     if isinstance(v, str):
         if v.startswith(HEX):
@@ -277,8 +294,8 @@ def platform_name(row):
     return f"{row['platform']}-{row['vendor']}" if row['vendor'] else row['platform']
 
 
-def cpu_name(row):
-    return row['cpu'] + (f"-{row['cores']}core" if row['cores'] else '')
+def build_params(row):
+    return {'cores': row['cores']} if row['cores'] else {}
 
 
 OVERLAY_ORDER = ('chipset', 'oem', 'variant')
@@ -302,7 +319,10 @@ def layer_chain(row, profiles):
     already produce."""
     chain = [profiles / 'base.toml',
              profiles / 'platform' / f'{platform_name(row)}.toml',
-             profiles / 'cpu' / platform_name(row) / f'{cpu_name(row)}.toml']
+             profiles / 'cpu' / platform_name(row) / f"{row['cpu']}.toml"]
+    if row['cores']:
+        chain.append(profiles / 'cpu' / platform_name(row) /
+                     f"{row['cpu']}.{row['cores']}core.toml")
     for axis in OVERLAY_ORDER:
         if row[axis]:
             chain.append(profiles / 'overlay' / f'{axis}.{row[axis]}.toml')
@@ -333,9 +353,9 @@ def strip_identity(tree):
     return t
 
 
-def assemble(sample, chain):
-    """Sample.plist + every profile in the chain."""
+def assemble(sample, chain, params=None):
+    """Sample.plist + every profile in the chain, with {placeholders} expanded."""
     tree = strip_identity(prepare_sample(sample))
     for p in chain:
-        tree = merge(tree, decode(read_toml(p)))
+        tree = merge(tree, decode(expand(read_toml(p), params or {})))
     return tree

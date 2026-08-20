@@ -1,4 +1,4 @@
-# Derived from EFI/OC/config/Laptop/006 - Laptop - Haswell.plist
+# 1 config
 
 [ACPI]
 Delete = []

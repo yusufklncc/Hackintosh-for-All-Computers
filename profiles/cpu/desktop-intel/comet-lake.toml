@@ -1,4 +1,4 @@
-# Derived from EFI/OC/config/Desktop/Intel/013 - Desktop - Comet Lake.plist
+# 1 config
 
 [ACPI]
 Delete = []

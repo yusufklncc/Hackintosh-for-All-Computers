@@ -16,6 +16,7 @@ merged on top in order:
     base              -> what every config in this repository changes
     platform/<x>      -> desktop-intel | desktop-amd | laptop
     cpu/<x>/<y>       -> one per CPU generation
+    cpu/<x>/<y>.<n>core -> override, when one core count deviates
     overlay/<axis>.<v> -> one per chipset or OEM (oem.hp is six lines, 35 configs)
     overlay/combo/<t> -> residual for one combination, if composing is not enough
     config/<x>        -> residual for one config, if its group is not uniform
@@ -70,12 +71,35 @@ report about it.
 
 ## Known non-minimality
 
-One thing still produces more profile text than necessary. It is correctness
-preserving:
+Core counts are a profile parameter, not a profile each. A byte inside a kernel
+patch becomes `{cores:02x}`, and a position is templated only where every
+variant holds its own core count - anything differing for another reason stays
+at the reference value and the variants that disagree get their own override.
+The reference is chosen as the variant needing the fewest overrides, so an
+outlier stays an outlier instead of becoming the norm its siblings correct.
+That turns the 11 AMD configs into `bulldozer-jaguar.toml`,
+`ryzen-threadripper.toml` and one `ryzen-threadripper.4core.toml`.
 
-* The 11 AMD core-count profiles differ only in one byte of one kernel patch.
+Residuals that carry a whole `Kernel.Add` or `Kernel.Patch` list are expected
+rather than wasteful: a list replaces wholesale, so changing one entry restates
+the list. `ryzen-threadripper.4core.toml` is large for exactly that reason - two
+of its sixteen patches differ. It is also the anomaly made visible, and it
+disappears if those two patches are ever reconciled (see below).
 
-Residuals that carry a whole `Kernel.Add` list are expected rather than wasteful:
-a list replaces wholesale, so enabling one extra kext restates the list.
+## An upstream discrepancy this surfaced
+
+The three `Force cpuid_cores_per_package` patches carry different opcodes across
+the AMD tree:
+
+    bulldozer 4/6/8   b8 XX ..    ba XX ..    ba XX .. 90
+    ryzen 4           b8 XX ..    ba XX ..    ba XX .. 90
+    ryzen 6..64       b8 XX ..    b8 XX ..    b8 XX ..
+
+AMD_Vanilla upstream specifies `b8`, `ba` and `ba .. 90` for the three kernel
+ranges, which is what Bulldozer and Ryzen 4-core use. Upstream also carries a
+fourth patch for kernel 22.4.0-25.99.99 (macOS 13.3+) that this tree does not
+have; its patches stop at MaxKernel 22.99.99.
+
+This has not been changed. It is recorded here so the decision is deliberate.
 
 `phase0/` holds the read-only analysis that established the layer structure.

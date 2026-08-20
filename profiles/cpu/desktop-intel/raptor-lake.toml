@@ -1,4 +1,4 @@
-# Derived from EFI/OC/config/Desktop/Intel/016 - Desktop - Raptor Lake.plist
+# 1 config
 
 [ACPI]
 Delete = []

@@ -1,4 +1,4 @@
-# Derived from EFI/OC/config/Desktop/Intel/004 - Desktop - Lynnfield ve Clarkdale UEFI BIOS.plist
+# 1 config
 
 [ACPI]
 Delete = []
