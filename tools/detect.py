@@ -136,7 +136,8 @@ def _windows():
         'ForEach-Object { "$($_.PNPDeviceID)|$($_.Name)" }')
     out['peripherals'] = _ps(
         'Get-CimInstance Win32_PnPEntity | Where-Object '
-        '{ $_.PNPClass -in @("Camera","Image","SDHost","MTD") } | ForEach-Object '
+        '{ $_.PNPClass -in @("Camera","Image","SDHost","MTD","Mouse","Keyboard") } '
+        '| ForEach-Object '
         '{ "$($_.PNPClass)|$($_.PNPDeviceID)|$($_.Name)" }')
     # BusType 17 is NVMe in the storage WMI classes, which is a cleaner answer
     # than guessing from a PCI class code or a model string.
@@ -321,6 +322,8 @@ def probe():
         'hda_ids': sorted(_pairs(raw.get('hda'), HDA_PATTERNS)),
         'nvme': nvme_drives(raw.get('storage')),
         'peripherals': peripherals(raw.get('peripherals')),
+        'ps2': 'PNP0F13' in (raw.get('peripherals') or '').upper()
+               or 'PNP0303' in (raw.get('peripherals') or '').upper(),
         'generation': cpu_generation(raw.get('cpu'), bool(laptop)),
     }
 

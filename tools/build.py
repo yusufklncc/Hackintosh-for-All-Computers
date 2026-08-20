@@ -136,6 +136,8 @@ def main(argv=None):
     ap.add_argument('--add-kexts', help='JSON file of extra Kernel.Add entries to append')
     ap.add_argument('--boot-args', help='extra boot arguments to append to the config')
     ap.add_argument('--notes', help='file of follow-up notes to write beside the EFI')
+    ap.add_argument('--device-props', help='JSON of DeviceProperties to merge in')
+    ap.add_argument('--drop-kexts', help='bundle names to disable, comma separated')
     a = ap.parse_args(argv)
 
     cat = {e['name']: e for e in
@@ -222,6 +224,27 @@ def main(argv=None):
             if arg not in have:
                 have.append(arg)
         nv['boot-args'] = ' '.join(have)
+
+    if a.device_props:
+        import json
+        with open(a.device_props) as fh:
+            props = json.load(fh)
+        add = config['DeviceProperties']['Add']
+        for path, values in props.items():
+            target = add.setdefault(path, {})
+            for k, v in values.items():
+                old = target.get(k)
+                target[k] = bytes.fromhex(v[4:]) if isinstance(v, str) and v.startswith('hex:') else v
+                if old is not None and old != target[k]:
+                    warn(f'{path} {k}: replaced {bytes(old).hex() if isinstance(old, bytes) else old}')
+
+    if a.drop_kexts:
+        drop = {x.strip() for x in a.drop_kexts.split(',') if x.strip()}
+        before = len(config['Kernel']['Add'])
+        config['Kernel']['Add'] = [k for k in config['Kernel']['Add']
+                                   if k['BundlePath'] not in drop]
+        if before != len(config['Kernel']['Add']):
+            print(f'  dropped      {", ".join(sorted(drop))}')
 
     serial = apply_identity(config, a.identity, warn)
 

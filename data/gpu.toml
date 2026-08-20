@@ -400,11 +400,51 @@ status = "works"
 profiles = ["ivy-bridge"]
 models = ["HD 2500 (Quicksync only)", "HD 4000", "HD P4000"]
 
+[[igpu.desktop_platform_id]]
+value = "0x0166000a"
+data = "0a006601"
+label = "default"
+
+[[igpu.desktop_platform_id]]
+value = "0x01620005"
+data = "05006201"
+label = ""
+
+[[igpu.laptop_platform_id]]
+value = "0x01660004"
+data = "04006601"
+label = "Recommended, 1600x900 screens or higher"
+
+[[igpu.laptop_platform_id]]
+value = "0x01660009"
+data = "09006601"
+label = "Alternative, eDP or autodetect"
+
+[[igpu.laptop_platform_id]]
+value = "0x01660003"
+data = "03006601"
+label = "1366x768 screens"
+
 [[igpu]]
 section = "Haswell 4XXX"
 status = "works"
 profiles = ["haswell"]
 models = ["HD 4200", "HD 4400 (HD 4600 Fake ID required for this iGPU)", "HD 4600", "HD 5000", "HD 5100", "HD P4600 (Theoretically)", "HD P4700 (Theoretically)"]
+
+[[igpu.desktop_platform_id]]
+value = "0x0d220003"
+data = "0300220d"
+label = "default"
+
+[[igpu.laptop_platform_id]]
+value = "0x0a160000"
+data = "0000160a"
+label = "default"
+
+[[igpu.laptop_platform_id]]
+value = "0x0a260005"
+data = "0500260a"
+label = "recommended"
 
 [[igpu]]
 section = "Broadwell 5XXX"
@@ -412,11 +452,36 @@ status = "works"
 profiles = ["broadwell"]
 models = ["HD 5300", "HD 5500", "HD 5600", "HD 6000", "HD 6100", "HD 6200", "HD P5700 (Theoretically)", "Iris Pro P6300"]
 
+[[igpu.desktop_platform_id]]
+value = "0x16220007"
+data = "07002216"
+label = "default"
+
+[[igpu.laptop_platform_id]]
+value = "0x16260006"
+data = "06002616"
+label = "default"
+
 [[igpu]]
 section = "Skylake 6XXX"
 status = "works"
 profiles = ["sky-lake"]
 models = ["HD 515", "HD 520", "HD 530", "HD P530", "Iris 540", "Iris 550", "Iris Pro 580", "Iris Pro P555", "Iris Pro P580"]
+
+[[igpu.desktop_platform_id]]
+value = "0x19120000"
+data = "00001219"
+label = "default"
+
+[[igpu.desktop_platform_id]]
+value = "0x19120001"
+data = "01001219"
+label = "Headless"
+
+[[igpu.laptop_platform_id]]
+value = "0x19160000"
+data = "00001619"
+label = "default"
 
 [[igpu]]
 section = "Kaby Lake 7XXX"
@@ -424,11 +489,46 @@ status = "works"
 profiles = ["kaby-lake"]
 models = ["HD 615", "HD 620", "HD 630", "Iris Plus 640", "Iris Plus 650"]
 
+[[igpu.desktop_platform_id]]
+value = "0x59160000"
+data = "00001659"
+label = "default"
+
+[[igpu.desktop_platform_id]]
+value = "0x59120003"
+data = "03001259"
+label = "Headless"
+
+[[igpu.laptop_platform_id]]
+value = "0x591b0000"
+data = "00001b59"
+label = "default"
+
 [[igpu]]
 section = "Kaby Lake Refresh/Coffee Lake/Coffee Lake Refresh/Whiskey Lake/Comet Lake 8XXX/9XXX/10XXX"
 status = "works"
 profiles = ["coffe-lake", "coffe-lake-plus", "coffee-lake-whiskey-lake", "comet-lake"]
 models = ["UHD 615", "UHD 617", "UHD 620", "UHD 630", "Iris Plus 645", "Iris Plus 655"]
+
+[[igpu.desktop_platform_id]]
+value = "0x3ea50000"
+data = "0000a53e"
+label = "default"
+
+[[igpu.desktop_platform_id]]
+value = "0x3e9b0007"
+data = "07009b3e"
+label = "desktop, recommended"
+
+[[igpu.desktop_platform_id]]
+value = "0x3e920003"
+data = "0300923e"
+label = "Headless"
+
+[[igpu.laptop_platform_id]]
+value = "0x3ea50009"
+data = "0900a53e"
+label = "default"
 
 [[igpu]]
 section = "Ice Lake 10XXX"

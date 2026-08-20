@@ -108,6 +108,36 @@ def peripherals():
     check('a card reader is recognised as one', ('card reader', False) in kinds, kinds)
 
 
+def trackpad():
+    import inputdev
+    lines, kexts = inputdev.entries(['8086:9d60'], False)
+    check('an I2C controller brings VoodooI2C and its HID plugin',
+          [k['BundlePath'] for k in kexts] == ['VoodooI2C.kext', 'VoodooI2CHID.kext'], kexts)
+    check('the keyboard warning is repeated, since PS2 is separate',
+          any('Most laptop keyboards are PS2' in l for l in lines))
+    check('a machine with no I2C controller gets nothing',
+          inputdev.entries(['8086:15b8'], False)[1] == [])
+    check('a PS/2 device present is called out as making it doubtful',
+          any('may well be PS/2' in l for l in inputdev.entries(['8086:9d60'], True)[0]))
+
+
+def framebuffer():
+    import igpu
+    lines, props, steps = igpu.report('ivy-bridge', True, True)
+    ids = [c['value'] for c in igpu.candidates('ivy-bridge', True)]
+    check('the recommended id comes before the alternatives',
+          ids and ids[0] == '0x01660004', ids)
+    check('it is written byte-swapped, as DeviceProperties wants',
+          props[igpu.IGPU_PATH]['AAPL,ig-platform-id'] == 'hex:04006601', props)
+    listed = [l for l in steps.splitlines() if l.strip().startswith('0x')]
+    check('every candidate reaches the notes', len(listed) == len(ids),
+          f'{len(listed)} listed, {len(ids)} candidates')
+    check('headless is never the one to start with',
+          igpu.candidates('kaby-lake', False)[0]['value'] == '0x59160000')
+    check('an unsupported generation is offered nothing',
+          igpu.report('alder-lake', False, False)[1] == {})
+
+
 def tables_match_sources():
     with tempfile.TemporaryDirectory() as tmp:
         gen = Path(tmp) / 'hardware.toml'
@@ -119,7 +149,7 @@ def tables_match_sources():
 
 if __name__ == '__main__':
     for section in (graphics, graphics_advice, audio_advice, storage, peripherals,
-                    boot_args, tables_match_sources):
+                    trackpad, framebuffer, boot_args, tables_match_sources):
         print(f'\n{section.__name__}')
         section()
     print()

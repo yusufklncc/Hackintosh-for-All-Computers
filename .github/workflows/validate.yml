@@ -54,9 +54,21 @@ jobs:
           test ! -d /tmp/wifi-sequoia/EFI/OC/Kexts/AirportItlwm.kext
           python3 tools/itlwm.py
 
+      - name: Trackpad, framebuffer and a user-made USB map
+        run: |
+          python3 tools/setup.py --ids 8086:9d60 --answers 2,10,3,1 --out /tmp/i2c/EFI
+          python3 tools/setup.py --ids 8086:5912 --answers 2,10,3   --out /tmp/fb/EFI
+          cp -r EFI/OC/Kexts/UTBDefault.kext /tmp/UTBMap.kext
+          python3 tools/setup.py --ids 8086:2723 --usb-map /tmp/UTBMap.kext \
+            --answers 2,10,3,2,10 --out /tmp/usbmap/EFI
+          test -d /tmp/usbmap/EFI/OC/Kexts/UTBMap.kext
+          test ! -d /tmp/usbmap/EFI/OC/Kexts/UTBDefault.kext
+
       - name: Detection and advice run standalone
         run: |
           python3 tools/detect.py
+          python3 tools/inputdev.py
+          python3 tools/igpu.py
           python3 tools/advise.py --ids 8086:15b8,8086:2723 --usb-ids 8087:0029
           python3 tools/advise.py --ids 10ec:c822
           python3 tools/gpu.py

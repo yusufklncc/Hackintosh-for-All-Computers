@@ -369,6 +369,48 @@ If you want a verdict for particular readers or sensors, that is knowledge to
 write down as data - the same shape as the AMD GPU rules - rather than something
 to derive.
 
+## Trackpad
+
+A trackpad does not announce how it is wired, but the controller it hangs off
+does. `data/input.toml` takes the 28 Intel I2C controller ids from VoodooI2C's
+README, so finding one on the PCI bus is the signal for offering VoodooI2C and
+VoodooI2CHID. Nothing decides the trackpad *is* I2C - plenty of machines have
+the controller and a PS/2 trackpad - so when a PS/2 device is present too, the
+report says so.
+
+The keyboard is left alone. Dortania is blunt about it - *"Most laptop keyboards
+are PS2! You will want to grab VoodooPS2 even if you have an I2C, USB, or SMBus
+trackpad"* - and the profiles here already decide that per machine, so the line
+is repeated as a warning rather than acted on.
+
+`NEXT-STEPS.txt` names the per-family plugins in the same release, the two SMBus
+paths for when it is not I2C at all, and the fact that some trackpads need an
+SSDT first - which is machine-specific and not something this can write.
+
+## Intel graphics framebuffer
+
+Dortania lists several `AAPL,ig-platform-id` per generation with a reason
+attached - default, recommended, headless, "1366x768 screens" - so this is a
+short list like the audio layouts, not an answer. The most likely goes in and
+the rest are written down. Headless is never the one to start with, since it
+means no display output.
+
+67 of the configs in this repository shipped `12345678` for this key, which is a
+placeholder rather than a real id, so replacing it is a fix; the replacement is
+reported as a warning so it is visible either way.
+
+What this deliberately does not write is framebuffer connector patches. A tuned
+laptop config carries twenty more properties - con0/con1 patches, stolenmem,
+fbmem - arrived at by trying. Generating those from a guess would look like
+configuration and behave like noise.
+
+## USB port map
+
+`--usb-map` takes a `UTBMap.kext` made with the USBToolBox tool, copies it in and
+drops `UTBDefault.kext`, which upstream is explicit about: *"it is not needed and
+must be removed if you choose to map"*. Producing the map is the tool's job, on
+Windows, against the real ports - not something to derive.
+
 ## Keeping the tables current
 
 Three of the data files are snapshots of other people's work, and they go stale

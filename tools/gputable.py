@@ -113,6 +113,33 @@ IGPU_GENERATIONS = {
 }
 
 
+def parse_framebuffers(seg):
+    """The AAPL,ig-platform-id candidates a generation section lists.
+
+    The page gives each as the value and then its byte-swapped form, which is
+    what actually goes into DeviceProperties, plus a label saying why you would
+    pick it - "default", "recommended", "1366x768 screens". Both halves are kept:
+    the label is the whole reason a list beats a single answer."""
+    txt = re.sub(r'\s+', ' ', html.unescape(re.sub(r'<[^>]+>', ' ', seg)))
+    if 'ig-platform-id' not in txt:
+        return {}
+    out = {}
+    # each block runs from "(desktop):" or "(laptop):" to the next one
+    for m in re.finditer(r'\((desktop|laptop)\):(.*?)(?=AAPL,ig-platform-id|Needed kexts|$)',
+                         txt, re.S):
+        where, body = m.group(1), m.group(2)
+        found = []
+        for value, label, swapped in re.findall(
+                r'(0x[0-9A-Fa-f]{8})\s*(?:\(([^)]*)\))?\s*([0-9A-Fa-f]{8})?', body):
+            if not swapped:
+                continue
+            found.append({'value': value.lower(), 'data': swapped.lower(),
+                          'label': (label or '').strip()})
+        if found:
+            out[where] = found
+    return out
+
+
 def parse_intel(page):
     """Generation sections, tagged Native or Unsupported, with their models."""
     body = page[page.index('<main'):] if '<main' in page else page
@@ -133,9 +160,12 @@ def parse_intel(page):
                     models.append(txt)
             profiles = IGPU_GENERATIONS.get(head, [])
             if models and (profiles or 'Discrete' in head):
-                out.append({'section': head,
-                            'status': 'works' if group.startswith('Native') else 'unsupported',
-                            'profiles': profiles, 'models': models})
+                entry = {'section': head,
+                         'status': 'works' if group.startswith('Native') else 'unsupported',
+                         'profiles': profiles, 'models': models}
+                for where, cands in parse_framebuffers(seg).items():
+                    entry[f'{where}_platform_id'] = cands
+                out.append(entry)
         i += 3
     return out
 

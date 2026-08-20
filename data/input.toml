@@ -1,0 +1,35 @@
+# Laptop input: which kext a trackpad needs.
+#
+# The controller ids are read from VoodooI2C's README, which names
+# every I2C controller it drives - the presence of one is what says a
+# trackpad may be I2C, since the trackpad itself does not announce it.
+# The kext rules are quoted from Dortania, where they are stated in
+# prose and nowhere machine-readable.
+[controller]
+source = "https://raw.githubusercontent.com/VoodooI2C/VoodooI2C/master/README.md"
+pci = ["8086:02e8", "8086:02e9", "8086:02ea", "8086:02eb", "8086:06e8", "8086:06e9", "8086:06ea", "8086:06eb", "8086:34e8", "8086:34e9", "8086:34ea", "8086:34eb", "8086:9d60", "8086:9d61", "8086:9d62", "8086:9d63", "8086:9de8", "8086:9de9", "8086:9dea", "8086:9deb", "8086:a160", "8086:a161", "8086:a162", "8086:a163", "8086:a368", "8086:a369", "8086:a36a", "8086:a36b"]
+acpi = ["INT33C2", "INT33C3", "INT3432", "INT3433"]
+
+[[rule]]
+bus = "i2c"
+label = "I2C trackpad"
+kexts = ["VoodooI2C.kext", "VoodooI2CHID.kext"]
+quote = "Attaches to I2C controllers to allow plugins to talk to I2C trackpads. Must be paired with one or more plugins"
+note = "VoodooI2CHID covers I2C-HID devices, which is most of them. ELAN, Synaptics and FTE trackpads have their own plugin in the same release."
+
+[[rule]]
+bus = "smbus-synaptics"
+label = "Synaptics SMBus trackpad"
+kexts = ["VoodooRMI.kext"]
+quote = "For systems with Synaptics SMBus trackpads. Requires macOS 10.11 or newer for MT2 functions. Depends on Acidanthera's VoodooPS2"
+
+[[rule]]
+bus = "smbus-elan"
+label = "ELAN SMBus trackpad"
+kexts = ["VoodooSMBus.kext"]
+min_kernel = "18.0.0"
+quote = "For systems with ELAN SMBus Trackpads. Supports macOS 10.14 or newer"
+
+[keyboard]
+source = "https://dortania.github.io/OpenCore-Install-Guide/ktext.html"
+quote = "Most laptop keyboards are PS2! You will want to grab VoodooPS2 even if you have an I2C, USB, or SMBus trackpad."
