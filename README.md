@@ -24,6 +24,7 @@ If you hit a problem, open an issue with what you have and what happened.
 ## Table of contents
 
 - [Get your EFI](#get-your-efi)
+- [Building for another machine](#building-for-another-machine)
 - [Check Compatibility](#check-compatibility)
 - [Download macOS Image](#download-macos-image)
 - [Write macOS Image](#write-macos-image)
@@ -43,23 +44,35 @@ for you - detection can be wrong, and a wrong answer that arrives already ticked
 is one nobody rechecks.
 
 ```
-[1] What kind of machine is this?
+[1] Which machine is this EFI for?
+      detected: This machine
+       1) This machine <- detected
+       2) Another machine, and I have its hardware report
+       3) Another machine, and I do not have one
+       4) Neither - just write this machine's report, to build for it elsewhere
+      > 1
+
+[2/4] What kind of machine is this?
       detected: Laptop
        1) Desktop
        2) Laptop <- detected
       > 2
 
-[2/3] Which CPU generation?
+[3/4] Which CPU generation?
       detected: Kaby Lake
       ...
       10) Kaby Lake <- detected
       > 10
 
-[3/3] Board or laptop brand?
+[4/4] Board or laptop brand?
       detected: hp
        3) HP <- detected
       > 3
 ```
+
+The first question matters because the USB stick is usually made on a computer
+that already works, not on the one being built for. See
+[Building for another machine](#building-for-another-machine).
 
 It then looks at your network hardware and offers to add the kexts it needs:
 
@@ -92,6 +105,39 @@ double-click it - it carries everything inside, so there is nothing else to get.
 If you would rather not run anything, `EFI-base.zip` and `configs.zip` in the
 same release are the manual route, described under
 [Put the EFI on the USB drive](#put-the-efi-on-the-usb-drive).
+
+<br>
+
+### Building for another machine
+
+Detection reads the computer it runs on. If you are preparing the USB on a
+working PC for a different one, everything it finds - graphics, audio codec,
+network cards, NVMe, trackpad - belongs to the wrong machine, and you do not
+want any of it in the config.
+
+The fix is to take the hardware report on the target machine and carry it over.
+On that machine, from Windows or Linux:
+
+```
+HackintoshEFIBuilder.exe --report machine.json      # or the menu's option 4
+python3 tools/detect.py --report machine.json       # from a clone
+```
+
+That writes one small JSON file: CPU, board, graphics, PCI, USB and audio ids,
+NVMe models. Copy it to the computer you build on and pass it back:
+
+```
+python3 tools/setup.py --machine machine.json
+```
+
+Every question and every piece of advice then applies to that machine. The
+report holds no serial numbers and no raw device dump, so it is safe to send to
+someone who is helping you.
+
+Without a report, answer *Another machine, and I do not have one*. Nothing is
+detected and nothing is guessed at; instead you are asked which Ethernet, Wi-Fi
+and Bluetooth it has, by name, from the drivers this repository ships. Graphics,
+audio and the trackpad need the report - they cannot be worked out from a name.
 
 <br>
 

@@ -60,6 +60,8 @@ and identity falls back to a placeholder, each with a warning.
 ## Commands
 
     python3 tools/setup.py                                         # guided, start here
+    python3 tools/setup.py --machine machine.json                  # build for another machine
+    python3 tools/detect.py --report machine.json                  # take that machine's report
     python3 tools/build.py --catalogue                             # published configs
     python3 tools/build.py --name "Laptop/HP/009 - Laptop - Kaby Lake"
     python3 tools/build.py --list                                  # profile axes
@@ -91,6 +93,40 @@ the question as `detected` and marks its row in the list.
 
 It is never preselected. Detection can be wrong, and a wrong answer that arrives
 already ticked is one nobody rechecks, so the person always types a number.
+
+## Which machine the answers are about
+
+Detection reads the machine the tool runs on, and that is usually not the target:
+a USB stick gets made on a computer that already works. So the first question is
+whose hardware this is, before anything is shown as `detected`.
+
+    1) This machine
+    2) Another machine, and I have its hardware report
+    3) Another machine, and I do not have one
+    4) Neither - just write this machine's report, to build for it elsewhere
+
+A report is `detect.probe()` written to JSON, which it survives unchanged because
+it is only strings, numbers and lists. `write_report` drops the raw `pci` dump
+first: nothing downstream reads it, it is large, and it can name a serial number
+in a file meant to be handed to someone else. `read_report` returns a complaint
+rather than raising, because a report that cannot be used is a reason to fall
+back to asking, not a reason to stop - a missing file, a JSON file that is not a
+report, or one written by a newer `REPORT_VERSION` than this copy understands.
+
+With a report, every later section - graphics, audio, framebuffer, trackpad,
+storage, network - works exactly as it does locally, because they all read the
+same dictionary.
+
+Without one, nothing is detected and nothing is guessed. `pick_network()` asks
+which Ethernet, Wi-Fi and Bluetooth that machine has by name, listing the sets in
+`data/network.toml`, and hands `netkexts.entries()` the same match names that
+device matching would have produced. Graphics, audio and the trackpad are not
+offered a by-name equivalent: a card name does not carry the framebuffer id or
+the codec layout, and inventing one is how a config acquires a value nobody can
+trace.
+
+`--no-detect` is the scripting primitive and skips all of it: no detection, no
+scope question and no hardware questions, just the profile menus.
 
 `detect.py` reads the machine through commands that ship with the OS -
 PowerShell CIM on Windows, `lspci` and sysfs on Linux, `system_profiler` and
@@ -471,7 +507,7 @@ workflow rather than repeating it, so what gets published is the build that was
 tested. Either way it has to produce an EFI from its own bundle before the run
 is allowed to pass.
 
-`--answers 2,10,3` replays a menu run non-interactively. That is what CI uses,
+`--answers 1,2,10,3` replays a menu run non-interactively. That is what CI uses,
 on both platforms, instead of piping keystrokes.
 
 Two things the frozen build gets wrong if written the obvious way, both fixed:

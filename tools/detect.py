@@ -7,10 +7,21 @@ no reason to doubt it.
 
 Windows, Linux and macOS are all read through commands that ship with the OS,
 so this needs no dependencies and no admin rights.
+
+Detection reads the machine it runs on, which is not always the machine being
+built for. `--report` writes everything it found to a file so the build can
+happen somewhere else:
+
+    python3 tools/detect.py --report machine.json     # on the target
+    python3 tools/setup.py --machine machine.json     # anywhere
 """
+import argparse
+import datetime
+import json
 import platform
 import re
 import subprocess
+from pathlib import Path
 
 
 def _run(cmd, shell=False):
@@ -328,7 +339,76 @@ def probe():
     }
 
 
+# --------------------------------------------------------------------------
+# A probe is a plain dictionary of strings, numbers and lists, so it survives a
+# round trip through JSON unchanged. That is what makes building for another
+# machine possible: run this there, carry the file, build here.
+
+REPORT_VERSION = 1
+
+
+def describe(hw):
+    """One line naming the machine a probe came from, for confirming it."""
+    parts = [hw.get('cpu') or 'unknown CPU']
+    if hw.get('cores'):
+        parts.append(f'{hw["cores"]} cores')
+    if hw.get('oem_raw'):
+        parts.append(hw['oem_raw'])
+    if hw.get('laptop') is not None:
+        parts.append('laptop' if hw['laptop'] else 'desktop')
+    return ', '.join(parts)
+
+
+def write_report(path):
+    """Write this machine's probe to a file. Returns what was written."""
+    data = probe()
+    data['report_version'] = REPORT_VERSION
+    data['written'] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
+    # `pci` is the raw command output the ids were parsed out of. It is large,
+    # it can name a serial number, and nothing downstream reads it, so a file
+    # meant to be sent to someone else does not carry it.
+    data.pop('pci', None)
+    Path(path).write_text(json.dumps(data, indent=2, sort_keys=True), encoding='utf-8')
+    return data
+
+
+def read_report(path):
+    """(probe, complaint) from a file written by write_report.
+
+    A complaint is returned rather than raised: a report that cannot be used is
+    a reason to fall back to asking, not a reason to stop."""
+    p = Path(path)
+    if not p.exists():
+        return None, f'{p} does not exist'
+    try:
+        data = json.loads(p.read_text(encoding='utf-8'))
+    except (OSError, ValueError) as exc:
+        return None, f'{p} could not be read: {exc}'
+    if not isinstance(data, dict) or 'report_version' not in data:
+        return None, (f'{p} is not a hardware report; make one with '
+                      f'"detect.py --report {p.name}" on the machine you are building for')
+    if data['report_version'] > REPORT_VERSION:
+        return None, (f'{p} was written by a newer version of this tool '
+                      f'(report {data["report_version"]}, this one reads {REPORT_VERSION})')
+    data.setdefault('pci', '')
+    return data, None
+
+
 if __name__ == '__main__':
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument('--report', metavar='FILE',
+                    help='write what was found to a file, to build for this '
+                         'machine from a different one')
+    args = ap.parse_args()
+    if args.report:
+        written = write_report(args.report)
+        print(f'  wrote {args.report}')
+        print(f'  {describe(written)}')
+        print(f'  {len(written["pci_ids"])} PCI, {len(written["usb_ids"])} USB, '
+              f'{len(written["hda_ids"])} audio ids')
+        print(f'\n  Copy it to the machine you build on and run:'
+              f'\n      setup.py --machine {args.report}')
+        raise SystemExit(0)
     for k, v in probe().items():
         if k == 'pci':
             print(f'  {k:10s} {len(v.splitlines())} lines')

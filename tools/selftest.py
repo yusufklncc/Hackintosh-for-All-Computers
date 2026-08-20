@@ -6,6 +6,7 @@ the whole file before a single step runs - which is exactly what happened.
 
     python3 tools/selftest.py
 """
+import json
 import os
 import subprocess
 import sys
@@ -91,7 +92,7 @@ def boot_args():
     with tempfile.TemporaryDirectory() as tmp:
         out = Path(tmp) / 'EFI'
         r = run([sys.executable, 'tools/setup.py', '--hda-ids', '10ec:0255',
-                 '--answers', '2,10,3', '--out', str(out)])
+                 '--answers', '1,2,10,3', '--out', str(out)])
         check('the guided build succeeds', r.returncode == 0)
         if r.returncode != 0:
             return
@@ -156,6 +157,50 @@ def framebuffer():
           igpu.report('alder-lake', False, False)[1] == {})
 
 
+def other_machine():
+    """A report has to survive the trip and be refused when it is not one."""
+    with tempfile.TemporaryDirectory() as tmp:
+        path = Path(tmp) / 'machine.json'
+        written = detect.write_report(path)
+        back, complaint = detect.read_report(path)
+        check('a report reads back as it was written', complaint is None, complaint)
+        if back:
+            check('the ids survive the round trip',
+                  back['pci_ids'] == written['pci_ids']
+                  and back['usb_ids'] == written['usb_ids']
+                  and back['hda_ids'] == written['hda_ids'])
+            check('it says which machine and when it was taken',
+                  bool(back.get('written')) and 'system' in back)
+        check('the raw device dump is not carried into a file meant to be sent',
+              'pci' not in json.loads(path.read_text()))
+
+        junk = Path(tmp) / 'junk.json'
+        junk.write_text('{"cpu": "something"}')
+        check('a file that is not a report is refused, not half-read',
+              detect.read_report(junk)[0] is None)
+        check('a missing file is refused', detect.read_report(Path(tmp) / 'no.json')[0] is None)
+
+        ahead = json.loads(path.read_text())
+        ahead['report_version'] = detect.REPORT_VERSION + 1
+        newer = Path(tmp) / 'newer.json'
+        newer.write_text(json.dumps(ahead))
+        check('a report from a newer tool is refused rather than guessed at',
+              detect.read_report(newer)[0] is None)
+
+        # named by hand, because nothing about that machine can be detected
+        out = Path(tmp) / 'EFI'
+        r = run([sys.executable, 'tools/setup.py', '--answers', '3,2,10,3,1,2,1,1',
+                 '--out', str(out)])
+        check('naming the hardware of another machine builds', r.returncode == 0)
+        if r.returncode == 0:
+            have = {p.name for p in (out / 'OC' / 'Kexts').iterdir()}
+            check('what was named is added', 'IntelMausi.kext' in have
+                  and 'IntelBluetoothFirmware.kext' in have, sorted(have))
+            check('what was declined is not', 'AirportItlwm.kext' not in have)
+            check('nothing is claimed about graphics it cannot see',
+                  not (out.parent / 'NEXT-STEPS.txt').exists())
+
+
 def tables_match_sources():
     with tempfile.TemporaryDirectory() as tmp:
         gen = Path(tmp) / 'hardware.toml'
@@ -169,7 +214,8 @@ def tables_match_sources():
 
 if __name__ == '__main__':
     for section in (graphics, graphics_advice, audio_advice, storage, peripherals,
-                    trackpad, framebuffer, boot_args, tables_match_sources):
+                    trackpad, framebuffer, boot_args, other_machine,
+                    tables_match_sources):
         print(f'\n{section.__name__}')
         section()
     print()
