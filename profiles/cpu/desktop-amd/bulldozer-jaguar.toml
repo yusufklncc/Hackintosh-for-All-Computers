@@ -122,10 +122,26 @@ Find = "hex:c1e81a000000"
 Identifier = "kernel"
 Limit = 0
 Mask = "hex:fffdff000000"
-MaxKernel = "22.99.99"
+MaxKernel = "22.3.99"
 MinKernel = "21.0.0"
 Replace = "hex:ba{cores:02x}00000090"
-ReplaceMask = "hex:ffffffffffff"
+ReplaceMask = "hex:"
+Skip = 0
+
+[[Kernel.Patch]]
+Arch = "x86_64"
+Base = "_cpuid_set_info"
+Comment = "algrey - Force cpuid_cores_per_package 13.3+"
+Count = 1
+Enabled = true
+Find = "hex:c1e81a0000"
+Identifier = "kernel"
+Limit = 0
+Mask = "hex:fffdff0000"
+MaxKernel = "25.99.99"
+MinKernel = "22.4.0"
+Replace = "hex:ba{cores:02x}000000"
+ReplaceMask = "hex:ffffffffff"
 Skip = 0
 
 [[Kernel.Patch]]

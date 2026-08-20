@@ -36,6 +36,16 @@ def fmt(t):
     return 'unbounded' if t == INF else '.'.join(str(x) for x in t)
 
 
+VERSION_TAIL = re.compile(
+    r'[\s\-/|,]*\b(?:\d{1,2}\.\d{1,2}(?:\.\d+)?|1[0-9]\.\d{1,2})\s*\+?'
+    r'(?:[\s\-/|,]*(?:\d{1,2}\.\d{1,2}(?:\.\d+)?)\s*\+?)*[\s\-/|]*$')
+
+
+def capability(comment):
+    """A patch comment with its trailing macOS version list removed."""
+    return VERSION_TAIL.sub('', comment).strip(' -/|,')
+
+
 def recover_names():
     """Darwin major -> macOS versions, learned from patch comments in this tree.
 
@@ -91,7 +101,11 @@ def main():
         caps = collections.defaultdict(list)
         for p in d['Kernel'].get('Patch', []):
             if p.get('Enabled'):
-                site = (p.get('Identifier', ''), p.get('Base', ''), bytes(p.get('Find', b'')))
+                # Successive patches for the same capability differ in Find as
+                # the compiled code shifts between releases, so the byte pattern
+                # cannot identify one. The comment minus its version suffix can.
+                site = (p.get('Identifier', ''), p.get('Base', ''),
+                        capability(p.get('Comment', '')))
                 caps[('patch', site, p.get('Comment', '')[:40])].append(
                     (parse(p.get('MinKernel'), (0, 0, 0)), parse(p.get('MaxKernel'), INF)))
         for k in d['Kernel']['Add']:
