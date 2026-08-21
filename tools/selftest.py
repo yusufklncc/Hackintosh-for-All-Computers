@@ -207,6 +207,22 @@ def other_machine():
                   not (out.parent / 'NEXT-STEPS.txt').exists())
 
 
+def undecodable_output():
+    """A byte the encoding cannot name must cost that byte, not the listing.
+
+    On a Turkish Windows the PnP listing carries names in a code page Python was
+    decoding without an error handler, and the reader thread inside subprocess
+    died on the first bad byte: stdout came back empty and a laptop full of PCI
+    devices reported none of them."""
+    out = detect._run([sys.executable, '-c',
+                       "import sys; sys.stdout.buffer.write("
+                       "b'8086:0a16 \\x81\\x8d name\\n')"])
+    check('output survives a byte the encoding has no character for',
+          '8086:0a16' in out and out.endswith('name\n'), repr(out))
+    check('nothing comes back as None, which no caller checks for',
+          isinstance(detect._run(['definitely-not-a-command-here']), str))
+
+
 def scripted_answers():
     """One answer string has to work whether the extra question appears or not.
 
@@ -251,7 +267,7 @@ def tables_match_sources():
 
 if __name__ == '__main__':
     for section in (graphics, graphics_advice, audio_advice, storage, peripherals,
-                    trackpad, framebuffer, boot_args, other_machine, scripted_answers,
+                    trackpad, framebuffer, boot_args, other_machine, undecodable_output, scripted_answers,
                     tables_match_sources):
         print(f'\n{section.__name__}')
         section()

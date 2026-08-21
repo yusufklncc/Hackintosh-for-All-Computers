@@ -235,6 +235,7 @@ def main():
                 setattr(a, opt, str((started_in / getattr(a, opt)).resolve()))
 
     if a.report:
+        a.report = str(Path(a.report).expanduser().resolve())
         written = detect.write_report(a.report)
         print(f'{BOLD}Hardware report{RESET}')
         print(f'  wrote {a.report}')
@@ -279,10 +280,16 @@ def main():
                                  'to build for it elsewhere')],
                      detected='this' if local.get('cpu') else None)
         if choice == 'report':
-            out = prompt('Where should the report go?',
-                         'a path, or enter for machine.json') or 'machine.json'
-            if started_in:
-                out = str((started_in / out).resolve())
+            # named in full before it is written, not after: "enter for
+            # machine.json" does not say which directory that lands in, and for
+            # the frozen build that is wherever the executable was started
+            # started_in is where the person actually is; when frozen the working
+            # directory has already moved into the unpacked bundle
+            base = started_in or Path.cwd()
+            default = base / 'machine.json'
+            typed = prompt('Where should the report go?',
+                           f'a path, or enter for {default}')
+            out = str((base / Path(typed).expanduser()).resolve()) if typed else str(default)
             written = detect.write_report(out)
             print(f'\n  wrote {out}')
             print(f'  {detect.describe(written)}')
