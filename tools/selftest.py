@@ -126,11 +126,20 @@ def peripherals():
     found = detect.peripherals(
         'Camera|USB\\VID_04F2&PID_B67C&MI_00\\6&a|Integrated Camera\n'
         'Image|PCI\\VEN_8086&DEV_9D32\\3&b|Intel Imaging Signal Processor\n'
-        'SDHost|PCI\\VEN_10EC&DEV_5229\\4&c|Realtek PCIE CardReader')
+        'SDHost|PCI\\VEN_10EC&DEV_5229\\4&c|Realtek PCIE CardReader\n'
+        'Keyboard|ACPI\\PNP0303\\4&d|Standart PS/2 Klavye\n'
+        'Mouse|ACPI\\ALP0021\\4&e|Alps Pointing-device')
     kinds = [(d['kind'], d['usb']) for d in found]
     check('a usb camera is told apart from an on-board sensor',
           ('camera', True) in kinds and ('camera', False) in kinds, kinds)
     check('a card reader is recognised as one', ('card reader', False) in kinds, kinds)
+    by_name = {d['name']: d for d in found}
+    check('a keyboard is not called a card reader',
+          by_name['Standart PS/2 Klavye']['kind'] == 'keyboard', by_name)
+    check('nor is a trackpad',
+          by_name['Alps Pointing-device']['kind'] == 'pointing device', by_name)
+    check('the hardware id is kept and the instance path is not',
+          by_name['Alps Pointing-device']['id'] == 'ACPI\\ALP0021', by_name)
 
 
 def trackpad():

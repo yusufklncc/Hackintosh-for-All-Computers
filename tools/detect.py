@@ -288,24 +288,46 @@ def split_graphics(entries):
     return real, virtual
 
 
-def peripherals(text):
-    """Cameras and card readers, with the bus each is on.
+# The classes the peripherals query asks for, and what each one is. Everything
+# that was not a camera used to fall through to "card reader", so a PS/2
+# keyboard, a remote desktop mouse and an Alps trackpad were all reported as
+# card readers - on screen as well as in the report.
+PNP_CLASS_KIND = {
+    'camera': 'camera', 'image': 'camera',
+    'sdhost': 'card reader', 'mtd': 'card reader',
+    'mouse': 'pointing device', 'keyboard': 'keyboard',
+}
 
-    The bus is the only part worth reporting: a USB camera is handled by the
-    class driver macOS already has, while one that is not on USB is an IPU or
-    MIPI sensor with no macOS driver at all. Which specific reader or sensor
-    works is not something this repository has data for, so it is not claimed."""
+
+def hardware_id(ident):
+    """The enumerator and hardware id of a device path, without the instance.
+
+    `ACPI\\PNP0303\\4&1e2f3a4b&0` becomes `ACPI\\PNP0303`. The tail is the
+    instance path, which says nothing about what the device is and can carry a
+    serial number, so it has no business in a file meant to be sent to someone."""
+    parts = (ident or '').split('\\')
+    return '\\'.join(parts[:2]) if len(parts) > 1 else (ident or '')
+
+
+def peripherals(text):
+    """Cameras, card readers and input devices, with the bus each is on.
+
+    The bus matters for a camera: a USB one is handled by the class driver macOS
+    already has, while one that is not on USB is an IPU or MIPI sensor with no
+    macOS driver at all. Which specific reader or sensor works is not something
+    this repository has data for, so it is not claimed."""
     out = []
     for line in (text or '').splitlines():
         parts = line.split('|')
         if len(parts) < 2:
             continue
-        kind, ident = parts[0].strip(), parts[1]
+        pnp_class, ident = parts[0].strip(), parts[1]
         name = parts[2].strip() if len(parts) > 2 else ident
         if not name:
             continue
-        out.append({'kind': 'camera' if kind.lower() in ('camera', 'image') else 'card reader',
-                    'name': name, 'usb': ident.upper().startswith('USB')})
+        out.append({'kind': PNP_CLASS_KIND.get(pnp_class.lower(), 'other'),
+                    'name': name, 'id': hardware_id(ident),
+                    'usb': ident.upper().startswith('USB')})
     return out
 
 
