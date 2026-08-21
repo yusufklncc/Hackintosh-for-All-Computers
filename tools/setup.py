@@ -425,10 +425,16 @@ def main():
             notes.append(isteps)
 
     input_lines, input_kexts = inputdev.entries(hw.get('pci_ids'), hw.get('ps2'))
-    if input_lines:
-        print(f'\n{BOLD}Trackpad{RESET}')
-        print('\n'.join(input_lines))
-        notes.append(inputdev.notes(hw.get('pci_ids')))
+    pointing = [d for d in hw.get('peripherals', [])
+                if d['kind'] in ('pointing device', 'keyboard')]
+    if input_lines or pointing:
+        print(f'\n{BOLD}Trackpad and keyboard{RESET}')
+        for dev in pointing:
+            print(f'  {dev["name"]}  {DIM}({dev["kind"]}'
+                  + (f', {dev["id"]}' if dev.get('id') else '') + f'){RESET}')
+        if input_lines:
+            print('\n'.join(input_lines))
+            notes.append(inputdev.notes(hw.get('pci_ids')))
 
     storage_kexts, storage_drives = netkexts.storage_entries(hw.get('nvme'))
     if hw.get('nvme'):
@@ -441,15 +447,19 @@ def main():
         else:
             print(f'      {DIM}Apple NVMe, which is the case NVMeFix is not for{RESET}')
 
-    if hw.get('peripherals'):
+    # the same query answers two questions, so it is split by what each device
+    # is rather than printed under one heading that fits only half of them
+    media = [d for d in hw.get('peripherals', [])
+             if d['kind'] in ('camera', 'card reader')]
+    if media:
         print(f'\n{BOLD}Camera and card reader{RESET}')
-        for dev in hw['peripherals']:
+        for dev in media:
             where = 'on USB' if dev['usb'] else 'not on USB'
             print(f'  {dev["name"]}  {DIM}({dev["kind"]}, {where}){RESET}')
-        if any(d['kind'] == 'camera' and d['usb'] for d in hw['peripherals']):
+        if any(d['kind'] == 'camera' and d['usb'] for d in media):
             print(f'      {DIM}a USB camera is handled by the class driver macOS already '
                   f'has, so it usually needs nothing{RESET}')
-        if any(d['kind'] == 'camera' and not d['usb'] for d in hw['peripherals']):
+        if any(d['kind'] == 'camera' and not d['usb'] for d in media):
             print(f'      {YELLOW}a camera that is not on USB is an IPU or MIPI sensor, '
                   f'which macOS has no driver for{RESET}')
         print(f'      {DIM}beyond that this repository has no support data for these, '
