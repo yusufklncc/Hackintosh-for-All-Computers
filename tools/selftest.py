@@ -182,8 +182,10 @@ def framebuffer():
     check('it is written byte-swapped, as DeviceProperties wants',
           props[igpu.IGPU_PATH]['AAPL,ig-platform-id'] == 'hex:04006601', props)
     listed = [l for l in steps.splitlines() if l.strip().startswith('0x')]
-    check('every candidate reaches the notes', len(listed) == len(ids),
-          f'{len(listed)} listed, {len(ids)} candidates')
+    # every candidate plus the no-acceleration id, which is offered but is not a
+    # candidate: nothing lists it as a framebuffer because nothing claims it
+    check('every candidate reaches the notes, and the fallback with them',
+          len(listed) == len(ids) + 1, f'{len(listed)} listed, {len(ids)} candidates')
     check('headless is never the one to start with',
           igpu.candidates('kaby-lake', False)[0]['value'] == '0x59160000')
     check('an unsupported generation is offered nothing',
@@ -230,8 +232,14 @@ def other_machine():
             check('what was named is added', 'IntelMausi.kext' in have
                   and 'IntelBluetoothFirmware.kext' in have, sorted(have))
             check('what was declined is not', 'AirportItlwm.kext' not in have)
-            check('nothing is claimed about graphics it cannot see',
-                  not (out.parent / 'NEXT-STEPS.txt').exists())
+            written = (out.parent / 'NEXT-STEPS.txt')
+            # the USB follow-up applies to every machine, so the file exists;
+            # what must not be there is advice about hardware nobody described
+            check('the follow-up is written even with nothing detected',
+                  written.exists())
+            body = written.read_text() if written.exists() else ''
+            check('and it claims nothing about graphics it cannot see',
+                  'Intel graphics' not in body and 'framebuffer id' not in body)
 
 
 def undecodable_output():
@@ -469,6 +477,62 @@ def broadcom_wifi():
           netkexts.entries(matched, 13)[0] == [])
 
 
+def framebuffers():
+    """Two sources, and they have to agree where they overlap."""
+    import igpu
+    import setup as guided
+    fb = ocgen.read_toml('data/framebuffer.toml')['framebuffer']
+    check('the whole list is parsed, not one table', len(fb) > 100, len(fb))
+    check('every entry carries what tells it apart',
+          all(e['type'] in ('mobile', 'desktop') and 'stolen' in e for e in fb))
+    check('the byte-swapped form is right',
+          [e['data'] for e in fb if e['value'] == '0x591B0000'] == ['00001b59'],
+          [e['data'] for e in fb if e['value'] == '0x591B0000'])
+    known = {e['value'].lower() for e in fb}
+    guide = [c['value'].lower() for g in ocgen.read_toml('data/gpu.toml')['igpu']
+             for key in ('laptop_platform_id', 'desktop_platform_id')
+             for c in g.get(key, [])]
+    check('every id the guide names is in the manual too, so neither has drifted',
+          all(v in known for v in guide), [v for v in guide if v not in known])
+
+    cands = igpu.candidates('kaby-lake', True)
+    check('a laptop generation now has more than the one the guide names',
+          len(cands) > 1, len(cands))
+    check("the guide's pick is still first", cands[0]['value'] == '0x591b0000', cands[0])
+    check('headless is last however it was spelled',
+          all('headless' not in c['label'].lower()
+              for c in cands[:len([c for c in cands
+                                   if 'headless' not in c['label'].lower()])]))
+    check('a desktop generation gets desktop framebuffers',
+          all(e['type'] == 'desktop' for e in igpu.documented('kaby-lake', False)))
+
+    check('leaving the key out asks for it to be removed, not merely unset',
+          igpu.props_for(None)[igpu.IGPU_PATH]['AAPL,ig-platform-id'] is None)
+    check('the no-acceleration id says whose testing it rests on',
+          'maintainer' in igpu.NO_ACCELERATION['note'])
+    check('and it is offered as a choice, not written by default',
+          igpu.report('kaby-lake', True, True)[1][igpu.IGPU_PATH]['AAPL,ig-platform-id']
+          != 'hex:' + igpu.NO_ACCELERATION['data'])
+
+    # the fast path must never be reachable on a guess
+    check('a machine with no generation gets no fast path',
+          guided.profile_from({'laptop': True}) is None)
+    check('nor one where the form factor is unknown',
+          guided.profile_from({'generation': 'kaby-lake'}) is None)
+    check('nor an AMD laptop, which has no profile',
+          guided.profile_from({'laptop': True,
+                               'generation': 'ryzen-threadripper'}) is None)
+    check('nor an AMD desktop with an unusable core count',
+          guided.profile_from({'laptop': False, 'cores': 3,
+                               'generation': 'ryzen-threadripper'}) is None)
+    ok = guided.profile_from({'laptop': True, 'generation': 'kaby-lake', 'oem': 'hp'})
+    check('a machine with all of it does', ok == ('laptop', None, 'kaby-lake', None, 'hp'), ok)
+    unknown_oem = guided.profile_from({'laptop': True, 'generation': 'kaby-lake',
+                                       'oem': 'toshiba'})
+    check('and a brand with no overlay falls back rather than failing',
+          unknown_oem and unknown_oem[4] is None, unknown_oem)
+
+
 def provenance():
     """The report has to be readable off the files, not off a memory of them."""
     import provenance as prov
@@ -515,7 +579,7 @@ if __name__ == '__main__':
     for section in (graphics, graphics_advice, audio_advice, storage, peripherals,
                     trackpad, framebuffer, boot_args, other_machine, undecodable_output, scripted_answers,
                     hardware_summary, device_names, broadcom_wifi,
-                    detection_gaps, provenance,
+                    detection_gaps, provenance, framebuffers,
                     tables_match_sources):
         print(f'\n{section.__name__}')
         section()

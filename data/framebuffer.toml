@@ -1,0 +1,1252 @@
+# Intel framebuffer platform ids, from WhateverGreen.
+#
+# Parsed by tools/fbtable.py from the project's own tables in
+# Manual/FAQ.IntelHD.en.md, at the tag matching the vendored kext.
+# Dortania names one or two per generation; this is the whole
+# set, with what tells them apart: mobile or desktop, how many
+# connectors, and how much memory the framebuffer takes.
+#
+# connectors = 0 is a headless framebuffer - no display output -
+# so it is never the one to start with.
+# Source: https://github.com/acidanthera/WhateverGreen/blob/master/Manual/FAQ.IntelHD.en.md
+[[framebuffer]]
+codename = "Capri"
+profiles = ["ivy-bridge"]
+value = "0x01660000"
+data = "00006601"
+type = "desktop"
+connectors = 4
+stolen = "24 MB"
+
+[[framebuffer]]
+codename = "Capri"
+profiles = ["ivy-bridge"]
+value = "0x01620006"
+data = "06006201"
+type = "desktop"
+connectors = 0
+stolen = "0 bytes"
+
+[[framebuffer]]
+codename = "Capri"
+profiles = ["ivy-bridge"]
+value = "0x01620007"
+data = "07006201"
+type = "desktop"
+connectors = 0
+stolen = "0 bytes"
+
+[[framebuffer]]
+codename = "Capri"
+profiles = ["ivy-bridge"]
+value = "0x01620005"
+data = "05006201"
+type = "desktop"
+connectors = 3
+stolen = "16 MB"
+
+[[framebuffer]]
+codename = "Capri"
+profiles = ["ivy-bridge"]
+value = "0x01660001"
+data = "01006601"
+type = "mobile"
+connectors = 4
+stolen = "24 MB"
+
+[[framebuffer]]
+codename = "Capri"
+profiles = ["ivy-bridge"]
+value = "0x01660002"
+data = "02006601"
+type = "mobile"
+connectors = 1
+stolen = "24 MB"
+
+[[framebuffer]]
+codename = "Capri"
+profiles = ["ivy-bridge"]
+value = "0x01660008"
+data = "08006601"
+type = "mobile"
+connectors = 3
+stolen = "16 MB"
+
+[[framebuffer]]
+codename = "Capri"
+profiles = ["ivy-bridge"]
+value = "0x01660009"
+data = "09006601"
+type = "mobile"
+connectors = 3
+stolen = "16 MB"
+
+[[framebuffer]]
+codename = "Capri"
+profiles = ["ivy-bridge"]
+value = "0x01660003"
+data = "03006601"
+type = "mobile"
+connectors = 4
+stolen = "16 MB"
+
+[[framebuffer]]
+codename = "Capri"
+profiles = ["ivy-bridge"]
+value = "0x01660004"
+data = "04006601"
+type = "mobile"
+connectors = 1
+stolen = "16 MB"
+
+[[framebuffer]]
+codename = "Capri"
+profiles = ["ivy-bridge"]
+value = "0x0166000A"
+data = "0a006601"
+type = "desktop"
+connectors = 3
+stolen = "16 MB"
+
+[[framebuffer]]
+codename = "Capri"
+profiles = ["ivy-bridge"]
+value = "0x0166000B"
+data = "0b006601"
+type = "desktop"
+connectors = 3
+stolen = "16 MB"
+
+[[framebuffer]]
+codename = "Azul"
+profiles = ["haswell"]
+value = "0x0C060000"
+data = "0000060c"
+type = "desktop"
+connectors = 3
+stolen = "209 MB"
+
+[[framebuffer]]
+codename = "Azul"
+profiles = ["haswell"]
+value = "0x0C160000"
+data = "0000160c"
+type = "desktop"
+connectors = 3
+stolen = "209 MB"
+
+[[framebuffer]]
+codename = "Azul"
+profiles = ["haswell"]
+value = "0x0C260000"
+data = "0000260c"
+type = "desktop"
+connectors = 3
+stolen = "209 MB"
+
+[[framebuffer]]
+codename = "Azul"
+profiles = ["haswell"]
+value = "0x04060000"
+data = "00000604"
+type = "desktop"
+connectors = 3
+stolen = "209 MB"
+
+[[framebuffer]]
+codename = "Azul"
+profiles = ["haswell"]
+value = "0x04160000"
+data = "00001604"
+type = "desktop"
+connectors = 3
+stolen = "209 MB"
+
+[[framebuffer]]
+codename = "Azul"
+profiles = ["haswell"]
+value = "0x04260000"
+data = "00002604"
+type = "desktop"
+connectors = 3
+stolen = "209 MB"
+
+[[framebuffer]]
+codename = "Azul"
+profiles = ["haswell"]
+value = "0x0D260000"
+data = "0000260d"
+type = "desktop"
+connectors = 3
+stolen = "209 MB"
+
+[[framebuffer]]
+codename = "Azul"
+profiles = ["haswell"]
+value = "0x0A160000"
+data = "0000160a"
+type = "desktop"
+connectors = 3
+stolen = "209 MB"
+
+[[framebuffer]]
+codename = "Azul"
+profiles = ["haswell"]
+value = "0x0A260000"
+data = "0000260a"
+type = "desktop"
+connectors = 3
+stolen = "209 MB"
+
+[[framebuffer]]
+codename = "Azul"
+profiles = ["haswell"]
+value = "0x0A260005"
+data = "0500260a"
+type = "mobile"
+connectors = 3
+stolen = "52 MB"
+
+[[framebuffer]]
+codename = "Azul"
+profiles = ["haswell"]
+value = "0x0A260006"
+data = "0600260a"
+type = "mobile"
+connectors = 3
+stolen = "52 MB"
+
+[[framebuffer]]
+codename = "Azul"
+profiles = ["haswell"]
+value = "0x0A2E0008"
+data = "08002e0a"
+type = "mobile"
+connectors = 3
+stolen = "99 MB"
+
+[[framebuffer]]
+codename = "Azul"
+profiles = ["haswell"]
+value = "0x0A16000C"
+data = "0c00160a"
+type = "mobile"
+connectors = 3
+stolen = "99 MB"
+
+[[framebuffer]]
+codename = "Azul"
+profiles = ["haswell"]
+value = "0x0D260007"
+data = "0700260d"
+type = "mobile"
+connectors = 4
+stolen = "99 MB"
+
+[[framebuffer]]
+codename = "Azul"
+profiles = ["haswell"]
+value = "0x0D220003"
+data = "0300220d"
+type = "desktop"
+connectors = 3
+stolen = "52 MB"
+
+[[framebuffer]]
+codename = "Azul"
+profiles = ["haswell"]
+value = "0x0A2E000A"
+data = "0a002e0a"
+type = "desktop"
+connectors = 3
+stolen = "52 MB"
+
+[[framebuffer]]
+codename = "Azul"
+profiles = ["haswell"]
+value = "0x0A26000A"
+data = "0a00260a"
+type = "desktop"
+connectors = 3
+stolen = "52 MB"
+
+[[framebuffer]]
+codename = "Azul"
+profiles = ["haswell"]
+value = "0x0A2E000D"
+data = "0d002e0a"
+type = "desktop"
+connectors = 2
+stolen = "131 MB"
+
+[[framebuffer]]
+codename = "Azul"
+profiles = ["haswell"]
+value = "0x0A26000D"
+data = "0d00260a"
+type = "desktop"
+connectors = 2
+stolen = "131 MB"
+
+[[framebuffer]]
+codename = "Azul"
+profiles = ["haswell"]
+value = "0x04120004"
+data = "04001204"
+type = "desktop"
+connectors = 0
+stolen = "1 MB"
+
+[[framebuffer]]
+codename = "Azul"
+profiles = ["haswell"]
+value = "0x0412000B"
+data = "0b001204"
+type = "desktop"
+connectors = 0
+stolen = "1 MB"
+
+[[framebuffer]]
+codename = "Azul"
+profiles = ["haswell"]
+value = "0x0D260009"
+data = "0900260d"
+type = "mobile"
+connectors = 1
+stolen = "99 MB"
+
+[[framebuffer]]
+codename = "Azul"
+profiles = ["haswell"]
+value = "0x0D26000E"
+data = "0e00260d"
+type = "mobile"
+connectors = 4
+stolen = "131 MB"
+
+[[framebuffer]]
+codename = "Azul"
+profiles = ["haswell"]
+value = "0x0D26000F"
+data = "0f00260d"
+type = "mobile"
+connectors = 1
+stolen = "131 MB"
+
+[[framebuffer]]
+codename = "BDW"
+profiles = ["broadwell"]
+value = "0x16060000"
+data = "00000616"
+type = "desktop"
+connectors = 3
+stolen = "32 MB"
+
+[[framebuffer]]
+codename = "BDW"
+profiles = ["broadwell"]
+value = "0x160E0000"
+data = "00000e16"
+type = "desktop"
+connectors = 3
+stolen = "32 MB"
+
+[[framebuffer]]
+codename = "BDW"
+profiles = ["broadwell"]
+value = "0x16160000"
+data = "00001616"
+type = "desktop"
+connectors = 3
+stolen = "32 MB"
+
+[[framebuffer]]
+codename = "BDW"
+profiles = ["broadwell"]
+value = "0x161E0000"
+data = "00001e16"
+type = "desktop"
+connectors = 3
+stolen = "32 MB"
+
+[[framebuffer]]
+codename = "BDW"
+profiles = ["broadwell"]
+value = "0x16260000"
+data = "00002616"
+type = "desktop"
+connectors = 3
+stolen = "32 MB"
+
+[[framebuffer]]
+codename = "BDW"
+profiles = ["broadwell"]
+value = "0x162B0000"
+data = "00002b16"
+type = "desktop"
+connectors = 3
+stolen = "32 MB"
+
+[[framebuffer]]
+codename = "BDW"
+profiles = ["broadwell"]
+value = "0x16220000"
+data = "00002216"
+type = "desktop"
+connectors = 3
+stolen = "32 MB"
+
+[[framebuffer]]
+codename = "BDW"
+profiles = ["broadwell"]
+value = "0x160E0001"
+data = "01000e16"
+type = "mobile"
+connectors = 3
+stolen = "60 MB"
+
+[[framebuffer]]
+codename = "BDW"
+profiles = ["broadwell"]
+value = "0x161E0001"
+data = "01001e16"
+type = "mobile"
+connectors = 3
+stolen = "60 MB"
+
+[[framebuffer]]
+codename = "BDW"
+profiles = ["broadwell"]
+value = "0x16060002"
+data = "02000616"
+type = "mobile"
+connectors = 3
+stolen = "56 MB"
+
+[[framebuffer]]
+codename = "BDW"
+profiles = ["broadwell"]
+value = "0x16160002"
+data = "02001616"
+type = "mobile"
+connectors = 3
+stolen = "56 MB"
+
+[[framebuffer]]
+codename = "BDW"
+profiles = ["broadwell"]
+value = "0x16260002"
+data = "02002616"
+type = "mobile"
+connectors = 3
+stolen = "56 MB"
+
+[[framebuffer]]
+codename = "BDW"
+profiles = ["broadwell"]
+value = "0x16220002"
+data = "02002216"
+type = "mobile"
+connectors = 3
+stolen = "56 MB"
+
+[[framebuffer]]
+codename = "BDW"
+profiles = ["broadwell"]
+value = "0x162B0002"
+data = "02002b16"
+type = "mobile"
+connectors = 3
+stolen = "56 MB"
+
+[[framebuffer]]
+codename = "BDW"
+profiles = ["broadwell"]
+value = "0x16120003"
+data = "03001216"
+type = "mobile"
+connectors = 4
+stolen = "56 MB"
+
+[[framebuffer]]
+codename = "BDW"
+profiles = ["broadwell"]
+value = "0x162B0004"
+data = "04002b16"
+type = "desktop"
+connectors = 3
+stolen = "56 MB"
+
+[[framebuffer]]
+codename = "BDW"
+profiles = ["broadwell"]
+value = "0x16260004"
+data = "04002616"
+type = "desktop"
+connectors = 3
+stolen = "56 MB"
+
+[[framebuffer]]
+codename = "BDW"
+profiles = ["broadwell"]
+value = "0x16220007"
+data = "07002216"
+type = "desktop"
+connectors = 3
+stolen = "77 MB"
+
+[[framebuffer]]
+codename = "BDW"
+profiles = ["broadwell"]
+value = "0x16260005"
+data = "05002616"
+type = "mobile"
+connectors = 3
+stolen = "56 MB"
+
+[[framebuffer]]
+codename = "BDW"
+profiles = ["broadwell"]
+value = "0x16260006"
+data = "06002616"
+type = "mobile"
+connectors = 3
+stolen = "56 MB"
+
+[[framebuffer]]
+codename = "BDW"
+profiles = ["broadwell"]
+value = "0x162B0008"
+data = "08002b16"
+type = "desktop"
+connectors = 2
+stolen = "69 MB"
+
+[[framebuffer]]
+codename = "BDW"
+profiles = ["broadwell"]
+value = "0x16260008"
+data = "08002616"
+type = "desktop"
+connectors = 2
+stolen = "69 MB"
+
+[[framebuffer]]
+codename = "SKL"
+profiles = ["sky-lake"]
+value = "0x191E0000"
+data = "00001e19"
+type = "mobile"
+connectors = 3
+stolen = "56 MB"
+
+[[framebuffer]]
+codename = "SKL"
+profiles = ["sky-lake"]
+value = "0x19160000"
+data = "00001619"
+type = "mobile"
+connectors = 3
+stolen = "56 MB"
+
+[[framebuffer]]
+codename = "SKL"
+profiles = ["sky-lake"]
+value = "0x19260000"
+data = "00002619"
+type = "mobile"
+connectors = 3
+stolen = "56 MB"
+
+[[framebuffer]]
+codename = "SKL"
+profiles = ["sky-lake"]
+value = "0x19270000"
+data = "00002719"
+type = "mobile"
+connectors = 3
+stolen = "56 MB"
+
+[[framebuffer]]
+codename = "SKL"
+profiles = ["sky-lake"]
+value = "0x191B0000"
+data = "00001b19"
+type = "mobile"
+connectors = 3
+stolen = "56 MB"
+
+[[framebuffer]]
+codename = "SKL"
+profiles = ["sky-lake"]
+value = "0x193B0000"
+data = "00003b19"
+type = "mobile"
+connectors = 3
+stolen = "56 MB"
+
+[[framebuffer]]
+codename = "SKL"
+profiles = ["sky-lake"]
+value = "0x19120000"
+data = "00001219"
+type = "mobile"
+connectors = 3
+stolen = "56 MB"
+
+[[framebuffer]]
+codename = "SKL"
+profiles = ["sky-lake"]
+value = "0x19020001"
+data = "01000219"
+type = "desktop"
+connectors = 0
+stolen = "1 MB"
+
+[[framebuffer]]
+codename = "SKL"
+profiles = ["sky-lake"]
+value = "0x19170001"
+data = "01001719"
+type = "desktop"
+connectors = 0
+stolen = "1 MB"
+
+[[framebuffer]]
+codename = "SKL"
+profiles = ["sky-lake"]
+value = "0x19120001"
+data = "01001219"
+type = "desktop"
+connectors = 0
+stolen = "1 MB"
+
+[[framebuffer]]
+codename = "SKL"
+profiles = ["sky-lake"]
+value = "0x19320001"
+data = "01003219"
+type = "desktop"
+connectors = 0
+stolen = "1 MB"
+
+[[framebuffer]]
+codename = "SKL"
+profiles = ["sky-lake"]
+value = "0x19160002"
+data = "02001619"
+type = "mobile"
+connectors = 3
+stolen = "58 MB"
+
+[[framebuffer]]
+codename = "SKL"
+profiles = ["sky-lake"]
+value = "0x19260002"
+data = "02002619"
+type = "mobile"
+connectors = 3
+stolen = "58 MB"
+
+[[framebuffer]]
+codename = "SKL"
+profiles = ["sky-lake"]
+value = "0x191E0003"
+data = "03001e19"
+type = "mobile"
+connectors = 3
+stolen = "41 MB"
+
+[[framebuffer]]
+codename = "SKL"
+profiles = ["sky-lake"]
+value = "0x19260004"
+data = "04002619"
+type = "mobile"
+connectors = 3
+stolen = "35 MB"
+
+[[framebuffer]]
+codename = "SKL"
+profiles = ["sky-lake"]
+value = "0x19270004"
+data = "04002719"
+type = "mobile"
+connectors = 3
+stolen = "58 MB"
+
+[[framebuffer]]
+codename = "SKL"
+profiles = ["sky-lake"]
+value = "0x193B0005"
+data = "05003b19"
+type = "mobile"
+connectors = 4
+stolen = "35 MB"
+
+[[framebuffer]]
+codename = "SKL"
+profiles = ["sky-lake"]
+value = "0x191B0006"
+data = "06001b19"
+type = "mobile"
+connectors = 1
+stolen = "39 MB"
+
+[[framebuffer]]
+codename = "SKL"
+profiles = ["sky-lake"]
+value = "0x19260007"
+data = "07002619"
+type = "mobile"
+connectors = 3
+stolen = "35 MB"
+
+[[framebuffer]]
+codename = "KBL/ABL"
+profiles = ["kaby-lake"]
+value = "0x591E0000"
+data = "00001e59"
+type = "mobile"
+connectors = 3
+stolen = "35 MB"
+
+[[framebuffer]]
+codename = "KBL/ABL"
+profiles = ["kaby-lake"]
+value = "0x87C00000"
+data = "0000c087"
+type = "mobile"
+connectors = 3
+stolen = "35 MB"
+
+[[framebuffer]]
+codename = "KBL/ABL"
+profiles = ["kaby-lake"]
+value = "0x59160000"
+data = "00001659"
+type = "mobile"
+connectors = 3
+stolen = "35 MB"
+
+[[framebuffer]]
+codename = "KBL/ABL"
+profiles = ["kaby-lake"]
+value = "0x59230000"
+data = "00002359"
+type = "desktop"
+connectors = 3
+stolen = "39 MB"
+
+[[framebuffer]]
+codename = "KBL/ABL"
+profiles = ["kaby-lake"]
+value = "0x59260000"
+data = "00002659"
+type = "desktop"
+connectors = 3
+stolen = "39 MB"
+
+[[framebuffer]]
+codename = "KBL/ABL"
+profiles = ["kaby-lake"]
+value = "0x59270000"
+data = "00002759"
+type = "desktop"
+connectors = 3
+stolen = "39 MB"
+
+[[framebuffer]]
+codename = "KBL/ABL"
+profiles = ["kaby-lake"]
+value = "0x59270009"
+data = "09002759"
+type = "mobile"
+connectors = 3
+stolen = "39 MB"
+
+[[framebuffer]]
+codename = "KBL/ABL"
+profiles = ["kaby-lake"]
+value = "0x59160009"
+data = "09001659"
+type = "mobile"
+connectors = 3
+stolen = "39 MB"
+
+[[framebuffer]]
+codename = "KBL/ABL"
+profiles = ["kaby-lake"]
+value = "0x59120000"
+data = "00001259"
+type = "desktop"
+connectors = 3
+stolen = "39 MB"
+
+[[framebuffer]]
+codename = "KBL/ABL"
+profiles = ["kaby-lake"]
+value = "0x591B0000"
+data = "00001b59"
+type = "mobile"
+connectors = 3
+stolen = "39 MB"
+
+[[framebuffer]]
+codename = "KBL/ABL"
+profiles = ["kaby-lake"]
+value = "0x591E0001"
+data = "01001e59"
+type = "mobile"
+connectors = 3
+stolen = "39 MB"
+
+[[framebuffer]]
+codename = "KBL/ABL"
+profiles = ["kaby-lake"]
+value = "0x59180002"
+data = "02001859"
+type = "mobile"
+connectors = 0
+stolen = "1 MB"
+
+[[framebuffer]]
+codename = "KBL/ABL"
+profiles = ["kaby-lake"]
+value = "0x59120003"
+data = "03001259"
+type = "mobile"
+connectors = 0
+stolen = "1 MB"
+
+[[framebuffer]]
+codename = "KBL/ABL"
+profiles = ["kaby-lake"]
+value = "0x59260007"
+data = "07002659"
+type = "desktop"
+connectors = 3
+stolen = "79 MB"
+
+[[framebuffer]]
+codename = "KBL/ABL"
+profiles = ["kaby-lake"]
+value = "0x59270004"
+data = "04002759"
+type = "mobile"
+connectors = 3
+stolen = "58 MB"
+
+[[framebuffer]]
+codename = "KBL/ABL"
+profiles = ["kaby-lake"]
+value = "0x59260002"
+data = "02002659"
+type = "mobile"
+connectors = 3
+stolen = "58 MB"
+
+[[framebuffer]]
+codename = "KBL/ABL"
+profiles = ["kaby-lake"]
+value = "0x87C00005"
+data = "0500c087"
+type = "mobile"
+connectors = 3
+stolen = "58 MB"
+
+[[framebuffer]]
+codename = "KBL/ABL"
+profiles = ["kaby-lake"]
+value = "0x591C0005"
+data = "05001c59"
+type = "mobile"
+connectors = 3
+stolen = "58 MB"
+
+[[framebuffer]]
+codename = "KBL/ABL"
+profiles = ["kaby-lake"]
+value = "0x591B0006"
+data = "06001b59"
+type = "mobile"
+connectors = 1
+stolen = "39 MB"
+
+[[framebuffer]]
+codename = "CFL/CML"
+profiles = ["coffe-lake", "coffe-lake-plus", "coffee-lake-whiskey-lake", "comet-lake"]
+value = "0x3EA50009"
+data = "0900a53e"
+type = "mobile"
+connectors = 3
+stolen = "58 MB"
+
+[[framebuffer]]
+codename = "CFL/CML"
+profiles = ["coffe-lake", "coffe-lake-plus", "coffee-lake-whiskey-lake", "comet-lake"]
+value = "0x3E920009"
+data = "0900923e"
+type = "mobile"
+connectors = 3
+stolen = "58 MB"
+
+[[framebuffer]]
+codename = "CFL/CML"
+profiles = ["coffe-lake", "coffe-lake-plus", "coffee-lake-whiskey-lake", "comet-lake"]
+value = "0x3E9B0009"
+data = "09009b3e"
+type = "mobile"
+connectors = 3
+stolen = "58 MB"
+
+[[framebuffer]]
+codename = "CFL/CML"
+profiles = ["coffe-lake", "coffe-lake-plus", "coffee-lake-whiskey-lake", "comet-lake"]
+value = "0x3EA50000"
+data = "0000a53e"
+type = "mobile"
+connectors = 3
+stolen = "58 MB"
+
+[[framebuffer]]
+codename = "CFL/CML"
+profiles = ["coffe-lake", "coffe-lake-plus", "coffee-lake-whiskey-lake", "comet-lake"]
+value = "0x3E920000"
+data = "0000923e"
+type = "mobile"
+connectors = 3
+stolen = "58 MB"
+
+[[framebuffer]]
+codename = "CFL/CML"
+profiles = ["coffe-lake", "coffe-lake-plus", "coffee-lake-whiskey-lake", "comet-lake"]
+value = "0x3E000000"
+data = "0000003e"
+type = "mobile"
+connectors = 3
+stolen = "58 MB"
+
+[[framebuffer]]
+codename = "CFL/CML"
+profiles = ["coffe-lake", "coffe-lake-plus", "coffee-lake-whiskey-lake", "comet-lake"]
+value = "0x3E9B0000"
+data = "00009b3e"
+type = "mobile"
+connectors = 3
+stolen = "58 MB"
+
+[[framebuffer]]
+codename = "CFL/CML"
+profiles = ["coffe-lake", "coffe-lake-plus", "coffee-lake-whiskey-lake", "comet-lake"]
+value = "0x3EA50004"
+data = "0400a53e"
+type = "mobile"
+connectors = 3
+stolen = "58 MB"
+
+[[framebuffer]]
+codename = "CFL/CML"
+profiles = ["coffe-lake", "coffe-lake-plus", "coffee-lake-whiskey-lake", "comet-lake"]
+value = "0x3EA50005"
+data = "0500a53e"
+type = "mobile"
+connectors = 3
+stolen = "58 MB"
+
+[[framebuffer]]
+codename = "CFL/CML"
+profiles = ["coffe-lake", "coffe-lake-plus", "coffee-lake-whiskey-lake", "comet-lake"]
+value = "0x3EA60005"
+data = "0500a63e"
+type = "mobile"
+connectors = 3
+stolen = "58 MB"
+
+[[framebuffer]]
+codename = "CFL/CML"
+profiles = ["coffe-lake", "coffe-lake-plus", "coffee-lake-whiskey-lake", "comet-lake"]
+value = "0x3E9B0006"
+data = "06009b3e"
+type = "mobile"
+connectors = 1
+stolen = "39 MB"
+
+[[framebuffer]]
+codename = "CFL/CML"
+profiles = ["coffe-lake", "coffe-lake-plus", "coffee-lake-whiskey-lake", "comet-lake"]
+value = "0x3E9B0008"
+data = "08009b3e"
+type = "mobile"
+connectors = 1
+stolen = "58 MB"
+
+[[framebuffer]]
+codename = "CFL/CML"
+profiles = ["coffe-lake", "coffe-lake-plus", "coffee-lake-whiskey-lake", "comet-lake"]
+value = "0x3E9B0007"
+data = "07009b3e"
+type = "desktop"
+connectors = 3
+stolen = "58 MB"
+
+[[framebuffer]]
+codename = "CFL/CML"
+profiles = ["coffe-lake", "coffe-lake-plus", "coffee-lake-whiskey-lake", "comet-lake"]
+value = "0x3E920003"
+data = "0300923e"
+type = "desktop"
+connectors = 0
+stolen = "1 MB"
+
+[[framebuffer]]
+codename = "CFL/CML"
+profiles = ["coffe-lake", "coffe-lake-plus", "coffee-lake-whiskey-lake", "comet-lake"]
+value = "0x3E910003"
+data = "0300913e"
+type = "desktop"
+connectors = 0
+stolen = "1 MB"
+
+[[framebuffer]]
+codename = "CFL/CML"
+profiles = ["coffe-lake", "coffe-lake-plus", "coffee-lake-whiskey-lake", "comet-lake"]
+value = "0x3E980003"
+data = "0300983e"
+type = "desktop"
+connectors = 0
+stolen = "1 MB"
+
+[[framebuffer]]
+codename = "CFL/CML"
+profiles = ["coffe-lake", "coffe-lake-plus", "coffee-lake-whiskey-lake", "comet-lake"]
+value = "0x9BC80003"
+data = "0300c89b"
+type = "desktop"
+connectors = 0
+stolen = "1 MB"
+
+[[framebuffer]]
+codename = "CFL/CML"
+profiles = ["coffe-lake", "coffe-lake-plus", "coffee-lake-whiskey-lake", "comet-lake"]
+value = "0x9BC50003"
+data = "0300c59b"
+type = "desktop"
+connectors = 0
+stolen = "1 MB"
+
+[[framebuffer]]
+codename = "CFL/CML"
+profiles = ["coffe-lake", "coffe-lake-plus", "coffee-lake-whiskey-lake", "comet-lake"]
+value = "0x9BC40003"
+data = "0300c49b"
+type = "desktop"
+connectors = 0
+stolen = "1 MB"
+
+[[framebuffer]]
+codename = "ICL"
+profiles = ["ice-lake"]
+value = "0xFF050000"
+data = "000005ff"
+type = "mobile"
+connectors = 3
+stolen = "193 MB?"
+
+[[framebuffer]]
+codename = "ICL"
+profiles = ["ice-lake"]
+value = "0x8A710000"
+data = "0000718a"
+type = "mobile"
+connectors = 6
+stolen = "193 MB?"
+
+[[framebuffer]]
+codename = "ICL"
+profiles = ["ice-lake"]
+value = "0x8A700000"
+data = "0000708a"
+type = "mobile"
+connectors = 6
+stolen = "193 MB?"
+
+[[framebuffer]]
+codename = "ICL"
+profiles = ["ice-lake"]
+value = "0x8A510000"
+data = "0000518a"
+type = "mobile"
+connectors = 6
+stolen = "193 MB?"
+
+[[framebuffer]]
+codename = "ICL"
+profiles = ["ice-lake"]
+value = "0x8A5C0000"
+data = "00005c8a"
+type = "mobile"
+connectors = 6
+stolen = "193 MB?"
+
+[[framebuffer]]
+codename = "ICL"
+profiles = ["ice-lake"]
+value = "0x8A5D0000"
+data = "00005d8a"
+type = "mobile"
+connectors = 6
+stolen = "193 MB?"
+
+[[framebuffer]]
+codename = "ICL"
+profiles = ["ice-lake"]
+value = "0x8A520000"
+data = "0000528a"
+type = "mobile"
+connectors = 6
+stolen = "193 MB?"
+
+[[framebuffer]]
+codename = "ICL"
+profiles = ["ice-lake"]
+value = "0x8A530000"
+data = "0000538a"
+type = "mobile"
+connectors = 6
+stolen = "193 MB?"
+
+[[framebuffer]]
+codename = "ICL"
+profiles = ["ice-lake"]
+value = "0x8A5A0000"
+data = "00005a8a"
+type = "mobile"
+connectors = 6
+stolen = "193 MB?"
+
+[[framebuffer]]
+codename = "ICL"
+profiles = ["ice-lake"]
+value = "0x8A5B0000"
+data = "00005b8a"
+type = "mobile"
+connectors = 6
+stolen = "193 MB?"
+
+[[framebuffer]]
+codename = "ICL"
+profiles = ["ice-lake"]
+value = "0x8A710001"
+data = "0100718a"
+type = "mobile"
+connectors = 5
+stolen = "193 MB?"
+
+[[framebuffer]]
+codename = "ICL"
+profiles = ["ice-lake"]
+value = "0x8A700001"
+data = "0100708a"
+type = "mobile"
+connectors = 5
+stolen = "193 MB?"
+
+[[framebuffer]]
+codename = "ICL"
+profiles = ["ice-lake"]
+value = "0x8A510001"
+data = "0100518a"
+type = "mobile"
+connectors = 3
+stolen = "193 MB?"
+
+[[framebuffer]]
+codename = "ICL"
+profiles = ["ice-lake"]
+value = "0x8A5C0001"
+data = "01005c8a"
+type = "mobile"
+connectors = 3
+stolen = "193 MB?"
+
+[[framebuffer]]
+codename = "ICL"
+profiles = ["ice-lake"]
+value = "0x8A5D0001"
+data = "01005d8a"
+type = "mobile"
+connectors = 3
+stolen = "193 MB?"
+
+[[framebuffer]]
+codename = "ICL"
+profiles = ["ice-lake"]
+value = "0x8A520001"
+data = "0100528a"
+type = "mobile"
+connectors = 5
+stolen = "193 MB?"
+
+[[framebuffer]]
+codename = "ICL"
+profiles = ["ice-lake"]
+value = "0x8A530001"
+data = "0100538a"
+type = "mobile"
+connectors = 5
+stolen = "193 MB?"
+
+[[framebuffer]]
+codename = "ICL"
+profiles = ["ice-lake"]
+value = "0x8A5A0001"
+data = "01005a8a"
+type = "mobile"
+connectors = 5
+stolen = "193 MB?"
+
+[[framebuffer]]
+codename = "ICL"
+profiles = ["ice-lake"]
+value = "0x8A5B0001"
+data = "01005b8a"
+type = "mobile"
+connectors = 5
+stolen = "193 MB?"
+
+[[framebuffer]]
+codename = "ICL"
+profiles = ["ice-lake"]
+value = "0x8A510002"
+data = "0200518a"
+type = "mobile"
+connectors = 3
+stolen = "193 MB?"
+
+[[framebuffer]]
+codename = "ICL"
+profiles = ["ice-lake"]
+value = "0x8A5C0002"
+data = "02005c8a"
+type = "mobile"
+connectors = 3
+stolen = "193 MB?"
+
+[[framebuffer]]
+codename = "ICL"
+profiles = ["ice-lake"]
+value = "0x8A520002"
+data = "0200528a"
+type = "mobile"
+connectors = 5
+stolen = "193 MB?"
+
+[[framebuffer]]
+codename = "ICL"
+profiles = ["ice-lake"]
+value = "0x8A530002"
+data = "0200538a"
+type = "mobile"
+connectors = 5
+stolen = "193 MB?"

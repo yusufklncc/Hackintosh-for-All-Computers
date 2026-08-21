@@ -96,6 +96,29 @@ the question as `detected` and marks its row in the list.
 It is never preselected. Detection can be wrong, and a wrong answer that arrives
 already ticked is one nobody rechecks, so the person always types a number.
 
+## The framebuffer id
+
+Two sources, because they answer different questions. `data/gpu.toml` carries
+Dortania's one or two per generation with a reason attached - `default`,
+`recommended`, `Headless` - which says where to start. `data/framebuffer.toml`
+is WhateverGreen's whole list, parsed by `tools/fbtable.py` from the project's
+own markdown tables at the tag matching the vendored kext, which says what else
+exists: 138 framebuffers with type, connector count and stolen memory.
+
+Kaby Lake laptops went from one candidate to fourteen that way. Every id
+Dortania names appears in WhateverGreen's list too, which is the check that
+neither parser has drifted, and a headless framebuffer is sorted last however it
+was spelled.
+
+The menu offers two things that are not framebuffers. `0x12345678` is an id
+nothing claims, so no framebuffer kext attaches and macOS falls back to a
+picture with no graphics acceleration - useful for a first boot, and attributed
+to this repository's maintainer rather than to any upstream document, because no
+upstream document states it. The other leaves the key out entirely, which means
+*removing* it: the profiles ship a placeholder, and not writing one would leave
+that behind and call it a choice. `null` in a `--device-props` file is how that
+is expressed.
+
 ## Where the answers come from
 
     python3 tools/provenance.py            # every category and its source

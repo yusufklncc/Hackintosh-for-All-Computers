@@ -82,9 +82,15 @@ def catalogue():
              source='the same guide, per generation, with its framebuffer ids',
              tool='tools/gputable.py',
              count=f'{rows_in("data/gpu.toml", "igpu")} generation sections',
-             covers='Ivy Bridge to Raptor Lake, and the platform ids each lists',
-             gap='The guide gives one laptop id for most generations. '
-                 'WhateverGreen documents many more and is not read.'),
+             covers='Ivy Bridge to Raptor Lake, and which one to start with',
+             gap='Rocket Lake and newer have no supported iGPU, so no ids.'),
+        dict(area='Framebuffer ids', kind=DERIVED, file='data/framebuffer.toml',
+             source="WhateverGreen's own tables, at the tag matching the kext",
+             tool='tools/fbtable.py',
+             count=f'{rows_in("data/framebuffer.toml", "framebuffer")} framebuffers',
+             covers='Ivy Bridge to Ice Lake, with type, connectors and memory',
+             gap='Sandy Bridge has a section but no list in that form. '
+                 'Connector patches are per machine and are not written at all.'),
         dict(area='Audio codecs', kind=DERIVED, file='data/audio.toml',
              source="AppleALC's own Resources/<CODEC>/Info.plist, pinned release",
              tool='tools/audiotable.py',

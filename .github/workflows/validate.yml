@@ -37,8 +37,19 @@ jobs:
           python3 tools/setup.py $NONE --answers 2,10,3 --out /tmp/laptop/EFI
           python3 tools/setup.py $NONE --answers 1,2,2,3,6 --out /tmp/amd/EFI
           python3 tools/build.py --name 'Desktop/Intel/016 - Desktop - Raptor Lake' --out /tmp/named/EFI
-          # and once against this runner, declining whatever it turns out to have
-          python3 tools/setup.py --answers 1,2,10,3,3 --out /tmp/local/EFI
+          # a whole real machine, which is the only fixture the fast path and
+          # the framebuffer menu can both be exercised from
+          E570='--machine tools/fixtures/thinkpad-e570.json'
+          # 1 takes the detected profile, 1 the recommended framebuffer, 1 the kexts
+          python3 tools/setup.py $E570 --answers 1,1,1 --out /tmp/fast/EFI
+          test -d /tmp/fast/EFI/OC/Kexts/AirportBrcmFixup.kext
+          test -d /tmp/fast/EFI/OC/Kexts/NVMeFix.kext
+          # 2 answers the profile questions by hand instead
+          python3 tools/setup.py $E570 --answers 2,2,10,6,1,1 --out /tmp/byhand/EFI
+          # the last framebuffer option leaves the key out; the one before it is
+          # the id that boots without acceleration
+          python3 tools/setup.py $E570 --answers 1,16,1 --out /tmp/fb-none/EFI
+          python3 tools/setup.py $E570 --answers 1,15,1 --out /tmp/fb-noaccel/EFI
 
       - name: Storage advice
         run: |

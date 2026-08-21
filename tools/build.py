@@ -234,6 +234,15 @@ def main(argv=None):
             target = add.setdefault(path, {})
             for k, v in values.items():
                 old = target.get(k)
+                if v is None:
+                    # null means remove: leaving a placeholder in place is not the
+                    # same as choosing not to set the key, and only one of those
+                    # is what somebody asked for
+                    if k in target:
+                        del target[k]
+                        warn(f'{path} {k}: removed '
+                             f'{bytes(old).hex() if isinstance(old, bytes) else old}')
+                    continue
                 target[k] = bytes.fromhex(v[4:]) if isinstance(v, str) and v.startswith('hex:') else v
                 if old is not None and old != target[k]:
                     warn(f'{path} {k}: replaced {bytes(old).hex() if isinstance(old, bytes) else old}')
