@@ -391,6 +391,65 @@ def device_names():
           detect._names('some heading', detect.PCI_PATTERNS) == {})
 
 
+def detection_gaps():
+    """Four things the tables knew and the tools were not reading."""
+    import inputdev
+    from hwtable import acpi_ids as hwtable_acpi_ids
+    from hwtable import pci_ids as hwtable_pci_ids
+
+    # a masked term covers a range, and the mask is not a second device
+    got = hwtable_pci_ids('0x9d608086&0xFFFCFFFF')
+    check('a masked IOPCIMatch expands to the range it covers',
+          got == {'8086:9d60', '8086:9d61', '8086:9d62', '8086:9d63'}, sorted(got))
+    check('the mask itself never becomes a device id',
+          not any(i.startswith('ffff') or i.endswith(':ffff') for i in got), sorted(got))
+    check('an unmasked term is unchanged', hwtable_pci_ids('0x8cb18086') == {'8086:8cb1'})
+    check('a term matching a whole vendor is not expanded into 65536 of them',
+          hwtable_pci_ids('0x000010de&0x0000ffff') == set())
+
+    check('ACPI names are read from IONameMatch',
+          hwtable_acpi_ids(['INT33C2', 'AMDI0010', 'pci14e4,43a3']) ==
+          {'INT33C2', 'AMDI0010'})
+    check('an instance path is not mistaken for an ACPI id',
+          detect.acpi_names('ACPI\\PNP0C0C\\2&daba3ff&2') == ['PNP0C0C'])
+    check('Linux names them its own way, and only the ones shaped like an id',
+          detect.acpi_names('INT3433:00\nLNXSYSTM:00') == ['INT3433'])
+
+    # Haswell and Broadwell put the controller on ACPI, and AMD only ever does
+    check('an ACPI-only I2C controller is found', inputdev.controllers([], ['INT33C2']))
+    check('including AMD, which has no PCI id at all',
+          inputdev.controllers([], ['AMDI0010']))
+    check('a PCI one still is', inputdev.controllers(['8086:9d60'], []))
+    check('and something unrelated is not',
+          not inputdev.controllers(['8086:15b8'], ['PNP0C0C']))
+    kexts = inputdev.entries([], False, ['INT33C2'])[1]
+    check('and it brings the kexts',
+          [k['BundlePath'] for k in kexts] == ['VoodooI2C.kext', 'VoodooI2CHID.kext'], kexts)
+
+    # the machines most likely to have an SMBus trackpad heard nothing about it
+    ps2_only = inputdev.notes([], [])
+    check('a machine with no I2C controller is told about SMBus anyway',
+          'VoodooRMI.kext' in ps2_only and 'VoodooSMBus.kext' in ps2_only)
+    check('and told that neither was added for it',
+          'Neither kext is added automatically' in ps2_only)
+
+    # nothing gets cut off a verdict
+    import summary
+    long_note = {'part': 'Graphics', 'what': 'card', 'verdict': summary.UNSUPPORTED,
+                 'detail': 'x' * 40 + ' ' + 'y' * 40}
+    out = summary.render({'cpu': None, 'pci_ids': []})
+    check('the summary still renders with nothing to say', len(out) > 2)
+    nvidia = {'generation': 'raptor-lake', 'laptop': False, 'pci_ids': [],
+              'gpu_devices': [{'id': '10de:1187', 'name': 'GTX 760'}]}
+    # the family rule used to need the word "nvidia" in the reported name, so a
+    # card the machine called anything else came out unknown
+    graphics = [r for r in summary.rows(nvidia) if r['part'] == 'Graphics']
+    check('a card is judged on its vendor id, not on what it happens to be called',
+          graphics and graphics[0]['verdict'] == summary.UNSUPPORTED, graphics)
+    check('a long verdict wraps instead of losing its caveat',
+          any('Turing' in l for l in summary.render(nvidia)))
+
+
 def broadcom_wifi():
     """A Lilu plugin declares its devices somewhere else, and it was being missed."""
     import advise
@@ -419,12 +478,20 @@ def tables_match_sources():
             return
         check('the hardware table still matches the kexts',
               gen.read_text() == Path('data/hardware.toml').read_text())
+        table = ocgen.read_toml('data/hardware.toml')['driver']
+        roles = {d['role'] for d in table}
+        check('every role the tools read is in it',
+              {'ethernet', 'wifi', 'bluetooth', 'trackpad'} <= roles, sorted(roles))
+        check('no id is a leftover mask',
+              not [i for d in table for i in d['ids']
+                   if i.startswith('ffff') or i.endswith(':ffff')])
 
 
 if __name__ == '__main__':
     for section in (graphics, graphics_advice, audio_advice, storage, peripherals,
                     trackpad, framebuffer, boot_args, other_machine, undecodable_output, scripted_answers,
                     hardware_summary, device_names, broadcom_wifi,
+                    detection_gaps,
                     tables_match_sources):
         print(f'\n{section.__name__}')
         section()

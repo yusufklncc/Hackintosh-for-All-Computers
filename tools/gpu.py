@@ -79,7 +79,9 @@ def classify(device, generation=None):
     name = (device.get('name') or '').lower()
     vendor = (device.get('id') or '').split(':')[0]
     for f in families:
-        if f['match'] in name or (f['vendor'] == vendor and f['match'] in name):
+        if f.get('whole_vendor') and f['vendor'] == vendor:
+            return f['status'], f
+        if f['match'] in name and f['vendor'] == vendor:
             return f['status'], f
     if looks_integrated(name) and vendor == '8086':
         state, models = igpu_verdict(generation)

@@ -173,7 +173,13 @@ def parse_intel(page):
 # Families stated in prose. Each carries the sentence it rests on so the claim
 # can be checked without going back to the page.
 FAMILIES = [
-    {'vendor': '10de', 'match': 'nvidia', 'name': 'NVIDIA, every series',
+    # whole_vendor: the sentence is about every card the vendor makes, so the
+    # PCI vendor id is enough to apply it. Without that, a card whose reported
+    # name does not happen to contain "nvidia" - and plenty do not - fell
+    # through to unknown. Intel cannot be treated that way: 8086 is also every
+    # integrated GPU, which is why the Arc rule still matches on the name.
+    {'vendor': '10de', 'match': 'nvidia', 'whole_vendor': True,
+     'name': 'NVIDIA, every series',
      'status': 'unsupported',
      'quote': 'There are no currently supported NVIDIA GPUs.',
      'source': f'{BASE}/modern-gpus/nvidia-gpu.html',

@@ -92,3 +92,19 @@ label = "Realtek Gigabit Ethernet"
 version = "3.0.0"
 bus = "pci"
 ids = ["10ec:2502", "10ec:2600", "10ec:8168", "1186:8168"]
+
+[[driver]]
+kext = "VoodooI2C.kext"
+role = "trackpad"
+label = "I2C controller"
+version = "2.9.1"
+bus = "pci"
+ids = ["8086:02e8", "8086:02e9", "8086:02ea", "8086:02eb", "8086:06e8", "8086:06e9", "8086:06ea", "8086:06eb", "8086:34e8", "8086:34e9", "8086:34ea", "8086:34eb", "8086:9d60", "8086:9d61", "8086:9d62", "8086:9d63", "8086:9de8", "8086:9de9", "8086:9dea", "8086:9deb", "8086:a160", "8086:a161", "8086:a162", "8086:a163", "8086:a368", "8086:a369", "8086:a36a", "8086:a36b"]
+
+[[driver]]
+kext = "VoodooI2C.kext"
+role = "trackpad"
+label = "I2C controller"
+version = "2.9.1"
+bus = "acpi"
+ids = ["AMD0010", "AMDI0010", "AMDI0510", "INT33C2", "INT33C3", "INT3432", "INT3433"]

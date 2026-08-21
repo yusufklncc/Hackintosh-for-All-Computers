@@ -569,6 +569,7 @@ models = ["UHD Graphics for 13th Gen Intel Processors", "UHD Graphics for 14th G
 [[family]]
 vendor = "10de"
 match = "nvidia"
+whole_vendor = true
 name = "NVIDIA, every series"
 status = "unsupported"
 quote = "There are no currently supported NVIDIA GPUs."
