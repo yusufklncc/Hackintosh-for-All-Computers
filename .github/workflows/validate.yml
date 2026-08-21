@@ -72,6 +72,10 @@ jobs:
         run: |
           NONE='--machine tools/fixtures/no-hardware.json'
           python3 tools/setup.py $NONE --ids 8086:9d60 --answers 2,10,3,1 --out /tmp/i2c/EFI
+          test -d /tmp/i2c/EFI/OC/Kexts/VoodooI2C.kext
+          # Haswell and Broadwell put the controller on ACPI, with no PCI id
+          python3 tools/setup.py $NONE --acpi-ids INT33C2 --answers 2,7,3,1 --out /tmp/i2c-acpi/EFI
+          test -d /tmp/i2c-acpi/EFI/OC/Kexts/VoodooI2C.kext
           python3 tools/setup.py $NONE --ids 8086:5912 --answers 2,10,3   --out /tmp/fb/EFI
           cp -r EFI/OC/Kexts/UTBDefault.kext /tmp/UTBMap.kext
           python3 tools/setup.py $NONE --ids 8086:2723 --usb-map /tmp/UTBMap.kext \

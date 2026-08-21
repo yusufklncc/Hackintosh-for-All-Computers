@@ -169,6 +169,12 @@ def _windows():
         '{ $_.PNPClass -in @("Camera","Image","SDHost","MTD","Mouse","Keyboard") } '
         '| ForEach-Object '
         '{ "$($_.PNPClass)|$($_.PNPDeviceID)|$($_.Name)|$($_.Service)" }')
+    # ACPI-enumerated devices, for the I2C controllers that have no PCI id at
+    # all: on Haswell and Broadwell they are INT33C2 and friends, and AMD's are
+    # only ever named this way.
+    out['acpi'] = _ps(
+        'Get-CimInstance Win32_PnPEntity | Where-Object { $_.PNPDeviceID -like "ACPI*" } | '
+        'ForEach-Object { $_.PNPDeviceID }')
     # BusType 17 is NVMe in the storage WMI classes, which is a cleaner answer
     # than guessing from a PCI class code or a model string.
     out['storage'] = _ps(
@@ -206,6 +212,9 @@ def _linux():
     # BUS_I8042 is 0x11 in the kernel's input.h, so a device on bus 0011 is on
     # the PS/2 controller by the kernel's own reckoning
     out['input'] = _read('/proc/bus/input/devices')
+    # /sys/bus/acpi/devices holds one directory per device, named INT33C2:00
+    out['acpi'] = '\n'.join(sorted(
+        Path(d).name for d in __import__('glob').glob('/sys/bus/acpi/devices/*')))
     import glob as _glob
     out['storage'] = '\n'.join(
         f'17|{_read(p + "/model")}' for p in sorted(_glob.glob('/sys/class/nvme/nvme*')))
@@ -293,6 +302,22 @@ def _names(text, patterns):
                 out[key] = name
             break
     return out
+
+
+# Two shapes, and both are anchored: an instance path like 2&daba3ff&2 has a
+# run of hex in it that a loose pattern happily reads as an ACPI id.
+ACPI_PATTERNS = [
+    re.compile(r'ACPI\\([A-Z]{3,4}[0-9A-F]{4})'),        # Windows PNPDeviceID
+    re.compile(r'^([A-Z]{3,4}[0-9A-F]{4}):\d+$', re.M),   # Linux /sys/bus/acpi/devices
+]
+
+
+def acpi_names(text):
+    """ACPI hardware ids in a device listing, without the instance that follows."""
+    out = set()
+    for pat in ACPI_PATTERNS:
+        out |= set(pat.findall((text or '').upper()))
+    return sorted(out)
 
 
 def _apple_pairs(text, vendor_key, device_key):
@@ -440,6 +465,7 @@ def probe():
                           | (_apple_pairs(raw.get('usb'), 'Vendor ID', 'Product ID')
                              if system == 'Darwin' else set())),
         'hda_ids': sorted(_pairs(raw.get('hda'), HDA_PATTERNS)),
+        'acpi_ids': acpi_names(raw.get('acpi')),
         # the model beside each id, where the machine printed one. A model name
         # is not a serial number, so it travels in a report like the id does.
         'device_names': {**_names(raw.get('pci'), PCI_PATTERNS),

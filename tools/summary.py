@@ -16,6 +16,7 @@ is reading it.
 import argparse
 import os
 import sys
+import textwrap
 from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -34,6 +35,8 @@ BOLD, DIM, GREEN, YELLOW, RED, RESET = (
     '\033[1m', '\033[2m', '\033[32m', '\033[33m', '\033[31m', '\033[0m')
 if os.environ.get('NO_COLOR') or not sys.stdout.isatty():
     BOLD = DIM = GREEN = YELLOW = RED = RESET = ''
+
+DETAIL = 52
 
 COLOUR = {SUPPORTED: GREEN, UNSUPPORTED: RED, UNKNOWN: YELLOW, ABSENT: DIM}
 
@@ -239,12 +242,16 @@ def render(hw, source='this machine'):
     lines = [f'{BOLD}Hardware for macOS{RESET}  {DIM}from {source}{RESET}', '']
     for r in table:
         what = _fit(r['what'], width)
-        # the long form of a verdict belongs in the section that acts on it; here
-        # a line that wraps costs more than the words at the end are worth
-        detail = _fit(r['detail'], 52)
         colour = COLOUR[r['verdict']]
+        # a detail that does not fit wraps rather than being cut. The part that
+        # would be lost is where the caveats live - "Kepler was the last
+        # supported family" - and half a sentence is worse than two lines.
+        body = textwrap.wrap(r['detail'], DETAIL) or ['']
         lines.append(f'  {r["part"]:<12s} {what:<{width}s}  '
-                     f'{colour}{r["verdict"]:<14s}{RESET}{DIM}{detail}{RESET}'.rstrip())
+                     f'{colour}{r["verdict"]:<14s}{RESET}{DIM}{body[0]}{RESET}'.rstrip())
+        pad = ' ' * (2 + 12 + 1 + width + 2 + 14)
+        for extra in body[1:]:
+            lines.append(f'{pad}{DIM}{extra}{RESET}')
     bad = [r for r in table if r['verdict'] == UNSUPPORTED]
     unknown = [r for r in table if r['verdict'] == UNKNOWN]
     lines.append('')

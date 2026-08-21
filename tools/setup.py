@@ -207,6 +207,8 @@ def overrides(a, hw):
         hw['hda_ids'] = [x.strip() for x in a.hda_ids.split(',') if x.strip()]
     if a.nvme is not None:
         hw['nvme'] = [x.strip() for x in a.nvme.split(',') if x.strip()]
+    if a.acpi_ids is not None:
+        hw['acpi_ids'] = [x.strip().upper() for x in a.acpi_ids.split(',') if x.strip()]
     return hw
 
 
@@ -246,6 +248,7 @@ def main():
     ap.add_argument('--usb-ids', help='USB ids to use instead of probing, comma separated')
     ap.add_argument('--hda-ids', help='HD audio codec ids to use instead of probing')
     ap.add_argument('--nvme', help='NVMe drive models to use instead of probing')
+    ap.add_argument('--acpi-ids', help='ACPI hardware ids to use instead of probing')
     ap.add_argument('--usb-map', help='a UTBMap.kext made with the USBToolBox tool')
     ap.add_argument('--answers', help='answer the menus non-interactively, comma separated; '
                                       'for scripting and for CI')
@@ -365,7 +368,8 @@ def main():
 
     if a.no_detect:
         overrides(a, hw)
-    if source is None and (hw.get('pci_ids') or hw.get('hda_ids') or hw.get('nvme')):
+    if source is None and (hw.get('pci_ids') or hw.get('hda_ids')
+                           or hw.get('nvme') or hw.get('acpi_ids')):
         source = 'the ids you passed'
 
     asked = step[0]      # the scope question, when it was asked at all
@@ -462,7 +466,8 @@ def main():
             device_props.update(iprops)
             notes.append(isteps)
 
-    input_lines, input_kexts = inputdev.entries(hw.get('pci_ids'), hw.get('ps2'))
+    input_lines, input_kexts = inputdev.entries(hw.get('pci_ids'), hw.get('ps2'),
+                                                hw.get('acpi_ids'))
     pointing = [d for d in hw.get('peripherals', [])
                 if d['kind'] in ('pointing device', 'keyboard')]
     aside = [d['name'] for d in pointing if d.get('virtual')]
@@ -478,7 +483,12 @@ def main():
                   f'not this machine\'s){RESET}')
         if input_lines:
             print('\n'.join(input_lines))
-            notes.append(inputdev.notes(hw.get('pci_ids')))
+        elif pointing:
+            print(f'      {DIM}no I2C controller here; if the trackpad turns out to be '
+                  f'on SMBus, NEXT-STEPS.txt names the two kexts for that{RESET}')
+        # the follow-up is written either way: a PS/2 laptop is the one most
+        # likely to have an SMBus trackpad and used to be told nothing
+        notes.append(inputdev.notes(hw.get('pci_ids'), hw.get('acpi_ids')))
 
     storage_kexts, storage_drives = netkexts.storage_entries(hw.get('nvme'))
     if hw.get('nvme'):
