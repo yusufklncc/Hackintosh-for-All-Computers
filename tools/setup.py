@@ -31,6 +31,7 @@ import igpu
 import inputdev
 import netkexts
 import ocgen
+import summary
 
 PROFILES = Path('profiles')
 
@@ -213,6 +214,8 @@ def main():
     ap.add_argument('--report', metavar='FILE',
                     help='write this machine\'s hardware report and stop, so an '
                          'EFI for it can be built elsewhere')
+    ap.add_argument('--check', action='store_true',
+                    help='print what the hardware means for macOS and stop')
     ap.add_argument('--ids', help='PCI ids to use instead of probing, comma separated')
     ap.add_argument('--usb-ids', help='USB ids to use instead of probing, comma separated')
     ap.add_argument('--hda-ids', help='HD audio codec ids to use instead of probing')
@@ -254,6 +257,18 @@ def main():
         return step[0]
 
     print(f'{BOLD}OpenCore EFI builder{RESET}')
+
+    if a.check:
+        if a.machine:
+            checked, complaint = load_machine(a.machine)
+            if checked is None:
+                sys.exit(complaint)
+            where = f'report {Path(a.machine).name}'
+        else:
+            checked, where = detect.probe(), 'this machine'
+        print()
+        print('\n'.join(summary.render(checked, where)))
+        return 0
 
     # Which machine the EFI is for has to be settled before anything is shown as
     # detected, because detection reads the machine this runs on. A hint from
@@ -329,6 +344,12 @@ def main():
         hw['nvme'] = [x.strip() for x in a.nvme.split(',') if x.strip()]
     if source is None and (hw.get('pci_ids') or hw.get('hda_ids') or hw.get('nvme')):
         source = 'the ids you passed'
+
+    if hw.get('cpu') or hw.get('pci_ids'):
+        # before any question, so nobody answers four of them to be told at the
+        # end that the Wi-Fi card has to be replaced
+        print()
+        print('\n'.join(summary.render(hw, source or 'this machine')))
 
     asked = step[0]      # the scope question, when it was asked at all
     plat = ask(nxt(), total, 'What kind of machine is this?',

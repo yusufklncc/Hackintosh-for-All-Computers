@@ -60,6 +60,8 @@ and identity falls back to a placeholder, each with a warning.
 ## Commands
 
     python3 tools/setup.py                                         # guided, start here
+    python3 tools/setup.py --check                                 # what the hardware means, then stop
+    python3 tools/summary.py --machine machine.json                # the same for a report
     python3 tools/setup.py --machine machine.json                  # build for another machine
     python3 tools/detect.py --report machine.json                  # take that machine's report
     python3 tools/build.py --catalogue                             # published configs
@@ -93,6 +95,25 @@ the question as `detected` and marks its row in the list.
 
 It is never preselected. Detection can be wrong, and a wrong answer that arrives
 already ticked is one nobody rechecks, so the person always types a number.
+
+## What the hardware means
+
+`summary.py` is the screen printed before the first question: one line per part,
+with `supported`, `not supported`, `unknown` or `-`.
+
+Every verdict is composed from a table that already backs a decision elsewhere -
+`data/gpu.toml` for the cards, AppleALC's layouts for the codec, the device ids
+`hwtable.py` reads out of the kexts for the network parts, the profile tree for
+the CPU - so the screen cannot claim something the build then contradicts. Where
+a table has nothing to say the row is `unknown` and the detail says why. A card
+reader gets `unknown` and will keep getting it until there is data to base an
+answer on; a verdict invented for it would be worse than the blank.
+
+Nothing on that screen stops a build. It runs before the questions so that an
+unsupported Wi-Fi card is known before four answers, not after.
+
+Rows that would be noise are left out rather than filled in: a desktop with no
+pointing device gets no trackpad row.
 
 ## Which machine the answers are about
 

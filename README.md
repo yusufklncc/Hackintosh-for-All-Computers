@@ -43,6 +43,32 @@ the answer off your machine it says so next to the question, but it never picks
 for you - detection can be wrong, and a wrong answer that arrives already ticked
 is one nobody rechecks.
 
+First it says what your hardware means for macOS:
+
+```
+Hardware for macOS  from this machine
+
+  CPU          Intel(R) Core(TM) i5-4200U CPU @ 1.60GHz  supported     haswell, laptop profile
+  Graphics     Intel(R) HD Graphics Family  [8086:0a16]  supported     Intel iGPU, haswell
+  Audio        Realtek ALC283                            supported     AppleALC, 11 layouts to try
+  Ethernet     Intel Ethernet                            supported     IntelMausi.kext  [8086:1559]
+  Wi-Fi        Intel Wi-Fi                               supported     AirportItlwm.kext  [8086:08b3]
+  Bluetooth    Intel Bluetooth                           supported     IntelBluetoothFirmware.kext
+  Storage      no NVMe                                   -             nothing to add
+  Trackpad     Alps Pointing-device                      supported     on PS/2, which VoodooPS2 covers
+  Camera       TOSHIBA Web Camera - FHD                  supported     USB, so the class driver handles it
+  Card reader  Realtek PCIE CardReader                   unknown       no support data for card readers
+
+  Nothing here is known to be unsupported.
+```
+
+`unknown` means no table here has anything to say about that part, not that it
+will fail. Nothing on this screen stops the build - if a card is unsupported it
+says so and suggests replacing it, and the choice stays yours. `python3
+tools/setup.py --check` prints just this and exits.
+
+Then it asks:
+
 ```
 [1] Which machine is this EFI for?
       detected: This machine

@@ -280,6 +280,56 @@ def scripted_answers():
               short.returncode)
 
 
+def hardware_summary():
+    """The screen shown before any question, composed from the same tables."""
+    import summary
+    toshiba = {
+        'cpu': 'Intel(R) Core(TM) i5-4200U CPU @ 1.60GHz', 'generation': 'haswell',
+        'laptop': True, 'ps2': True, 'nvme': [], 'hda_ids': ['10ec:0283'],
+        'gpu_devices': [{'id': '8086:0a16', 'name': 'Intel(R) HD Graphics Family'}],
+        'pci_ids': ['8086:1559', '8086:08b3'], 'usb_ids': ['8087:07dc'],
+        'peripherals': [
+            {'kind': 'pointing device', 'name': 'Alps Pointing-device',
+             'usb': False, 'virtual': False, 'driver': 'i8042prt'},
+            {'kind': 'card reader', 'name': 'Realtek PCIE CardReader',
+             'usb': False, 'virtual': False, 'driver': 'rtsper'},
+            {'kind': 'keyboard', 'name': 'Uzak Masaustu Klavye',
+             'usb': False, 'virtual': True, 'driver': 'terminpt'}]}
+    by_part = {}
+    for r in summary.rows(toshiba):
+        by_part.setdefault(r['part'], []).append(r)
+    check('a machine that works says so on every row it has data for',
+          not [r for rs in by_part.values() for r in rs
+               if r['verdict'] == summary.UNSUPPORTED], by_part)
+    check('the network rows name the kext, not just a yes',
+          'IntelMausi.kext' in by_part['Ethernet'][0]['detail'], by_part.get('Ethernet'))
+    check('a PS/2 trackpad is covered by the profile, and says which',
+          by_part['Trackpad'][0]['verdict'] == summary.SUPPORTED, by_part.get('Trackpad'))
+    check('a card reader stays unknown rather than being guessed at',
+          by_part['Card reader'][0]['verdict'] == summary.UNKNOWN)
+
+    desktop = dict(toshiba, laptop=False, ps2=False, peripherals=[],
+                   cpu='Intel(R) Core(TM) i9-14900K', generation='raptor-lake',
+                   hda_ids=['ffff:ffff'],
+                   gpu_devices=[{'id': '8086:e20b', 'name': 'Intel Arc B580'},
+                                {'id': '8086:a780', 'name': 'Intel UHD Graphics 770'}])
+    parts = [r['part'] for r in summary.rows(desktop)]
+    verdicts = {(r['part'], r['what']): r['verdict'] for r in summary.rows(desktop)}
+    check('an unsupported card and an unsupported igpu are both called out',
+          [v for (p_, _), v in verdicts.items()
+           if p_ == 'Graphics'] == [summary.UNSUPPORTED] * 2, verdicts)
+    check('a codec AppleALC does not carry is not called supported',
+          verdicts[('Audio', 'ffff:ffff')] == summary.UNSUPPORTED, verdicts)
+    check('a desktop with no pointing device gets no trackpad row',
+          'Trackpad' not in parts, parts)
+
+    blank, complaint = detect.read_report('tools/fixtures/no-hardware.json')
+    check('a machine nothing is known about renders without claiming anything',
+          complaint is None and not [r for r in summary.rows(blank)
+                                     if r['verdict'] == summary.SUPPORTED])
+    check('and it still renders', len(summary.render(blank, 'nothing')) > 3)
+
+
 def tables_match_sources():
     with tempfile.TemporaryDirectory() as tmp:
         gen = Path(tmp) / 'hardware.toml'
@@ -294,6 +344,7 @@ def tables_match_sources():
 if __name__ == '__main__':
     for section in (graphics, graphics_advice, audio_advice, storage, peripherals,
                     trackpad, framebuffer, boot_args, other_machine, undecodable_output, scripted_answers,
+                    hardware_summary,
                     tables_match_sources):
         print(f'\n{section.__name__}')
         section()
