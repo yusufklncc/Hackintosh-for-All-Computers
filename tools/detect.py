@@ -160,11 +160,15 @@ def _windows():
     out['usb'] = _ps(
         'Get-CimInstance Win32_PnPEntity | Where-Object { $_.PNPDeviceID -like "USB*" } | '
         'ForEach-Object { "$($_.PNPDeviceID)|$($_.Name)" }')
+    # the driver Windows bound is carried along, because it is the only honest
+    # answer to "is this on the PS/2 controller". The PnP id is not: this laptop
+    # calls its PS/2 keyboard ACPI\\TOS7407 and its Alps trackpad ACPI\\TTP1000,
+    # neither of which is the standard PNP0303 or PNP0F13.
     out['peripherals'] = _ps(
         'Get-CimInstance Win32_PnPEntity | Where-Object '
         '{ $_.PNPClass -in @("Camera","Image","SDHost","MTD","Mouse","Keyboard") } '
         '| ForEach-Object '
-        '{ "$($_.PNPClass)|$($_.PNPDeviceID)|$($_.Name)" }')
+        '{ "$($_.PNPClass)|$($_.PNPDeviceID)|$($_.Name)|$($_.Service)" }')
     # BusType 17 is NVMe in the storage WMI classes, which is a cleaner answer
     # than guessing from a PCI class code or a model string.
     out['storage'] = _ps(
@@ -199,6 +203,9 @@ def _linux():
                          __import__('glob').glob('/proc/asound/card*/codec#*'))
     out['peripherals'] = '\n'.join(
         f'Camera|{l}' for l in (out.get('usb') or '').splitlines() if 'cam' in l.lower())
+    # BUS_I8042 is 0x11 in the kernel's input.h, so a device on bus 0011 is on
+    # the PS/2 controller by the kernel's own reckoning
+    out['input'] = _read('/proc/bus/input/devices')
     import glob as _glob
     out['storage'] = '\n'.join(
         f'17|{_read(p + "/model")}' for p in sorted(_glob.glob('/sys/class/nvme/nvme*')))
@@ -309,6 +316,34 @@ def hardware_id(ident):
     return '\\'.join(parts[:2]) if len(parts) > 1 else (ident or '')
 
 
+# Enumerators a device can appear under and still be a device. Remote desktop
+# installs a keyboard and a mouse under TERMINPUT_BUS, the same way a dummy
+# monitor tool installs a display adapter under ROOT: reporting those as the
+# machine's hardware is the kind of wrong answer that looks right.
+REAL_BUSES = ('ACPI', 'USB', 'HID', 'PCI', 'I2C', 'BTHENUM', 'BTHLE')
+
+# Windows binds the 8042 port driver to whatever hangs off the PS/2 controller,
+# whatever the vendor called the device. On Linux the same fact is BUS_I8042,
+# 0x11 in the kernel's input.h, printed as the bus of each input device.
+PS2_DRIVER = 'i8042prt'
+PS2_LINUX_BUS = 'Bus=0011'
+
+
+def ps2_present(raw):
+    """Whether anything is on the PS/2 controller, by the driver actually bound.
+
+    Matching PnP ids was wrong: a Toshiba calls its PS/2 keyboard ACPI\\TOS7407
+    and its Alps trackpad ACPI\\TTP1000, so a machine with both reported neither
+    and got no VoodooPS2 advice."""
+    text = (raw.get('peripherals') or '')
+    if PS2_DRIVER in text.lower():
+        return True
+    if PS2_LINUX_BUS in (raw.get('input') or ''):
+        return True
+    # the standard ids still count, for anything that does use them
+    return 'PNP0F13' in text.upper() or 'PNP0303' in text.upper()
+
+
 def peripherals(text):
     """Cameras, card readers and input devices, with the bus each is on.
 
@@ -323,11 +358,13 @@ def peripherals(text):
             continue
         pnp_class, ident = parts[0].strip(), parts[1]
         name = parts[2].strip() if len(parts) > 2 else ident
+        driver = parts[3].strip() if len(parts) > 3 else ''
         if not name:
             continue
+        bus = ident.split('\\')[0].upper()
         out.append({'kind': PNP_CLASS_KIND.get(pnp_class.lower(), 'other'),
-                    'name': name, 'id': hardware_id(ident),
-                    'usb': ident.upper().startswith('USB')})
+                    'name': name, 'id': hardware_id(ident), 'driver': driver,
+                    'usb': bus == 'USB', 'virtual': bus not in REAL_BUSES})
     return out
 
 
@@ -370,8 +407,7 @@ def probe():
         'hda_ids': sorted(_pairs(raw.get('hda'), HDA_PATTERNS)),
         'nvme': nvme_drives(raw.get('storage')),
         'peripherals': peripherals(raw.get('peripherals')),
-        'ps2': 'PNP0F13' in (raw.get('peripherals') or '').upper()
-               or 'PNP0303' in (raw.get('peripherals') or '').upper(),
+        'ps2': ps2_present(raw),
         'generation': cpu_generation(raw.get('cpu'), bool(laptop)),
     }
 
