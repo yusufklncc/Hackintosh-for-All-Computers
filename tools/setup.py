@@ -427,11 +427,17 @@ def main():
     input_lines, input_kexts = inputdev.entries(hw.get('pci_ids'), hw.get('ps2'))
     pointing = [d for d in hw.get('peripherals', [])
                 if d['kind'] in ('pointing device', 'keyboard')]
+    aside = [d['name'] for d in pointing if d.get('virtual')]
+    pointing = [d for d in pointing if not d.get('virtual')]
     if input_lines or pointing:
         print(f'\n{BOLD}Trackpad and keyboard{RESET}')
         for dev in pointing:
+            on_ps2 = ' on the PS/2 controller' if dev.get('driver') == 'i8042prt' else ''
             print(f'  {dev["name"]}  {DIM}({dev["kind"]}'
-                  + (f', {dev["id"]}' if dev.get('id') else '') + f'){RESET}')
+                  + (f', {dev["id"]}' if dev.get('id') else '') + f'{on_ps2}){RESET}')
+        if aside:
+            print(f'      {DIM}ignored: {", ".join(aside)}  (remote desktop input, '
+                  f'not this machine\'s){RESET}')
         if input_lines:
             print('\n'.join(input_lines))
             notes.append(inputdev.notes(hw.get('pci_ids')))
@@ -449,8 +455,8 @@ def main():
 
     # the same query answers two questions, so it is split by what each device
     # is rather than printed under one heading that fits only half of them
-    media = [d for d in hw.get('peripherals', [])
-             if d['kind'] in ('camera', 'card reader')]
+    real = [d for d in hw.get('peripherals', []) if not d.get('virtual')]
+    media = [d for d in real if d['kind'] in ('camera', 'card reader')]
     if media:
         print(f'\n{BOLD}Camera and card reader{RESET}')
         for dev in media:

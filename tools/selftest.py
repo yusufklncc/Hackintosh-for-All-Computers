@@ -141,6 +141,23 @@ def peripherals():
     check('the hardware id is kept and the instance path is not',
           by_name['Alps Pointing-device']['id'] == 'ACPI\\ALP0021', by_name)
 
+    # a real Toshiba: neither device uses a standard PnP id, so matching ids
+    # reported no PS/2 hardware on a machine whose keyboard and trackpad are both
+    # on the PS/2 controller
+    listing = ('Keyboard|ACPI\\TOS7407\\4&a|Standart PS/2 Klavye|i8042prt\n'
+               'Mouse|ACPI\\TTP1000\\4&b|Alps Pointing-device|i8042prt\n'
+               'Keyboard|TERMINPUT_BUS\\UMB\\1&c|Uzak Masaustu Klavye Aygiti|terminpt')
+    check('PS/2 is read from the driver Windows bound, not from the PnP id',
+          detect.ps2_present({'peripherals': listing}))
+    check('and on Linux from the kernel bus number',
+          detect.ps2_present({'input': 'I: Bus=0011 Vendor=0001 Product=0001'}))
+    check('a machine with neither says so',
+          not detect.ps2_present({'peripherals':
+                                  'Camera|USB\\VID_04F2&PID_B3B2\\6&d|Cam|usbvideo'}))
+    remote = [d for d in detect.peripherals(listing) if d['virtual']]
+    check('remote desktop input is set aside, like a virtual display adapter',
+          [d['name'] for d in remote] == ['Uzak Masaustu Klavye Aygiti'], remote)
+
 
 def trackpad():
     import inputdev
