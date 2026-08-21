@@ -55,9 +55,10 @@ def matched_kexts(pci, usb):
     return out
 
 
-def report(pci, usb, source):
+def report(pci, usb, source, names=None):
     """Print what the given devices need. Shared with setup.py."""
     index = load_table()
+    names = names or {}
     hits = collections.defaultdict(list)
     for bus, ids in (('pci', pci), ('usb', usb)):
         for i in ids:
@@ -87,8 +88,9 @@ def report(pci, usb, source):
             if key in seen:
                 continue
             seen.add(key)
+            model = names.get(device_id)
             print(f'      {GREEN}{device_id}{RESET}  needs {BOLD}{d["kext"]}{RESET}'
-                  f'  {DIM}{d["label"]}, v{d["version"]}{RESET}')
+                  f'  {DIM}{model or d["label"]}, v{d["version"]}{RESET}')
 
     if [r for r in hits if len({d['kext'] for _, d in hits[r]}) > 1]:
         print(f'\n  {DIM}Some devices match more than one kext, because they target different\n'

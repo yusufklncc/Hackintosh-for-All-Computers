@@ -527,7 +527,7 @@ def main():
         if matched and not manual:
             print(f'\n{BOLD}Network kexts{RESET}')
             advise.report(hw.get('pci_ids', []), hw.get('usb_ids', []),
-                          source or 'the ids you passed')
+                          source or 'the ids you passed', hw.get('device_names'))
         mode = ask(0, 0, 'Add these to the EFI?',
                    [('all', 'Yes, for every macOS version they support'),
                     ('one', 'Yes, for one macOS version only'),
