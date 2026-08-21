@@ -25,15 +25,30 @@ from pathlib import Path
 
 
 def _run(cmd, shell=False):
+    """Output of a command, or an empty string. Never raises, never returns None.
+
+    text=True alone decodes with the locale encoding and no error handling, so on
+    a Turkish Windows a device name carrying a byte cp1254 has no character for
+    killed the reader thread inside subprocess. The traceback printed, stdout
+    came back as None, and the whole listing was lost - not just that one name.
+    That is how a laptop with a full complement of PCI devices reported none."""
     try:
-        r = subprocess.run(cmd, shell=shell, capture_output=True, text=True, timeout=25)
-        return r.stdout if r.returncode == 0 else ''
-    except (OSError, subprocess.SubprocessError):
+        r = subprocess.run(cmd, shell=shell, capture_output=True, timeout=25,
+                           text=True, encoding='utf-8', errors='replace')
+        return (r.stdout or '') if r.returncode == 0 else ''
+    except (OSError, subprocess.SubprocessError, ValueError):
         return ''
 
 
+# PowerShell writes in the console code page unless told otherwise, which is not
+# UTF-8 on a non-English Windows. Setting it per call costs nothing and means the
+# bytes match how they are decoded; errors='replace' above covers the rest.
+PS_UTF8 = '[Console]::OutputEncoding = New-Object System.Text.UTF8Encoding $false; '
+
+
 def _ps(script):
-    return _run(['powershell', '-NoProfile', '-NonInteractive', '-Command', script])
+    return _run(['powershell', '-NoProfile', '-NonInteractive', '-Command',
+                 PS_UTF8 + script])
 
 
 def _read(path):
