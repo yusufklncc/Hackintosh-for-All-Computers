@@ -93,6 +93,14 @@ jobs:
           test -d /tmp/by-name/EFI/OC/Kexts/IntelBluetoothFirmware.kext
           test ! -d /tmp/by-name/EFI/OC/Kexts/AirportItlwm.kext
 
+      - name: The hardware summary
+        run: |
+          NONE='--machine tools/fixtures/no-hardware.json'
+          python3 tools/summary.py $NONE
+          python3 tools/setup.py --check $NONE
+          python3 tools/summary.py
+          python3 tools/setup.py --check
+
       - name: Detection and advice run standalone
         run: |
           python3 tools/detect.py

@@ -19,7 +19,8 @@ a = Analysis(
     [os.path.join(TOOLS, 'setup.py')],
     pathex=[TOOLS],
     datas=datas,
-    hiddenimports=['advise', 'build', 'detect', 'itlwm', 'netkexts', 'ocgen'],
+    hiddenimports=['advise', 'audio', 'build', 'detect', 'gpu', 'igpu',
+                   'inputdev', 'itlwm', 'netkexts', 'ocgen', 'summary'],
     excludes=['tkinter', 'unittest', 'pydoc_data', 'test'],
 )
 pyz = PYZ(a.pure)
