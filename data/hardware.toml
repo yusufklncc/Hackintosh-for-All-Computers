@@ -6,6 +6,14 @@
 # rather than what a guide remembers. Regenerate after updating a
 # kext; the diff is the list of devices it gained or lost.
 [[driver]]
+kext = "AirportBrcmFixup.kext"
+role = "wifi"
+label = "Broadcom Wi-Fi"
+version = "2.2.0"
+bus = "pci"
+ids = ["14e4:4311", "14e4:4312", "14e4:4313", "14e4:4318", "14e4:4319", "14e4:431a", "14e4:4320", "14e4:4324", "14e4:4325", "14e4:4328", "14e4:432b", "14e4:432c", "14e4:432d", "14e4:4331", "14e4:4353", "14e4:4357", "14e4:43a0", "14e4:43a3", "14e4:43b1", "14e4:43b2", "14e4:43ba"]
+
+[[driver]]
 kext = "AirportItlwm.kext"
 role = "wifi"
 label = "Intel Wi-Fi"

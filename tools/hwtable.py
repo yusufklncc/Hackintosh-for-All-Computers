@@ -2,7 +2,8 @@
 
 The mapping from a PCI or USB id to the kext that drives it is not written by
 hand and not copied out of a guide. Every kext already declares exactly which
-devices it binds to, in IOPCIPrimaryMatch, IOPCIMatch or idVendor/idProduct, so
+devices it binds to, in IOPCIPrimaryMatch, IOPCIMatch, IONameMatch or
+idVendor/idProduct, so
 the table is read straight out of those and carries the kext version it came
 from. When a kext is updated the table is regenerated and the diff shows which
 devices it gained or lost.
@@ -29,6 +30,7 @@ ROLES = {
     'LucyRTL8125Ethernet': ('ethernet', 'Realtek 2.5G Ethernet'),
     'AtherosE2200Ethernet': ('ethernet', 'Atheros/Killer Ethernet'),
     'AirportItlwm': ('wifi', 'Intel Wi-Fi'),
+    'AirportBrcmFixup': ('wifi', 'Broadcom Wi-Fi'),
     'IntelBluetoothFirmware': ('bluetooth', 'Intel Bluetooth'),
     'IntelBluetoothInjector': ('bluetooth', 'Intel Bluetooth, Monterey and older'),
     'BrcmPatchRAM3': ('bluetooth', 'Broadcom Bluetooth, Big Sur and newer'),
@@ -43,6 +45,21 @@ def pci_ids(value):
     for tok in re.findall(r'0x[0-9a-fA-F]{8}', value or ''):
         n = int(tok, 16)
         out.add(f'{n & 0xffff:04x}:{n >> 16:04x}')
+    return out
+
+
+def name_ids(value):
+    """IONameMatch names a device the way IOKit does: pci14e4,43a3.
+
+    A Lilu plugin has no IOPCIPrimaryMatch to read, because it does not bind to
+    the device itself - it patches the driver that does. Its device list lives
+    here instead, and skipping the field meant AirportBrcmFixup contributed
+    nothing and every Broadcom Wi-Fi card came out unrecognised."""
+    out = set()
+    for name in ([value] if isinstance(value, str) else (value or [])):
+        m = re.fullmatch(r'pci([0-9a-fA-F]{4}),([0-9a-fA-F]{4})', str(name).strip())
+        if m:
+            out.add(f'{m.group(1).lower()}:{m.group(2).lower()}')
     return out
 
 
@@ -64,6 +81,7 @@ def scan(root):
         for p in info.get('IOKitPersonalities', {}).values():
             found[name]['pci'] |= pci_ids(p.get('IOPCIPrimaryMatch', ''))
             found[name]['pci'] |= pci_ids(p.get('IOPCIMatch', ''))
+            found[name]['pci'] |= name_ids(p.get('IONameMatch'))
             v, d = p.get('idVendor'), p.get('idProduct')
             if isinstance(v, int) and isinstance(d, int):
                 found[name]['usb'].add(f'{v:04x}:{d:04x}')
