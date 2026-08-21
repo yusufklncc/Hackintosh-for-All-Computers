@@ -18,6 +18,7 @@ import audio
 import detect
 import gpu
 import ocgen
+from hwtable import name_ids as hwtable_name_ids
 
 FAILED = []
 
@@ -221,7 +222,7 @@ def other_machine():
 
         # named by hand, because nothing about that machine can be detected
         out = Path(tmp) / 'EFI'
-        r = run([sys.executable, 'tools/setup.py', '--answers', '3,2,10,3,1,2,1,1',
+        r = run([sys.executable, 'tools/setup.py', '--answers', '3,2,10,3,1,3,1,1',
                  '--out', str(out)])
         check('naming the hardware of another machine builds', r.returncode == 0)
         if r.returncode == 0:
@@ -352,6 +353,20 @@ def hardware_summary():
           'one build per macOS' in net['Wi-Fi'][0]['detail'], net['Wi-Fi'])
     check('a set with version-bounded extras says how many',
           '+3' in net['Bluetooth'][0]['detail'], net['Bluetooth'])
+    # a DW1820A: the Wi-Fi half came out unrecognised while the Bluetooth half
+    # was found, because AirportBrcmFixup declares its devices in IONameMatch
+    brcm = dict(toshiba, pci_ids=['14e4:43a3'], usb_ids=['0a5c:6412'],
+                device_names={'14e4:43a3': 'Dell Wireless 1820A 802.11ac'})
+    rows_by = {}
+    for r in summary.rows(brcm):
+        rows_by.setdefault(r['part'], []).append(r)
+    check('a Broadcom Wi-Fi card is recognised, not left unknown',
+          rows_by['Wi-Fi'][0]['verdict'] == summary.SUPPORTED, rows_by['Wi-Fi'])
+    check('and it names the kext that patches it',
+          'AirportBrcmFixup.kext' in rows_by['Wi-Fi'][0]['detail'], rows_by['Wi-Fi'])
+    check('the bluetooth row names the kext the build keys on, not a sibling',
+          'BrcmPatchRAM3.kext' in rows_by['Bluetooth'][0]['detail'], rows_by['Bluetooth'])
+
     check('falling back to the set label when the machine named nothing',
           summary.rows(dict(named, device_names={}))[3]['what'] == 'Intel Ethernet')
 
@@ -376,6 +391,25 @@ def device_names():
           detect._names('some heading', detect.PCI_PATTERNS) == {})
 
 
+def broadcom_wifi():
+    """A Lilu plugin declares its devices somewhere else, and it was being missed."""
+    import advise
+    import netkexts
+    check('IONameMatch is read the way IOKit writes it',
+          hwtable_name_ids('pci14e4,43a3') == {'14e4:43a3'})
+    check('anything that is not a pci name is left alone',
+          hwtable_name_ids(['IOResourceMatch', 'pci8086,1559']) == {'8086:1559'})
+    matched = advise.matched_kexts(['14e4:43a3'], [])
+    check('a Broadcom card matches the kext that covers it',
+          matched == {'AirportBrcmFixup.kext'}, matched)
+    added, _ = netkexts.entries(matched, None)
+    check('and it goes in with the bound its README gives',
+          [(e['BundlePath'], e['MinKernel']) for e in added]
+          == [('AirportBrcmFixup.kext', '14.0.0')], added)
+    check('so it is left out of a release older than that',
+          netkexts.entries(matched, 13)[0] == [])
+
+
 def tables_match_sources():
     with tempfile.TemporaryDirectory() as tmp:
         gen = Path(tmp) / 'hardware.toml'
@@ -390,7 +424,7 @@ def tables_match_sources():
 if __name__ == '__main__':
     for section in (graphics, graphics_advice, audio_advice, storage, peripherals,
                     trackpad, framebuffer, boot_args, other_machine, undecodable_output, scripted_answers,
-                    hardware_summary, device_names,
+                    hardware_summary, device_names, broadcom_wifi,
                     tables_match_sources):
         print(f'\n{section.__name__}')
         section()

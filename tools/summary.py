@@ -119,13 +119,25 @@ def _kext_note(match):
     return ''
 
 
+def _driver_sets():
+    """The kexts data/network.toml keys a set on.
+
+    Several kexts can claim one device - a Broadcom Bluetooth adapter matches
+    BrcmPatchRAM3, BrcmPatchRAM2 and BrcmBluetoothInjector - and only one of
+    them is what the build will key on. Naming any other one here would show a
+    kext that is not the one being added."""
+    return {s['match'] for s in netkexts.sets() + netkexts.variant_sets()}
+
+
 def network_rows(hw):
     index = advise.load_table()
     names = hw.get('device_names') or {}
+    keyed = _driver_sets()
     seen, order = {}, []
     for bus, ids in (('pci', hw.get('pci_ids') or []), ('usb', hw.get('usb_ids') or [])):
         for i in ids:
-            for d in index.get((bus, i), []):
+            for d in sorted(index.get((bus, i), []),
+                            key=lambda x: x['kext'] not in keyed):
                 # keyed on the device, not the role: a machine with both an Intel
                 # and a Realtek NIC has two of them, and hiding one is a lie by
                 # omission about the card the person is looking for
