@@ -118,6 +118,13 @@ pointing device gets no trackpad row, and a machine where every row would say
 case is what a Mac produces - it reports its own hardware, which none of these
 tables cover.
 
+Network rows name the card the way the machine named it, not the way the driver
+set is labelled: `Intel(R) Dual Band Wireless-AC 3160`, not `Intel Wi-Fi`. The
+model is printed beside the id by every source - after the pipe on Windows,
+before the bracketed id in `lspci -nn`, after it in `lsusb` - and `detect._names`
+keeps it. There is one row per matched device rather than per role, so a machine
+with two NICs shows both.
+
 The screen goes above the first question, including the one asking which machine
 this is for, so that nothing is answered before it is seen. Answering that
 question with a report shows the summary again, for that machine. Ids passed on

@@ -332,6 +332,49 @@ def hardware_summary():
           not summary.worth_showing(blank))
     check('one that says something is', summary.worth_showing(toshiba))
 
+    # the model the machine printed, rather than the name of the driver set
+    named = dict(toshiba, pci_ids=['8086:1559', '10ec:8168', '8086:08b3'],
+                 device_names={'8086:1559': 'Intel(R) Ethernet Connection I218-V',
+                               '10ec:8168': 'Realtek PCIe GBE Family Controller',
+                               '8086:08b3': 'Intel(R) Dual Band Wireless-AC 3160'})
+    net = {}
+    for r in summary.rows(named):
+        net.setdefault(r['part'], []).append(r)
+    check('a card is named as the machine names it, not as its driver set',
+          [r['what'] for r in net['Wi-Fi']] == ['Intel(R) Dual Band Wireless-AC 3160'],
+          net.get('Wi-Fi'))
+    check('two cards of one kind are both listed, not just the first',
+          len(net['Ethernet']) == 2, net.get('Ethernet'))
+    check('the device id survives however long the note is',
+          all('[' in r['detail'] for rs in
+              (net['Ethernet'], net['Wi-Fi'], net['Bluetooth']) for r in rs), net)
+    check('Intel Wi-Fi says it is built per release, since that is why it is asked',
+          'one build per macOS' in net['Wi-Fi'][0]['detail'], net['Wi-Fi'])
+    check('a set with version-bounded extras says how many',
+          '+3' in net['Bluetooth'][0]['detail'], net['Bluetooth'])
+    check('falling back to the set label when the machine named nothing',
+          summary.rows(dict(named, device_names={}))[3]['what'] == 'Intel Ethernet')
+
+
+def device_names():
+    """The model beside each id, from each source's own shape."""
+    windows = ('PCI\\VEN_8086&DEV_1559&SUBSYS_00011179&REV_04\\3&x|'
+               'Intel(R) Ethernet Connection I218-V')
+    lspci = ('00:19.0 Ethernet controller: Intel Corporation Ethernet Connection '
+             'I218-V [8086:1559] (rev 04)')
+    lsusb = 'Bus 001 Device 004: ID 8087:07dc Intel Corp. Bluetooth wireless interface'
+    check('Windows names the device after the pipe',
+          detect._names(windows, detect.PCI_PATTERNS) ==
+          {'8086:1559': 'Intel(R) Ethernet Connection I218-V'})
+    check('lspci names it before the bracketed id, not the revision after it',
+          detect._names(lspci, detect.PCI_PATTERNS) ==
+          {'8086:1559': 'Intel Corporation Ethernet Connection I218-V'})
+    check('lsusb names it after the id',
+          detect._names(lsusb, detect.USB_PATTERNS) ==
+          {'8087:07dc': 'Intel Corp. Bluetooth wireless interface'})
+    check('a line with no id contributes nothing',
+          detect._names('some heading', detect.PCI_PATTERNS) == {})
+
 
 def tables_match_sources():
     with tempfile.TemporaryDirectory() as tmp:
@@ -347,7 +390,7 @@ def tables_match_sources():
 if __name__ == '__main__':
     for section in (graphics, graphics_advice, audio_advice, storage, peripherals,
                     trackpad, framebuffer, boot_args, other_machine, undecodable_output, scripted_answers,
-                    hardware_summary,
+                    hardware_summary, device_names,
                     tables_match_sources):
         print(f'\n{section.__name__}')
         section()

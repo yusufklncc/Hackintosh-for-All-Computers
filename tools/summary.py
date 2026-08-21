@@ -24,6 +24,7 @@ import audio
 import detect
 import gpu
 import inputdev
+import netkexts
 
 PROFILES = Path('profiles')
 
@@ -105,21 +106,46 @@ def audio_row(hw):
                f'AppleALC, {layouts} layout' + ('s to try' if layouts != 1 else ''))
 
 
+def _kext_note(match):
+    """What else the driver set for a kext brings, from data/network.toml."""
+    for s in netkexts.sets():
+        if s['match'] == match:
+            extra = len(s['kext']) - 1
+            return f'+{extra} by macOS version' if extra else ''
+    for s in netkexts.variant_sets():
+        if s['match'] == match:
+            # one build per release, which is why setup.py asks which macOS
+            return 'one build per macOS'
+    return ''
+
+
 def network_rows(hw):
     index = advise.load_table()
-    seen = {}
+    names = hw.get('device_names') or {}
+    seen, order = {}, []
     for bus, ids in (('pci', hw.get('pci_ids') or []), ('usb', hw.get('usb_ids') or [])):
         for i in ids:
             for d in index.get((bus, i), []):
-                seen.setdefault(d['role'], (i, d))
+                # keyed on the device, not the role: a machine with both an Intel
+                # and a Realtek NIC has two of them, and hiding one is a lie by
+                # omission about the card the person is looking for
+                key = (d['role'], i)
+                if key in seen:
+                    continue
+                seen[key] = d
+                order.append(key)
     out = []
     for role, label in (('ethernet', 'Ethernet'), ('wifi', 'Wi-Fi'),
                         ('bluetooth', 'Bluetooth')):
-        hit = seen.get(role)
-        if hit:
-            device_id, d = hit
-            out.append(row(label, d['label'], SUPPORTED,
-                           f'{d["kext"]}  [{device_id}]'))
+        hits = [(i, seen[(r, i)]) for r, i in order if r == role]
+        if hits:
+            for device_id, d in hits:
+                # the id goes right after the kext so a long note cannot push
+                # the most useful part of the line off the end
+                note = _kext_note(d['kext'])
+                out.append(row(label, names.get(device_id) or d['label'], SUPPORTED,
+                               f'{d["kext"]}  [{device_id}]'
+                               + (f'  {note}' if note else '')))
         elif hw.get('pci_ids') or hw.get('usb_ids'):
             # the devices were read and none of them matched, which is a fact
             # worth stating: either macOS needs no kext, or the card has to go
@@ -153,7 +179,7 @@ def input_row(hw):
         return row('Trackpad', name, SUPPORTED, f'VoodooI2C  [{", ".join(i2c)}]')
     if hw.get('ps2'):
         return row('Trackpad', name, SUPPORTED,
-                   'on PS/2, which VoodooPS2 in the laptop profile covers')
+                   'on PS/2; VoodooPS2 is in the laptop profile')
     return row('Trackpad', name, UNKNOWN, 'no I2C controller and nothing on PS/2')
 
 
@@ -169,7 +195,7 @@ def peripheral_rows(hw):
                            'not on USB, so an IPU or MIPI sensor'))
     for dev in [d for d in real if d['kind'] == 'card reader']:
         out.append(row('Card reader', dev['name'], UNKNOWN,
-                       'this repository has no support data for card readers'))
+                       'no support data for card readers here'))
     return out
 
 
@@ -203,7 +229,7 @@ def render(hw, source='this machine'):
         what = _fit(r['what'], width)
         # the long form of a verdict belongs in the section that acts on it; here
         # a line that wraps costs more than the words at the end are worth
-        detail = _fit(r['detail'], 46)
+        detail = _fit(r['detail'], 52)
         colour = COLOUR[r['verdict']]
         lines.append(f'  {r["part"]:<12s} {what:<{width}s}  '
                      f'{colour}{r["verdict"]:<14s}{RESET}{DIM}{detail}{RESET}'.rstrip())

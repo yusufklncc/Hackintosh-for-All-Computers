@@ -260,6 +260,41 @@ def _pairs(text, patterns):
     return out
 
 
+def _names(text, patterns):
+    r"""{id: name} for the lines an id was found on.
+
+    The machine already prints the model beside the id and it was being thrown
+    away, so a Wi-Fi card the tool had fully identified was reported as the name
+    of the driver set it belongs to - "Intel Wi-Fi" rather than what it is.
+
+    Each source puts the name somewhere different, and the id itself says which:
+
+        Windows   PCI\VEN_8086&DEV_1559&...|Intel(R) Ethernet Connection I218-V
+        lspci     00:19.0 Ethernet controller: Intel Corporation I218-V [8086:1559] (rev 04)
+        lsusb     Bus 001 Device 004: ID 8087:07dc Intel Corp. Bluetooth
+    """
+    out = {}
+    for line in (text or '').splitlines():
+        for pat in patterns:
+            m = pat.search(line)
+            if not m:
+                continue
+            key = f'{m.group(1).lower()}:{m.group(2).lower()}'
+            if '|' in line:
+                name = line.rsplit('|', 1)[1]                # Windows
+            elif line[m.start():m.start() + 1] == '[':
+                # lspci, where the id is bracketed and the model comes before it,
+                # after the device class. Anything after is "(rev 04)".
+                name = line[:m.start()].split(': ', 1)[-1]
+            else:
+                name = line[m.end():]                        # lsusb
+            name = name.strip().strip('()').strip()
+            if name and key not in out:
+                out[key] = name
+            break
+    return out
+
+
 def _apple_pairs(text, vendor_key, device_key):
     """system_profiler prints the two halves on separate lines within a block."""
     out, vendor = set(), None
@@ -405,6 +440,10 @@ def probe():
                           | (_apple_pairs(raw.get('usb'), 'Vendor ID', 'Product ID')
                              if system == 'Darwin' else set())),
         'hda_ids': sorted(_pairs(raw.get('hda'), HDA_PATTERNS)),
+        # the model beside each id, where the machine printed one. A model name
+        # is not a serial number, so it travels in a report like the id does.
+        'device_names': {**_names(raw.get('pci'), PCI_PATTERNS),
+                         **_names(raw.get('usb'), USB_PATTERNS)},
         'nvme': nvme_drives(raw.get('storage')),
         'peripherals': peripherals(raw.get('peripherals')),
         'ps2': ps2_present(raw),
