@@ -469,6 +469,30 @@ def broadcom_wifi():
           netkexts.entries(matched, 13)[0] == [])
 
 
+def provenance():
+    """The report has to be readable off the files, not off a memory of them."""
+    import provenance as prov
+    table = prov.catalogue()
+    kinds = {r['kind'] for r in table}
+    check('every row declares one of the four kinds',
+          kinds <= {prov.DERIVED, prov.QUOTED, prov.MEASURED, prov.NONE}, kinds)
+    check('every row names what it does not cover',
+          all(r['gap'] for r in table))
+    hardware = [r for r in table if r['file'] == 'data/hardware.toml'][0]
+    real = sum(len(d['ids']) for d in ocgen.read_toml('data/hardware.toml')['driver'])
+    check('the counts are read from the files, not typed',
+          str(real) in hardware['count'], hardware['count'])
+    check('the areas with no source are named as such',
+          {r['area'] for r in table if r['kind'] == prov.NONE} ==
+          {'Camera', 'Card reader', 'USB port mapping', 'AMD graphics kexts'},
+          [r['area'] for r in table if r['kind'] == prov.NONE])
+    import contextlib
+    import io
+    with contextlib.redirect_stdout(io.StringIO()) as printed:
+        rc = prov.main([])
+    check('and it runs', rc == 0 and 'Where the answers come from' in printed.getvalue())
+
+
 def tables_match_sources():
     with tempfile.TemporaryDirectory() as tmp:
         gen = Path(tmp) / 'hardware.toml'
@@ -491,7 +515,7 @@ if __name__ == '__main__':
     for section in (graphics, graphics_advice, audio_advice, storage, peripherals,
                     trackpad, framebuffer, boot_args, other_machine, undecodable_output, scripted_answers,
                     hardware_summary, device_names, broadcom_wifi,
-                    detection_gaps,
+                    detection_gaps, provenance,
                     tables_match_sources):
         print(f'\n{section.__name__}')
         section()

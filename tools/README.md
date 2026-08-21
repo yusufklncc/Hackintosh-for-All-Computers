@@ -96,6 +96,22 @@ the question as `detected` and marks its row in the list.
 It is never preselected. Detection can be wrong, and a wrong answer that arrives
 already ticked is one nobody rechecks, so the person always types a number.
 
+## Where the answers come from
+
+    python3 tools/provenance.py            # every category and its source
+    python3 tools/provenance.py --gaps     # only what is not covered
+
+Four kinds of source, and the counts are read off the files rather than typed,
+so the report cannot claim coverage the repository does not have:
+
+* **derived** - read out of a machine-readable file the upstream project ships.
+  Regenerating after an update produces a diff, so drift is visible.
+* **quoted** - the rule exists only in prose, so the row carries the sentence it
+  rests on and names where it came from.
+* **measured** - produced by running something and recording what happened.
+* **none** - no source, so no verdict. This is why some rows say `unknown`, and
+  they will keep saying it until there is something to base an answer on.
+
 ## What the hardware means
 
 `summary.py` is the screen printed before the first question: one line per part,
