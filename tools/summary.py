@@ -180,6 +180,15 @@ def rows(hw):
     return [r for r in out + peripheral_rows(hw) if r]
 
 
+def worth_showing(hw):
+    """Whether a summary of this machine would say anything.
+
+    A table of nothing but `unknown` is not a report, it is noise - and it is
+    what a Mac produces, since it reports its own hardware and this reads none
+    of it. One line saying so beats ten saying nothing."""
+    return any(r['verdict'] in (SUPPORTED, UNSUPPORTED) for r in rows(hw))
+
+
 def _fit(text, width):
     return text if len(text) <= width else text[:width - 1] + '\u2026'
 

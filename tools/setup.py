@@ -195,6 +195,32 @@ def pick_network():
     return picked
 
 
+def overrides(a, hw):
+    """Fold the ids a caller passed into a probe, in place.
+
+    Applied as soon as the machine is settled rather than just before the build,
+    so the summary describes what will actually be built for."""
+    if a.ids is not None or a.usb_ids is not None:
+        hw['pci_ids'] = [x.strip() for x in (a.ids or '').split(',') if x.strip()]
+        hw['usb_ids'] = [x.strip() for x in (a.usb_ids or '').split(',') if x.strip()]
+    if a.hda_ids is not None:
+        hw['hda_ids'] = [x.strip() for x in a.hda_ids.split(',') if x.strip()]
+    if a.nvme is not None:
+        hw['nvme'] = [x.strip() for x in a.nvme.split(',') if x.strip()]
+    return hw
+
+
+def describe_machine(hw, label, source):
+    """The banner and the summary for one machine."""
+    show_machine(hw, label)
+    if summary.worth_showing(hw):
+        print()
+        print('\n'.join(summary.render(hw, source)))
+    elif hw:
+        print(f'  {DIM}nothing here is in any table this repository has, so there is '
+              f'no summary to give{RESET}')
+
+
 def load_machine(path):
     """(probe, label) for a report file, or (None, complaint) if unusable."""
     hw, complaint = detect.read_report(path)
@@ -278,12 +304,14 @@ def main():
         hw, source = load_machine(a.machine)
         if hw is None:
             sys.exit(source)
-        show_machine(hw, 'building for')
+        describe_machine(overrides(a, hw), 'building for', source)
     elif a.no_detect:
         pass
     else:
-        local = detect.probe()
-        show_machine(local, 'this machine')
+        local = overrides(a, detect.probe())
+        # the summary goes above the first question, not after it: the point of
+        # showing it is that nobody answers anything before seeing it
+        describe_machine(local, 'this machine', 'this machine')
         if not local.get('cpu'):
             print(f'  {DIM}could not read this machine; every question is still '
                   f'answerable{RESET}')
@@ -323,7 +351,7 @@ def main():
                     path = str((started_in / path).resolve())
                 hw, source = load_machine(path)
                 if hw is not None:
-                    show_machine(hw, 'building for')
+                    describe_machine(overrides(a, hw), 'building for', source)
                     break
                 print(f'      {YELLOW}{source}{RESET}')
                 hw = {}
@@ -335,21 +363,10 @@ def main():
                   f'detected for it.\n  Graphics, audio and the trackpad need a report '
                   f'taken there:\n      setup.py --report machine.json{RESET}')
 
-    if a.ids is not None or a.usb_ids is not None:
-        hw['pci_ids'] = [x.strip() for x in (a.ids or '').split(',') if x.strip()]
-        hw['usb_ids'] = [x.strip() for x in (a.usb_ids or '').split(',') if x.strip()]
-    if a.hda_ids is not None:
-        hw['hda_ids'] = [x.strip() for x in a.hda_ids.split(',') if x.strip()]
-    if a.nvme is not None:
-        hw['nvme'] = [x.strip() for x in a.nvme.split(',') if x.strip()]
+    if a.no_detect:
+        overrides(a, hw)
     if source is None and (hw.get('pci_ids') or hw.get('hda_ids') or hw.get('nvme')):
         source = 'the ids you passed'
-
-    if hw.get('cpu') or hw.get('pci_ids'):
-        # before any question, so nobody answers four of them to be told at the
-        # end that the Wi-Fi card has to be replaced
-        print()
-        print('\n'.join(summary.render(hw, source or 'this machine')))
 
     asked = step[0]      # the scope question, when it was asked at all
     plat = ask(nxt(), total, 'What kind of machine is this?',
