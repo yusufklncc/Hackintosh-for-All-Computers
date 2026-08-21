@@ -44,6 +44,25 @@ def load():
     return ({c['id']: c for c in d['card']}, d.get('family', []), d.get('igpu', []))
 
 
+FIELD = Path('data/field.toml')
+
+
+def field_igpu(cpu_name):
+    """A field report about this exact processor's iGPU, if there is one.
+
+    Support is documented per generation and per device id, and neither reaches
+    a single SKU. A processor whose iGPU behaves differently from the rest of
+    its generation can only be recorded from someone having run it, so the entry
+    carries who ran it and what they saw."""
+    if not cpu_name or not FIELD.exists():
+        return None
+    haystack = cpu_name.lower()
+    for e in ocgen.read_toml(FIELD).get('igpu', []):
+        if e['cpu'].lower() in haystack:
+            return e
+    return None
+
+
 def igpu_verdict(generation):
     """Intel iGPU support for a CPU generation, or None if not covered.
 
@@ -94,14 +113,27 @@ def classify(device, generation=None):
     return 'unknown', None
 
 
-def report(devices, generation=None):
-    """Lines describing the graphics situation, and the boot args to add."""
+def report(devices, generation=None, cpu_name=None):
+    """Lines describing the graphics situation, and the boot args to add.
+
+    cpu_name is the processor as the machine reports it, which is the only thing
+    a field report can be matched on."""
     lines, args = [], []
     if not devices:
         return ['  no graphics hardware was readable here'], args
 
-    judged = [(d, *classify(d, generation)) for d in devices]
-    igpu_state, igpu_models = igpu_verdict(generation)
+    field = field_igpu(cpu_name)
+    judged = []
+    for d in devices:
+        verdict, entry = classify(d, generation)
+        if field and looks_integrated(d.get('name')):
+            verdict = field['status']
+            entry = {'family': f'{field["observed"]}, reported by '
+                               f'{field["observed_by"]}',
+                     'note': field.get('note', '')}
+        judged.append((d, verdict, entry))
+    igpu_state = field['status'] if field else igpu_verdict(generation)[0]
+    igpu_state = 'works' if igpu_state == 'works' else igpu_state
     supported_igpu = [d for d, v, _ in judged
                       if looks_integrated(d.get('name'))
                       and (v in ('works', 'works-spoofed') or igpu_state == 'works')]

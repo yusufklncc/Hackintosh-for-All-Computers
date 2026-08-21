@@ -72,8 +72,15 @@ def cpu_row(hw):
 
 def graphics_rows(hw):
     out = []
+    field = gpu.field_igpu(hw.get('cpu'))
     for device in hw.get('gpu_devices', []):
         verdict, entry = gpu.classify(device, hw.get('generation'))
+        if field and gpu.looks_integrated(device.get('name')):
+            # somebody ran this exact processor. That outranks a rule written
+            # for its generation, and says so rather than quietly disagreeing.
+            verdict = field['status']
+            entry = {'family': f'{field["observed"]}, reported by '
+                               f'{field["observed_by"]}'}
         detail = ''
         if entry:
             detail = entry.get('family') or entry.get('name') or ''

@@ -1,0 +1,33 @@
+{
+  "acpi_ids": [],
+  "cores": 4,
+  "cpu": "Intel(R) Core(TM) i5-10200H CPU @ 2.40GHz",
+  "device_names": {},
+  "generation": "comet-lake",
+  "gpu": [
+    "Intel(R) UHD Graphics"
+  ],
+  "gpu_devices": [
+    {
+      "id": "8086:9bc4",
+      "name": "Intel(R) UHD Graphics"
+    }
+  ],
+  "gpu_virtual": [],
+  "hda_ids": [
+    "10ec:0256"
+  ],
+  "laptop": true,
+  "nvme": [],
+  "oem": null,
+  "oem_raw": null,
+  "pci_ids": [
+    "8086:9bc4"
+  ],
+  "peripherals": [],
+  "ps2": true,
+  "report_version": 1,
+  "system": "Windows",
+  "usb_ids": [],
+  "written": "a fixture, not a real machine"
+}

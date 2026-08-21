@@ -11,6 +11,10 @@ a fact and an opinion:
             source says whether they were right.
   measured  produced by running something and recording what happened, not by
             asserting what should happen.
+  reported  somebody ran macOS on the hardware and wrote down what happened.
+            Weaker than a document, and labelled as such wherever it is used,
+            but a machine that has been booted beats a table that has never
+            heard of it. Each entry names who observed it and what exactly.
   none      no source, so no verdict. The tools say `unknown` here, and will
             keep saying it until there is something to base an answer on.
 
@@ -32,8 +36,10 @@ BOLD, DIM, GREEN, YELLOW, RESET = '\033[1m', '\033[2m', '\033[32m', '\033[33m', 
 if os.environ.get('NO_COLOR') or not sys.stdout.isatty():
     BOLD = DIM = GREEN = YELLOW = RESET = ''
 
-DERIVED, QUOTED, MEASURED, NONE = 'derived', 'quoted', 'measured', 'none'
-KIND_COLOUR = {DERIVED: GREEN, QUOTED: GREEN, MEASURED: GREEN, NONE: YELLOW}
+DERIVED, QUOTED, MEASURED, REPORTED, NONE = (
+    'derived', 'quoted', 'measured', 'reported', 'none')
+KIND_COLOUR = {DERIVED: GREEN, QUOTED: GREEN, MEASURED: GREEN,
+               REPORTED: YELLOW, NONE: YELLOW}
 
 
 def rows_in(path, key):
@@ -137,6 +143,13 @@ def catalogue():
              count=f'{rows_in("profiles/catalogue.toml", "config")} configs',
              covers='byte equality between generated and published',
              gap='None. This is the gate.'),
+        dict(area='Field reports', kind=REPORTED, file='data/field.toml',
+             source='running macOS on the machine, attributed per entry',
+             tool='hand written',
+             count=f'{rows_in("data/field.toml", "igpu")} iGPU exception{"s" if rows_in("data/field.toml", "igpu") != 1 else ""}',
+             covers='processors whose iGPU behaves differently from its generation',
+             gap='One person, one machine each. It outranks the generation rule '
+                 'because it is more specific, not because it is stronger.'),
         dict(area='Camera', kind=NONE, file='-',
              source='none', tool='-',
              count='bus only',
@@ -174,9 +187,10 @@ def main(argv=None):
             print(f'  {r["area"]:<{width}s}  {colour}{r["kind"]:<9s}{RESET} '
                   f'{r["count"]:<28s} {DIM}{r["file"]}{RESET}')
         counts = {k: sum(1 for r in table if r['kind'] == k)
-                  for k in (DERIVED, QUOTED, MEASURED, NONE)}
+                  for k in (DERIVED, QUOTED, MEASURED, REPORTED, NONE)}
         print(f'\n  {counts[DERIVED]} derived from a machine-readable source, '
               f'{counts[QUOTED]} quoted from prose, {counts[MEASURED]} measured, '
+              f'{counts[REPORTED]} reported from running it, '
               f'{counts[NONE]} with no source.')
         print(f'  {DIM}The last group is why some rows say unknown. That is the '
               f'honest answer, not a missing feature.{RESET}\n')

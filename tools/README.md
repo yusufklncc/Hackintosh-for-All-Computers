@@ -119,6 +119,29 @@ upstream document states it. The other leaves the key out entirely, which means
 that behind and call it a choice. `null` in a `--device-props` file is how that
 is expressed.
 
+## When somebody has actually run it
+
+`data/field.toml` holds observations that no upstream document carries, and it
+is the only table here that rests on nothing but somebody having booted the
+machine. Each entry names who observed it and what exactly they saw, and the
+tools label the verdict that way rather than presenting it as a documented fact.
+
+The first entry is the i5-10200H: Dortania states iGPU support per generation
+and WhateverGreen per device id, and Comet Lake is supported by both, so every
+rule here would call that processor's iGPU supported. It installs and the
+graphics never accelerate. A single SKU is below the resolution of either
+source, so it can only be recorded from having run it.
+
+An entry outranks the generation rule because it is more specific, not because
+it is stronger. It earns its place by being specific about the observation:
+"does not work" is not an entry, "installs, but graphics acceleration cannot be
+made to work" is.
+
+Where one applies, the framebuffer section is skipped entirely and the
+placeholder the profiles ship is removed - an id will not rescue an iGPU that
+has been run and found not to accelerate, and leaving a value nobody chose is
+worse than leaving the key out.
+
 ## Where the answers come from
 
     python3 tools/provenance.py            # every category and its source

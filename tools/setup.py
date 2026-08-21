@@ -503,7 +503,7 @@ def main():
     # so nobody is asked to decide about a device they do not have
     if hw.get('gpu_devices'):
         print(f'\n{BOLD}Graphics{RESET}')
-        lines, gpu_args = gpu.report(hw['gpu_devices'], cpu)
+        lines, gpu_args = gpu.report(hw['gpu_devices'], cpu, hw.get('cpu'))
         print('\n'.join(lines))
         if gpu_args:
             print(f'\n      {GREEN}boot arguments needed: {" ".join(gpu_args)}{RESET}')
@@ -513,7 +513,7 @@ def main():
     boot_args = []
 
     if hw.get('gpu_devices'):
-        boot_args += gpu.report(hw['gpu_devices'], cpu)[1]
+        boot_args += gpu.report(hw['gpu_devices'], cpu, hw.get('cpu'))[1]
 
     if hw.get('hda_ids'):
         print(f'\n{BOLD}Audio{RESET}')
@@ -554,8 +554,19 @@ def main():
 
     device_props = {}
     if hw.get('gpu_devices'):
+        # a framebuffer id cannot rescue an iGPU that has been run and found
+        # not to accelerate, so the field report suppresses the whole section
         state = gpu.igpu_verdict(cpu)[0]
-        ilines, iprops, isteps = igpu.report(cpu, plat == 'laptop', state == 'works')
+        field = gpu.field_igpu(hw.get('cpu'))
+        works = state == 'works' and not (field and field['status'] != 'works')
+        ilines, iprops, isteps = igpu.report(cpu, plat == 'laptop', works)
+        if field and not works:
+            # the profiles ship a placeholder. Leaving it because the section was
+            # skipped would put a value in the config that nobody chose.
+            print(f'\n{BOLD}Intel graphics framebuffer{RESET}')
+            print(f'      {YELLOW}none written: this iGPU has been reported not to '
+                  f'accelerate, and a framebuffer id will not change that{RESET}')
+            device_props.update(igpu.props_for(None))
         if ilines:
             print(f'\n{BOLD}Intel graphics framebuffer{RESET}')
             print('\n'.join(ilines))

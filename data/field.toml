@@ -1,0 +1,23 @@
+# What somebody actually observed, where no upstream document says anything.
+#
+# Every other table here rests on a machine-readable source or on a quoted
+# sentence. This one does not: it holds findings from running macOS on the
+# hardware, and each entry names who found it and what exactly they saw. That
+# is a weaker kind of evidence than a kext's own Info.plist and it is labelled
+# as such wherever it is used, but a machine somebody has actually booted beats
+# a table that has never heard of it.
+#
+# An entry earns its place by being specific about the observation. "Does not
+# work" is not an entry; "installs, but graphics acceleration cannot be made to
+# work" is.
+
+# Intel iGPUs, matched on the processor model as the machine reports it.
+# Dortania states iGPU support per generation and WhateverGreen per device id.
+# Neither reaches a single SKU, so a processor whose iGPU behaves differently
+# from its generation can only be recorded here.
+[[igpu]]
+cpu = "i5-10200H"
+status = "unsupported"
+observed_by = "yusufklncc"
+observed = "macOS installs, but graphics acceleration cannot be made to work"
+note = "Comet Lake is supported as a generation, so the generation rule alone would call this one supported."

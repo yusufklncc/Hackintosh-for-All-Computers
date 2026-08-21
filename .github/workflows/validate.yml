@@ -50,6 +50,16 @@ jobs:
           # the id that boots without acceleration
           python3 tools/setup.py $E570 --answers 1,16,1 --out /tmp/fb-none/EFI
           python3 tools/setup.py $E570 --answers 1,15,1 --out /tmp/fb-noaccel/EFI
+          # a processor whose iGPU a field report says does not accelerate: no
+          # framebuffer section, no menu, and the profile's placeholder removed
+          CML='--machine tools/fixtures/comet-lake-h.json'
+          python3 tools/setup.py $CML --answers 1,3 --out /tmp/field/EFI
+          python3 - <<'CHECK'
+          import plistlib
+          d = plistlib.load(open('/tmp/field/EFI/OC/config.plist', 'rb'))
+          got = d['DeviceProperties']['Add'].get('PciRoot(0x0)/Pci(0x2,0x0)', {})
+          assert 'AAPL,ig-platform-id' not in got, got
+          CHECK
 
       - name: Storage advice
         run: |

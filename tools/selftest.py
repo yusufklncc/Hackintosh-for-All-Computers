@@ -533,13 +533,47 @@ def framebuffers():
           unknown_oem and unknown_oem[4] is None, unknown_oem)
 
 
+def field_reports():
+    """An observation outranks a rule written for the generation, and says so."""
+    import gpu
+    import summary
+    ten = {'cpu': 'Intel(R) Core(TM) i5-10200H CPU @ 2.40GHz',
+           'generation': 'comet-lake', 'laptop': True, 'pci_ids': [], 'ps2': False,
+           'gpu_devices': [{'id': '8086:9bc4', 'name': 'Intel(R) UHD Graphics'}]}
+    other = dict(ten, cpu='Intel(R) Core(TM) i5-10210U CPU @ 1.60GHz')
+
+    check('the generation rule alone would call this one supported',
+          gpu.igpu_verdict('comet-lake')[0] == 'works')
+    found = gpu.field_igpu(ten['cpu'])
+    check('the field report is matched on the processor', found and
+          found['status'] == 'unsupported', found)
+    check('and it names who observed it and what they saw',
+          found and found['observed_by'] and 'acceleration' in found['observed'])
+    check('another processor of the same generation is untouched',
+          gpu.field_igpu(other['cpu']) is None)
+
+    rows = {r['part']: r for r in summary.rows(ten)}
+    check('so the summary calls it unsupported',
+          rows['Graphics']['verdict'] == summary.UNSUPPORTED, rows['Graphics'])
+    check('with the observation as the reason, not a table',
+          'reported by' in rows['Graphics']['detail'], rows['Graphics'])
+    check('and the rest of the generation still reads supported',
+          {r['part']: r for r in summary.rows(other)}['Graphics']['verdict']
+          == summary.SUPPORTED)
+
+    lines = gpu.report(ten['gpu_devices'], 'comet-lake', ten['cpu'])[0]
+    check('the graphics section agrees with the summary',
+          any('not supported' in l for l in lines), lines)
+
+
 def provenance():
     """The report has to be readable off the files, not off a memory of them."""
     import provenance as prov
     table = prov.catalogue()
     kinds = {r['kind'] for r in table}
-    check('every row declares one of the four kinds',
-          kinds <= {prov.DERIVED, prov.QUOTED, prov.MEASURED, prov.NONE}, kinds)
+    check('every row declares one of the kinds',
+          kinds <= {prov.DERIVED, prov.QUOTED, prov.MEASURED,
+                    prov.REPORTED, prov.NONE}, kinds)
     check('every row names what it does not cover',
           all(r['gap'] for r in table))
     hardware = [r for r in table if r['file'] == 'data/hardware.toml'][0]
@@ -579,7 +613,7 @@ if __name__ == '__main__':
     for section in (graphics, graphics_advice, audio_advice, storage, peripherals,
                     trackpad, framebuffer, boot_args, other_machine, undecodable_output, scripted_answers,
                     hardware_summary, device_names, broadcom_wifi,
-                    detection_gaps, provenance, framebuffers,
+                    detection_gaps, provenance, framebuffers, field_reports,
                     tables_match_sources):
         print(f'\n{section.__name__}')
         section()
