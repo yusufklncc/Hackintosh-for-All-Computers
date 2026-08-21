@@ -113,7 +113,16 @@ Nothing on that screen stops a build. It runs before the questions so that an
 unsupported Wi-Fi card is known before four answers, not after.
 
 Rows that would be noise are left out rather than filled in: a desktop with no
-pointing device gets no trackpad row.
+pointing device gets no trackpad row, and a machine where every row would say
+`unknown` gets one line saying so instead of a table saying nothing. That last
+case is what a Mac produces - it reports its own hardware, which none of these
+tables cover.
+
+The screen goes above the first question, including the one asking which machine
+this is for, so that nothing is answered before it is seen. Answering that
+question with a report shows the summary again, for that machine. Ids passed on
+the command line are folded in before it renders, so it describes what will
+actually be built rather than what was detected.
 
 ## Which machine the answers are about
 

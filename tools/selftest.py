@@ -328,6 +328,9 @@ def hardware_summary():
           complaint is None and not [r for r in summary.rows(blank)
                                      if r['verdict'] == summary.SUPPORTED])
     check('and it still renders', len(summary.render(blank, 'nothing')) > 3)
+    check('a table of nothing but unknown is not worth printing',
+          not summary.worth_showing(blank))
+    check('one that says something is', summary.worth_showing(toshiba))
 
 
 def tables_match_sources():
