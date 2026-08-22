@@ -125,6 +125,10 @@ jobs:
           test -d /tmp/by-name/EFI/OC/Kexts/IntelBluetoothFirmware.kext
           test ! -d /tmp/by-name/EFI/OC/Kexts/AirportItlwm.kext
 
+      - name: The vendored USB tool is the file that was checked
+        run: |
+          python3 tools/usbmap.py
+
       - name: What we ship and what we do not
         run: |
           python3 tools/thirdparty.py

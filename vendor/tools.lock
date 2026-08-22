@@ -1,0 +1,19 @@
+# Programs vendored whole, as their projects publish them.
+#
+# A kext is a bundle this repository copies into an EFI; these are tools that
+# run on the person's machine. They are pinned the same way: a version, the
+# upstream that published it, and a hash of the exact file, so what ships is
+# what was checked rather than whatever the project has today.
+#
+# Each one keeps its own LICENSE beside it. The LICENSE at the root of this
+# repository covers what is written here and nothing else.
+
+[tool."USBToolBox/Windows.exe"]
+version = "0.2"
+sha256 = "715532b242b65be1a93759c67efe9b7987c99e505cd790d4aa9bbca551493177"
+upstream = "USBToolBox/tool"
+license = "MIT"
+# The Python source needs the wmi and pywin32 packages, which this repository
+# has none of and does not want. The project publishes this build for exactly
+# that reason, so the build is what is vendored.
+note = "the released Windows build, not the source"

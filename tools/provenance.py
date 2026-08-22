@@ -182,12 +182,13 @@ def catalogue():
                     'and does not',
              gap='Realtek only, and the kext is not shipped here - the row says so. '
                  'The project calls itself pre-1.0 beta and last moved in 2022.'),
-        dict(area='USB port mapping', kind=NONE, file='-',
-             source='none', tool='tools/setup.py --usb-map',
-             count='-',
-             covers='a UTBMap.kext made elsewhere is accepted and replaces UTBDefault',
-             gap='The map itself cannot be produced here: it takes plugging a '
-                 'device into every port on the machine.'),
+        dict(area='USB port mapping', kind=DERIVED, file='vendor/tools.lock',
+             source='USBToolBox, vendored whole and driven',
+             tool='tools/usbmap.py',
+             count='1 tool, pinned by hash',
+             covers='the map the tool writes, on Windows, run from the builder',
+             gap='Windows only, because that is the build the project publishes. '
+                 'Nothing here can produce a map without a person at the machine.'),
         dict(area='AMD graphics kexts', kind=NONE, file='-',
              source='out of scope by request', tool='-',
              count='-', covers='-',

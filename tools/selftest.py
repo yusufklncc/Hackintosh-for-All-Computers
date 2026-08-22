@@ -574,6 +574,35 @@ def native_device_ids():
           gpu.native_ids('rocket-lake') == set())
 
 
+def usb_mapping():
+    """The tool is vendored whole and driven, so what matters is the wiring."""
+    import usbmap
+    tool = usbmap.available()
+    check('the tool is here', tool is not None, tool)
+    if tool:
+        ok, detail = usbmap.verify(tool)
+        check('and it is the file that was checked', ok, detail)
+        with tempfile.TemporaryDirectory() as tmp:
+            fake = Path(tmp) / 'Windows.exe'
+            fake.write_bytes(b'not the tool')
+            check('a file that is not would be refused', not usbmap.verify(fake)[0])
+    check('it is only offered where it can run',
+          usbmap.runnable_here() == (sys.platform == 'win32'))
+
+    # which map was written decides what comes out of the EFI, and the native
+    # ones do not ride on USBToolBox.kext
+    utb = usbmap.OUTPUTS['UTBMap.kext']
+    native = usbmap.OUTPUTS['USBMap.kext']
+    check('a UTBMap keeps USBToolBox.kext and drops the catch-all',
+          utb['needs'] == ['USBToolBox.kext'] and utb['drops'] == ['UTBDefault.kext'])
+    check('a native map drops both',
+          set(native['drops']) == {'UTBDefault.kext', 'USBToolBox.kext'}
+          and not native['needs'])
+    lock = ocgen.read_toml('vendor/tools.lock')['tool']['USBToolBox/Windows.exe']
+    check('the lock records the licence, since it is somebody else\'s binary',
+          lock['license'] == 'MIT' and (Path('vendor/tools/USBToolBox/LICENSE')).exists())
+
+
 def third_party():
     """What we ship that somebody else wrote, and under what."""
     import thirdparty
@@ -743,7 +772,7 @@ def provenance():
           str(real) in hardware['count'], hardware['count'])
     check('the areas with no source are named as such',
           {r['area'] for r in table if r['kind'] == prov.NONE} ==
-          {'Camera', 'USB port mapping', 'AMD graphics kexts'},
+          {'Camera', 'AMD graphics kexts'},
           [r['area'] for r in table if r['kind'] == prov.NONE])
     import contextlib
     import io
@@ -774,7 +803,7 @@ if __name__ == '__main__':
     for section in (graphics, graphics_advice, audio_advice, storage, peripherals,
                     trackpad, framebuffer, boot_args, other_machine, undecodable_output, scripted_answers,
                     hardware_summary, device_names, broadcom_wifi,
-                    detection_gaps, provenance, framebuffers, native_device_ids, field_reports, macos_window, card_readers, third_party,
+                    detection_gaps, provenance, framebuffers, native_device_ids, field_reports, macos_window, card_readers, third_party, usb_mapping,
                     tables_match_sources):
         print(f'\n{section.__name__}')
         section()

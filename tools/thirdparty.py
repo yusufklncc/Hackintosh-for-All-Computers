@@ -168,6 +168,14 @@ def fetch_candidates():
     return 0
 
 
+def vendored_tools():
+    """Programs vendored whole, which are not kexts and are licensed separately."""
+    lock = Path('vendor/tools.lock')
+    if not lock.exists():
+        return []
+    return [dict(path=k, **v) for k, v in ocgen.read_toml(lock)['tool'].items()]
+
+
 def report(hw=None):
     lic = read_licences()
     ours = upstreams()
@@ -194,6 +202,16 @@ def report(hw=None):
         print(f'\n  {RED}{len(missing)} of these state no licence at all.{RESET} '
               f'{DIM}That is not permission; it is the\n  absence of one. Shipping '
               f'them is a decision this report only makes visible.{RESET}')
+
+    tools = vendored_tools()
+    if tools:
+        print(f'\n{BOLD}Programs vendored whole{RESET}  '
+              f'{DIM}not kexts, and licensed separately{RESET}\n')
+        for tool in tools:
+            print(f'  {tool["path"]:28s} {GREEN}{tool["license"]:16s}{RESET} '
+                  f'v{tool["version"]}  {DIM}{tool["upstream"]}{RESET}')
+            if tool.get('note'):
+                print(f'      {DIM}{tool["note"]}{RESET}')
 
     rows = candidates()
     if not rows:
