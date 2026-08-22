@@ -673,6 +673,29 @@ def frozen_build():
     check('and the builder can load the tools on demand', r.returncode == 0)
 
 
+def window_stays_open():
+    """A console the program opened for itself dies with it, taking the summary.
+
+    Somebody who double-clicks the executable sees a window flash and nothing
+    else: the warnings, the path to the EFI and the ROM reminder all go with it.
+    So the frozen build waits for a key - and only the frozen build, only on a
+    terminal, and never under --answers, or CI would hang."""
+    import setup as guided
+    src = Path('tools/setup.py').read_text()
+    check('the pause is only for the frozen build',
+          "if not getattr(sys, 'frozen', False) or SCRIPTING:" in src)
+    check('and a refusal is printed before it, not swallowed',
+          'if isinstance(exc.code, str):' in src)
+
+    # unfrozen, it must be a no-op whatever stdin is
+    check('nothing waits when running from a clone', guided.hold() is None)
+
+    r = run([sys.executable, 'tools/setup.py', '--machine', '/tmp/nope.json'],
+            may_fail=True)
+    check('a refusal still exits non-zero', r.returncode == 1, r.returncode)
+    check('and says why', 'does not exist' in (r.stdout + r.stderr))
+
+
 def frozen_names():
     """Names a frozen build takes away, which the vendored code still uses.
 
@@ -1018,7 +1041,7 @@ if __name__ == '__main__':
                     device_names, broadcom_wifi, detection_gaps, provenance,
                     framebuffers, native_device_ids, field_reports, macos_window,
                     card_readers, third_party, usb_mapping, acpi_tables,
-                    frozen_names, frozen_build, workflow_flags,
+                    window_stays_open, frozen_names, frozen_build, workflow_flags,
                     runner_independence, tables_match_sources):
         print(f'\n{section.__name__}')
         section()
