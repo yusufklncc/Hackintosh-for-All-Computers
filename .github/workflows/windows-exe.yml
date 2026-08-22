@@ -32,6 +32,18 @@ jobs:
       - name: And detection runs without throwing
         run: dist/HackintoshEFIBuilder.exe --answers 1,2,10,3,3 --out smoke2/EFI
 
+      # SSDTTime is imported at runtime, so PyInstaller cannot see what it
+      # imports. A missing module does not show until somebody answers yes to a
+      # question, which is how it was found the first time. This answers it.
+      - name: The vendored tools load inside the frozen build
+        run: dist/HackintoshEFIBuilder.exe --check-tools
+
+      - name: It can dump this runner's ACPI tables and compile against them
+        run: |
+          dist/HackintoshEFIBuilder.exe --report machine.json --acpi ACPI
+          if (-not (Test-Path machine.json)) { exit 1 }
+          Get-ChildItem ACPI | Select-Object -First 5 Name
+
       - uses: actions/upload-artifact@v4
         with:
           name: windows-exe

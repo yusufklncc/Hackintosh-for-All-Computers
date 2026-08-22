@@ -19,10 +19,22 @@ a = Analysis(
     [os.path.join(TOOLS, 'setup.py')],
     pathex=[TOOLS],
     datas=datas,
-    hiddenimports=['advise', 'audio', 'build', 'detect', 'gpu', 'igpu',
+    hiddenimports=['acpi', 'advise', 'audio', 'build', 'detect', 'gpu', 'igpu',
                    'inputdev', 'itlwm', 'netkexts', 'ocgen', 'provenance',
-                   'acpi', 'thirdparty', 'usbmap',
-                   'summary'],
+                   'summary', 'thirdparty', 'usbmap']
+                  # SSDTTime is loaded at runtime with importlib, from a copy of
+                  # the vendored tree. PyInstaller never sees those imports, so
+                  # the standard library it uses has to be named here or the
+                  # frozen build dies the moment somebody says yes to SSDTs -
+                  # which is exactly how this was found.
+                  + ['binascii', 'ctypes', 'datetime', 'errno', 'getpass', 'glob',
+                     'msvcrt', 'os', 'sys',
+                     'gzip', 'io', 'itertools', 'json', 'multiprocessing',
+                     'plistlib', 'queue', 're', 'select', 'shlex', 'shutil',
+                     'ssl', 'string', 'struct', 'subprocess', 'tempfile',
+                     'textwrap', 'threading', 'time', 'urllib', 'urllib.error',
+                     'urllib.parse', 'urllib.request', 'xml', 'xml.etree',
+                     'xml.etree.ElementTree', 'zipfile'],
     excludes=['tkinter', 'unittest', 'pydoc_data', 'test'],
 )
 pyz = PYZ(a.pure)

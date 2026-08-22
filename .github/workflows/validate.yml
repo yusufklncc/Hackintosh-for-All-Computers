@@ -125,6 +125,9 @@ jobs:
           test -d /tmp/by-name/EFI/OC/Kexts/IntelBluetoothFirmware.kext
           test ! -d /tmp/by-name/EFI/OC/Kexts/AirportItlwm.kext
 
+      - name: The vendored tools load
+        run: python3 tools/setup.py --check-tools
+
       - name: The vendored ACPI tools are the files that were checked
         run: |
           python3 - <<'CHECK'

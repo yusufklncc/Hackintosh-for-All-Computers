@@ -815,7 +815,18 @@ is allowed to pass.
 `--machine tools/fixtures/no-hardware.json`. That is what CI uses,
 on both platforms, instead of piping keystrokes.
 
-Two things the frozen build gets wrong if written the obvious way, both fixed:
+A third: **PyInstaller only bundles what it can see being imported.** SSDTTime
+is loaded at runtime with `importlib`, from a copy of the vendored tree, so its
+imports are invisible to the analysis and none of the standard library it uses
+gets bundled. The frozen build then dies the moment somebody answers yes to the
+SSDT question - `No module named 'shlex'` - which is exactly how it was found,
+on a real machine, after CI had passed. Every module the tree imports is now
+named in the spec, a self-test reads them back out of the tree and fails if one
+is missing, and `--check-tools` loads the tools so the Windows job can answer
+that question against the executable it just built instead of waiting for a
+person to.
+
+Two other things the frozen build gets wrong if written the obvious way:
 a relative script path in the spec resolves against the spec's own directory, so
 `tools/setup.py` in a spec that lives in `tools/` looks for `tools/tools/`; and
 `sys.executable` is the executable itself rather than an interpreter, so
