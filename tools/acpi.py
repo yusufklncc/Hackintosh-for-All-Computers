@@ -74,7 +74,7 @@ def available():
 
 
 def verify():
-    """(ok, complaint) - the binaries have to be the ones that were checked."""
+    """(ok, detail) - the binaries have to be the ones that were checked."""
     if not LOCK.exists():
         return False, f'{LOCK} is missing'
     lock = ocgen.read_toml(LOCK)['tool']
@@ -82,11 +82,28 @@ def verify():
         entry = lock.get(f'iasl/{src}')
         if not entry:
             return False, f'iasl/{src} is not in {LOCK}'
+        if not (IASL / src).exists():
+            return False, f'{IASL / src} is missing'
+        if getattr(sys, 'frozen', False):
+            continue
         got = hashlib.sha256((IASL / src).read_bytes()).hexdigest()
         if got != entry['sha256']:
             return False, (f'{IASL / src} does not match {LOCK}; expected '
                            f'{entry["sha256"][:12]}, found {got[:12]}')
-    return True, lock['SSDTTime']['version']
+    version = lock['SSDTTime']['version']
+    return True, (f'{version}, {hash_note()}' if getattr(sys, 'frozen', False)
+                  else version)
+
+def hash_note():
+    """Why a hash is not checked inside a frozen build.
+
+    PyInstaller rewrites the binaries it bundles - it re-signs Mach-O files, so
+    what is unpacked is not byte for byte what was committed. The hash pins what
+    is in the repository and CI checks it there; once the packer has been over
+    it the guarantee belongs to the build, not to a check at run time. Saying so
+    is better than a check that passes because it was quietly skipped."""
+    return 'not hashed here: the packer rewrote it, so CI checks the repository copy'
+
 
 
 def prepare(work):
@@ -103,8 +120,36 @@ def prepare(work):
     return work
 
 
+def restore_site_builtins():
+    """Put back the names a frozen build takes away.
+
+    SSDTTime quits with `exit(0)`. That name comes from site.py, which
+    PyInstaller does not run, so in the frozen build it is a NameError rather
+    than a SystemExit - and an unhandled one, which killed the whole builder the
+    moment somebody finished making their SSDTs. Restoring the name is putting
+    back what the interpreter normally provides, not patching their code."""
+    import builtins
+    for name in ('exit', 'quit'):
+        if not hasattr(builtins, name):
+            setattr(builtins, name, _Quitter(name))
+
+
+class _Quitter:
+    """What site.py installs: calling it raises SystemExit."""
+
+    def __init__(self, name):
+        self.name = name
+
+    def __repr__(self):
+        return f'Use {self.name}() to exit'
+
+    def __call__(self, code=None):
+        raise SystemExit(code)
+
+
 def load(work):
     """Import SSDTTime from the copy, so its own __file__ is in our directory."""
+    restore_site_builtins()
     sys.path.insert(0, str(work))
     spec = importlib.util.spec_from_file_location('SSDTTime', work / 'SSDTTime.py')
     module = importlib.util.module_from_spec(spec)
@@ -133,6 +178,10 @@ def run(work, tables=None):
             ssdt.main()
     except SystemExit:
         pass
+    except BaseException as exc:                   # noqa: BLE001
+        # a half-finished EFI is not worth losing to the tool falling over, and
+        # whatever went wrong is worth naming rather than swallowing
+        print(f'  SSDTTime stopped: {exc!r}')
     finally:
         os.chdir(here)
         if str(work) in sys.path:

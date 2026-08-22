@@ -175,20 +175,35 @@ def check_tools():
 
     if usbmap.available():
         ok, detail = usbmap.verify(usbmap.available())
-        report('the USB mapper is the file that was checked', ok, '' if ok else detail)
+        report('the USB mapper is the file that was checked', ok, detail)
     else:
         report('the USB mapper is here', False, 'it is not')
 
     if acpi.available():
         ok, detail = acpi.verify()
-        report('every ACPI compiler is the file that was checked', ok,
-               '' if ok else detail)
+        report('every ACPI compiler is the file that was checked', ok, detail)
         try:
             with tempfile.TemporaryDirectory() as tmp:
                 work = acpi.prepare(Path(tmp) / 'acpi')
                 module = acpi.load(work)
                 ssdt = module.SSDT()
                 report('SSDTTime loads, with everything it imports', True)
+                # it quits with exit(0), which a frozen build does not have.
+                # That killed the whole builder the first time somebody
+                # finished their SSDTs, so it is asked here instead.
+                try:
+                    # it prints a goodbye on the way out, which is not wanted here
+                    import contextlib
+                    import io
+                    with contextlib.redirect_stdout(io.StringIO()):
+                        ssdt.u.custom_quit()
+                    report('quitting it raises SystemExit, not something fatal',
+                           False, 'it returned instead')
+                except SystemExit:
+                    report('quitting it raises SystemExit, not something fatal', True)
+                except BaseException as exc:      # noqa: BLE001 - the whole point
+                    report('quitting it raises SystemExit, not something fatal',
+                           False, repr(exc))
                 report('and finds the compiler beside it', bool(ssdt.d.iasl),
                        '' if ssdt.d.iasl else 'it did not')
                 report('and the legacy one, so it never downloads',

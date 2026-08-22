@@ -826,6 +826,21 @@ is missing, and `--check-tools` loads the tools so the Windows job can answer
 that question against the executable it just built instead of waiting for a
 person to.
 
+A fourth, which only shows at the very end of a session: **PyInstaller does not
+run `site.py`, so `exit` and `quit` do not exist.** SSDTTime quits with
+`exit(0)`. Unfrozen that is a `SystemExit` and is caught; frozen it is a
+`NameError`, unhandled, and the whole builder dies the moment somebody finishes
+making their SSDTs and presses Q - taking the EFI they were about to get with
+it. The names are put back before the tool is loaded, which is restoring what
+the interpreter normally provides rather than patching somebody else's code, and
+nothing the tool throws is left to reach the builder any more.
+
+A fifth, found by building a frozen binary here and running `--check-tools` in
+it: **PyInstaller rewrites the binaries it bundles.** It re-signs Mach-O files,
+so the hash of a vendored compiler inside the bundle is not the hash that was
+committed. The lock pins the repository copy and CI checks it there; inside a
+frozen build the check says so rather than passing quietly or failing wrongly.
+
 Two other things the frozen build gets wrong if written the obvious way:
 a relative script path in the spec resolves against the spec's own directory, so
 `tools/setup.py` in a spec that lives in `tools/` looks for `tools/tools/`; and
