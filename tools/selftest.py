@@ -575,6 +575,44 @@ def native_device_ids():
           gpu.native_ids('rocket-lake') == set())
 
 
+def workflow_flags():
+    """Every flag CI passes has to be one the tool actually has, spelled in full.
+
+    argparse accepts an unambiguous prefix, so --acpi worked until --acpi-ids
+    and --acpi-tables both existed and it became "ambiguous option". Nothing
+    fails at the point the flag is added; it fails later, in a job that only
+    runs on dispatch."""
+    import ast
+    declared = {}
+    for tool in sorted(Path('tools').glob('*.py')):
+        names = set()
+        for node in ast.walk(ast.parse(tool.read_text())):
+            if (isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
+                    and node.func.attr == 'add_argument'):
+                for arg in node.args:
+                    if isinstance(arg, ast.Constant) and str(arg.value).startswith('--'):
+                        names.add(arg.value)
+        if names:
+            declared[tool.name] = names | {'--help'}
+
+    used, bad = 0, []
+    for wf in sorted(Path('.github/workflows').glob('*.yml')):
+        for line in wf.read_text().splitlines():
+            line = line.strip()
+            if line.startswith('#'):
+                continue
+            for tool, names in declared.items():
+                if f'tools/{tool}' not in line and not (
+                        tool == 'setup.py' and 'HackintoshEFIBuilder.exe' in line):
+                    continue
+                for flag in re.findall(r'(?<![\w-])--[a-z][a-z-]*', line):
+                    used += 1
+                    if flag not in names:
+                        bad.append(f'{wf.name}: {flag} is not a flag of {tool}')
+    check('every flag the workflows pass is spelled in full', not bad, bad)
+    check('and there were flags to check', used > 20, used)
+
+
 def frozen_build():
     """What PyInstaller cannot see, and therefore has to be told."""
     import ast
@@ -905,7 +943,7 @@ if __name__ == '__main__':
     for section in (graphics, graphics_advice, audio_advice, storage, peripherals,
                     trackpad, framebuffer, boot_args, other_machine, undecodable_output, scripted_answers,
                     hardware_summary, device_names, broadcom_wifi,
-                    detection_gaps, provenance, framebuffers, native_device_ids, field_reports, macos_window, card_readers, third_party, usb_mapping, acpi_tables, frozen_build,
+                    detection_gaps, provenance, framebuffers, native_device_ids, field_reports, macos_window, card_readers, third_party, usb_mapping, acpi_tables, frozen_build, workflow_flags,
                     tables_match_sources):
         print(f'\n{section.__name__}')
         section()
