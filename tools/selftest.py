@@ -673,6 +673,40 @@ def frozen_build():
     check('and the builder can load the tools on demand', r.returncode == 0)
 
 
+def frozen_names():
+    """Names a frozen build takes away, which the vendored code still uses.
+
+    PyInstaller does not run site.py, so `exit` and `quit` do not exist. SSDTTime
+    quits with `exit(0)`: unfrozen that is a SystemExit and is caught, frozen it
+    is a NameError that killed the whole builder the moment somebody finished
+    making their SSDTs. Reproduced with a one-line frozen probe before fixing."""
+    import builtins
+    import acpi
+    had = {n: getattr(builtins, n, None) for n in ('exit', 'quit')}
+    try:
+        for name in had:
+            if hasattr(builtins, name):
+                delattr(builtins, name)
+        acpi.restore_site_builtins()
+        check('exit is put back when it is not there', hasattr(builtins, 'exit'))
+        try:
+            builtins.exit(0)
+            check('and calling it raises SystemExit', False, 'it returned')
+        except SystemExit:
+            check('and calling it raises SystemExit', True)
+        except BaseException as exc:                # noqa: BLE001
+            check('and calling it raises SystemExit', False, repr(exc))
+    finally:
+        for name, value in had.items():
+            if value is not None:
+                setattr(builtins, name, value)
+
+    # the tool must not take the builder down with it whatever it does
+    src = Path('tools/acpi.py').read_text()
+    check('and nothing the tool throws is left to reach the builder',
+          'except BaseException' in src)
+
+
 def acpi_tables():
     """SSDTTime is driven, not reimplemented, so the wiring is what is checked."""
     import acpi
@@ -979,11 +1013,13 @@ def tables_match_sources():
 
 if __name__ == '__main__':
     for section in (graphics, graphics_advice, audio_advice, storage, peripherals,
-                    trackpad, framebuffer, boot_args, other_machine, undecodable_output, scripted_answers,
-                    hardware_summary, device_names, broadcom_wifi,
-                    detection_gaps, provenance, framebuffers, native_device_ids, field_reports, macos_window, card_readers, third_party, usb_mapping, acpi_tables, frozen_build, workflow_flags,
-                    runner_independence,
-                    tables_match_sources):
+                    trackpad, framebuffer, boot_args, other_machine,
+                    undecodable_output, scripted_answers, hardware_summary,
+                    device_names, broadcom_wifi, detection_gaps, provenance,
+                    framebuffers, native_device_ids, field_reports, macos_window,
+                    card_readers, third_party, usb_mapping, acpi_tables,
+                    frozen_names, frozen_build, workflow_flags,
+                    runner_independence, tables_match_sources):
         print(f'\n{section.__name__}')
         section()
     print()

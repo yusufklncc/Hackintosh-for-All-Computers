@@ -48,10 +48,20 @@ def available():
 
 
 def verify(path):
-    """(ok, complaint) - the file has to be the one that was checked."""
+    """(ok, detail) - the file has to be the one that was checked.
+
+    PyInstaller rewrites the binaries it bundles, so inside a frozen build what
+    is unpacked is not byte for byte what was committed. The hash pins the
+    repository copy and CI checks it there; here the guarantee belongs to the
+    build, and that is said rather than skipped quietly."""
     entry = ocgen.read_toml(LOCK)['tool'].get(TOOL)
     if not entry:
         return False, f'{TOOL} is not in {LOCK}'
+    if not path.exists():
+        return False, f'{path} is missing'
+    if getattr(sys, 'frozen', False):
+        return True, (f'{entry["version"]}, not hashed here: the packer rewrote '
+                      f'it, so CI checks the repository copy')
     got = hashlib.sha256(path.read_bytes()).hexdigest()
     if got != entry['sha256']:
         return False, (f'{path} does not match the hash in {LOCK}; '
