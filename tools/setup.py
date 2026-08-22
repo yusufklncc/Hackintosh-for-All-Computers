@@ -376,7 +376,10 @@ def main():
     started_in = unbundle()
     if started_in:
         a.out = str((started_in / a.out).resolve())
-        for opt in ('machine', 'report', 'usb_map'):
+        # every path a caller passes is theirs, not the bundle's. Leaving
+        # acpi_tables out of this meant the frozen build looked for the dumped
+        # tables inside its own unpacked copy, where they never are.
+        for opt in ('machine', 'report', 'usb_map', 'acpi_tables'):
             if getattr(a, opt):
                 setattr(a, opt, str((started_in / getattr(a, opt)).resolve()))
 

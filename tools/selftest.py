@@ -613,6 +613,44 @@ def workflow_flags():
     check('and there were flags to check', used > 20, used)
 
 
+def runner_independence():
+    """No job may answer menus against whatever machine it lands on.
+
+    A fixed --answers string only means one thing if the questions are fixed,
+    and they are not: they depend on what was detected. The Windows job answered
+    a laptop's questions on a Hyper-V Xeon and ran out halfway."""
+    bad = []
+    for wf in sorted(Path('.github/workflows').glob('*.yml')):
+        # a command can be split over lines with a backslash or a backtick, and
+        # the --machine that makes it deterministic is often on the first of them
+        joined, buffer = [], ''
+        for number, line in enumerate(wf.read_text().splitlines(), 1):
+            stripped = line.strip()
+            if stripped.startswith('#'):
+                continue
+            start = number if not buffer else start          # noqa: F821 - set below
+            buffer += ' ' + stripped
+            if stripped.endswith(('\\', '`')):
+                continue
+            joined.append((start, buffer))
+            buffer = ''
+        for number, command in joined:
+            if '--answers' not in command:
+                continue
+            answers = re.search(r'--answers\s+(\S+)', command)
+            first = answers.group(1).split(',')[0] if answers else ''
+            fixed = ('--machine' in command or '--no-detect' in command
+                     or re.search(r'\$[A-Z0-9]+', command)
+                     # 2 and 3 at the scope question are "another machine", which
+                     # takes the report or the by-name path and detects nothing
+                     or first in ('2', '3'))
+            if not fixed:
+                bad.append(f'{wf.name}:{number} {command.strip()[:70]}')
+    # no exceptions: the one job that wanted to build from real detection uses
+    # --check instead, which asks nothing
+    check('no job answers menus against a machine it cannot predict', not bad, bad)
+
+
 def frozen_build():
     """What PyInstaller cannot see, and therefore has to be told."""
     import ast
@@ -944,6 +982,7 @@ if __name__ == '__main__':
                     trackpad, framebuffer, boot_args, other_machine, undecodable_output, scripted_answers,
                     hardware_summary, device_names, broadcom_wifi,
                     detection_gaps, provenance, framebuffers, native_device_ids, field_reports, macos_window, card_readers, third_party, usb_mapping, acpi_tables, frozen_build, workflow_flags,
+                    runner_independence,
                     tables_match_sources):
         print(f'\n{section.__name__}')
         section()
