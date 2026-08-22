@@ -266,7 +266,12 @@ def main(argv=None):
             # made for the machine wins and the generic one is turned off, out
             # loud, because that is a decision and not a merge.
             for old_entry in config['ACPI']['Add']:
-                if acpi_tool.same_purpose(old_entry['Path'], entry['Path']):
+                if old_entry['Path'] == entry['Path']:
+                    # the same name is a replacement, not a conflict: the file in
+                    # the EFI is overwritten and the entry is rewritten below
+                    warn(f'{entry["Path"]} replaced by the one built for this '
+                         f'machine')
+                elif acpi_tool.same_purpose(old_entry['Path'], entry['Path']):
                     if old_entry.get('Enabled'):
                         warn(f'{old_entry["Path"]} disabled: {entry["Path"]} is '
                              f'built for this machine and does the same job')

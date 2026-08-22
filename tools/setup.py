@@ -754,9 +754,27 @@ def main():
         if aside:
             print(f'      {DIM}ignored: {", ".join(aside)}  (remote desktop input, '
                   f'not this machine\'s){RESET}')
+        bus, smbus_id, smbus_name = inputdev.smbus_trackpad(hw.get('device_names'))
+        if bus:
+            rule = inputdev.smbus_rule(bus)
+            print(f'      {GREEN}{smbus_name}  [{smbus_id}]{RESET}')
+            print(f'      {DIM}Windows named the SMBus controller after the driver '
+                  f'bound to it, which\n      is this machine saying the trackpad is '
+                  f'on SMBus and not PS/2.{RESET}')
+            print(f'      {DIM}"{rule["quote"]}"{RESET}')
+            if ask(0, 0, f'Add {", ".join(rule["kexts"])} for it?',
+                   [('yes', f'Yes, add {", ".join(rule["kexts"])}'),
+                    ('no', 'No, VoodooPS2 alone')]) == 'yes':
+                for bundle in rule['kexts']:
+                    entry = {'Arch': 'x86_64', 'BundlePath': bundle,
+                             'Comment': rule['label'], 'Enabled': True,
+                             'ExecutablePath': '', 'MinKernel':
+                                 rule.get('min_kernel', ''), 'MaxKernel': '',
+                             'PlistPath': 'Contents/Info.plist'}
+                    input_kexts.append(entry)
         if input_lines:
             print('\n'.join(input_lines))
-        elif pointing:
+        elif pointing and not bus:
             print(f'      {DIM}no I2C controller here; if the trackpad turns out to be '
                   f'on SMBus, NEXT-STEPS.txt names the two kexts for that{RESET}')
         # the follow-up is written either way: a PS/2 laptop is the one most

@@ -205,6 +205,14 @@ def input_row(hw):
     name = pointing[0]['name'] if pointing else ('I2C trackpad' if i2c else 'not readable')
     if i2c:
         return row('Trackpad', name, SUPPORTED, f'VoodooI2C  [{", ".join(i2c)}]')
+    # the machine names its own SMBus controller after whatever drives the
+    # trackpad, which outranks the PS/2 controller also being there: on these
+    # laptops both are, and only one of them is carrying the trackpad
+    bus, smbus_id, _ = inputdev.smbus_trackpad(hw.get('device_names'))
+    if bus:
+        rule = inputdev.smbus_rule(bus)
+        return row('Trackpad', name, SUPPORTED,
+                   f'{", ".join(rule["kexts"])} for {rule["label"]}  [{smbus_id}]')
     if hw.get('ps2'):
         return row('Trackpad', name, SUPPORTED,
                    'on PS/2; VoodooPS2 is in the laptop profile')

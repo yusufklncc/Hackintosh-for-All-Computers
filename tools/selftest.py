@@ -911,6 +911,40 @@ def card_readers():
           other['verdict'] == summary.UNKNOWN, other)
 
 
+def smbus_trackpad():
+    """The machine names its own SMBus controller, which says which bus it is on.
+
+    A Synaptics or ELAN trackpad on SMBus puts its vendor's driver on the SMBus
+    device, and Windows reports the device under that name. Until this, nothing
+    read here could tell an SMBus trackpad from a PS/2 one, so both kexts were
+    only ever named in the notes."""
+    import inputdev
+    import summary
+    real = {'8086:9d23': 'Synaptics SMBus Driver'}
+    check('a vendor on the SMBus is read as the trackpad being there',
+          inputdev.smbus_trackpad(real)[0] == 'smbus-synaptics',
+          inputdev.smbus_trackpad(real))
+    check('ELAN too',
+          inputdev.smbus_trackpad({'8086:9d23': 'ELAN SMBus Device'})[0] == 'smbus-elan')
+    check('an SMBus controller nobody claimed says nothing',
+          inputdev.smbus_trackpad({'8086:9d23': 'Intel(R) SMBus - 9D23'})[0] is None)
+    check('nor does a Synaptics device that is not on the SMBus',
+          inputdev.smbus_trackpad({'8086:9d60': 'Synaptics Pointing Device'})[0] is None)
+    check('and the rule it points at is the quoted one',
+          inputdev.smbus_rule('smbus-synaptics')['kexts'] == ['VoodooRMI.kext'])
+
+    base, _ = detect.read_report('tools/fixtures/thinkpad-e570.json')
+    ps2_only = {r['part']: r for r in summary.rows(base)}['Trackpad']
+    check('without it the row still says PS/2', 'PS/2' in ps2_only['detail'], ps2_only)
+    on_smbus = dict(base, device_names={**base['device_names'], **real})
+    row = {r['part']: r for r in summary.rows(on_smbus)}['Trackpad']
+    check('with it the row names the kext instead',
+          'VoodooRMI.kext' in row['detail'], row)
+    # both controllers are present on these laptops; only one carries the pad
+    check('and the PS/2 controller being there too does not win',
+          'PS/2' not in row['detail'], row)
+
+
 def macos_window():
     """Where each part bounds macOS, and what the intersection of those is."""
     import summary
@@ -1039,7 +1073,7 @@ if __name__ == '__main__':
                     trackpad, framebuffer, boot_args, other_machine,
                     undecodable_output, scripted_answers, hardware_summary,
                     device_names, broadcom_wifi, detection_gaps, provenance,
-                    framebuffers, native_device_ids, field_reports, macos_window,
+                    framebuffers, native_device_ids, field_reports, smbus_trackpad, macos_window,
                     card_readers, third_party, usb_mapping, acpi_tables,
                     window_stays_open, frozen_names, frozen_build, workflow_flags,
                     runner_independence, tables_match_sources):
