@@ -154,6 +154,21 @@ def catalogue():
              covers='processors whose iGPU behaves differently from its generation',
              gap='One person, one machine each. It outranks the generation rule '
                  'because it is more specific, not because it is stronger.'),
+        dict(area='Third-party licences', kind=DERIVED, file='vendor/licences.toml',
+             source="each project's own LICENSE file, read from GitHub",
+             tool='tools/thirdparty.py --refresh',
+             count=f'{rows_in("vendor/licences.toml", "upstream")} upstream projects',
+             covers='what every vendored kext is under, including the ones under '
+                    'nothing',
+             gap='Five projects state no licence at all. The report makes that '
+                 'visible; it does not resolve it.'),
+        dict(area='Drivers not shipped', kind=DERIVED, file='data/candidates.toml',
+             source='each project checked to exist, ids read from its own release',
+             tool='tools/thirdparty.py --fetch',
+             count=f'{rows_in("data/candidates.toml", "candidate")} candidates',
+             covers='what vendoring each one would add, counted from the kext',
+             gap='Not a recommendation. Two are archived with no release, and '
+                 'three state no licence.'),
         dict(area='Camera', kind=NONE, file='-',
              source='none', tool='-',
              count='bus only',

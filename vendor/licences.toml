@@ -1,0 +1,122 @@
+# The licence each vendored kext is under, read from the
+# project's own LICENSE file by tools/thirdparty.py --refresh.
+#
+# The LICENSE at the root of this repository covers what is
+# written here. It says nothing about a binary somebody else
+# compiled, which is why this file exists.
+#
+# "none stated" means the project has no LICENSE file at all.
+# That is not permission; it is the absence of one.
+[[upstream]]
+repo = "1Revenger1/ECEnabler"
+licence = "none stated"
+described = "no LICENSE file in the repository"
+kexts = ["ECEnabler.kext"]
+
+[[upstream]]
+repo = "Mieze/AtherosE2200Ethernet"
+licence = "none stated"
+described = "no LICENSE file in the repository"
+kexts = ["AtherosE2200Ethernet.kext"]
+
+[[upstream]]
+repo = "Mieze/LucyRTL8125Ethernet"
+licence = "none stated"
+described = "no LICENSE file in the repository"
+kexts = ["LucyRTL8125Ethernet.kext"]
+
+[[upstream]]
+repo = "Mieze/RTL8111_driver_for_OS_X"
+licence = "none stated"
+described = "no LICENSE file in the repository"
+kexts = ["RealtekRTL8111.kext"]
+
+[[upstream]]
+repo = "OpenIntelWireless/IntelBluetoothFirmware"
+licence = "GPL-3.0"
+described = "GNU General Public License v3.0"
+kexts = ["IntelBTPatcher.kext", "IntelBluetoothFirmware.kext", "IntelBluetoothInjector.kext"]
+
+[[upstream]]
+repo = "OpenIntelWireless/itlwm"
+licence = "GPL-2.0"
+described = "GNU General Public License v2.0"
+kexts = ["AirportItlwm.kext"]
+
+[[upstream]]
+repo = "USBToolBox/kext"
+licence = "none stated"
+described = "no LICENSE file in the repository"
+kexts = ["USBToolBox.kext", "UTBDefault.kext"]
+
+[[upstream]]
+repo = "VoodooI2C/VoodooI2C"
+licence = "GPL-3.0"
+described = "GNU General Public License v3.0"
+kexts = ["VoodooI2C.kext", "VoodooI2CELAN.kext", "VoodooI2CFTE.kext", "VoodooI2CHID.kext", "VoodooI2CSynaptics.kext"]
+
+[[upstream]]
+repo = "VoodooSMBus/VoodooRMI"
+licence = "GPL-2.0"
+described = "GNU General Public License v2.0"
+kexts = ["VoodooRMI.kext", "VoodooSMBus.kext"]
+
+[[upstream]]
+repo = "acidanthera/AirportBrcmFixup"
+licence = "BSD-3-Clause"
+described = "BSD 3-Clause \"New\" or \"Revised\" License"
+kexts = ["AirportBrcmFixup.kext"]
+
+[[upstream]]
+repo = "acidanthera/AppleALC"
+licence = "BSD-3-Clause"
+described = "BSD 3-Clause \"New\" or \"Revised\" License"
+kexts = ["AppleALC.kext"]
+
+[[upstream]]
+repo = "acidanthera/BrcmPatchRAM"
+licence = "GPL-2.0"
+described = "GNU General Public License v2.0"
+kexts = ["BlueToolFixup.kext", "BrcmBluetoothInjector.kext", "BrcmFirmwareData.kext", "BrcmPatchRAM.kext", "BrcmPatchRAM2.kext", "BrcmPatchRAM3.kext"]
+
+[[upstream]]
+repo = "acidanthera/IntelMausi"
+licence = "GPL-2.0"
+described = "GNU General Public License v2.0"
+kexts = ["IntelMausi.kext"]
+
+[[upstream]]
+repo = "acidanthera/Lilu"
+licence = "BSD-3-Clause"
+described = "BSD 3-Clause \"New\" or \"Revised\" License"
+kexts = ["Lilu.kext"]
+
+[[upstream]]
+repo = "acidanthera/NVMeFix"
+licence = "Other"
+described = "Other"
+kexts = ["NVMeFix.kext"]
+
+[[upstream]]
+repo = "acidanthera/VirtualSMC"
+licence = "BSD-3-Clause"
+described = "BSD 3-Clause \"New\" or \"Revised\" License"
+kexts = ["SMCBatteryManager.kext", "SMCDellSensors.kext", "SMCProcessor.kext", "SMCSuperIO.kext", "VirtualSMC.kext"]
+
+[[upstream]]
+repo = "acidanthera/VoodooPS2"
+licence = "Other"
+described = "Other"
+kexts = ["VoodooPS2Controller.kext"]
+
+[[upstream]]
+repo = "acidanthera/WhateverGreen"
+licence = "BSD-3-Clause"
+described = "BSD 3-Clause \"New\" or \"Revised\" License"
+kexts = ["WhateverGreen.kext"]
+
+[[upstream]]
+repo = "trulyspinach/SMCAMDProcessor"
+licence = "BSD-3-Clause"
+described = "BSD 3-Clause \"New\" or \"Revised\" License"
+kexts = ["AMDRyzenCPUPowerManagement.kext", "SMCAMDProcessor.kext"]

@@ -1,0 +1,55 @@
+# Driver projects for hardware this repository has no answer for.
+#
+# Every entry was checked to exist and its licence read from the project itself,
+# because that is what decides whether it could be vendored at all. Nothing here
+# is a recommendation: the list exists so that "we do not know about this device"
+# can be followed by "and here is who does".
+#
+# ids and release are filled in by tools/thirdparty.py --fetch, which downloads
+# the project's own release and reads them out of the kext the same way
+# tools/hwtable.py does. Counting them any other way would be a guess.
+#
+# The existence of several of these was learnt from lzhoang2801/OpCore-Simplify,
+# whose pci_data.py covers roles this repository does not. None of its data is
+# copied here; the ids come from the kexts.
+[[candidate]]
+name = "AppleIGC"
+repo = "SongXiaoXi/AppleIGC"
+role = "ethernet"
+licence = "none stated"
+archived = false
+covers = "Intel I225 and I226 2.5G Ethernet, which IntelMausi does not claim"
+release = "v1.8"
+ids = ["8086:125b", "8086:125c", "8086:125d", "8086:15f2", "8086:15f3", "8086:15f8", "8086:3102"]
+
+[[candidate]]
+name = "AppleIGB"
+repo = "Shaneee/AppleIGB"
+role = "ethernet"
+licence = "none stated"
+archived = true
+covers = "Intel I211 and I350 server NICs, which IntelMausi does not claim"
+release = ""
+ids = []
+unreleased = true
+
+[[candidate]]
+name = "RealtekRTL8100"
+repo = "Mieze/RealtekRTL8100"
+role = "ethernet"
+licence = "none stated"
+archived = true
+covers = "Realtek Fast Ethernet, the 810x parts RealtekRTL8111 does not claim"
+release = ""
+ids = []
+unreleased = true
+
+[[candidate]]
+name = "RealtekCardReader"
+repo = "0xFireWolf/RealtekCardReader"
+role = "card reader"
+licence = "BSD-3-Clause"
+archived = false
+covers = "Realtek SD card readers; its device table is already read into data/cardreader.toml"
+release = "v0.9.7"
+ids = ["0bda:0129", "0bda:0139", "0bda:0140", "10ec:5209", "10ec:5227", "10ec:5229", "10ec:522a", "10ec:5249", "10ec:524a", "10ec:525a", "10ec:5260", "10ec:5286", "10ec:5287", "10ec:5289"]

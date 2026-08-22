@@ -574,6 +574,46 @@ def native_device_ids():
           gpu.native_ids('rocket-lake') == set())
 
 
+def third_party():
+    """What we ship that somebody else wrote, and under what."""
+    import thirdparty
+    ours = thirdparty.upstreams()
+    lic = thirdparty.read_licences()
+    check('every vendored kext with an upstream has that licence read',
+          set(ours) <= set(lic), sorted(set(ours) - set(lic)))
+    check('and the answer is recorded, not guessed',
+          all(e.get('licence') for e in lic.values()))
+    # the point of the report: these are not a problem to be fixed, they are a
+    # fact to be visible
+    stated = {r for r, e in lic.items() if e['licence'] != thirdparty.NONE_STATED}
+    check('some are copyleft, which is an obligation and not an error',
+          any(e['licence'].startswith('GPL') for e in lic.values()))
+    check('and some state nothing at all', len(stated) < len(lic), sorted(lic))
+
+    cands = thirdparty.candidates()
+    check('every candidate names a licence, since that decides vendoring',
+          all(c.get('licence') for c in cands), cands)
+    check('and says what it would cover', all(c.get('covers') for c in cands))
+    counted = [c for c in cands if c.get('ids')]
+    check('the ones with a release carry ids read from the kext itself',
+          counted and all(all(':' in i for i in c['ids']) for c in counted))
+    have = {i for d in ocgen.read_toml('data/hardware.toml')['driver'] for i in d['ids']}
+    check('and every one of those ids is genuinely new',
+          all(set(c['ids']) - have for c in counted),
+          [c['name'] for c in counted if not set(c['ids']) - have])
+    check('an archived project with no release says so rather than looking uncounted',
+          any(c.get('unreleased') for c in cands))
+
+    import contextlib
+    import io
+    with contextlib.redirect_stdout(io.StringIO()) as out:
+        rc = thirdparty.main([])
+    text = out.getvalue()
+    check('the report runs offline', rc == 0 and 'What this repository ships' in text)
+    check('and names the kexts with no upstream recorded at all',
+          'no upstream recorded' in text)
+
+
 def card_readers():
     """macOS ships no driver for these; one project does and publishes a table."""
     import summary
@@ -734,7 +774,7 @@ if __name__ == '__main__':
     for section in (graphics, graphics_advice, audio_advice, storage, peripherals,
                     trackpad, framebuffer, boot_args, other_machine, undecodable_output, scripted_answers,
                     hardware_summary, device_names, broadcom_wifi,
-                    detection_gaps, provenance, framebuffers, native_device_ids, field_reports, macos_window, card_readers,
+                    detection_gaps, provenance, framebuffers, native_device_ids, field_reports, macos_window, card_readers, third_party,
                     tables_match_sources):
         print(f'\n{section.__name__}')
         section()

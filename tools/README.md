@@ -205,6 +205,46 @@ placeholder the profiles ship is removed - an id will not rescue an iGPU that
 has been run and found not to accelerate, and leaving a value nobody chose is
 worse than leaving the key out.
 
+## What somebody else wrote
+
+    python3 tools/thirdparty.py
+    python3 tools/thirdparty.py --machine machine.json
+    python3 tools/thirdparty.py --refresh   # re-read the licences (network)
+    python3 tools/thirdparty.py --fetch     # count what a candidate adds (network)
+
+**What we ship.** Forty-two kexts from nineteen projects, under six licences.
+The LICENSE at the root of this repository covers what is written here and says
+nothing about a binary somebody else compiled, so `vendor/licences.toml` records
+what each project states, read from its own LICENSE file:
+
+    BSD-3-Clause  6      GPL-2.0  4      GPL-3.0  2      Other  2      none stated  5
+
+Copyleft is an obligation, not an error. **Five projects state no licence at
+all** - Mieze's three Ethernet drivers, ECEnabler and the USBToolBox kext - and
+that is the absence of permission rather than the granting of it. The report
+makes it visible; it does not resolve it. Five more kexts have no upstream
+recorded in the lock and are named too.
+
+**What we do not ship.** `data/candidates.toml` lists driver projects for
+hardware with no answer here. Each was checked to exist and each carries the
+licence that would decide whether it could be vendored at all. `--fetch`
+downloads the project's own release and counts its device ids with the same
+reader that builds `data/hardware.toml`, so the number is the kext's own:
+
+    AppleIGC           none stated    7 new ids     Intel I225/I226 2.5G Ethernet
+    AppleIGB           none stated    no release    Intel I211/I350, archived
+    RealtekRTL8100     none stated    no release    Realtek Fast Ethernet, archived
+    RealtekCardReader  BSD-3-Clause   14 new ids    Realtek SD card readers
+
+Nothing here is a recommendation. The list exists so that "this repository does
+not know about your device" can be followed by "and here is who does". That
+three of the four state no licence is itself the finding: the coverage we lack
+is mostly behind projects that grant nothing.
+
+The existence of several was learnt from `lzhoang2801/OpCore-Simplify`, whose
+`pci_data.py` covers roles this repository does not. None of its data is copied;
+the ids come from the kexts.
+
 ## Where the answers come from
 
     python3 tools/provenance.py            # every category and its source
