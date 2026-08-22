@@ -919,5 +919,39 @@ def main():
     return 0
 
 
+def hold():
+    """Keep the window open when there is nobody else keeping it open.
+
+    A frozen build started from a file manager gets a console of its own, and
+    that console dies with the process - taking the summary, the warnings and
+    the path to the EFI with it. Somebody who double-clicked the executable sees
+    a window flash and nothing else.
+
+    Only there: from a shell the window outlives the program, and a run with
+    --answers has nobody to press the key."""
+    if not getattr(sys, 'frozen', False) or SCRIPTING:
+        return
+    try:
+        if not sys.stdin.isatty():
+            return
+        input('\n  Press enter to close.')
+    except (EOFError, OSError, KeyboardInterrupt):
+        pass
+
+
 if __name__ == '__main__':
-    sys.exit(main())
+    try:
+        code = main()
+    except SystemExit as exc:
+        # a message rather than a number is how the tools refuse; printing it
+        # before the pause is the whole point of pausing
+        if isinstance(exc.code, str):
+            print(exc.code)
+            code = 1
+        else:
+            code = exc.code or 0
+    except KeyboardInterrupt:
+        print('\n  stopped')
+        code = 130
+    hold()
+    sys.exit(code)

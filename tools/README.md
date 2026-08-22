@@ -815,7 +815,15 @@ is allowed to pass.
 `--machine tools/fixtures/no-hardware.json`. That is what CI uses,
 on both platforms, instead of piping keystrokes.
 
-A third: **PyInstaller only bundles what it can see being imported.** SSDTTime
+A third, and it is not a bug in the packer: **a console the program opened for
+itself dies with it.** Somebody who double-clicks the executable gets a window
+that flashes and closes, taking the build summary, the warnings and the path to
+the EFI with it. The frozen build waits for a key before it exits - only the
+frozen build, only on a terminal, and never under `--answers`, which would hang
+CI. A refusal is printed before the pause rather than after, since being able to
+read it is the point.
+
+A fourth: **PyInstaller only bundles what it can see being imported.** SSDTTime
 is loaded at runtime with `importlib`, from a copy of the vendored tree, so its
 imports are invisible to the analysis and none of the standard library it uses
 gets bundled. The frozen build then dies the moment somebody answers yes to the
@@ -841,7 +849,7 @@ so the hash of a vendored compiler inside the bundle is not the hash that was
 committed. The lock pins the repository copy and CI checks it there; inside a
 frozen build the check says so rather than passing quietly or failing wrongly.
 
-Two other things the frozen build gets wrong if written the obvious way:
+Two more things the frozen build gets wrong if written the obvious way:
 a relative script path in the spec resolves against the spec's own directory, so
 `tools/setup.py` in a spec that lives in `tools/` looks for `tools/tools/`; and
 `sys.executable` is the executable itself rather than an interpreter, so
