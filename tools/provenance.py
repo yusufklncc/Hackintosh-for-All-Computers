@@ -154,6 +154,14 @@ def catalogue():
              covers='processors whose iGPU behaves differently from its generation',
              gap='One person, one machine each. It outranks the generation rule '
                  'because it is more specific, not because it is stronger.'),
+        dict(area='Kext load order', kind=DERIVED, file='EFI/OC/Kexts/',
+             source="OSBundleLibraries in each kext, as OpenCore's manual says",
+             tool='tools/kextorder.py',
+             count='28 of 54 bundles declare a dependency',
+             covers='that every kext is listed after the ones it needs, in every '
+                    'published config and every build',
+             gap='Only kexts vendored here. It reports and never reorders: the '
+                 'order is a decision, and rewriting it would hide the mistake.'),
         dict(area='Third-party licences', kind=DERIVED, file='vendor/licences.toml',
              source="each project's own LICENSE file, read from GitHub",
              tool='tools/thirdparty.py --refresh',

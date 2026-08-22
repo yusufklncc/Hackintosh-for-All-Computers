@@ -911,6 +911,56 @@ def card_readers():
           other['verdict'] == summary.UNKNOWN, other)
 
 
+def load_order():
+    """OpenCore loads kexts in list order, so a dependency listed late is inert.
+
+    Not a rule anybody here invented: the reference manual states it and says to
+    read OSBundleLibraries for the answer, which is where the graph comes from.
+    A config that gets this wrong does not fail loudly - the dependent kext just
+    never loads, and whatever it was for does not work."""
+    import kextorder
+    deps = kextorder.graph()
+    check('the graph is read from the kexts, not written down',
+          deps.get('WhateverGreen.kext') == {'Lilu.kext'}, deps.get('WhateverGreen.kext'))
+    check('a plugin is a bundle path of its own, as the manual says',
+          'VoodooRMI.kext' in deps.get(
+              'VoodooRMI.kext/Contents/PlugIns/RMISMBus.kext', set()),
+          deps.get('VoodooRMI.kext/Contents/PlugIns/RMISMBus.kext'))
+    check('and a kext with no libraries needs nothing',
+          not deps.get('Lilu.kext'), deps.get('Lilu.kext'))
+
+    wrong = [{'BundlePath': 'WhateverGreen.kext', 'Enabled': True},
+             {'BundlePath': 'Lilu.kext', 'Enabled': True}]
+    found = kextorder.check(wrong, deps)
+    check('the wrong way round is caught', len(found) == 1 and
+          found[0][:2] == ('WhateverGreen.kext', 'Lilu.kext'), found)
+    right = list(reversed(wrong))
+    check('and the right way round is not', not kextorder.check(right, deps))
+    off = [{'BundlePath': 'WhateverGreen.kext', 'Enabled': True},
+           {'BundlePath': 'Lilu.kext', 'Enabled': False}]
+    check('a dependency that is present but disabled counts as absent',
+          kextorder.check(off, deps)[0][2] == 'is not in the config',
+          kextorder.check(off, deps))
+
+    import contextlib
+    import io
+    with contextlib.redirect_stdout(io.StringIO()) as printed:
+        rc = kextorder.main([])
+    check('every published config is in order', rc == 0, printed.getvalue())
+
+    # and a build that adds kexts keeps it that way
+    with tempfile.TemporaryDirectory() as tmp:
+        out = Path(tmp) / 'EFI'
+        r = run([sys.executable, 'tools/setup.py',
+                 '--machine', 'tools/fixtures/thinkpad-e570.json',
+                 '--answers', '1,1,1', '--out', str(out)])
+        check('a build with kexts added succeeds', r.returncode == 0)
+        if r.returncode == 0:
+            cfg = ocgen.load_plist(out / 'OC' / 'config.plist')
+            problems = kextorder.check(cfg['Kernel']['Add'], deps)
+            check('and what was added is still in order', not problems, problems)
+
+
 def smbus_trackpad():
     """The machine names its own SMBus controller, which says which bus it is on.
 
@@ -1102,7 +1152,7 @@ if __name__ == '__main__':
                     trackpad, framebuffer, boot_args, other_machine,
                     undecodable_output, scripted_answers, hardware_summary,
                     device_names, broadcom_wifi, detection_gaps, provenance,
-                    framebuffers, native_device_ids, field_reports, smbus_trackpad, macos_window,
+                    framebuffers, native_device_ids, field_reports, load_order, smbus_trackpad, macos_window,
                     card_readers, third_party, usb_mapping, acpi_tables,
                     window_stays_open, frozen_names, frozen_build, workflow_flags,
                     runner_independence, tables_match_sources):

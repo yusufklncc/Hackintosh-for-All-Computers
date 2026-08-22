@@ -315,6 +315,17 @@ def main(argv=None):
         if before != len(config['Kernel']['Add']):
             print(f'  dropped      {", ".join(sorted(drop))}')
 
+    # OpenCore loads kexts in the order they appear, so a dependency listed
+    # after the kext that needs it does not fail loudly - the dependent one just
+    # does not load. Checked here rather than left to be discovered on the
+    # machine, and never reordered: the order in a published config is somebody's
+    # decision, and silently rewriting it would hide the mistake instead of
+    # naming it.
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import kextorder
+    for bundle, needed, why in kextorder.check(config['Kernel']['Add']):
+        warn(f'load order: {bundle} needs {needed}, which {why}')
+
     serial = apply_identity(config, a.identity, warn)
 
     out = Path(a.out)
