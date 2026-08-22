@@ -127,8 +127,8 @@ def catalogue():
              tool='hand written',
              count=f'{rows_in("data/input.toml", "rule")} rules',
              covers='I2C, Synaptics SMBus, ELAN SMBus, and the PS/2 keyboard rule',
-             gap='Nothing readable says which bus a trackpad is on, so only the '
-                 'I2C case is acted on and the rest are named in the notes.'),
+             gap='I2C is read from the controller ids and SMBus from what '
+                 'Windows named the bus; a Linux or macOS report has neither.'),
         dict(area='macOS releases', kind=DERIVED, file='data/macos.toml',
              source="the repository's own patch comments, cross-checked",
              tool='tools/coverage.py --names',

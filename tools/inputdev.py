@@ -72,6 +72,32 @@ def entries(pci_ids, ps2_present, acpi_ids=None):
     return lines, kexts
 
 
+# Windows names the SMBus controller after whatever bound to it. A trackpad on
+# SMBus puts its vendor's driver there, so "Synaptics SMBus Driver" on the SMBus
+# device is the machine saying which bus its trackpad is on - the one thing that
+# could not be worked out before.
+SMBUS_VENDORS = {'synaptics': 'smbus-synaptics', 'elan': 'smbus-elan'}
+
+
+def smbus_trackpad(device_names):
+    """(bus, id, name) for an SMBus device a trackpad vendor has claimed."""
+    for device_id, name in sorted((device_names or {}).items()):
+        low = (name or '').lower()
+        if 'smbus' not in low:
+            continue
+        for vendor, bus in SMBUS_VENDORS.items():
+            if vendor in low:
+                return bus, device_id, name
+    return None, None, None
+
+
+def smbus_rule(bus):
+    for rule in load()['rule']:
+        if rule['bus'] == bus:
+            return rule
+    return None
+
+
 def smbus_notes():
     """The other two paths, for a machine with no I2C controller.
 

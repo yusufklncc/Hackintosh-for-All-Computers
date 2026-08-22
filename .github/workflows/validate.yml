@@ -179,6 +179,20 @@ jobs:
           python3 tools/thirdparty.py
           python3 tools/thirdparty.py --machine tools/fixtures/thinkpad-e570.json
 
+      - name: A trackpad on SMBus is told apart from one on PS/2
+        run: |
+          python3 - <<'CHECK'
+          import sys; sys.path.insert(0, 'tools')
+          import detect, summary
+          base, _ = detect.read_report('tools/fixtures/thinkpad-e570.json')
+          row = lambda hw: {r['part']: r for r in summary.rows(hw)}['Trackpad']
+          assert 'PS/2' in row(base)['detail'], row(base)
+          smbus = dict(base, device_names={**base['device_names'],
+                                           '8086:9d23': 'Synaptics SMBus Driver'})
+          assert 'VoodooRMI.kext' in row(smbus)['detail'], row(smbus)
+          print('SMBus and PS/2 are told apart')
+          CHECK
+
       - name: The card reader has three answers, not one
         run: |
           python3 - <<'CHECK'
