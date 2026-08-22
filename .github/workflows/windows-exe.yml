@@ -29,8 +29,12 @@ jobs:
           dist/HackintoshEFIBuilder.exe --no-detect --answers 2,10,3 --out smoke/EFI
           if (-not (Test-Path smoke/EFI/OC/config.plist)) { exit 1 }
 
+      # --check reads this runner and prints what it means, with no questions
+      # to answer. A fixed answer string against whatever the runner happens to
+      # be is what broke this job: a Hyper-V Xeon takes a different path through
+      # the menus than a laptop does.
       - name: And detection runs without throwing
-        run: dist/HackintoshEFIBuilder.exe --answers 1,2,10,3,3 --out smoke2/EFI
+        run: dist/HackintoshEFIBuilder.exe --check
 
       # SSDTTime is imported at runtime, so PyInstaller cannot see what it
       # imports. A missing module does not show until somebody answers yes to a
@@ -47,9 +51,12 @@ jobs:
           if (-not (Test-Path ACPI)) { Write-Error 'no ACPI tables were dumped'; exit 1 }
           Get-ChildItem ACPI | Select-Object -First 8 Name
           if (-not (Test-Path ACPI/DSDT.aml)) { Write-Error 'no DSDT'; exit 1 }
-          # and the tables it just dumped are the ones a build would use
-          dist/HackintoshEFIBuilder.exe --machine machine.json --acpi-tables ACPI `
-            --answers 1,2,10,3,3 --out acpi-smoke/EFI
+          # and the tables it just dumped are the ones a build would use.
+          # The machine is the fixture, not this runner: a Hyper-V Xeon answers
+          # a different set of questions than a laptop does, and a fixed answer
+          # string against whatever the runner happens to be is how this failed.
+          dist/HackintoshEFIBuilder.exe --machine tools/fixtures/no-hardware.json `
+            --acpi-tables ACPI --answers 2,10,3 --out acpi-smoke/EFI
           if (-not (Test-Path acpi-smoke/EFI/OC/config.plist)) { exit 1 }
 
       - uses: actions/upload-artifact@v4
