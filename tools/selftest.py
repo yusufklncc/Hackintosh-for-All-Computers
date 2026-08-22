@@ -182,8 +182,10 @@ def framebuffer():
     check('it is written byte-swapped, as DeviceProperties wants',
           props[igpu.IGPU_PATH]['AAPL,ig-platform-id'] == 'hex:04006601', props)
     listed = [l for l in steps.splitlines() if l.strip().startswith('0x')]
-    check('every candidate reaches the notes', len(listed) == len(ids),
-          f'{len(listed)} listed, {len(ids)} candidates')
+    # every candidate plus the no-acceleration id, which is offered but is not a
+    # candidate: nothing lists it as a framebuffer because nothing claims it
+    check('every candidate reaches the notes, and the fallback with them',
+          len(listed) == len(ids) + 1, f'{len(listed)} listed, {len(ids)} candidates')
     check('headless is never the one to start with',
           igpu.candidates('kaby-lake', False)[0]['value'] == '0x59160000')
     check('an unsupported generation is offered nothing',
@@ -230,8 +232,14 @@ def other_machine():
             check('what was named is added', 'IntelMausi.kext' in have
                   and 'IntelBluetoothFirmware.kext' in have, sorted(have))
             check('what was declined is not', 'AirportItlwm.kext' not in have)
-            check('nothing is claimed about graphics it cannot see',
-                  not (out.parent / 'NEXT-STEPS.txt').exists())
+            written = (out.parent / 'NEXT-STEPS.txt')
+            # the USB follow-up applies to every machine, so the file exists;
+            # what must not be there is advice about hardware nobody described
+            check('the follow-up is written even with nothing detected',
+                  written.exists())
+            body = written.read_text() if written.exists() else ''
+            check('and it claims nothing about graphics it cannot see',
+                  'Intel graphics' not in body and 'framebuffer id' not in body)
 
 
 def undecodable_output():
@@ -469,6 +477,208 @@ def broadcom_wifi():
           netkexts.entries(matched, 13)[0] == [])
 
 
+def framebuffers():
+    """Two sources, and they have to agree where they overlap."""
+    import igpu
+    import setup as guided
+    fb = ocgen.read_toml('data/framebuffer.toml')['framebuffer']
+    check('the whole list is parsed, not one table', len(fb) > 100, len(fb))
+    check('every entry carries what tells it apart',
+          all(e['type'] in ('mobile', 'desktop') and 'stolen' in e for e in fb))
+    check('the byte-swapped form is right',
+          [e['data'] for e in fb if e['value'] == '0x591B0000'] == ['00001b59'],
+          [e['data'] for e in fb if e['value'] == '0x591B0000'])
+    known = {e['value'].lower() for e in fb}
+    guide = [c['value'].lower() for g in ocgen.read_toml('data/gpu.toml')['igpu']
+             for key in ('laptop_platform_id', 'desktop_platform_id')
+             for c in g.get(key, [])]
+    check('every id the guide names is in the manual too, so neither has drifted',
+          all(v in known for v in guide), [v for v in guide if v not in known])
+
+    cands = igpu.candidates('kaby-lake', True)
+    check('a laptop generation now has more than the one the guide names',
+          len(cands) > 1, len(cands))
+    check("the guide's pick is still first", cands[0]['value'] == '0x591b0000', cands[0])
+    check('headless is last however it was spelled',
+          all('headless' not in c['label'].lower()
+              for c in cands[:len([c for c in cands
+                                   if 'headless' not in c['label'].lower()])]))
+    check('a desktop generation gets desktop framebuffers',
+          all(e['type'] == 'desktop' for e in igpu.documented('kaby-lake', False)))
+
+    check('leaving the key out asks for it to be removed, not merely unset',
+          igpu.props_for(None)[igpu.IGPU_PATH]['AAPL,ig-platform-id'] is None)
+    check('the no-acceleration id says whose testing it rests on',
+          'maintainer' in igpu.NO_ACCELERATION['note'])
+    check('and it is offered as a choice, not written by default',
+          igpu.report('kaby-lake', True, True)[1][igpu.IGPU_PATH]['AAPL,ig-platform-id']
+          != 'hex:' + igpu.NO_ACCELERATION['data'])
+
+    # the fast path must never be reachable on a guess
+    check('a machine with no generation gets no fast path',
+          guided.profile_from({'laptop': True}) is None)
+    check('nor one where the form factor is unknown',
+          guided.profile_from({'generation': 'kaby-lake'}) is None)
+    check('nor an AMD laptop, which has no profile',
+          guided.profile_from({'laptop': True,
+                               'generation': 'ryzen-threadripper'}) is None)
+    check('nor an AMD desktop with an unusable core count',
+          guided.profile_from({'laptop': False, 'cores': 3,
+                               'generation': 'ryzen-threadripper'}) is None)
+    ok = guided.profile_from({'laptop': True, 'generation': 'kaby-lake', 'oem': 'hp'})
+    check('a machine with all of it does', ok == ('laptop', None, 'kaby-lake', None, 'hp'), ok)
+    unknown_oem = guided.profile_from({'laptop': True, 'generation': 'kaby-lake',
+                                       'oem': 'toshiba'})
+    check('and a brand with no overlay falls back rather than failing',
+          unknown_oem and unknown_oem[4] is None, unknown_oem)
+
+
+def native_device_ids():
+    """A generation being supported is not every part in it being supported."""
+    import gpu
+    native = ocgen.read_toml('data/framebuffer.toml')['native']
+    check('every generation with framebuffers has its device ids too',
+          len(native) == 58, len(native))
+    # the Ivy Bridge section writes "DevIDs :" with a space; matching strictly
+    # dropped that whole generation and said nothing
+    check('including Ivy Bridge, whose heading is punctuated differently',
+          gpu.native_ids('ivy-bridge') == {'8086:0152', '8086:0156',
+                                           '8086:0162', '8086:0166'},
+          sorted(gpu.native_ids('ivy-bridge')))
+    check('Comet Lake is read apart from Coffee Lake, though they share a section',
+          gpu.native_ids('comet-lake') == {'8086:9bc8', '8086:9bc5', '8086:9bc4'},
+          sorted(gpu.native_ids('comet-lake')))
+    check('and Coffee Lake does not inherit Comet Lake ids',
+          '8086:9bc4' not in gpu.native_ids('coffe-lake'))
+
+    listed = gpu.classify({'id': '8086:5916', 'name': 'Intel HD Graphics 620'},
+                          'kaby-lake')
+    check('an id on the list is called natively supported',
+          listed[0] == 'works' and 'natively supported' in listed[1]['family'], listed)
+
+    # Whiskey Lake sits in a supported generation and is not on the list, and
+    # the document says exactly what it needs: a faked device-id
+    whiskey = gpu.classify({'id': '8086:3ea0', 'name': 'Intel UHD Graphics 620'},
+                           'coffee-lake-whiskey-lake')
+    check('an id off the list is still supported, not condemned',
+          whiskey[0] == 'works', whiskey)
+    check('and the reason it is flagged is the faked device-id, not support',
+          'faked device-id' in whiskey[1]['note'], whiskey[1])
+    check('the table row stays one line about it',
+          whiskey[1]['family'].endswith('not natively'), whiskey[1]['family'])
+
+    check('an unsupported generation is untouched by any of this',
+          gpu.classify({'id': '8086:4680', 'name': 'Intel UHD Graphics 770'},
+                       'alder-lake')[0] == 'unsupported')
+    check('and a generation with no list gets no claim either way',
+          gpu.native_ids('rocket-lake') == set())
+
+
+def macos_window():
+    """Where each part bounds macOS, and what the intersection of those is."""
+    import summary
+    e570, _ = detect.read_report('tools/fixtures/thinkpad-e570.json')
+
+    ranges = ocgen.read_toml('data/framebuffer.toml')['support']
+    check('every generation states its macOS range', len(ranges) == 7, len(ranges))
+    skl = [r for r in ranges if r['codename'] == 'SKL']
+    check('including the one that writes "Officially supported"',
+          skl and (skl[0]['min_darwin'], skl[0]['max_darwin']) == (15, 21), skl)
+    ivy = [r for r in ranges if r['codename'] == 'Capri']
+    check('and one whose floor is older than data/macos.toml lists',
+          ivy and ivy[0]['min_darwin'] == 12, ivy)
+    kbl = [r for r in ranges if r['codename'] == 'KBL/ABL']
+    check('a generation with no ceiling records none rather than inventing one',
+          kbl and kbl[0]['max_darwin'] == 0, kbl)
+
+    parts = {w[0]: w for w in summary.macos_windows(e570)}
+    check('the iGPU bounds it', 'Intel graphics' in parts, sorted(parts))
+    check('so does a kext the card actually needs',
+          parts.get('Broadcom Wi-Fi', (None, None, None))[1] == 14, parts)
+    check('but a kext that only improves a device does not',
+          'Non-Apple NVMe' not in parts, sorted(parts))
+
+    floor, ceiling = summary.macos_range(e570)
+    check('the oldest is the highest floor of them all',
+          floor[1] == 16 and floor[0] == 'Intel graphics', floor)
+    check('and with nothing capped, there is no ceiling', ceiling is None, ceiling)
+
+    haswell = dict(e570, generation='haswell',
+                   gpu_devices=[{'id': '8086:0a16', 'name': 'Intel HD Graphics 4400'}])
+    floor, ceiling = summary.macos_range(haswell)
+    check('a generation macOS dropped does cap it',
+          ceiling and ceiling[2] == 21, ceiling)
+
+    # an iGPU that has been run and found not to accelerate bounds nothing
+    cml, _ = detect.read_report('tools/fixtures/comet-lake-h.json')
+    check('a field report takes the iGPU out of the reckoning',
+          'Intel graphics' not in {w[0] for w in summary.macos_windows(cml)},
+          summary.macos_windows(cml))
+
+    rendered = '\n'.join(summary.render(e570, 'test'))
+    check('the range reaches the screen', 'Sierra 10.12 or newer' in rendered)
+    check('with what these tables cannot see said next to it',
+          'SMBIOS' in rendered and 'discrete card' in rendered)
+
+
+def field_reports():
+    """An observation outranks a rule written for the generation, and says so."""
+    import gpu
+    import summary
+    ten = {'cpu': 'Intel(R) Core(TM) i5-10200H CPU @ 2.40GHz',
+           'generation': 'comet-lake', 'laptop': True, 'pci_ids': [], 'ps2': False,
+           'gpu_devices': [{'id': '8086:9bc4', 'name': 'Intel(R) UHD Graphics'}]}
+    other = dict(ten, cpu='Intel(R) Core(TM) i5-10210U CPU @ 1.60GHz')
+
+    check('the generation rule alone would call this one supported',
+          gpu.igpu_verdict('comet-lake')[0] == 'works')
+    found = gpu.field_igpu(ten['cpu'])
+    check('the field report is matched on the processor', found and
+          found['status'] == 'unsupported', found)
+    check('and it names who observed it and what they saw',
+          found and found['observed_by'] and 'acceleration' in found['observed'])
+    check('another processor of the same generation is untouched',
+          gpu.field_igpu(other['cpu']) is None)
+
+    rows = {r['part']: r for r in summary.rows(ten)}
+    check('so the summary calls it unsupported',
+          rows['Graphics']['verdict'] == summary.UNSUPPORTED, rows['Graphics'])
+    check('with the observation as the reason, not a table',
+          'reported by' in rows['Graphics']['detail'], rows['Graphics'])
+    check('and the rest of the generation still reads supported',
+          {r['part']: r for r in summary.rows(other)}['Graphics']['verdict']
+          == summary.SUPPORTED)
+
+    lines = gpu.report(ten['gpu_devices'], 'comet-lake', ten['cpu'])[0]
+    check('the graphics section agrees with the summary',
+          any('not supported' in l for l in lines), lines)
+
+
+def provenance():
+    """The report has to be readable off the files, not off a memory of them."""
+    import provenance as prov
+    table = prov.catalogue()
+    kinds = {r['kind'] for r in table}
+    check('every row declares one of the kinds',
+          kinds <= {prov.DERIVED, prov.QUOTED, prov.MEASURED,
+                    prov.REPORTED, prov.NONE}, kinds)
+    check('every row names what it does not cover',
+          all(r['gap'] for r in table))
+    hardware = [r for r in table if r['file'] == 'data/hardware.toml'][0]
+    real = sum(len(d['ids']) for d in ocgen.read_toml('data/hardware.toml')['driver'])
+    check('the counts are read from the files, not typed',
+          str(real) in hardware['count'], hardware['count'])
+    check('the areas with no source are named as such',
+          {r['area'] for r in table if r['kind'] == prov.NONE} ==
+          {'Camera', 'Card reader', 'USB port mapping', 'AMD graphics kexts'},
+          [r['area'] for r in table if r['kind'] == prov.NONE])
+    import contextlib
+    import io
+    with contextlib.redirect_stdout(io.StringIO()) as printed:
+        rc = prov.main([])
+    check('and it runs', rc == 0 and 'Where the answers come from' in printed.getvalue())
+
+
 def tables_match_sources():
     with tempfile.TemporaryDirectory() as tmp:
         gen = Path(tmp) / 'hardware.toml'
@@ -491,7 +701,7 @@ if __name__ == '__main__':
     for section in (graphics, graphics_advice, audio_advice, storage, peripherals,
                     trackpad, framebuffer, boot_args, other_machine, undecodable_output, scripted_answers,
                     hardware_summary, device_names, broadcom_wifi,
-                    detection_gaps,
+                    detection_gaps, provenance, framebuffers, native_device_ids, field_reports, macos_window,
                     tables_match_sources):
         print(f'\n{section.__name__}')
         section()

@@ -156,6 +156,61 @@ def unbundle():
     return here
 
 
+def profile_from(hw):
+    """(platform, vendor, cpu, cores, oem) when detection answers all of it.
+
+    None when anything is missing or has no profile. The fast path exists to
+    save answering four questions whose answers are already on the screen; it
+    must not be reachable on a guess, so every part has to be there and the
+    profile has to exist."""
+    gen = hw.get('generation')
+    if not gen or hw.get('laptop') is None:
+        return None
+    plat = 'laptop' if hw['laptop'] else 'desktop'
+    amd = gen in ('ryzen-threadripper', 'bulldozer-jaguar')
+    if plat == 'laptop' and amd:
+        return None                      # laptop profiles are Intel only
+    vendor = ('amd' if amd else 'intel') if plat == 'desktop' else None
+    pname = f'{plat}-{vendor}' if vendor else plat
+    if not (PROFILES / 'cpu' / pname / f'{gen}.toml').exists():
+        return None
+    cores = hw.get('cores') if vendor == 'amd' else None
+    if vendor == 'amd' and cores not in (4, 6, 8, 12, 16, 24, 32, 64):
+        return None
+    oem = hw.get('oem')
+    if oem and not (PROFILES / 'overlay' / f'oem.{oem}.toml').exists():
+        oem = None
+    return plat, vendor, gen, cores, oem
+
+
+def usb_notes():
+    """The follow-up for a machine built without a port map."""
+    return '\n'.join([
+        'USB ports', '',
+        '  This EFI has UTBDefault, which enables every port on the controller',
+        '  without mapping any of them. macOS allows fifteen ports per controller;',
+        '  a machine with more than that will have some that never work, and which',
+        '  ones is not predictable.',
+        '',
+        '  A real map fixes that, and it cannot be made from here: it takes',
+        '  plugging a device into every port in turn on the machine itself.',
+        '',
+        '    1. On Windows, download USBToolBox from github.com/USBToolBox/tool',
+        '    2. Run it, choose Discover Ports, and plug a USB 2 device and then a',
+        '       USB 3 device into every port, watching which entries light up',
+        '    3. Select the ports you want, set the port types, and build the kext',
+        '    4. It writes UTBMap.kext. Build again with:',
+        '',
+        '         setup.py --usb-map UTBMap.kext',
+        '',
+        '  That copies your map in and removes UTBDefault, which upstream says',
+        '  "is not needed and must be removed if you choose to map".',
+        '',
+        '  USBToolBox reads the ports from Windows, so it can be run on the target',
+        '  machine and the kext carried back, the same way as a hardware report.',
+        ''])
+
+
 def show_machine(hw, label):
     """Print what a probe says, so the person can see it is the right machine."""
     if not hw.get('cpu'):
@@ -373,41 +428,68 @@ def main():
         source = 'the ids you passed'
 
     asked = step[0]      # the scope question, when it was asked at all
-    plat = ask(nxt(), total, 'What kind of machine is this?',
-               [('desktop', 'Desktop'), ('laptop', 'Laptop')],
-               detected=('laptop' if hw.get('laptop') else
-                         'desktop' if hw.get('laptop') is False else None))
 
-    total = asked + 3    # laptop: platform, generation, brand
-    vendor = None
-    if plat == 'desktop':
-        det = ('amd' if hw.get('generation') in ('ryzen-threadripper', 'bulldozer-jaguar')
-               else 'intel' if hw.get('generation') else None)
-        # this answer decides whether a core count is asked for, so like the
-        # first question it cannot honestly claim a total yet
-        vendor = ask(nxt(), 0, 'Which CPU vendor?',
-                     [('intel', 'Intel'), ('amd', 'AMD')], detected=det)
-        total = asked + (5 if vendor == 'amd' else 4)
-    else:
-        print(f'\n      {DIM}laptop profiles cover Intel only, so no vendor question{RESET}')
+    # Everything the profile questions ask for is on the screen already when
+    # detection worked, so offer to take it in one answer. Shown and confirmed,
+    # never assumed: a wrong guess that arrives already applied is the thing
+    # this whole flow is arranged to avoid.
+    ready = profile_from(hw)
+    if ready:
+        r_plat, r_vendor, r_cpu, r_cores, r_oem = ready
+        described = ', '.join(x for x in [
+            r_plat.capitalize(),
+            CPU_LABELS.get(r_cpu, r_cpu),
+            f'{r_cores} cores' if r_cores else None,
+            (r_oem.upper().replace('-', ' / ') if r_oem else 'no board overlay'),
+        ] if x)
+        if ask(nxt(), 0, 'Use what was detected, or answer for yourself?',
+               [('go', f'Use it: {described}'),
+                ('ask', 'Answer the questions myself')],
+               detected='go') == 'go':
+            plat, vendor, cpu, cores, oem = ready
+            pname = f'{plat}-{vendor}' if vendor else plat
+            print(f'      {DIM}the profile questions are answered; everything below '
+                  f'is still asked{RESET}')
+        else:
+            ready = None
+        asked = step[0]
 
-    pname = f'{plat}-{vendor}' if vendor else plat
-    choices = cpu_choices(pname)
-    if not choices:
-        sys.exit(f'no profiles for {pname}')
-    gen = hw.get('generation')
-    cpu = ask(nxt(), total, 'Which CPU generation?', choices,
-              detected=gen if any(v == gen for v, _ in choices) else None)
+    if not ready:
+        plat = ask(nxt(), total, 'What kind of machine is this?',
+                   [('desktop', 'Desktop'), ('laptop', 'Laptop')],
+                   detected=('laptop' if hw.get('laptop') else
+                             'desktop' if hw.get('laptop') is False else None))
 
-    cores = None
-    if vendor == 'amd':
-        opts = [(n, f'{n} cores') for n in (4, 6, 8, 12, 16, 24, 32, 64)]
-        cores = ask(nxt(), total, 'How many physical cores?', opts,
-                    detected=hw.get('cores') if any(v == hw.get('cores') for v, _ in opts) else None)
+        total = asked + 3    # laptop: platform, generation, brand
+        vendor = None
+        if plat == 'desktop':
+            det = ('amd' if hw.get('generation') in ('ryzen-threadripper', 'bulldozer-jaguar')
+                   else 'intel' if hw.get('generation') else None)
+            # this answer decides whether a core count is asked for, so like the
+            # first question it cannot honestly claim a total yet
+            vendor = ask(nxt(), 0, 'Which CPU vendor?',
+                         [('intel', 'Intel'), ('amd', 'AMD')], detected=det)
+            total = asked + (5 if vendor == 'amd' else 4)
+        else:
+            print(f'\n      {DIM}laptop profiles cover Intel only, so no vendor question{RESET}')
 
-    oem = ask(nxt(), total, 'Board or laptop brand?',
-              [(o, o.upper().replace('-', ' / ')) for o in available('oem')],
-              detected=hw.get('oem'), allow_skip=True)
+        pname = f'{plat}-{vendor}' if vendor else plat
+        choices = cpu_choices(pname)
+        if not choices:
+            sys.exit(f'no profiles for {pname}')
+        gen = hw.get('generation')
+        cpu = ask(nxt(), total, 'Which CPU generation?', choices,
+                  detected=gen if any(v == gen for v, _ in choices) else None)
+
+        cores = None
+        if vendor == 'amd':
+            opts = [(n, f'{n} cores') for n in (4, 6, 8, 12, 16, 24, 32, 64)]
+            cores = ask(nxt(), total, 'How many physical cores?', opts,
+                        detected=hw.get('cores') if any(v == hw.get('cores') for v, _ in opts) else None)
+
+        oem = ask(nxt(), total, 'Board or laptop brand?',
+                  [(o, o.upper().replace('-', ' / ')) for o in available('oem')],
+                  detected=hw.get('oem'), allow_skip=True)
 
     row = dict(path='', platform=plat, vendor=vendor, cpu=cpu,
                chipset=None, oem=oem, variant=None, cores=cores)
@@ -421,7 +503,7 @@ def main():
     # so nobody is asked to decide about a device they do not have
     if hw.get('gpu_devices'):
         print(f'\n{BOLD}Graphics{RESET}')
-        lines, gpu_args = gpu.report(hw['gpu_devices'], cpu)
+        lines, gpu_args = gpu.report(hw['gpu_devices'], cpu, hw.get('cpu'))
         print('\n'.join(lines))
         if gpu_args:
             print(f'\n      {GREEN}boot arguments needed: {" ".join(gpu_args)}{RESET}')
@@ -431,7 +513,7 @@ def main():
     boot_args = []
 
     if hw.get('gpu_devices'):
-        boot_args += gpu.report(hw['gpu_devices'], cpu)[1]
+        boot_args += gpu.report(hw['gpu_devices'], cpu, hw.get('cpu'))[1]
 
     if hw.get('hda_ids'):
         print(f'\n{BOLD}Audio{RESET}')
@@ -442,6 +524,20 @@ def main():
             notes.append(asteps)
 
     queued = []
+    if not a.usb_map:
+        # UTBDefault claims every port on the controller, which boots but is not
+        # a map: macOS allows fifteen ports per controller and a machine with
+        # more than that loses whichever the default happens to reach last.
+        print(f'\n{BOLD}USB ports{RESET}')
+        print(f'  {DIM}UTBDefault is going in, which turns every port on without '
+              f'mapping any.\n  That boots. It is not the same as a map, and sleep and '
+              f'USB 3 ports are\n  where the difference shows.{RESET}')
+        print(f'      {DIM}To make one: run USBToolBox on this machine under Windows, '
+              f'plug a\n      device into every port when it asks, and it writes a '
+              f'UTBMap.kext.\n      Then build again with --usb-map UTBMap.kext and it '
+              f'replaces the default.{RESET}')
+        print(f'      {DIM}github.com/USBToolBox/tool{RESET}')
+        notes.append(usb_notes())
     if a.usb_map:
         mapped = Path(a.usb_map)
         if not (mapped / 'Contents' / 'Info.plist').exists():
@@ -458,13 +554,42 @@ def main():
 
     device_props = {}
     if hw.get('gpu_devices'):
+        # a framebuffer id cannot rescue an iGPU that has been run and found
+        # not to accelerate, so the field report suppresses the whole section
         state = gpu.igpu_verdict(cpu)[0]
-        ilines, iprops, isteps = igpu.report(cpu, plat == 'laptop', state == 'works')
+        field = gpu.field_igpu(hw.get('cpu'))
+        works = state == 'works' and not (field and field['status'] != 'works')
+        ilines, iprops, isteps = igpu.report(cpu, plat == 'laptop', works)
+        if field and not works:
+            # the profiles ship a placeholder. Leaving it because the section was
+            # skipped would put a value in the config that nobody chose.
+            print(f'\n{BOLD}Intel graphics framebuffer{RESET}')
+            print(f'      {YELLOW}none written: this iGPU has been reported not to '
+                  f'accelerate, and a framebuffer id will not change that{RESET}')
+            device_props.update(igpu.props_for(None))
         if ilines:
             print(f'\n{BOLD}Intel graphics framebuffer{RESET}')
             print('\n'.join(ilines))
-            device_props.update(iprops)
             notes.append(isteps)
+            device_props.update(iprops)
+            cands = igpu.candidates(cpu, plat == 'laptop')
+            if len(cands) > 1:
+                # the first option is what would have gone in anyway, so pressing
+                # 1 is the old behaviour and the rest is a choice, not a chore
+                options = [(c['value'], f'{c["value"]}  {c["label"]}') for c in cands]
+                options.append((igpu.NO_ACCELERATION['value'],
+                                f'{igpu.NO_ACCELERATION["value"]}  '
+                                f'{igpu.NO_ACCELERATION["label"]}'))
+                options.append((None, 'leave the key out; WhateverGreen picks'))
+                picked = ask(0, 0, 'Which framebuffer id?', options,
+                             detected=cands[0]['value'])
+                by_value = {c['value']: c for c in cands}
+                by_value[igpu.NO_ACCELERATION['value']] = igpu.NO_ACCELERATION
+                device_props = {k: v for k, v in device_props.items()
+                                if k != igpu.IGPU_PATH}
+                device_props.update(igpu.props_for(by_value.get(picked)))
+                if picked == igpu.NO_ACCELERATION['value']:
+                    print(f'      {YELLOW}{igpu.NO_ACCELERATION["note"]}{RESET}')
 
     input_lines, input_kexts = inputdev.entries(hw.get('pci_ids'), hw.get('ps2'),
                                                 hw.get('acpi_ids'))

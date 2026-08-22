@@ -176,7 +176,9 @@ audio and the trackpad need the report - they cannot be worked out from a name.
 To check if your hardware is incompatible, I leave links below.
 
 - [Processors](https://dortania.github.io/Anti-Hackintosh-Buyers-Guide/CPU.html#cpus-to-avoid)
-  - Intel Core i5-10200H (Unfortunately, this processor's integrated graphics card is not supported by macOS.)
+  - Intel Core i5-10200H - macOS installs, but the integrated graphics never
+    accelerate. Comet Lake is supported as a generation, so no guide says this;
+    it is recorded in `data/field.toml` and the builder reports it.
 - [Graphics Cards](https://dortania.github.io/GPU-Buyers-Guide/)
 - [Motherboards](https://dortania.github.io/Anti-Hackintosh-Buyers-Guide/Motherboard.html)
 - [Storage](https://dortania.github.io/Anti-Hackintosh-Buyers-Guide/Storage.html)

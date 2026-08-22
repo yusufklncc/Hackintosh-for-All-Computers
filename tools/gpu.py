@@ -44,6 +44,39 @@ def load():
     return ({c['id']: c for c in d['card']}, d.get('family', []), d.get('igpu', []))
 
 
+FIELD = Path('data/field.toml')
+FRAMEBUFFERS = Path('data/framebuffer.toml')
+
+
+def native_ids(generation):
+    """The device ids WhateverGreen says need no faked device-id.
+
+    A generation being supported is not the same as every part in it being
+    supported: Whiskey Lake and Coffee Lake Refresh are in supported generations
+    and missing from these lists, and the document says what they need instead.
+    Absent from the list therefore means "not native", never "unsupported"."""
+    if not generation or not FRAMEBUFFERS.exists():
+        return set()
+    return {e['id'] for e in ocgen.read_toml(FRAMEBUFFERS).get('native', [])
+            if generation in e.get('profiles', [])}
+
+
+def field_igpu(cpu_name):
+    """A field report about this exact processor's iGPU, if there is one.
+
+    Support is documented per generation and per device id, and neither reaches
+    a single SKU. A processor whose iGPU behaves differently from the rest of
+    its generation can only be recorded from someone having run it, so the entry
+    carries who ran it and what they saw."""
+    if not cpu_name or not FIELD.exists():
+        return None
+    haystack = cpu_name.lower()
+    for e in ocgen.read_toml(FIELD).get('igpu', []):
+        if e['cpu'].lower() in haystack:
+            return e
+    return None
+
+
 def igpu_verdict(generation):
     """Intel iGPU support for a CPU generation, or None if not covered.
 
@@ -87,21 +120,51 @@ def classify(device, generation=None):
         state, models = igpu_verdict(generation)
         if state:
             entry = {'family': f'Intel iGPU, {generation}'}
+            notes = []
             if state == 'works' and models:
-                entry['note'] = ('except ' + ', '.join(models)
-                                 + ', which the guide lists as unsupported')
+                notes.append('except ' + ', '.join(models)
+                             + ', which the guide lists as unsupported')
+            if state == 'works':
+                native = native_ids(generation)
+                if native and device.get('id'):
+                    if device['id'].lower() in native:
+                        entry['family'] += ', natively supported'
+                    else:
+                        entry['family'] += ', not natively'
+                        notes.append(
+                            f'{device["id"]} is not among the ids this generation '
+                            f'supports without a faked device-id')
+            if notes:
+                entry['note'] = '; '.join(notes)
+                # the family string already carries the short form of this, and
+                # the section below prints the note in full, so a table row does
+                # not need both
+                entry['long_note'] = True
             return state, entry
     return 'unknown', None
 
 
-def report(devices, generation=None):
-    """Lines describing the graphics situation, and the boot args to add."""
+def report(devices, generation=None, cpu_name=None):
+    """Lines describing the graphics situation, and the boot args to add.
+
+    cpu_name is the processor as the machine reports it, which is the only thing
+    a field report can be matched on."""
     lines, args = [], []
     if not devices:
         return ['  no graphics hardware was readable here'], args
 
-    judged = [(d, *classify(d, generation)) for d in devices]
-    igpu_state, igpu_models = igpu_verdict(generation)
+    field = field_igpu(cpu_name)
+    judged = []
+    for d in devices:
+        verdict, entry = classify(d, generation)
+        if field and looks_integrated(d.get('name')):
+            verdict = field['status']
+            entry = {'family': f'{field["observed"]}, reported by '
+                               f'{field["observed_by"]}',
+                     'note': field.get('note', '')}
+        judged.append((d, verdict, entry))
+    igpu_state = field['status'] if field else igpu_verdict(generation)[0]
+    igpu_state = 'works' if igpu_state == 'works' else igpu_state
     supported_igpu = [d for d, v, _ in judged
                       if looks_integrated(d.get('name'))
                       and (v in ('works', 'works-spoofed') or igpu_state == 'works')]

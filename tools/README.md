@@ -96,6 +96,111 @@ the question as `detected` and marks its row in the list.
 It is never preselected. Detection can be wrong, and a wrong answer that arrives
 already ticked is one nobody rechecks, so the person always types a number.
 
+## The framebuffer id
+
+Two sources, because they answer different questions. `data/gpu.toml` carries
+Dortania's one or two per generation with a reason attached - `default`,
+`recommended`, `Headless` - which says where to start. `data/framebuffer.toml`
+is WhateverGreen's whole list, parsed by `tools/fbtable.py` from the project's
+own markdown tables at the tag matching the vendored kext, which says what else
+exists: 138 framebuffers with type, connector count and stolen memory.
+
+Kaby Lake laptops went from one candidate to fourteen that way. Every id
+Dortania names appears in WhateverGreen's list too, which is the check that
+neither parser has drifted, and a headless framebuffer is sorted last however it
+was spelled.
+
+The same document lists, per generation, the device ids that need no faked
+`device-id` - 58 of them - and those turn one verdict per generation into one
+per device. Whiskey Lake and Kaby Lake Refresh sit in supported generations and
+are absent from those lists, and the document says elsewhere exactly what they
+need instead: `fake device-id A53E0000` and `16590000`. So absent from the list
+means *not native*, never *unsupported*, and the row says which:
+
+    Intel iGPU, kaby-lake, natively supported
+    Intel iGPU, coffee-lake-whiskey-lake, not natively
+
+Ivy Bridge writes its heading `Native supported DevIDs :` with a space, which a
+strict match dropped silently - a whole generation missing and nothing to say
+so. `fbtable.py` now refuses to write a table where a generation has
+framebuffers but no device ids.
+
+The menu offers two things that are not framebuffers. `0x12345678` is an id
+nothing claims, so no framebuffer kext attaches and macOS falls back to a
+picture with no graphics acceleration - useful for a first boot, and attributed
+to this repository's maintainer rather than to any upstream document, because no
+upstream document states it. The other leaves the key out entirely, which means
+*removing* it: the profiles ship a placeholder, and not writing one would leave
+that behind and call it a choice. `null` in a `--device-props` file is how that
+is expressed.
+
+## The oldest and newest macOS a machine can run
+
+Each part that bounds macOS contributes a window, and the machine's range is
+what is left where they overlap:
+
+    macOS  Yosemite 10.10 to Monterey 12
+        Broadcom Wi-Fi sets the oldest, Intel graphics the newest
+
+The floors and ceilings come from what already backs a decision elsewhere:
+`data/framebuffer.toml` carries the sentence each iGPU generation states about
+itself, parsed from the same document as the framebuffers, and `data/network.toml`
+already bounds every kext it adds.
+
+Two distinctions the answer depends on:
+
+* **A set covers wherever any one of its kexts applies.** Broadcom Bluetooth is
+  four kexts in a relay with no gap in it, so the set's floor is the oldest kext's,
+  not the newest.
+* **A kext that only improves a device does not raise the floor.** NVMeFix wants
+  10.14 and the drive works without it, so the set is marked `optional` and left
+  out of the reckoning. A kext the card cannot work without is not.
+
+An iGPU a field report says does not accelerate bounds nothing either - the
+machine is not going to be run on it.
+
+What this cannot see is stated next to it: the SMBIOS a build picks has a ceiling
+of its own, and so can a discrete card, and neither is recorded in this repository.
+
+## When somebody has actually run it
+
+`data/field.toml` holds observations that no upstream document carries, and it
+is the only table here that rests on nothing but somebody having booted the
+machine. Each entry names who observed it and what exactly they saw, and the
+tools label the verdict that way rather than presenting it as a documented fact.
+
+The first entry is the i5-10200H: Dortania states iGPU support per generation
+and WhateverGreen per device id, and Comet Lake is supported by both, so every
+rule here would call that processor's iGPU supported. It installs and the
+graphics never accelerate. A single SKU is below the resolution of either
+source, so it can only be recorded from having run it.
+
+An entry outranks the generation rule because it is more specific, not because
+it is stronger. It earns its place by being specific about the observation:
+"does not work" is not an entry, "installs, but graphics acceleration cannot be
+made to work" is.
+
+Where one applies, the framebuffer section is skipped entirely and the
+placeholder the profiles ship is removed - an id will not rescue an iGPU that
+has been run and found not to accelerate, and leaving a value nobody chose is
+worse than leaving the key out.
+
+## Where the answers come from
+
+    python3 tools/provenance.py            # every category and its source
+    python3 tools/provenance.py --gaps     # only what is not covered
+
+Four kinds of source, and the counts are read off the files rather than typed,
+so the report cannot claim coverage the repository does not have:
+
+* **derived** - read out of a machine-readable file the upstream project ships.
+  Regenerating after an update produces a diff, so drift is visible.
+* **quoted** - the rule exists only in prose, so the row carries the sentence it
+  rests on and names where it came from.
+* **measured** - produced by running something and recording what happened.
+* **none** - no source, so no verdict. This is why some rows say `unknown`, and
+  they will keep saying it until there is something to base an answer on.
+
 ## What the hardware means
 
 `summary.py` is the screen printed before the first question: one line per part,

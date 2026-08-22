@@ -37,8 +37,34 @@ jobs:
           python3 tools/setup.py $NONE --answers 2,10,3 --out /tmp/laptop/EFI
           python3 tools/setup.py $NONE --answers 1,2,2,3,6 --out /tmp/amd/EFI
           python3 tools/build.py --name 'Desktop/Intel/016 - Desktop - Raptor Lake' --out /tmp/named/EFI
-          # and once against this runner, declining whatever it turns out to have
-          python3 tools/setup.py --answers 1,2,10,3,3 --out /tmp/local/EFI
+          # a whole real machine, which is the only fixture the fast path and
+          # the framebuffer menu can both be exercised from
+          E570='--machine tools/fixtures/thinkpad-e570.json'
+          # 1 takes the detected profile, 1 the recommended framebuffer, 1 the kexts
+          python3 tools/setup.py $E570 --answers 1,1,1 --out /tmp/fast/EFI
+          test -d /tmp/fast/EFI/OC/Kexts/AirportBrcmFixup.kext
+          test -d /tmp/fast/EFI/OC/Kexts/NVMeFix.kext
+          # 2 answers the profile questions by hand instead
+          python3 tools/setup.py $E570 --answers 2,2,10,6,1,1 --out /tmp/byhand/EFI
+          # the last framebuffer option leaves the key out; the one before it is
+          # the id that boots without acceleration
+          python3 tools/setup.py $E570 --answers 1,16,1 --out /tmp/fb-none/EFI
+          python3 tools/setup.py $E570 --answers 1,15,1 --out /tmp/fb-noaccel/EFI
+          # a processor whose iGPU a field report says does not accelerate: no
+          # framebuffer section, no menu, and the profile's placeholder removed
+          # an id in a supported generation that is not natively supported:
+          # still supported, flagged as needing a faked device-id
+          WSK='--machine tools/fixtures/whiskey-lake.json'
+          python3 tools/setup.py $WSK --answers 1,1,1 --out /tmp/whiskey/EFI
+          python3 tools/summary.py $WSK | grep -q 'not natively'
+          CML='--machine tools/fixtures/comet-lake-h.json'
+          python3 tools/setup.py $CML --answers 1,3 --out /tmp/field/EFI
+          python3 - <<'CHECK'
+          import plistlib
+          d = plistlib.load(open('/tmp/field/EFI/OC/config.plist', 'rb'))
+          got = d['DeviceProperties']['Add'].get('PciRoot(0x0)/Pci(0x2,0x0)', {})
+          assert 'AAPL,ig-platform-id' not in got, got
+          CHECK
 
       - name: Storage advice
         run: |
@@ -109,6 +135,7 @@ jobs:
 
       - name: Detection and advice run standalone
         run: |
+          python3 tools/provenance.py
           python3 tools/detect.py
           python3 tools/inputdev.py
           python3 tools/igpu.py

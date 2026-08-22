@@ -26,6 +26,7 @@ import detect
 import gpu
 import inputdev
 import netkexts
+import ocgen
 
 PROFILES = Path('profiles')
 
@@ -72,12 +73,23 @@ def cpu_row(hw):
 
 def graphics_rows(hw):
     out = []
+    field = gpu.field_igpu(hw.get('cpu'))
     for device in hw.get('gpu_devices', []):
         verdict, entry = gpu.classify(device, hw.get('generation'))
+        if field and gpu.looks_integrated(device.get('name')):
+            # somebody ran this exact processor. That outranks a rule written
+            # for its generation, and says so rather than quietly disagreeing.
+            verdict = field['status']
+            entry = {'family': f'{field["observed"]}, reported by '
+                               f'{field["observed_by"]}'}
         detail = ''
         if entry:
             detail = entry.get('family') or entry.get('name') or ''
-            if entry.get('note'):
+            # a note is the substance of a family rule - "Kepler was the last
+            # supported family" - and must survive. Where it is only the long
+            # form of what the family string already says, it is marked as such
+            # and the section below prints it instead.
+            if entry.get('note') and not entry.get('long_note'):
                 detail = f'{detail}, {entry["note"]}' if detail else entry['note']
         state = {'works': SUPPORTED, 'works-spoofed': SUPPORTED,
                  'unsupported': UNSUPPORTED}.get(verdict, UNKNOWN)
@@ -221,6 +233,78 @@ def rows(hw):
     return [r for r in out + peripheral_rows(hw) if r]
 
 
+FRAMEBUFFERS = Path('data/framebuffer.toml')
+
+
+def _window(lo, hi):
+    return (lo or 0, hi if hi else None)
+
+
+def macos_windows(hw):
+    """[(what, min_darwin, max_darwin or None)] for the parts that bound macOS.
+
+    Only the parts a table here actually bounds. The SMBIOS a build picks has a
+    ceiling of its own and a discrete card can have one too; neither is recorded
+    anywhere in this repository, so neither narrows the answer and the caller
+    has to say so rather than presenting this as the machine's true ceiling."""
+    out = []
+    gen = hw.get('generation')
+    if gen and any(gpu.looks_integrated(d.get('name'))
+                   for d in hw.get('gpu_devices', [])):
+        # an iGPU a field report says does not accelerate bounds nothing: the
+        # machine is not going to be run on it either way
+        field = gpu.field_igpu(hw.get('cpu'))
+        usable = gpu.igpu_verdict(gen)[0] == 'works' and not (
+            field and field['status'] != 'works')
+        if usable and FRAMEBUFFERS.exists():
+            for s in ocgen.read_toml(FRAMEBUFFERS).get('support', []):
+                if gen in s.get('profiles', []):
+                    out.append(('Intel graphics', *_window(s['min_darwin'],
+                                                           s['max_darwin'])))
+                    break
+
+    matched = advise.matched_kexts(hw.get('pci_ids') or [], hw.get('usb_ids') or [])
+    third_party_nvme = [d for d in hw.get('nvme') or [] if 'apple' not in d.lower()]
+    if third_party_nvme:
+        matched = set(matched) | {'NVMeFix.kext'}
+    for s in netkexts.sets():
+        if s['match'] not in matched or s.get('optional'):
+            continue
+        # a set covers wherever any one of its kexts applies: Broadcom Bluetooth
+        # is four kexts in a relay, and the relay has no gap in it
+        los = [int((k.get('min_kernel') or '0').split('.')[0]) for k in s['kext']]
+        his = [k.get('max_kernel') for k in s['kext']]
+        ceiling = None if any(not h for h in his) else max(
+            int(h.split('.')[0]) for h in his)
+        out.append((s['label'], min(los), ceiling))
+    for s in netkexts.variant_sets():
+        if s['match'] not in matched:
+            continue
+        variants = s.get('variant', [])
+        if variants:
+            out.append((s['label'], min(v['min_darwin'] for v in variants),
+                        max(v['max_darwin'] for v in variants)))
+    return out
+
+
+def macos_range(hw):
+    """(min_darwin, max_darwin or None, what set each end) across the machine."""
+    windows = macos_windows(hw)
+    if not windows:
+        return None
+    floor = max(windows, key=lambda w: w[1])
+    ceilings = [w for w in windows if w[2] is not None]
+    ceiling = min(ceilings, key=lambda w: w[2]) if ceilings else None
+    return floor, ceiling
+
+
+def name_for(darwin):
+    for r in ocgen.read_toml(Path('data/macos.toml'))['release']:
+        if r['darwin'] == darwin:
+            return f'{r["name"]} {r["version"]}'
+    return f'Darwin {darwin}'
+
+
 def worth_showing(hw):
     """Whether a summary of this machine would say anything.
 
@@ -266,6 +350,22 @@ def render(hw, source='this machine'):
     if unknown:
         lines.append(f'  {DIM}{len(unknown)} left as unknown, where no table here has '
                      f'anything to say.{RESET}')
+
+    window = macos_range(hw)
+    if window:
+        floor, ceiling = window
+        span = f'{name_for(floor[1])} or newer'
+        if ceiling:
+            span = f'{name_for(floor[1])} to {name_for(ceiling[2])}'
+        lines.append('')
+        lines.append(f'  {BOLD}macOS{RESET}  {span}')
+        lines.append(f'      {DIM}{floor[0]} sets the oldest'
+                     + (f', {ceiling[0]} the newest' if ceiling else '') + f'{RESET}')
+        # the honest caveat: this is as far as these tables reach, and two of the
+        # things that really do cap a machine are not in any of them
+        lines.append(f'      {DIM}from the parts these tables bound. The SMBIOS a build '
+                     f'picks has a ceiling\n      of its own, and so can a discrete '
+                     f'card; neither is recorded here.{RESET}')
     return lines
 
 

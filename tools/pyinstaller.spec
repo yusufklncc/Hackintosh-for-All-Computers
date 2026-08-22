@@ -20,7 +20,8 @@ a = Analysis(
     pathex=[TOOLS],
     datas=datas,
     hiddenimports=['advise', 'audio', 'build', 'detect', 'gpu', 'igpu',
-                   'inputdev', 'itlwm', 'netkexts', 'ocgen', 'summary'],
+                   'inputdev', 'itlwm', 'netkexts', 'ocgen', 'provenance',
+                   'summary'],
     excludes=['tkinter', 'unittest', 'pydoc_data', 'test'],
 )
 pyz = PYZ(a.pure)

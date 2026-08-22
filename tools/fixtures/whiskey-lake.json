@@ -1,0 +1,115 @@
+{
+  "acpi_ids": [
+    "ACPI0003",
+    "INT3394",
+    "INT3F0D",
+    "LEN0071",
+    "LEN0268",
+    "LEN2043",
+    "MSFT0101",
+    "PNP0000",
+    "PNP0100",
+    "PNP0103",
+    "PNP0800",
+    "PNP0A08",
+    "PNP0B00",
+    "PNP0C01",
+    "PNP0C02",
+    "PNP0C09",
+    "PNP0C0A",
+    "PNP0C0D",
+    "PNP0C0E",
+    "PNP0C14"
+  ],
+  "cores": 2,
+  "cpu": "Intel(R) Core(TM) i5-8265U CPU @ 1.60GHz",
+  "device_names": {
+    "0a5c:6412": "Dell Wireless 1820A Bluetooth 4.1 LE",
+    "10ec:8168": "Realtek PCIe GbE Family Controller",
+    "14e4:43a3": "Dell Wireless 1820A 802.11ac",
+    "15b7:5009": "Standart NVM Express Denetleyicisi",
+    "8086:9d71": "High Definition Audio Denetleyicisi"
+  },
+  "generation": "coffee-lake-whiskey-lake",
+  "gpu": [
+    "Intel(R) UHD Graphics 620"
+  ],
+  "gpu_devices": [
+    {
+      "id": "8086:3ea0",
+      "name": "Intel(R) UHD Graphics 620"
+    }
+  ],
+  "gpu_virtual": [
+    "Microsoft Remote Display Adapter"
+  ],
+  "hda_ids": [
+    "14f1:5111",
+    "8086:280b"
+  ],
+  "laptop": true,
+  "nvme": [
+    "WDC WDS250G2B0C-00PXH0"
+  ],
+  "oem": null,
+  "oem_raw": null,
+  "pci_ids": [
+    "10ec:8168",
+    "14e4:43a3",
+    "15b7:5009",
+    "8086:5904",
+    "8086:5916",
+    "8086:9d03",
+    "8086:9d18",
+    "8086:9d1a",
+    "8086:9d1b",
+    "8086:9d21",
+    "8086:9d23",
+    "8086:9d2f",
+    "8086:9d31",
+    "8086:9d3a",
+    "8086:9d58",
+    "8086:9d71"
+  ],
+  "peripherals": [
+    {
+      "driver": "i8042prt",
+      "id": "ACPI\\LEN2043",
+      "kind": "pointing device",
+      "name": "Synaptics Pointing Device",
+      "usb": false,
+      "virtual": false
+    },
+    {
+      "driver": "mouhid",
+      "id": "HID\\SYNHIDMINI&COL01",
+      "kind": "pointing device",
+      "name": "HID uyumlu fare",
+      "usb": false,
+      "virtual": false
+    },
+    {
+      "driver": "terminpt",
+      "id": "TERMINPUT_BUS\\UMB",
+      "kind": "keyboard",
+      "name": "Uzak Masaustu Klavye Aygiti",
+      "usb": false,
+      "virtual": true
+    },
+    {
+      "driver": "i8042prt",
+      "id": "ACPI\\LEN0071",
+      "kind": "keyboard",
+      "name": "Standart PS/2 Klavye",
+      "usb": false,
+      "virtual": false
+    }
+  ],
+  "ps2": true,
+  "report_version": 1,
+  "system": "Windows",
+  "usb_ids": [
+    "0a5c:6412"
+  ],
+  "written": "a fixture, not a real machine"
+}
