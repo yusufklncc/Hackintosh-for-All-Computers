@@ -94,9 +94,11 @@ def catalogue():
              source="WhateverGreen's own tables, at the tag matching the kext",
              tool='tools/fbtable.py',
              count=f'{rows_in("data/framebuffer.toml", "framebuffer")} framebuffers, '
-                   f'{rows_in("data/framebuffer.toml", "native")} native device ids',
-             covers='Ivy Bridge to Ice Lake: type, connectors, memory, and which '
-                    'device ids need no faked device-id',
+                   f'{rows_in("data/framebuffer.toml", "native")} native ids, '
+                   f'{rows_in("data/framebuffer.toml", "support")} macOS ranges',
+             covers='Ivy Bridge to Ice Lake: type, connectors, memory, which '
+                    'device ids need no faked device-id, and the macOS range '
+                    'each generation states',
              gap='Sandy Bridge has a section but no list in that form. '
                  'Connector patches are per machine and are not written at all.'),
         dict(area='Audio codecs', kind=DERIVED, file='data/audio.toml',

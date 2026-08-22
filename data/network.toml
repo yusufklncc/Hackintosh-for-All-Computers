@@ -168,10 +168,14 @@ bundle = "AirportBrcmFixup.kext"
 min_kernel = "14.0.0"
 note = "'a set of patches required for non-native Airport Broadcom Wi-Fi cards'; 'currently this kext requires macOS 10.10 or newer'"
 
+# optional: the device works without this kext, which only improves it. That
+# matters for working out the oldest macOS a machine can run: a kext that is
+# required drags the floor up with it, one that is an improvement does not.
 [[set]]
 role = "storage"
 match = "NVMeFix.kext"
 label = "Non-Apple NVMe"
+optional = true
 source = "acidanthera/NVMeFix README"
 [[set.kext]]
 bundle = "NVMeFix.kext"

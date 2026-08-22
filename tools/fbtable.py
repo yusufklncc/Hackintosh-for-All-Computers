@@ -54,6 +54,43 @@ SUBLABEL_PROFILES = {
 
 # the Ivy Bridge section writes 'DevIDs :' with a space, and matching
 # strictly dropped that whole generation without saying so
+# Each generation states its macOS range in one blockquote under the heading,
+# with the wording varying just enough to matter: "Supported from X to Y",
+# "Supported since X to Y", "Officially supported since X to Y", "Supported
+# since X" with no ceiling at all.
+SUPPORT = re.compile(
+    r'^>\s*(?:Officially\s+)?[Ss]upported\s+(?:from|since)\s+'
+    r'(?:Mac\s+OS\s+X|OS\s+X|macOS)\s+(?P<lo>\d+(?:\.\d+)*)(?:\.x|x)?'
+    r'(?:\s+to\s+(?:Mac\s+OS\s+X|OS\s+X|macOS)\s+(?P<hi>\d+(?:\.\d+)*)(?:\.x|x)?)?',
+    re.M)
+
+
+def release_darwin():
+    """{macOS version: darwin major} from this repository's own table."""
+    return {r['version']: r['darwin']
+            for r in ocgen.read_toml(Path('data/macos.toml'))['release']}
+
+
+def darwin_for(version, table):
+    """Darwin major for a macOS version, ignoring the point release.
+
+    10.15.4 and 10.15 are the same kernel major, and a kernel major is the only
+    thing OpenCore can bound on, so the point release is dropped rather than
+    pretended to matter.
+
+    Releases older than data/macos.toml fall back to 10.x = Darwin x+4, which is
+    not a guess: it is the rule the six rows of that table already follow, and
+    the guide quotes releases going back to 10.6 that this repository does not
+    otherwise care about."""
+    parts = version.strip('.').split('.')
+    for candidate in ('.'.join(parts[:2]), parts[0]):
+        if candidate in table:
+            return table[candidate]
+    if parts[0] == '10' and len(parts) > 1 and parts[1].isdigit():
+        return int(parts[1]) + 4
+    return None
+
+
 NATIVE = re.compile(r'^\*\*\*Native supported DevIDs\s*:\*\*\*', re.M)
 SUBLABEL = re.compile(r'^- ([A-Z]{3}):\s*$', re.M)
 DEVID = re.compile(r'^\s*-\s+`0x([0-9A-Fa-f]{4})`\s*$', re.M)
@@ -146,6 +183,34 @@ def parse_native(text):
     return out
 
 
+def parse_support(text):
+    """The macOS range each generation is supported on, from its own sentence."""
+    table = release_darwin()
+    out = []
+    sections = [(m.start(), m.group(0)) for m in
+                re.finditer(r'^## Intel .*$', text, re.M)]
+    for k, (pos, _) in enumerate(sections):
+        end = sections[k + 1][0] if k + 1 < len(sections) else len(text)
+        seg = text[pos:end]
+        fb = LIST.search(seg)
+        if not fb:
+            continue
+        profiles = CODENAME_PROFILES.get(fb.group('name').strip())
+        if not profiles:
+            continue
+        m = SUPPORT.search(seg)
+        if not m:
+            continue
+        lo = darwin_for(m.group('lo'), table)
+        hi = darwin_for(m.group('hi'), table) if m.group('hi') else None
+        if lo is None:
+            continue
+        out.append({'codename': fb.group('name').strip(), 'profiles': profiles,
+                    'min_darwin': lo, 'max_darwin': hi or 0,
+                    'quote': ' '.join(m.group(0).lstrip('> ').split())})
+    return out
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument('--out', default='data/framebuffer.toml')
@@ -157,7 +222,8 @@ def main(argv=None):
     text = Path(a.local).read_text(encoding='utf-8') if a.local else fetch(a.ref)
     entries = parse(text)
     native = parse_native(text)
-    if not entries or not native:
+    support = parse_support(text)
+    if not entries or not native or not support:
         sys.exit('no framebuffer lists found; the document layout may have changed')
     # a generation that has a framebuffer list and no device ids means the
     # document moved something and the parser lost it quietly, which is the one
@@ -168,8 +234,12 @@ def main(argv=None):
         if not any(set(profiles) & set(n['profiles']) for n in native):
             sys.exit(f'{codename} has framebuffers but no native device ids; '
                      f'the document layout has changed')
+        if not any(codename == s['codename'] for s in support):
+            sys.exit(f'{codename} has framebuffers but no macOS range; '
+                     f'the document layout has changed')
 
-    ocgen.write_toml(Path(a.out), {'framebuffer': entries, 'native': native},
+    ocgen.write_toml(Path(a.out), {'framebuffer': entries, 'native': native,
+                                   'support': support},
                      '# Intel framebuffer platform ids, from WhateverGreen.\n'
                      '#\n'
                      '# Parsed by tools/fbtable.py from the project\'s own tables in\n'
@@ -187,8 +257,8 @@ def main(argv=None):
                      '# Refresh are missing from these lists and the document says\n'
                      '# exactly what they need instead.\n'
                      f'# Source: https://github.com/{REPO}/blob/master/{DOC}')
-    print(f'  {len(entries)} framebuffers and {len(native)} native device ids '
-          f'from {a.ref}')
+    print(f'  {len(entries)} framebuffers, {len(native)} native device ids and '
+          f'{len(support)} macOS ranges from {a.ref}')
     for name in CODENAME_PROFILES:
         rows = [e for e in entries if e['codename'] == name]
         if rows:

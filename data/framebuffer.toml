@@ -1546,3 +1546,52 @@ id = "8086:8a5a"
 label = "ICL"
 profiles = ["ice-lake"]
 id = "8086:8a5b"
+
+[[support]]
+codename = "Capri"
+profiles = ["ivy-bridge"]
+min_darwin = 12
+max_darwin = 20
+quote = "Supported from OS X 10.8.x to macOS 11.x"
+
+[[support]]
+codename = "Azul"
+profiles = ["haswell"]
+min_darwin = 13
+max_darwin = 21
+quote = "Supported since OS X 10.9.x to macOS 12.x"
+
+[[support]]
+codename = "BDW"
+profiles = ["broadwell"]
+min_darwin = 14
+max_darwin = 21
+quote = "Supported since OS X 10.10.2 to macOS 12.x"
+
+[[support]]
+codename = "SKL"
+profiles = ["sky-lake"]
+min_darwin = 15
+max_darwin = 21
+quote = "Officially supported since OS X 10.11.4 to macOS 12.x"
+
+[[support]]
+codename = "KBL/ABL"
+profiles = ["kaby-lake"]
+min_darwin = 16
+max_darwin = 0
+quote = "Supported since macOS 10.12.6"
+
+[[support]]
+codename = "CFL/CML"
+profiles = ["coffe-lake", "coffe-lake-plus", "coffee-lake-whiskey-lake", "comet-lake"]
+min_darwin = 18
+max_darwin = 0
+quote = "Supported since macOS 10.14"
+
+[[support]]
+codename = "ICL"
+profiles = ["ice-lake"]
+min_darwin = 19
+max_darwin = 0
+quote = "Supported since macOS 10.15.4"

@@ -574,6 +574,53 @@ def native_device_ids():
           gpu.native_ids('rocket-lake') == set())
 
 
+def macos_window():
+    """Where each part bounds macOS, and what the intersection of those is."""
+    import summary
+    e570, _ = detect.read_report('tools/fixtures/thinkpad-e570.json')
+
+    ranges = ocgen.read_toml('data/framebuffer.toml')['support']
+    check('every generation states its macOS range', len(ranges) == 7, len(ranges))
+    skl = [r for r in ranges if r['codename'] == 'SKL']
+    check('including the one that writes "Officially supported"',
+          skl and (skl[0]['min_darwin'], skl[0]['max_darwin']) == (15, 21), skl)
+    ivy = [r for r in ranges if r['codename'] == 'Capri']
+    check('and one whose floor is older than data/macos.toml lists',
+          ivy and ivy[0]['min_darwin'] == 12, ivy)
+    kbl = [r for r in ranges if r['codename'] == 'KBL/ABL']
+    check('a generation with no ceiling records none rather than inventing one',
+          kbl and kbl[0]['max_darwin'] == 0, kbl)
+
+    parts = {w[0]: w for w in summary.macos_windows(e570)}
+    check('the iGPU bounds it', 'Intel graphics' in parts, sorted(parts))
+    check('so does a kext the card actually needs',
+          parts.get('Broadcom Wi-Fi', (None, None, None))[1] == 14, parts)
+    check('but a kext that only improves a device does not',
+          'Non-Apple NVMe' not in parts, sorted(parts))
+
+    floor, ceiling = summary.macos_range(e570)
+    check('the oldest is the highest floor of them all',
+          floor[1] == 16 and floor[0] == 'Intel graphics', floor)
+    check('and with nothing capped, there is no ceiling', ceiling is None, ceiling)
+
+    haswell = dict(e570, generation='haswell',
+                   gpu_devices=[{'id': '8086:0a16', 'name': 'Intel HD Graphics 4400'}])
+    floor, ceiling = summary.macos_range(haswell)
+    check('a generation macOS dropped does cap it',
+          ceiling and ceiling[2] == 21, ceiling)
+
+    # an iGPU that has been run and found not to accelerate bounds nothing
+    cml, _ = detect.read_report('tools/fixtures/comet-lake-h.json')
+    check('a field report takes the iGPU out of the reckoning',
+          'Intel graphics' not in {w[0] for w in summary.macos_windows(cml)},
+          summary.macos_windows(cml))
+
+    rendered = '\n'.join(summary.render(e570, 'test'))
+    check('the range reaches the screen', 'Sierra 10.12 or newer' in rendered)
+    check('with what these tables cannot see said next to it',
+          'SMBIOS' in rendered and 'discrete card' in rendered)
+
+
 def field_reports():
     """An observation outranks a rule written for the generation, and says so."""
     import gpu
@@ -654,7 +701,7 @@ if __name__ == '__main__':
     for section in (graphics, graphics_advice, audio_advice, storage, peripherals,
                     trackpad, framebuffer, boot_args, other_machine, undecodable_output, scripted_answers,
                     hardware_summary, device_names, broadcom_wifi,
-                    detection_gaps, provenance, framebuffers, native_device_ids, field_reports,
+                    detection_gaps, provenance, framebuffers, native_device_ids, field_reports, macos_window,
                     tables_match_sources):
         print(f'\n{section.__name__}')
         section()

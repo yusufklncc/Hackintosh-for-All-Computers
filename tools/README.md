@@ -134,6 +134,34 @@ upstream document states it. The other leaves the key out entirely, which means
 that behind and call it a choice. `null` in a `--device-props` file is how that
 is expressed.
 
+## The oldest and newest macOS a machine can run
+
+Each part that bounds macOS contributes a window, and the machine's range is
+what is left where they overlap:
+
+    macOS  Yosemite 10.10 to Monterey 12
+        Broadcom Wi-Fi sets the oldest, Intel graphics the newest
+
+The floors and ceilings come from what already backs a decision elsewhere:
+`data/framebuffer.toml` carries the sentence each iGPU generation states about
+itself, parsed from the same document as the framebuffers, and `data/network.toml`
+already bounds every kext it adds.
+
+Two distinctions the answer depends on:
+
+* **A set covers wherever any one of its kexts applies.** Broadcom Bluetooth is
+  four kexts in a relay with no gap in it, so the set's floor is the oldest kext's,
+  not the newest.
+* **A kext that only improves a device does not raise the floor.** NVMeFix wants
+  10.14 and the drive works without it, so the set is marked `optional` and left
+  out of the reckoning. A kext the card cannot work without is not.
+
+An iGPU a field report says does not accelerate bounds nothing either - the
+machine is not going to be run on it.
+
+What this cannot see is stated next to it: the SMBIOS a build picks has a ceiling
+of its own, and so can a discrete card, and neither is recorded in this repository.
+
 ## When somebody has actually run it
 
 `data/field.toml` holds observations that no upstream document carries, and it
