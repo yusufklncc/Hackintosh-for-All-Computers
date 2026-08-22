@@ -32,6 +32,7 @@ import inputdev
 import netkexts
 import ocgen
 import summary
+import usbmap
 
 PROFILES = Path('profiles')
 
@@ -192,10 +193,14 @@ def usb_notes():
         '  a machine with more than that will have some that never work, and which',
         '  ones is not predictable.',
         '',
-        '  A real map fixes that, and it cannot be made from here: it takes',
-        '  plugging a device into every port in turn on the machine itself.',
+        '  A real map fixes that, and it cannot be worked out from a listing: it',
+        '  takes plugging a device into every port in turn on the machine itself.',
         '',
-        '    1. On Windows, download USBToolBox from github.com/USBToolBox/tool',
+        '  USBToolBox is bundled with this builder. Run it on Windows and it is',
+        '  offered before the build; these are the steps either way.',
+        '',
+        '    1. On Windows, run this builder, or USBToolBox from',
+        '       github.com/USBToolBox/tool',
         '    2. Run it, choose Discover Ports, and plug a USB 2 device and then a',
         '       USB 3 device into every port, watching which entries light up',
         '    3. Select the ports you want, set the port types, and build the kext',
@@ -523,7 +528,26 @@ def main():
             boot_args.append(f'alcid={alcid}')
             notes.append(asteps)
 
+    usb_implies = None
     queued = []
+    if not a.usb_map and usbmap.available() and usbmap.runnable_here():
+        # the tool is here and this is the machine it runs on, so offer it
+        # rather than describing it: the map has to be made somewhere and this
+        # is the only place it can be
+        print(f'\n{BOLD}USB ports{RESET}')
+        print(f'  {DIM}UTBDefault turns every port on without mapping any. A real map '
+              f'takes\n  plugging a device into each port in turn, which USBToolBox '
+              f'does and this\n  cannot - so it is here, and it can run now.{RESET}')
+        if ask(0, 0, 'Map the USB ports now?',
+               [('yes', 'Yes, run USBToolBox'),
+                ('no', 'No, use UTBDefault and map later')]) == 'yes':
+            made, implies = usbmap.run(Path(a.out).parent / 'usbmap')
+            if made:
+                print(f'      {GREEN}{made.name} written{RESET}')
+                a.usb_map = str(made)
+                usb_implies = implies
+            else:
+                print(f'      {YELLOW}{implies}; UTBDefault stays in{RESET}')
     if not a.usb_map:
         # UTBDefault claims every port on the controller, which boots but is not
         # a map: macOS allows fifteen ports per controller and a machine with
@@ -532,11 +556,15 @@ def main():
         print(f'  {DIM}UTBDefault is going in, which turns every port on without '
               f'mapping any.\n  That boots. It is not the same as a map, and sleep and '
               f'USB 3 ports are\n  where the difference shows.{RESET}')
-        print(f'      {DIM}To make one: run USBToolBox on this machine under Windows, '
-              f'plug a\n      device into every port when it asks, and it writes a '
-              f'UTBMap.kext.\n      Then build again with --usb-map UTBMap.kext and it '
-              f'replaces the default.{RESET}')
-        print(f'      {DIM}github.com/USBToolBox/tool{RESET}')
+        print(f'      {DIM}To make one: run USBToolBox on the target machine under '
+              f'Windows, plug a\n      device into every port when it asks, and it '
+              f'writes a UTBMap.kext.\n      Then build again with --usb-map '
+              f'UTBMap.kext and it replaces the default.{RESET}')
+        if usbmap.available():
+            print(f'      {DIM}It is bundled here: on Windows this builder offers to '
+                  f'run it for you.{RESET}')
+        else:
+            print(f'      {DIM}github.com/USBToolBox/tool{RESET}')
         notes.append(usb_notes())
     if a.usb_map:
         mapped = Path(a.usb_map)
@@ -657,7 +685,11 @@ def main():
     # hardware to match, or a machine with neither gets nothing
     # a real map replaces the catch-all; keeping both would have UTBDefault
     # claim the controllers the map is for
-    cmd_extra_drop = ['UTBDefault.kext'] if a.usb_map else []
+    # which kexts a map replaces depends on which map it is: the native ones
+    # need no USBToolBox.kext, and leaving it in would inject a driver for
+    # hardware nothing is claiming
+    cmd_extra_drop = list(usb_implies['drops']) if usb_implies else (
+        ['UTBDefault.kext'] if a.usb_map else [])
     if matched or storage_kexts or input_kexts:
         if matched and not manual:
             print(f'\n{BOLD}Network kexts{RESET}')

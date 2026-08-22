@@ -21,6 +21,7 @@ a = Analysis(
     datas=datas,
     hiddenimports=['advise', 'audio', 'build', 'detect', 'gpu', 'igpu',
                    'inputdev', 'itlwm', 'netkexts', 'ocgen', 'provenance',
+                   'thirdparty', 'usbmap',
                    'summary'],
     excludes=['tkinter', 'unittest', 'pydoc_data', 'test'],
 )

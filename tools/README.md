@@ -205,6 +205,31 @@ placeholder the profiles ship is removed - an id will not rescue an iGPU that
 has been run and found not to accelerate, and leaving a value nobody chose is
 worse than leaving the key out.
 
+## USB port mapping
+
+A port map cannot be worked out from a device listing. It takes plugging
+something into every port in turn and watching which entry lights up, which
+USBToolBox does and this cannot. So the tool is vendored whole and driven -
+`vendor/tools/USBToolBox/Windows.exe`, MIT, pinned by sha256 in
+`vendor/tools.lock` the same way the kexts are - and on Windows the builder
+offers to run it before the build. Nothing here reimplements it; the kext it
+writes is the kext that goes in.
+
+The Python source was not an option: it needs the `wmi` and `pywin32` packages,
+and every tool here is standard library only. The project publishes this build
+for exactly that reason, so the build is what is vendored. It costs 11 MB.
+
+Two things from the tool's own code decide how it has to be run:
+
+* `shared.current_dir` is `Path(sys.executable).parent` for a frozen build, so
+  it writes the map beside itself. Run from inside our bundle that would be a
+  temporary directory that disappears, so it is copied out and run somewhere of
+  ours first.
+* It writes one of three names depending on which classes were chosen.
+  `UTBMap.kext` rides on `USBToolBox.kext`; `USBMap.kext` and `USBMapLegacy.kext`
+  use Apple's own classes and need neither it nor `UTBDefault.kext`. Which one
+  came out decides what is dropped, rather than one rule for all three.
+
 ## What somebody else wrote
 
     python3 tools/thirdparty.py
