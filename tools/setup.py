@@ -228,8 +228,23 @@ def run_ssdts(a, where):
     question about the rest. Three answers up front - automatic, menu, no - read
     as a puzzle to solve before anything has happened; this way the choice comes
     after the facts."""
+    # Building for this machine means its tables are right here, and SSDTTime
+    # can dump them. Asking "work out the SSDTs?" and then saying "no ACPI
+    # tables were loaded" is offering something and not doing it.
+    tables = a.acpi_tables
+    if not tables:
+        into = Path(a.out).parent / 'ACPI'
+        print(f'      {DIM}reading this machine\'s ACPI tables{RESET}')
+        dumped, complaint = acpi.dump(Path(a.out).parent / 'acpi-dump', into)
+        if not dumped:
+            print(f'      {YELLOW}{complaint}{RESET}')
+            return None
+        tables = str(dumped)
+        print(f'      {DIM}{len(list(Path(dumped).glob("*.aml")))} tables in '
+              f'{dumped}{RESET}')
+
     outcomes = []
-    got, complaint = acpi.run(Path(a.out).parent / 'acpi', a.acpi_tables,
+    got, complaint = acpi.run(Path(a.out).parent / 'acpi', tables,
                               unattended=True, outcomes=outcomes)
     if not got and not outcomes:
         print(f'      {YELLOW}{complaint}{RESET}')
@@ -261,7 +276,7 @@ def run_ssdts(a, where):
     if ask(0, 0, 'Open SSDTTime to work through those too?',
            [('no', 'No, what came out is enough'),
             ('yes', 'Yes, open the menus')]) == 'yes':
-        more, complaint = acpi.run(Path(a.out).parent / 'acpi', a.acpi_tables)
+        more, complaint = acpi.run(Path(a.out).parent / 'acpi', tables)
         if more:
             got = more
         else:
