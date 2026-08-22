@@ -930,8 +930,37 @@ def smbus_trackpad():
           inputdev.smbus_trackpad({'8086:9d23': 'Intel(R) SMBus - 9D23'})[0] is None)
     check('nor does a Synaptics device that is not on the SMBus',
           inputdev.smbus_trackpad({'8086:9d60': 'Synaptics Pointing Device'})[0] is None)
-    check('and the rule it points at is the quoted one',
-          inputdev.smbus_rule('smbus-synaptics')['kexts'] == ['VoodooRMI.kext'])
+    # saying yes is not "add one kext": the project gives an ordered set and one
+    # plugin that has to come out, and two VoodooInput kexts at once is the
+    # failure it is warning about
+    rule = inputdev.smbus_rule('smbus-synaptics')
+    check('the rule carries the whole ordered set',
+          rule['kexts'] == ['VoodooRMI.kext',
+                            'VoodooRMI.kext/Contents/PlugIns/VoodooInput.kext',
+                            'VoodooSMBus.kext',
+                            'VoodooRMI.kext/Contents/PlugIns/RMISMBus.kext'],
+          rule['kexts'])
+    check("and what the profile's has to stop doing",
+          rule['disable'] == ['VoodooPS2Controller.kext/Contents/PlugIns/'
+                              'VoodooInput.kext'], rule.get('disable'))
+    check('every plugin it names is in the vendored kext',
+          all((Path('EFI/OC/Kexts') / k).exists() for k in rule['kexts']),
+          [k for k in rule['kexts'] if not (Path('EFI/OC/Kexts') / k).exists()])
+    check('and the check to run in macOS afterwards is quoted',
+          'Intertouch Support' in rule['macos_check'])
+
+    with tempfile.TemporaryDirectory() as tmp:
+        out = Path(tmp) / 'EFI'
+        r = run([sys.executable, 'tools/build.py', '--platform', 'laptop',
+                 '--cpu', 'kaby-lake', '--disable-kexts', rule['disable'][0],
+                 '--out', str(out)])
+        check('a build can turn one off without taking it out', r.returncode == 0)
+        if r.returncode == 0:
+            cfg = ocgen.load_plist(out / 'OC' / 'config.plist')
+            by = {k['BundlePath']: k for k in cfg['Kernel']['Add']}
+            check('it is off', by[rule['disable'][0]]['Enabled'] is False)
+            check('and still there, so turning it back on is one edit',
+                  rule['disable'][0] in by)
 
     base, _ = detect.read_report('tools/fixtures/thinkpad-e570.json')
     ps2_only = {r['part']: r for r in summary.rows(base)}['Trackpad']
