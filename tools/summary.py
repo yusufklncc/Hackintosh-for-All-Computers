@@ -15,6 +15,7 @@ is reading it.
 """
 import argparse
 import os
+import re
 import sys
 import textwrap
 from pathlib import Path
@@ -210,6 +211,20 @@ def input_row(hw):
     return row('Trackpad', name, UNKNOWN, 'no I2C controller and nothing on PS/2')
 
 
+CARDREADER = Path('data/cardreader.toml')
+
+
+def card_reader(device_id):
+    """(entry, driver) for a card reader this repository has data for."""
+    if not device_id or not CARDREADER.exists():
+        return None, None
+    d = ocgen.read_toml(CARDREADER)
+    for e in d.get('device', []):
+        if e['id'] == device_id.lower():
+            return e, d['driver']
+    return None, d.get('driver')
+
+
 def peripheral_rows(hw):
     out = []
     real = [d for d in hw.get('peripherals', []) if not d.get('virtual')]
@@ -220,9 +235,31 @@ def peripheral_rows(hw):
         else:
             out.append(row('Camera', dev['name'], UNSUPPORTED,
                            'not on USB, so an IPU or MIPI sensor'))
+    ids = {i.lower() for i in (hw.get('pci_ids') or []) + (hw.get('usb_ids') or [])}
     for dev in [d for d in real if d['kind'] == 'card reader']:
-        out.append(row('Card reader', dev['name'], UNKNOWN,
-                       'no support data for card readers here'))
+        # the peripheral entry carries the reader's own hardware id, which is
+        # the right one to look up; the device listing is only the fallback for
+        # a report that predates that field
+        found = driver = None
+        own = re.search(r'VEN_([0-9A-Fa-f]{4})&DEV_([0-9A-Fa-f]{4})', dev.get('id') or '')
+        for i in ([f'{own.group(1)}:{own.group(2)}'] if own else []) + sorted(ids):
+            found, driver = card_reader(i)
+            if found:
+                break
+        if found and found['supported']:
+            # saying "supported" about a kext this repository does not ship would
+            # promise something the build cannot deliver
+            here = Path('EFI/OC/Kexts') / driver['kext']
+            tail = '' if here.exists() else ', not shipped here'
+            out.append(row('Card reader', dev['name'], SUPPORTED,
+                           f'{driver["kext"]} since {found["since"]}'
+                           f'  [{found["id"]}]{tail}'))
+        elif found:
+            out.append(row('Card reader', dev['name'], UNSUPPORTED,
+                           f'{driver["kext"]} lists it and does not drive it yet'))
+        else:
+            out.append(row('Card reader', dev['name'], UNKNOWN,
+                           'not in the one driver this repository has data for'))
     return out
 
 
@@ -343,8 +380,10 @@ def render(hw, source='this machine'):
         parts = list(dict.fromkeys(r['part'] for r in bad))   # Graphics once, not twice
         lines.append(f'  {RED}macOS does not support {len(bad)} of these: '
                      f'{", ".join(parts)}.{RESET}')
-        lines.append(f'  {DIM}Replacing the part is usually the answer. This does not '
-                     f'stop the build, and the sections below say more.{RESET}')
+        lines.append(f'  {DIM}For a card in a slot, replacing it is usually the '
+                     f'answer. For one soldered on,\n  it is something to live '
+                     f'without. Either way this does not stop the build, and the\n'
+                     f'  sections below say more.{RESET}')
     else:
         lines.append(f'  {GREEN}Nothing here is known to be unsupported.{RESET}')
     if unknown:

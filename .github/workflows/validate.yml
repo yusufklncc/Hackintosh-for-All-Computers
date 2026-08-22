@@ -125,6 +125,23 @@ jobs:
           test -d /tmp/by-name/EFI/OC/Kexts/IntelBluetoothFirmware.kext
           test ! -d /tmp/by-name/EFI/OC/Kexts/AirportItlwm.kext
 
+      - name: The card reader has three answers, not one
+        run: |
+          python3 - <<'CHECK'
+          import sys; sys.path.insert(0, 'tools')
+          import detect, summary
+          base, _ = detect.read_report('tools/fixtures/thinkpad-e570.json')
+          def verdict(hw_id):
+              hw = dict(base, peripherals=base['peripherals'] + [
+                  {'kind': 'card reader', 'name': 'Reader', 'id': hw_id,
+                   'driver': 'rtsper', 'usb': False, 'virtual': False}])
+              return [r for r in summary.rows(hw) if r['part'] == 'Card reader'][0]
+          assert verdict(r'PCI\VEN_10EC&DEV_5227')['verdict'] == summary.SUPPORTED
+          assert verdict(r'PCI\VEN_10EC&DEV_5261')['verdict'] == summary.UNSUPPORTED
+          assert verdict(r'PCI\VEN_1217&DEV_8621')['verdict'] == summary.UNKNOWN
+          print('card reader: three answers')
+          CHECK
+
       - name: The hardware summary
         run: |
           NONE='--machine tools/fixtures/no-hardware.json'

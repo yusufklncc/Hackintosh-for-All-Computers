@@ -1,0 +1,128 @@
+# Realtek card readers, from the driver's own device table.
+#
+# Parsed by tools/cardtable.py from 0xFireWolf/RealtekCardReader's README, which
+# publishes a device id, a name and whether each one works. macOS
+# ships no driver for these, so without this the answer for a card
+# reader was "there is one" and nothing more.
+#
+# supported = false is the project saying it knows the device and does
+# not drive it, which is a different answer from silence.
+# Source: https://github.com/0xFireWolf/RealtekCardReader
+[driver]
+kext = "RealtekCardReader.kext"
+project = "0xFireWolf/RealtekCardReader"
+license = "BSD-3-Clause"
+systems = ["macOS Monterey", "macOS Big Sur", "macOS Catalina", "macOS Mojave"]
+note = "the project calls itself Pre-1.0 Beta and says other systems are not tested yet"
+
+[[device]]
+id = "0bda:0129"
+name = "RTS5129 USB 2.0/3.0 Card Reader"
+series = "51X9"
+supported = true
+since = "0.9.5"
+
+[[device]]
+id = "0bda:0139"
+name = "RTS5139 USB 2.0/3.0 Card Reader"
+series = "51X9"
+supported = true
+since = "0.9.5"
+
+[[device]]
+id = "0bda:0140"
+name = "RTS5179 USB 2.0/3.0 Card Reader"
+series = "51X9"
+supported = true
+since = "0.9.5"
+
+[[device]]
+id = "10ec:5209"
+name = "RTS5209 PCI Express Card Reader"
+series = "5209"
+supported = true
+since = "0.9.1"
+
+[[device]]
+id = "10ec:5227"
+name = "RTS5227 PCI Express Card Reader"
+series = "5227"
+supported = true
+since = "0.9.3"
+
+[[device]]
+id = "10ec:522a"
+name = "RTS522A PCI Express Card Reader"
+series = "5227"
+supported = true
+since = "0.9.3"
+
+[[device]]
+id = "10ec:5228"
+name = "RTS5228 PCI Express Card Reader"
+series = "5228"
+supported = false
+since = "N/A"
+
+[[device]]
+id = "10ec:5229"
+name = "RTS5229 PCI Express Card Reader"
+series = "5229"
+supported = true
+since = "0.9.1"
+
+[[device]]
+id = "10ec:5249"
+name = "RTS5249 PCI Express Card Reader"
+series = "5249"
+supported = true
+since = "0.9.0"
+
+[[device]]
+id = "10ec:524a"
+name = "RTS524A PCI Express Card Reader"
+series = "5249"
+supported = true
+since = "0.9.0"
+
+[[device]]
+id = "10ec:525a"
+name = "RTS525A PCI Express Card Reader"
+series = "5249"
+supported = true
+since = "0.9.0"
+
+[[device]]
+id = "10ec:5260"
+name = "RTS5260 PCI Express Card Reader"
+series = "5260"
+supported = true
+since = "0.9.6"
+
+[[device]]
+id = "10ec:5261"
+name = "RTS5261 PCI Express Card Reader"
+series = "5261"
+supported = false
+since = "N/A"
+
+[[device]]
+id = "10ec:5286"
+name = "RTL8402 PCI Express Card Reader"
+series = "8411"
+supported = true
+since = "0.9.2"
+
+[[device]]
+id = "10ec:5287"
+name = "RTL8411B PCI Express Card Reader"
+series = "8411"
+supported = true
+since = "0.9.2"
+
+[[device]]
+id = "10ec:5289"
+name = "RTL8411 PCI Express Card Reader"
+series = "8411"
+supported = true
+since = "0.9.2"

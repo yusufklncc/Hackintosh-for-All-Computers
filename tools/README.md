@@ -162,6 +162,26 @@ machine is not going to be run on it.
 What this cannot see is stated next to it: the SMBIOS a build picks has a ceiling
 of its own, and so can a discrete card, and neither is recorded in this repository.
 
+## The card reader
+
+macOS ships no driver for a Realtek card reader, so the answer here used to be
+"there is one" and nothing more. There is a driver -
+[0xFireWolf/RealtekCardReader](https://github.com/0xFireWolf/RealtekCardReader),
+BSD-3 - and it publishes a table with a device id, a name, and whether each one
+works. `tools/cardtable.py` parses it, the same way every other id table here is
+parsed rather than retyped.
+
+Three answers now, where there was one:
+
+* the driver drives it - `RealtekCardReader.kext since 0.9.3  [10ec:5227]`
+* the driver lists it and does not drive it yet - the project's own wording,
+  which is a different answer from silence
+* no driver here knows it, which is still `unknown`
+
+**The kext is not shipped here**, and the row says so. Vendoring it is a
+decision, not a consequence of having the data: the project calls itself pre-1.0
+beta and last moved in 2022.
+
 ## When somebody has actually run it
 
 `data/field.toml` holds observations that no upstream document carries, and it
