@@ -8,6 +8,7 @@ the whole file before a single step runs - which is exactly what happened.
 """
 import json
 import os
+import re
 import subprocess
 import sys
 import tempfile
@@ -574,6 +575,28 @@ def native_device_ids():
           gpu.native_ids('rocket-lake') == set())
 
 
+def frozen_build():
+    """What PyInstaller cannot see, and therefore has to be told."""
+    import ast
+    spec = Path('tools/pyinstaller.spec').read_text()
+    named = set(re.findall(r"'([\w.]+)'", spec))
+    wanted = set()
+    for f in sorted(Path('vendor/tools/SSDTTime').rglob('*.py')):
+        for node in ast.walk(ast.parse(f.read_text(encoding='utf-8', errors='replace'))):
+            if isinstance(node, ast.Import):
+                wanted |= {a.name.split('.')[0] for a in node.names}
+            elif isinstance(node, ast.ImportFrom) and not node.level and node.module:
+                wanted.add(node.module.split('.')[0])
+    # only the standard library: the Python 2 fallbacks in its try blocks are
+    # not there to be found, and the frozen build is Python 3
+    wanted = {m for m in wanted if m in sys.stdlib_module_names}
+    missing = sorted(wanted - named)
+    check('every module SSDTTime imports is named in the spec', not missing, missing)
+
+    r = run([sys.executable, 'tools/setup.py', '--check-tools'])
+    check('and the builder can load the tools on demand', r.returncode == 0)
+
+
 def acpi_tables():
     """SSDTTime is driven, not reimplemented, so the wiring is what is checked."""
     import acpi
@@ -882,7 +905,7 @@ if __name__ == '__main__':
     for section in (graphics, graphics_advice, audio_advice, storage, peripherals,
                     trackpad, framebuffer, boot_args, other_machine, undecodable_output, scripted_answers,
                     hardware_summary, device_names, broadcom_wifi,
-                    detection_gaps, provenance, framebuffers, native_device_ids, field_reports, macos_window, card_readers, third_party, usb_mapping, acpi_tables,
+                    detection_gaps, provenance, framebuffers, native_device_ids, field_reports, macos_window, card_readers, third_party, usb_mapping, acpi_tables, frozen_build,
                     tables_match_sources):
         print(f'\n{section.__name__}')
         section()

@@ -158,6 +158,54 @@ def unbundle():
     return here
 
 
+def check_tools():
+    """Load every vendored tool, which is the thing a frozen build gets wrong.
+
+    SSDTTime is imported at runtime from a copy of its tree, so PyInstaller
+    cannot see what it imports and does not bundle it. Nothing catches that
+    until somebody answers yes to a question - so this answers it instead, and
+    CI runs it against the executable it just built."""
+    import tempfile
+    failed = []
+
+    def report(name, ok, detail=''):
+        print(f'  {"ok  " if ok else "FAIL"}  {name}' + (f'   {detail}' if detail else ''))
+        if not ok:
+            failed.append(name)
+
+    if usbmap.available():
+        ok, detail = usbmap.verify(usbmap.available())
+        report('the USB mapper is the file that was checked', ok, '' if ok else detail)
+    else:
+        report('the USB mapper is here', False, 'it is not')
+
+    if acpi.available():
+        ok, detail = acpi.verify()
+        report('every ACPI compiler is the file that was checked', ok,
+               '' if ok else detail)
+        try:
+            with tempfile.TemporaryDirectory() as tmp:
+                work = acpi.prepare(Path(tmp) / 'acpi')
+                module = acpi.load(work)
+                ssdt = module.SSDT()
+                report('SSDTTime loads, with everything it imports', True)
+                report('and finds the compiler beside it', bool(ssdt.d.iasl),
+                       '' if ssdt.d.iasl else 'it did not')
+                report('and the legacy one, so it never downloads',
+                       bool(ssdt.d.iasl_legacy))
+        except Exception as exc:                   # noqa: BLE001 - the whole point
+            report('SSDTTime loads, with everything it imports', False, repr(exc))
+    else:
+        report('SSDTTime is usable here', False, f'not on {sys.platform}')
+
+    print()
+    if failed:
+        print(f'  {len(failed)} failed: {", ".join(failed)}')
+        return 1
+    print('  all good')
+    return 0
+
+
 def profile_from(hw):
     """(platform, vendor, cpu, cores, oem) when detection answers all of it.
 
@@ -305,6 +353,9 @@ def main():
                          'EFI for it can be built elsewhere')
     ap.add_argument('--check', action='store_true',
                     help='print what the hardware means for macOS and stop')
+    ap.add_argument('--check-tools', action='store_true',
+                    help='load the vendored tools and stop, which is what a '
+                         'frozen build has to be able to do')
     ap.add_argument('--ids', help='PCI ids to use instead of probing, comma separated')
     ap.add_argument('--usb-ids', help='USB ids to use instead of probing, comma separated')
     ap.add_argument('--hda-ids', help='HD audio codec ids to use instead of probing')
@@ -328,6 +379,9 @@ def main():
         for opt in ('machine', 'report', 'usb_map'):
             if getattr(a, opt):
                 setattr(a, opt, str((started_in / getattr(a, opt)).resolve()))
+
+    if a.check_tools:
+        return check_tools()
 
     if a.report:
         a.report = str(Path(a.report).expanduser().resolve())
