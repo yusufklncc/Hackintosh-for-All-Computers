@@ -193,6 +193,9 @@ jobs:
           print('SMBus and PS/2 are told apart')
           CHECK
 
+      - name: Every kext is listed after the ones it needs
+        run: python3 tools/kextorder.py
+
       - name: Choosing SMBus follows the project's own install order
         run: |
           E570='--machine tools/fixtures/thinkpad-e570.json'

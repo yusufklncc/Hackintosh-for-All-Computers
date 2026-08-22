@@ -319,6 +319,41 @@ The existence of several was learnt from `lzhoang2801/OpCore-Simplify`, whose
 `pci_data.py` covers roles this repository does not. None of its data is copied;
 the ids come from the kexts.
 
+## Kext load order
+
+OpenCore loads kexts in the order they appear in `Kernel.Add`, and a dependency
+listed after the kext that needs it does not fail loudly - the dependent kext
+simply never loads, and whatever it was for does not work. The reference manual
+states the rule and says where to read the answer from:
+
+> The load order is based on the order in which the kexts appear in the array.
+> Hence, dependencies must appear before kexts that depend on them.
+>
+> To track the dependency order, inspect the `OSBundleLibraries` key in the
+> `Info.plist` file of the kext being added. Any kext included under the key is
+> a dependency that must appear before the kext being added.
+>
+> Kexts may have inner kexts (`Plugins`) included in the bundle. Such `Plugins`
+> must be added separately and follow the same global ordering rules as other
+> kexts.
+
+So `tools/kextorder.py` does exactly that: it reads `OSBundleLibraries` out of
+every vendored kext - 28 of 54 bundles declare one - resolves each identifier to
+the bundle that provides it, and checks that it appears earlier in the list. A
+plugin is a bundle path of its own, because that is how OpenCore refers to it.
+
+    python3 tools/kextorder.py                    # every published config
+    python3 tools/kextorder.py path/to/config.plist
+
+Every build runs the same check and warns; the 179 published configs are checked
+in CI. They all pass, and they passed before this existed - the order was right
+by hand. What was missing was anything that would notice if it stopped being.
+
+**It never reorders.** The order in a published config is somebody's decision,
+and rewriting it silently would hide a mistake rather than name it. A kext that
+is disabled counts as absent, because a kext that does not load cannot satisfy
+anything.
+
 ## Where the answers come from
 
     python3 tools/provenance.py            # every category and its source
