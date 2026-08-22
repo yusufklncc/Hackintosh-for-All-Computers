@@ -393,7 +393,7 @@ def main():
         # travel with the report rather than being asked for later
         tables = None
         if acpi.available() and acpi.platform_key() != 'darwin':
-            beside = Path(a.report).with_suffix('') .parent / 'ACPI'
+            beside = Path(a.report).parent / 'ACPI'
             tables, complaint = acpi.dump(Path(a.out).parent / 'acpi-dump', beside)
             print(f'  {"and its ACPI tables to " + str(beside) if tables else complaint}')
         print(f'\n  Copy {"them" if tables else "it"} to the machine you build on '

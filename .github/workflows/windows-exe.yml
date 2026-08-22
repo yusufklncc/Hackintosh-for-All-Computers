@@ -40,9 +40,17 @@ jobs:
 
       - name: It can dump this runner's ACPI tables and compile against them
         run: |
-          dist/HackintoshEFIBuilder.exe --report machine.json --acpi ACPI
+          # the report dumps the tables beside itself; there is no flag for it,
+          # and --acpi is ambiguous with --acpi-ids and --acpi-tables
+          dist/HackintoshEFIBuilder.exe --report machine.json
           if (-not (Test-Path machine.json)) { exit 1 }
-          Get-ChildItem ACPI | Select-Object -First 5 Name
+          if (-not (Test-Path ACPI)) { Write-Error 'no ACPI tables were dumped'; exit 1 }
+          Get-ChildItem ACPI | Select-Object -First 8 Name
+          if (-not (Test-Path ACPI/DSDT.aml)) { Write-Error 'no DSDT'; exit 1 }
+          # and the tables it just dumped are the ones a build would use
+          dist/HackintoshEFIBuilder.exe --machine machine.json --acpi-tables ACPI `
+            --answers 1,2,10,3,3 --out acpi-smoke/EFI
+          if (-not (Test-Path acpi-smoke/EFI/OC/config.plist)) { exit 1 }
 
       - uses: actions/upload-artifact@v4
         with:
