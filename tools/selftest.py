@@ -574,6 +574,39 @@ def native_device_ids():
           gpu.native_ids('rocket-lake') == set())
 
 
+def card_readers():
+    """macOS ships no driver for these; one project does and publishes a table."""
+    import summary
+    d = ocgen.read_toml('data/cardreader.toml')
+    check('the device table is parsed, not retyped', len(d['device']) >= 15,
+          len(d['device']))
+    check('and it keeps the ones the project does not drive yet',
+          any(not e['supported'] for e in d['device']))
+    check('with the systems it says it was tested on',
+          any('Monterey' in s for s in d['driver']['systems']), d['driver']['systems'])
+    check('and its licence, since vendoring it would need one',
+          d['driver']['license'] == 'BSD-3-Clause')
+
+    base, _ = detect.read_report('tools/fixtures/thinkpad-e570.json')
+    def reader(hw_id):
+        hw = dict(base, peripherals=base['peripherals'] + [
+            {'kind': 'card reader', 'name': 'Realtek PCIE CardReader',
+             'id': hw_id, 'driver': 'rtsper', 'usb': False, 'virtual': False}])
+        return [r for r in summary.rows(hw) if r['part'] == 'Card reader'][0]
+
+    good = reader('PCI\\VEN_10EC&DEV_5227')
+    check('a reader the driver drives is called supported',
+          good['verdict'] == summary.SUPPORTED, good)
+    check('and the row says the kext is not shipped here',
+          'not shipped here' in good['detail'], good)
+    notyet = reader('PCI\\VEN_10EC&DEV_5261')
+    check('one the project lists and does not drive is not called unknown',
+          notyet['verdict'] == summary.UNSUPPORTED, notyet)
+    other = reader('PCI\\VEN_1217&DEV_8621')
+    check('and one no driver here knows stays unknown',
+          other['verdict'] == summary.UNKNOWN, other)
+
+
 def macos_window():
     """Where each part bounds macOS, and what the intersection of those is."""
     import summary
@@ -670,7 +703,7 @@ def provenance():
           str(real) in hardware['count'], hardware['count'])
     check('the areas with no source are named as such',
           {r['area'] for r in table if r['kind'] == prov.NONE} ==
-          {'Camera', 'Card reader', 'USB port mapping', 'AMD graphics kexts'},
+          {'Camera', 'USB port mapping', 'AMD graphics kexts'},
           [r['area'] for r in table if r['kind'] == prov.NONE])
     import contextlib
     import io
@@ -701,7 +734,7 @@ if __name__ == '__main__':
     for section in (graphics, graphics_advice, audio_advice, storage, peripherals,
                     trackpad, framebuffer, boot_args, other_machine, undecodable_output, scripted_answers,
                     hardware_summary, device_names, broadcom_wifi,
-                    detection_gaps, provenance, framebuffers, native_device_ids, field_reports, macos_window,
+                    detection_gaps, provenance, framebuffers, native_device_ids, field_reports, macos_window, card_readers,
                     tables_match_sources):
         print(f'\n{section.__name__}')
         section()

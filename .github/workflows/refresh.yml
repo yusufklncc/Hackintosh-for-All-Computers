@@ -28,6 +28,7 @@ jobs:
           python3 tools/gputable.py --out data/gpu.toml
           python3 tools/audiotable.py --out data/audio.toml
           python3 tools/fbtable.py --out data/framebuffer.toml
+          python3 tools/cardtable.py --out data/cardreader.toml
 
       - name: Anything moved?
         id: diff
