@@ -617,6 +617,19 @@ def main():
     # person works through, and offering one to a script means a build that
     # hangs waiting for a keystroke nobody is there to press
     interactive = not SCRIPTING
+    # the automatic set asks nothing by construction, so it is the one thing here
+    # a script may have. Without this it could not be tested against a real
+    # machine's tables anywhere, which is the only place it means anything.
+    if SCRIPTING and a.acpi_tables and acpi.available():
+        print(f'\n{BOLD}ACPI{RESET}')
+        got, complaint = acpi.run(Path(a.out).parent / 'acpi', a.acpi_tables,
+                                  unattended=True)
+        if got:
+            aml, add, patches = acpi.collect(got)
+            print(f'      {GREEN}{len(aml)} SSDTs and {len(patches)} patches{RESET}')
+            acpi_results = str(got)
+        else:
+            print(f'      {YELLOW}{complaint}{RESET}')
     if interactive and acpi.available() and (
             a.acpi_tables or acpi.platform_key() != 'darwin'):
         # SSDTs are written against one machine's tables. Offer it where there
@@ -630,11 +643,18 @@ def main():
                   f'power\n  management, PNLF for the backlight - and each is written '
                   f'against the\n  machine\'s own tables. SSDTTime does that and is '
                   f'bundled here.{RESET}')
-            if ask(0, 0, 'Work out the SSDTs now?',
-                   [('yes', f'Yes, run SSDTTime against {where}'),
-                    ('no', 'No, the profile\'s generic SSDTs will do')]) == 'yes':
+            print(f'      {DIM}Six of them decide entirely from the tables and ask '
+                  f'nothing:\n      {", ".join(n for _, n, _ in acpi.AUTOMATIC)}.\n'
+                  f'      The rest ask questions only you can answer, so they are '
+                  f'in the menus.{RESET}')
+            picked = ask(0, 0, 'Work out the SSDTs now?',
+                         [('auto', 'Yes, the six that decide for themselves'),
+                          ('menu', f'Yes, and let me choose, against {where}'),
+                          ('no', 'No, the profile\'s generic SSDTs will do')])
+            if picked != 'no':
                 got, complaint = acpi.run(Path(a.out).parent / 'acpi',
-                                          a.acpi_tables)
+                                          a.acpi_tables,
+                                          unattended=picked == 'auto')
                 if got:
                     aml, add, patches = acpi.collect(got)
                     print(f'      {GREEN}{len(aml)} SSDTs and {len(patches)} '

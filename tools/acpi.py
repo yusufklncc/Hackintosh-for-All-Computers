@@ -148,8 +148,17 @@ class _Quitter:
 
 
 def load(work):
-    """Import SSDTTime from the copy, so its own __file__ is in our directory."""
+    """Import SSDTTime from the copy, so its own __file__ is in our directory.
+
+    Any earlier copy has to be forgotten first. The tree is copied to a fresh
+    directory each time, but `SSDTTime` and its `Scripts` package stay in
+    sys.modules, so a second run would take SSDTTime.py from the new copy and
+    Scripts from the old one - which by then has been deleted. Running the SSDTs
+    twice in one session is an ordinary thing to do."""
     restore_site_builtins()
+    for name in [n for n in sys.modules
+                 if n == 'SSDTTime' or n == 'Scripts' or n.startswith('Scripts.')]:
+        del sys.modules[name]
     sys.path.insert(0, str(work))
     spec = importlib.util.spec_from_file_location('SSDTTime', work / 'SSDTTime.py')
     module = importlib.util.module_from_spec(spec)
@@ -157,8 +166,11 @@ def load(work):
     return module
 
 
-def run(work, tables=None):
-    """Drive the tool. Returns the Results folder it wrote into, or None."""
+def run(work, tables=None, unattended=False):
+    """Drive the tool. Returns the Results folder it wrote into, or None.
+
+    unattended runs the self-deciding patches and returns, instead of handing
+    the menus to a person."""
     tool = available()
     if not tool:
         return None, f'{VENDOR} is not usable on {sys.platform}'
@@ -171,9 +183,26 @@ def run(work, tables=None):
     module = load(work)
     ssdt = module.SSDT()
     if tables:
-        # handing it the tables up front saves the person finding them again
-        ssdt.dsdt = ssdt.load_dsdt(str(Path(tables).resolve()))
+        # handing it the tables up front saves the person finding them again.
+        # Loading them prompts too - "press enter" on a table it could not read,
+        # and worse on an empty folder - so unattended has to cover this as well,
+        # or a script hangs before it reaches the patches.
+        original = ssdt.u.grab
+        if unattended:
+            ssdt.u.grab = _auto_grab
+        try:
+            ssdt.dsdt = ssdt.load_dsdt(str(Path(tables).resolve()))
+        except _Unattended as exc:
+            return None, f'the tables could not be loaded without asking: {exc}'
+        finally:
+            ssdt.u.grab = original
     try:
+        if unattended:
+            if not ssdt.dsdt:
+                return None, 'no ACPI tables were loaded, so there is nothing to read'
+            for name, outcome in automatic(ssdt):
+                print(f'      {name:16s} {outcome}')
+            raise SystemExit(0)
         while True:
             ssdt.main()
     except SystemExit:
@@ -239,6 +268,88 @@ def same_purpose(one, other):
         # the same as SSDT-PLUG
         return '-'.join(parts[:2]) if len(parts) > 1 else stem
     return family(one) == family(other)
+
+
+# The patches SSDTTime works out entirely from the tables, with nothing to ask.
+# Each one inspects the machine and produces nothing when it is not needed -
+# "Named EC device located - no fake needed", "no bridge needed", "Could not
+# locate a valid bus device! Aborting" - so running them is not this repository
+# deciding anything. It is the tool deciding without a person pressing the same
+# keys fourteen times.
+#
+# What is deliberately not here: PNLF asks five questions, XOSI and USBX and
+# DMAR ask one each, and answering those for somebody is the thing this must not
+# do. The laptop profiles already carry a generic XOSI and PNLF, so the gap that
+# leaves is smaller than it looks. USB Reset is left out for a different reason:
+# it is for hardware port querying and belongs with the USB map, not here.
+AUTOMATIC = [
+    ('fake_ec', 'SSDT-EC', 'a fake EC, or nothing if the machine has a real one'),
+    ('plugin_type', 'SSDT-PLUG', 'plugin-type on the first CPU object'),
+    ('ssdt_awac', 'SSDT-AWAC', 'the AWAC clock, if this board has one'),
+    ('ssdt_pmc', 'SSDT-PMC', 'native NVRAM on a true 300-series board'),
+    # fix_hpet stays in the list: with no conflicts it says so and writes
+    # nothing, and with conflicts it asks which devices to patch - which is a
+    # real choice, and saying so points at the menu rather than hiding it
+    ('fix_hpet', 'SSDT-HPET', 'IRQ conflicts, if there are any'),
+    ('smbus', 'SSDT-SBUS-MCHC', 'MCHC and BUS0, if there is a bus device'),
+]
+
+
+class _Unattended(Exception):
+    """Raised when a patch asks something a person would have to answer."""
+
+
+def _auto_grab(prompt=''):
+    """Answer "press enter" and refuse anything else.
+
+    The list above is the set that asks nothing, but that is read off today's
+    code. If a patch ever grows a real question, this stops rather than sending
+    a blank line into it - a wrong answer nobody gave is worse than no SSDT."""
+    if 'press [enter]' in str(prompt).lower():
+        return ''
+    raise _Unattended(str(prompt).strip() or 'a question with no prompt')
+
+
+def automatic(ssdt):
+    """Run the self-deciding patches. Returns [(name, what happened)]."""
+    import contextlib
+    import io
+    done = []
+    original = ssdt.u.grab
+    try:
+        ssdt.u.grab = _auto_grab
+        for method, name, what in AUTOMATIC:
+            run = getattr(ssdt, method, None)
+            if not run:
+                done.append((name, 'not in this version of the tool'))
+                continue
+            printed = io.StringIO()
+            try:
+                with contextlib.redirect_stdout(printed):
+                    run()
+                done.append((name, _summarise(printed.getvalue(), what)))
+            except _Unattended as exc:
+                # not a failure: the patch found something that needs a choice.
+                # fix_hpet does this the moment there is an IRQ conflict, which
+                # is the only time it has anything to do.
+                done.append((name, f'needs a choice, so it is in the menu: '
+                                   f'"{exc}"'))
+            except Exception as exc:                # noqa: BLE001
+                done.append((name, f'stopped: {exc!r}'))
+    finally:
+        ssdt.u.grab = original
+    return done
+
+
+def _summarise(output, what):
+    """One line from a screenful, preferring what the tool said it did."""
+    for line in reversed(output.splitlines()):
+        line = line.strip()
+        if not line or line.startswith(('#', 'Press')):
+            continue
+        if 'Done' in line or '.aml' in line or 'no ' in line.lower():
+            return line
+    return what
 
 
 def collect(results):
