@@ -8,6 +8,12 @@
 #
 # connectors = 0 is a headless framebuffer - no display output -
 # so it is never the one to start with.
+#
+# The native rows are the device ids each generation supports
+# without a faked device-id. A generation being supported does
+# not mean every part in it is: Whiskey Lake and Coffee Lake
+# Refresh are missing from these lists and the document says
+# exactly what they need instead.
 # Source: https://github.com/acidanthera/WhateverGreen/blob/master/Manual/FAQ.IntelHD.en.md
 [[framebuffer]]
 codename = "Capri"
@@ -1250,3 +1256,293 @@ data = "0200538a"
 type = "mobile"
 connectors = 5
 stolen = "193 MB?"
+
+[[native]]
+label = "Capri"
+profiles = ["ivy-bridge"]
+id = "8086:0152"
+
+[[native]]
+label = "Capri"
+profiles = ["ivy-bridge"]
+id = "8086:0156"
+
+[[native]]
+label = "Capri"
+profiles = ["ivy-bridge"]
+id = "8086:0162"
+
+[[native]]
+label = "Capri"
+profiles = ["ivy-bridge"]
+id = "8086:0166"
+
+[[native]]
+label = "Azul"
+profiles = ["haswell"]
+id = "8086:0d26"
+
+[[native]]
+label = "Azul"
+profiles = ["haswell"]
+id = "8086:0a26"
+
+[[native]]
+label = "Azul"
+profiles = ["haswell"]
+id = "8086:0a2e"
+
+[[native]]
+label = "Azul"
+profiles = ["haswell"]
+id = "8086:0d22"
+
+[[native]]
+label = "Azul"
+profiles = ["haswell"]
+id = "8086:0412"
+
+[[native]]
+label = "BDW"
+profiles = ["broadwell"]
+id = "8086:0bd1"
+
+[[native]]
+label = "BDW"
+profiles = ["broadwell"]
+id = "8086:0bd2"
+
+[[native]]
+label = "BDW"
+profiles = ["broadwell"]
+id = "8086:0bd3"
+
+[[native]]
+label = "BDW"
+profiles = ["broadwell"]
+id = "8086:1606"
+
+[[native]]
+label = "BDW"
+profiles = ["broadwell"]
+id = "8086:160e"
+
+[[native]]
+label = "BDW"
+profiles = ["broadwell"]
+id = "8086:1616"
+
+[[native]]
+label = "BDW"
+profiles = ["broadwell"]
+id = "8086:161e"
+
+[[native]]
+label = "BDW"
+profiles = ["broadwell"]
+id = "8086:1626"
+
+[[native]]
+label = "BDW"
+profiles = ["broadwell"]
+id = "8086:1622"
+
+[[native]]
+label = "BDW"
+profiles = ["broadwell"]
+id = "8086:1612"
+
+[[native]]
+label = "BDW"
+profiles = ["broadwell"]
+id = "8086:162b"
+
+[[native]]
+label = "SKL"
+profiles = ["sky-lake"]
+id = "8086:1916"
+
+[[native]]
+label = "SKL"
+profiles = ["sky-lake"]
+id = "8086:191e"
+
+[[native]]
+label = "SKL"
+profiles = ["sky-lake"]
+id = "8086:1926"
+
+[[native]]
+label = "SKL"
+profiles = ["sky-lake"]
+id = "8086:1927"
+
+[[native]]
+label = "SKL"
+profiles = ["sky-lake"]
+id = "8086:1912"
+
+[[native]]
+label = "SKL"
+profiles = ["sky-lake"]
+id = "8086:1932"
+
+[[native]]
+label = "SKL"
+profiles = ["sky-lake"]
+id = "8086:1902"
+
+[[native]]
+label = "SKL"
+profiles = ["sky-lake"]
+id = "8086:1917"
+
+[[native]]
+label = "SKL"
+profiles = ["sky-lake"]
+id = "8086:193b"
+
+[[native]]
+label = "SKL"
+profiles = ["sky-lake"]
+id = "8086:191b"
+
+[[native]]
+label = "KBL"
+profiles = ["kaby-lake"]
+id = "8086:5912"
+
+[[native]]
+label = "KBL"
+profiles = ["kaby-lake"]
+id = "8086:5916"
+
+[[native]]
+label = "KBL"
+profiles = ["kaby-lake"]
+id = "8086:591b"
+
+[[native]]
+label = "KBL"
+profiles = ["kaby-lake"]
+id = "8086:591c"
+
+[[native]]
+label = "KBL"
+profiles = ["kaby-lake"]
+id = "8086:591e"
+
+[[native]]
+label = "KBL"
+profiles = ["kaby-lake"]
+id = "8086:5926"
+
+[[native]]
+label = "KBL"
+profiles = ["kaby-lake"]
+id = "8086:5927"
+
+[[native]]
+label = "KBL"
+profiles = ["kaby-lake"]
+id = "8086:5923"
+
+[[native]]
+label = "ABL"
+profiles = ["kaby-lake"]
+id = "8086:87c0"
+
+[[native]]
+label = "CFL"
+profiles = ["coffe-lake", "coffe-lake-plus", "coffee-lake-whiskey-lake"]
+id = "8086:3e9b"
+
+[[native]]
+label = "CFL"
+profiles = ["coffe-lake", "coffe-lake-plus", "coffee-lake-whiskey-lake"]
+id = "8086:3ea5"
+
+[[native]]
+label = "CFL"
+profiles = ["coffe-lake", "coffe-lake-plus", "coffee-lake-whiskey-lake"]
+id = "8086:3ea6"
+
+[[native]]
+label = "CFL"
+profiles = ["coffe-lake", "coffe-lake-plus", "coffee-lake-whiskey-lake"]
+id = "8086:3e92"
+
+[[native]]
+label = "CFL"
+profiles = ["coffe-lake", "coffe-lake-plus", "coffee-lake-whiskey-lake"]
+id = "8086:3e91"
+
+[[native]]
+label = "CFL"
+profiles = ["coffe-lake", "coffe-lake-plus", "coffee-lake-whiskey-lake"]
+id = "8086:3e98"
+
+[[native]]
+label = "CML"
+profiles = ["comet-lake"]
+id = "8086:9bc8"
+
+[[native]]
+label = "CML"
+profiles = ["comet-lake"]
+id = "8086:9bc5"
+
+[[native]]
+label = "CML"
+profiles = ["comet-lake"]
+id = "8086:9bc4"
+
+[[native]]
+label = "ICL"
+profiles = ["ice-lake"]
+id = "8086:ff05"
+
+[[native]]
+label = "ICL"
+profiles = ["ice-lake"]
+id = "8086:8a70"
+
+[[native]]
+label = "ICL"
+profiles = ["ice-lake"]
+id = "8086:8a71"
+
+[[native]]
+label = "ICL"
+profiles = ["ice-lake"]
+id = "8086:8a51"
+
+[[native]]
+label = "ICL"
+profiles = ["ice-lake"]
+id = "8086:8a5c"
+
+[[native]]
+label = "ICL"
+profiles = ["ice-lake"]
+id = "8086:8a5d"
+
+[[native]]
+label = "ICL"
+profiles = ["ice-lake"]
+id = "8086:8a52"
+
+[[native]]
+label = "ICL"
+profiles = ["ice-lake"]
+id = "8086:8a53"
+
+[[native]]
+label = "ICL"
+profiles = ["ice-lake"]
+id = "8086:8a5a"
+
+[[native]]
+label = "ICL"
+profiles = ["ice-lake"]
+id = "8086:8a5b"

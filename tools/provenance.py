@@ -93,8 +93,10 @@ def catalogue():
         dict(area='Framebuffer ids', kind=DERIVED, file='data/framebuffer.toml',
              source="WhateverGreen's own tables, at the tag matching the kext",
              tool='tools/fbtable.py',
-             count=f'{rows_in("data/framebuffer.toml", "framebuffer")} framebuffers',
-             covers='Ivy Bridge to Ice Lake, with type, connectors and memory',
+             count=f'{rows_in("data/framebuffer.toml", "framebuffer")} framebuffers, '
+                   f'{rows_in("data/framebuffer.toml", "native")} native device ids',
+             covers='Ivy Bridge to Ice Lake: type, connectors, memory, and which '
+                    'device ids need no faked device-id',
              gap='Sandy Bridge has a section but no list in that form. '
                  'Connector patches are per machine and are not written at all.'),
         dict(area='Audio codecs', kind=DERIVED, file='data/audio.toml',

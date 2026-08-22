@@ -110,6 +110,21 @@ Dortania names appears in WhateverGreen's list too, which is the check that
 neither parser has drifted, and a headless framebuffer is sorted last however it
 was spelled.
 
+The same document lists, per generation, the device ids that need no faked
+`device-id` - 58 of them - and those turn one verdict per generation into one
+per device. Whiskey Lake and Kaby Lake Refresh sit in supported generations and
+are absent from those lists, and the document says elsewhere exactly what they
+need instead: `fake device-id A53E0000` and `16590000`. So absent from the list
+means *not native*, never *unsupported*, and the row says which:
+
+    Intel iGPU, kaby-lake, natively supported
+    Intel iGPU, coffee-lake-whiskey-lake, not natively
+
+Ivy Bridge writes its heading `Native supported DevIDs :` with a space, which a
+strict match dropped silently - a whole generation missing and nothing to say
+so. `fbtable.py` now refuses to write a table where a generation has
+framebuffers but no device ids.
+
 The menu offers two things that are not framebuffers. `0x12345678` is an id
 nothing claims, so no framebuffer kext attaches and macOS falls back to a
 picture with no graphics acceleration - useful for a first boot, and attributed

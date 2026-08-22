@@ -52,6 +52,11 @@ jobs:
           python3 tools/setup.py $E570 --answers 1,15,1 --out /tmp/fb-noaccel/EFI
           # a processor whose iGPU a field report says does not accelerate: no
           # framebuffer section, no menu, and the profile's placeholder removed
+          # an id in a supported generation that is not natively supported:
+          # still supported, flagged as needing a faked device-id
+          WSK='--machine tools/fixtures/whiskey-lake.json'
+          python3 tools/setup.py $WSK --answers 1,1,1 --out /tmp/whiskey/EFI
+          python3 tools/summary.py $WSK | grep -q 'not natively'
           CML='--machine tools/fixtures/comet-lake-h.json'
           python3 tools/setup.py $CML --answers 1,3 --out /tmp/field/EFI
           python3 - <<'CHECK'

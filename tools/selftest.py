@@ -533,6 +533,47 @@ def framebuffers():
           unknown_oem and unknown_oem[4] is None, unknown_oem)
 
 
+def native_device_ids():
+    """A generation being supported is not every part in it being supported."""
+    import gpu
+    native = ocgen.read_toml('data/framebuffer.toml')['native']
+    check('every generation with framebuffers has its device ids too',
+          len(native) == 58, len(native))
+    # the Ivy Bridge section writes "DevIDs :" with a space; matching strictly
+    # dropped that whole generation and said nothing
+    check('including Ivy Bridge, whose heading is punctuated differently',
+          gpu.native_ids('ivy-bridge') == {'8086:0152', '8086:0156',
+                                           '8086:0162', '8086:0166'},
+          sorted(gpu.native_ids('ivy-bridge')))
+    check('Comet Lake is read apart from Coffee Lake, though they share a section',
+          gpu.native_ids('comet-lake') == {'8086:9bc8', '8086:9bc5', '8086:9bc4'},
+          sorted(gpu.native_ids('comet-lake')))
+    check('and Coffee Lake does not inherit Comet Lake ids',
+          '8086:9bc4' not in gpu.native_ids('coffe-lake'))
+
+    listed = gpu.classify({'id': '8086:5916', 'name': 'Intel HD Graphics 620'},
+                          'kaby-lake')
+    check('an id on the list is called natively supported',
+          listed[0] == 'works' and 'natively supported' in listed[1]['family'], listed)
+
+    # Whiskey Lake sits in a supported generation and is not on the list, and
+    # the document says exactly what it needs: a faked device-id
+    whiskey = gpu.classify({'id': '8086:3ea0', 'name': 'Intel UHD Graphics 620'},
+                           'coffee-lake-whiskey-lake')
+    check('an id off the list is still supported, not condemned',
+          whiskey[0] == 'works', whiskey)
+    check('and the reason it is flagged is the faked device-id, not support',
+          'faked device-id' in whiskey[1]['note'], whiskey[1])
+    check('the table row stays one line about it',
+          whiskey[1]['family'].endswith('not natively'), whiskey[1]['family'])
+
+    check('an unsupported generation is untouched by any of this',
+          gpu.classify({'id': '8086:4680', 'name': 'Intel UHD Graphics 770'},
+                       'alder-lake')[0] == 'unsupported')
+    check('and a generation with no list gets no claim either way',
+          gpu.native_ids('rocket-lake') == set())
+
+
 def field_reports():
     """An observation outranks a rule written for the generation, and says so."""
     import gpu
@@ -613,7 +654,7 @@ if __name__ == '__main__':
     for section in (graphics, graphics_advice, audio_advice, storage, peripherals,
                     trackpad, framebuffer, boot_args, other_machine, undecodable_output, scripted_answers,
                     hardware_summary, device_names, broadcom_wifi,
-                    detection_gaps, provenance, framebuffers, field_reports,
+                    detection_gaps, provenance, framebuffers, native_device_ids, field_reports,
                     tables_match_sources):
         print(f'\n{section.__name__}')
         section()

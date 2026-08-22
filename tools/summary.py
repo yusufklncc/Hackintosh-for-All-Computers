@@ -84,7 +84,11 @@ def graphics_rows(hw):
         detail = ''
         if entry:
             detail = entry.get('family') or entry.get('name') or ''
-            if entry.get('note'):
+            # a note is the substance of a family rule - "Kepler was the last
+            # supported family" - and must survive. Where it is only the long
+            # form of what the family string already says, it is marked as such
+            # and the section below prints it instead.
+            if entry.get('note') and not entry.get('long_note'):
                 detail = f'{detail}, {entry["note"]}' if detail else entry['note']
         state = {'works': SUPPORTED, 'works-spoofed': SUPPORTED,
                  'unsupported': UNSUPPORTED}.get(verdict, UNKNOWN)

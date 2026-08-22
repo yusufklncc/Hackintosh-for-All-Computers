@@ -45,6 +45,20 @@ def load():
 
 
 FIELD = Path('data/field.toml')
+FRAMEBUFFERS = Path('data/framebuffer.toml')
+
+
+def native_ids(generation):
+    """The device ids WhateverGreen says need no faked device-id.
+
+    A generation being supported is not the same as every part in it being
+    supported: Whiskey Lake and Coffee Lake Refresh are in supported generations
+    and missing from these lists, and the document says what they need instead.
+    Absent from the list therefore means "not native", never "unsupported"."""
+    if not generation or not FRAMEBUFFERS.exists():
+        return set()
+    return {e['id'] for e in ocgen.read_toml(FRAMEBUFFERS).get('native', [])
+            if generation in e.get('profiles', [])}
 
 
 def field_igpu(cpu_name):
@@ -106,9 +120,26 @@ def classify(device, generation=None):
         state, models = igpu_verdict(generation)
         if state:
             entry = {'family': f'Intel iGPU, {generation}'}
+            notes = []
             if state == 'works' and models:
-                entry['note'] = ('except ' + ', '.join(models)
-                                 + ', which the guide lists as unsupported')
+                notes.append('except ' + ', '.join(models)
+                             + ', which the guide lists as unsupported')
+            if state == 'works':
+                native = native_ids(generation)
+                if native and device.get('id'):
+                    if device['id'].lower() in native:
+                        entry['family'] += ', natively supported'
+                    else:
+                        entry['family'] += ', not natively'
+                        notes.append(
+                            f'{device["id"]} is not among the ids this generation '
+                            f'supports without a faked device-id')
+            if notes:
+                entry['note'] = '; '.join(notes)
+                # the family string already carries the short form of this, and
+                # the section below prints the note in full, so a table row does
+                # not need both
+                entry['long_note'] = True
             return state, entry
     return 'unknown', None
 
