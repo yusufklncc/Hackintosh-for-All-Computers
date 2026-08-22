@@ -22,6 +22,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import acpi
 import advise
 import audio
 import build
@@ -309,6 +310,8 @@ def main():
     ap.add_argument('--hda-ids', help='HD audio codec ids to use instead of probing')
     ap.add_argument('--nvme', help='NVMe drive models to use instead of probing')
     ap.add_argument('--acpi-ids', help='ACPI hardware ids to use instead of probing')
+    ap.add_argument('--acpi-tables', metavar='DIR',
+                    help='a folder of ACPI tables dumped from the target machine')
     ap.add_argument('--usb-map', help='a UTBMap.kext made with the USBToolBox tool')
     ap.add_argument('--answers', help='answer the menus non-interactively, comma separated; '
                                       'for scripting and for CI')
@@ -332,8 +335,17 @@ def main():
         print(f'{BOLD}Hardware report{RESET}')
         print(f'  wrote {a.report}')
         print(f'  {detect.describe(written)}')
-        print(f'\n  Copy it to the machine you build on and pass it back:')
-        print(f'      setup.py --machine {Path(a.report).name}')
+        # the SSDTs have to be written against this machine's tables, so they
+        # travel with the report rather than being asked for later
+        tables = None
+        if acpi.available() and acpi.platform_key() != 'darwin':
+            beside = Path(a.report).with_suffix('') .parent / 'ACPI'
+            tables, complaint = acpi.dump(Path(a.out).parent / 'acpi-dump', beside)
+            print(f'  {"and its ACPI tables to " + str(beside) if tables else complaint}')
+        print(f'\n  Copy {"them" if tables else "it"} to the machine you build on '
+              f'and pass {"them" if tables else "it"} back:')
+        print(f'      setup.py --machine {Path(a.report).name}'
+              + (' --acpi-tables ACPI' if tables else ''))
         return 0
 
     # a laptop never asks for vendor or core count, so the count is worked out
@@ -528,9 +540,45 @@ def main():
             boot_args.append(f'alcid={alcid}')
             notes.append(asteps)
 
+    acpi_results = None
+    # neither of the vendored tools can be driven by --answers: both are menus a
+    # person works through, and offering one to a script means a build that
+    # hangs waiting for a keystroke nobody is there to press
+    interactive = not SCRIPTING
+    if interactive and acpi.available() and (
+            a.acpi_tables or acpi.platform_key() != 'darwin'):
+        # SSDTs are written against one machine's tables. Offer it where there
+        # are tables to write against: either a dump that came with the report,
+        # or this machine, which is the target when it is the target.
+        print(f'\n{BOLD}ACPI{RESET}')
+        where = a.acpi_tables or ('this machine' if not manual and source ==
+                                  'this machine' else None)
+        if where:
+            print(f'  {DIM}A laptop usually needs a few SSDTs - a fake EC, PLUG for '
+                  f'power\n  management, PNLF for the backlight - and each is written '
+                  f'against the\n  machine\'s own tables. SSDTTime does that and is '
+                  f'bundled here.{RESET}')
+            if ask(0, 0, 'Work out the SSDTs now?',
+                   [('yes', f'Yes, run SSDTTime against {where}'),
+                    ('no', 'No, the profile\'s generic SSDTs will do')]) == 'yes':
+                got, complaint = acpi.run(Path(a.out).parent / 'acpi',
+                                          a.acpi_tables)
+                if got:
+                    aml, add, patches = acpi.collect(got)
+                    print(f'      {GREEN}{len(aml)} SSDTs and {len(patches)} '
+                          f'patches{RESET}')
+                    acpi_results = str(got)
+                else:
+                    print(f'      {YELLOW}{complaint}; the profile\'s SSDTs stay'
+                          f'{RESET}')
+        else:
+            print(f'  {DIM}SSDTs need the target machine\'s ACPI tables. Take them '
+                  f'there with\n      detect.py --report machine.json --acpi ACPI/'
+                  f'{RESET}')
+
     usb_implies = None
     queued = []
-    if not a.usb_map and usbmap.available() and usbmap.runnable_here():
+    if interactive and not a.usb_map and usbmap.available() and usbmap.runnable_here():
         # the tool is here and this is the machine it runs on, so offer it
         # rather than describing it: the map has to be made somewhere and this
         # is the only place it can be
@@ -768,6 +816,8 @@ def main():
         cmd += ['--cores', str(cores)]
     if row['oem']:
         cmd += ['--oem', row['oem']]
+    if acpi_results:
+        cmd += ['--acpi', acpi_results]
 
     print(f'\n{BOLD}Building{RESET}')
     print(f'  {DIM}build {" ".join(cmd)}{RESET}\n')

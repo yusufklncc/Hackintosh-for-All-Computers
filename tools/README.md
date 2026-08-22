@@ -205,6 +205,55 @@ placeholder the profiles ship is removed - an id will not rescue an iGPU that
 has been run and found not to accelerate, and leaving a value nobody chose is
 worse than leaving the key out.
 
+## SSDTs
+
+An SSDT is written against one machine's ACPI tables. Which renames a board
+needs, where the EC is, whether the RTC has to be faked - none of that can be
+worked out from a device listing, and getting it wrong is worse than doing
+nothing. So SSDTTime is vendored whole and driven. **Nothing here decides which
+patches a machine needs, and nothing here writes AML.**
+
+`vendor/tools/SSDTTime` is the source tree at a pinned commit, MIT, standard
+library only - so unlike USBToolBox there is no binary to vendor and no
+dependency to add. `vendor/tools/iasl` holds the compilers, dual licensed Intel
+or GPL-2.0; the Intel option is the one taken and its condition 3.3 requires the
+notice to travel with the binaries, which is `ACPICA-LICENSE.txt`. About 9 MB in
+total, and every file is pinned by sha256 in `vendor/tools.lock`.
+
+Three things about the tool decide how it is run:
+
+* it looks for `iasl` in its own `Scripts` directory and nowhere else, so the
+  compilers are copied in there rather than pointed at;
+* `Results` is relative to `SSDTTime.py`'s own `__file__`, so the tree is copied
+  out and imported from the copy, which makes that path ours;
+* **it downloads a legacy compiler on startup if one is not beside it.** An
+  offline build that quietly reaches for the network is worse than one that is a
+  megabyte larger, so the legacy compilers are vendored too.
+
+What this repository does is the joining up. The `.aml` files become `ACPI.Add`
+entries and are copied into the EFI; `patches_OC.plist` becomes `ACPI.Patch`
+entries as the tool wrote them, not rebuilt from a reading of them. Any key
+OpenCore requires and the plist lacks is filled with OpenCore's own default -
+a patch missing one does not fail loudly, it makes ocvalidate reject the whole
+config while the build that produced it looked fine.
+
+**Two SSDTs doing the same job is not additive.** The profiles ship generic ones
+- `SSDT-PLUG-DRTNIA`, `SSDT-EC-USBX-LAPTOP` - and SSDTTime writes `SSDT-PLUG`
+and `SSDT-EC` built against this machine. Neither pair is a duplicate by name
+and both pairs would fight, so the comparison is on what the name says the table
+is for, the tailored one wins, and the generic one is turned off with a warning
+because that is a decision rather than a merge.
+
+The tables travel with the hardware report: `detect.py --report machine.json
+--acpi ACPI/` dumps them with the tool's own acpidump, and
+`setup.py --machine machine.json --acpi-tables ACPI` builds the SSDTs for that
+machine somewhere else entirely. macOS cannot dump its own and would be the
+wrong machine anyway, so it is not offered there.
+
+Neither this nor USBToolBox is ever offered to `--answers`: both are menus a
+person works through, and offering one to a script means a build that hangs
+waiting for a keystroke nobody is there to press.
+
 ## USB port mapping
 
 A port map cannot be worked out from a device listing. It takes plugging

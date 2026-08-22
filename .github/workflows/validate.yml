@@ -125,6 +125,48 @@ jobs:
           test -d /tmp/by-name/EFI/OC/Kexts/IntelBluetoothFirmware.kext
           test ! -d /tmp/by-name/EFI/OC/Kexts/AirportItlwm.kext
 
+      - name: The vendored ACPI tools are the files that were checked
+        run: |
+          python3 - <<'CHECK'
+          import sys; sys.path.insert(0, 'tools')
+          import acpi
+          assert acpi.available(), 'SSDTTime is not usable here'
+          ok, detail = acpi.verify()
+          assert ok, detail
+          work = acpi.prepare('/tmp/acpi-work')
+          names = {p.name for p in (work / 'Scripts').iterdir()}
+          assert any(n.startswith('iasl') for n in names), sorted(names)
+          module = acpi.load(work)
+          ssdt = module.SSDT()
+          assert ssdt.d.iasl and str(work) in str(ssdt.d.iasl), ssdt.d.iasl
+          assert ssdt.d.iasl_legacy, 'no legacy compiler, so it would download one'
+          print(f'SSDTTime {detail}, compiler found without reaching the network')
+          CHECK
+
+      - name: An SSDT built for the machine replaces the generic one
+        run: |
+          mkdir -p /tmp/Results
+          python3 - <<'CHECK'
+          import plistlib
+          from pathlib import Path
+          r = Path('/tmp/Results')
+          (r / 'SSDT-PLUG.aml').write_bytes(b'SSDT' + bytes(32))
+          with open(r / 'patches_OC.plist', 'wb') as fh:
+              plistlib.dump({'ACPI': {'Patch': [{'Comment': 'x', 'Find': b'EC0_',
+                                                 'Replace': b'EC__'}]}}, fh)
+          CHECK
+          python3 tools/build.py --platform laptop --cpu kaby-lake \
+            --acpi /tmp/Results --out /tmp/acpi-efi/EFI
+          test -f /tmp/acpi-efi/EFI/OC/ACPI/SSDT-PLUG.aml
+          python3 - <<'CHECK'
+          import plistlib
+          d = plistlib.load(open('/tmp/acpi-efi/EFI/OC/config.plist', 'rb'))
+          by = {e['Path']: e for e in d['ACPI']['Add']}
+          assert by['SSDT-PLUG.aml']['Enabled'], by
+          assert by['SSDT-PLUG-DRTNIA.aml']['Enabled'] is False, by
+          print('the generic SSDT is off, the tailored one is on')
+          CHECK
+
       - name: The vendored USB tool is the file that was checked
         run: |
           python3 tools/usbmap.py

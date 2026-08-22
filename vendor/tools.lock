@@ -17,3 +17,64 @@ license = "MIT"
 # has none of and does not want. The project publishes this build for exactly
 # that reason, so the build is what is vendored.
 note = "the released Windows build, not the source"
+# SSDTTime, vendored as source: it is standard library only, so the
+# whole tree is here and no interpreter has to be found for it.
+[tool."SSDTTime"]
+version = "3b195df"
+sha256 = ""   # a tree, not a file; the commit is the pin
+upstream = "corpnewt/SSDTTime"
+license = "MIT"
+note = "the source tree at that commit, copied out and driven"
+
+# iasl compiles the SSDTs and acpidump reads the tables off the machine.
+# Both are ACPICA, dual licensed Intel or GPL-2.0; the Intel option is the
+# one taken, and condition 3.3 requires its notice to travel with the
+# binaries, which is what ACPICA-LICENSE.txt is.
+
+[tool."iasl/macos/iasl-stable"]
+version = "Dist"
+sha256 = "93f1f48e6f1ea26b14b45f4a0b6e65a660c1cc6f14969348ec9411ae6b969c12"
+upstream = "acidanthera/MaciASL"
+license = "ACPICA (Intel or GPL-2.0)"
+note = "built by MaciASL from ACPICA"
+
+[tool."iasl/linux/iasl"]
+version = "main"
+sha256 = "64d529126eb0c0b5ff6a656acaa5374850a2ddfa1c003c4c2ccf3432d6782dd7"
+upstream = "corpnewt/linux_iasl"
+license = "ACPICA (Intel or GPL-2.0)"
+note = "built by corpnewt from ACPICA"
+
+[tool."iasl/windows/iasl.exe"]
+version = "20260408"
+sha256 = "739c597bcee4563f18d13e73b2051bb661707713e6154cf5712a1b7eef4a5df9"
+upstream = "acpica/acpica"
+license = "ACPICA (Intel or GPL-2.0)"
+note = "the project's own release"
+
+[tool."iasl/windows/acpidump.exe"]
+version = "20260408"
+sha256 = "a0095a57521378c290d030db7ad196a27de2fcc770dd0347104ff49d19d792e0"
+upstream = "acpica/acpica"
+license = "ACPICA (Intel or GPL-2.0)"
+note = "the project's own release"
+[tool."iasl/macos/iasl-legacy"]
+version = "Dist"
+sha256 = "929d116775fac7ba0e66c1b3b00c9854fe251691389d3c07ea5d7ef6a2aca47f"
+upstream = "acidanthera/MaciASL"
+license = "ACPICA (Intel or GPL-2.0)"
+note = "the legacy compiler, for macOS 10.6 and older"
+
+[tool."iasl/linux/iasl-legacy"]
+version = "main"
+sha256 = "a5c1a240e9609e11d23811974b8491e2b278028f92c51922bbe947716a6968b0"
+upstream = "corpnewt/iasl-legacy"
+license = "ACPICA (Intel or GPL-2.0)"
+note = "the legacy compiler, for macOS 10.6 and older"
+
+[tool."iasl/windows/iasl-legacy.exe"]
+version = "main"
+sha256 = "a88662eebd751c7914c9c5ab36656d386a1fdc51822a20009dc27c34e13bed47"
+upstream = "corpnewt/iasl-legacy"
+license = "ACPICA (Intel or GPL-2.0)"
+note = "the legacy compiler, for macOS 10.6 and older"
