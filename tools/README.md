@@ -723,8 +723,17 @@ are PS2! You will want to grab VoodooPS2 even if you have an I2C, USB, or SMBus
 trackpad"* - and the profiles here already decide that per machine, so the line
 is repeated as a warning rather than acted on.
 
+**An SMBus trackpad can be told apart after all.** Windows names the SMBus
+controller after whatever bound to it, so a Synaptics or ELAN trackpad on that
+bus makes the device come back as `Synaptics SMBus Driver` rather than
+`Intel(R) SMBus Controller`. That is the machine saying which bus its trackpad
+is on, and it outranks the PS/2 controller also being there - on these laptops
+both are, and only one is carrying the pad. The kext `data/input.toml` quotes for
+that vendor is then offered, not added silently: a Windows driver name is good
+enough to ask on and not good enough to decide with.
+
 `NEXT-STEPS.txt` names the per-family plugins in the same release, the two SMBus
-paths for when it is not I2C at all, and the fact that some trackpads need an
+paths for when neither signal is there, and the fact that some trackpads need an
 SSDT first - which is machine-specific and not something this can write.
 
 ## Intel graphics framebuffer
