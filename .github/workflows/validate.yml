@@ -125,6 +125,11 @@ jobs:
           test -d /tmp/by-name/EFI/OC/Kexts/IntelBluetoothFirmware.kext
           test ! -d /tmp/by-name/EFI/OC/Kexts/AirportItlwm.kext
 
+      - name: What we ship and what we do not
+        run: |
+          python3 tools/thirdparty.py
+          python3 tools/thirdparty.py --machine tools/fixtures/thinkpad-e570.json
+
       - name: The card reader has three answers, not one
         run: |
           python3 - <<'CHECK'
