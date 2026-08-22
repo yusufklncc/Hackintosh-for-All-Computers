@@ -766,6 +766,16 @@ def ssdt_flow():
     named = {n for n, _ in acpi.ASKS} | {n for _, n, _ in acpi.AUTOMATIC}
     check('so nothing the tool can do is invisible', len(named) >= 12, sorted(named))
 
+    src = Path('tools/setup.py').read_text()
+    # offering to work out the SSDTs and then saying "no ACPI tables were
+    # loaded" is offering something and not doing it. Building for this machine
+    # means the tables are right here.
+    flow = src[src.index('def run_ssdts('):src.index('def profile_from(')]
+    check('the tables are dumped when none were handed in',
+          'acpi.dump(' in flow and 'if not tables:' in flow)
+    check('and the menu run uses the same ones',
+          "acpi.run(Path(a.out).parent / 'acpi', tables)" in flow)
+
     if not acpi.available():
         return
     import contextlib
