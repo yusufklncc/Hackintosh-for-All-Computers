@@ -15,11 +15,25 @@ kexts = ["VoodooI2C.kext", "VoodooI2CHID.kext"]
 quote = "Attaches to I2C controllers to allow plugins to talk to I2C trackpads. Must be paired with one or more plugins"
 note = "VoodooI2CHID covers I2C-HID devices, which is most of them. ELAN, Synaptics and FTE trackpads have their own plugin in the same release."
 
+# Saying yes to this is not "add one kext". VoodooRMI's own Installation
+# section gives an ordered set and one plugin that has to come out: two
+# VoodooInput kexts loaded at once is the failure it is warning about. The order
+# is the project's, kept as written.
 [[rule]]
 bus = "smbus-synaptics"
 label = "Synaptics SMBus trackpad"
-kexts = ["VoodooRMI.kext"]
+source = "VoodooSMBus/VoodooRMI README, Compatibility and Installation"
+kexts = [
+    "VoodooRMI.kext",
+    "VoodooRMI.kext/Contents/PlugIns/VoodooInput.kext",
+    "VoodooSMBus.kext",
+    "VoodooRMI.kext/Contents/PlugIns/RMISMBus.kext",
+]
+disable = ["VoodooPS2Controller.kext/Contents/PlugIns/VoodooInput.kext"]
+needs = "VoodooPS2 2.3.6 or newer, which the profiles already carry"
 quote = "For systems with Synaptics SMBus trackpads. Requires macOS 10.11 or newer for MT2 functions. Depends on Acidanthera's VoodooPS2"
+windows_check = "Check under Device Manager for a Synaptics SMBus device"
+macos_check = "Look in IORegistryExplorer under ApplePS2SynapticsTrackpad, and look for the value Intertouch Support=True"
 
 [[rule]]
 bus = "smbus-elan"

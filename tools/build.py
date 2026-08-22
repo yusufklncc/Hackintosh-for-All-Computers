@@ -144,6 +144,8 @@ def main(argv=None):
     ap.add_argument('--device-props', help='JSON of DeviceProperties to merge in')
     ap.add_argument('--acpi', metavar='DIR',
                     help='a SSDTTime Results folder: its SSDTs and patches go in')
+    ap.add_argument('--disable-kexts',
+                    help='comma-separated BundlePaths to turn off but leave in')
     ap.add_argument('--drop-kexts', help='bundle names to disable, comma separated')
     a = ap.parse_args(argv)
 
@@ -293,6 +295,17 @@ def main(argv=None):
         if add or fresh:
             print(f'  ACPI         {len(add)} SSDTs, {len(fresh)} patches from '
                   f'{a.acpi}')
+
+    if a.disable_kexts:
+        # off, not out: a kext another one replaces has to stay in the config so
+        # that turning it back on is one edit, and so that what was decided is
+        # visible rather than absent
+        names = {x.strip() for x in a.disable_kexts.split(',') if x.strip()}
+        for entry in config['Kernel']['Add']:
+            if entry['BundlePath'] in names and entry.get('Enabled'):
+                entry['Enabled'] = False
+                warn(f'{entry["BundlePath"]} disabled: the kext replacing it says '
+                     f'it must not load too')
 
     if a.drop_kexts:
         drop = {x.strip() for x in a.drop_kexts.split(',') if x.strip()}

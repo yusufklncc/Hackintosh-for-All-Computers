@@ -728,9 +728,22 @@ controller after whatever bound to it, so a Synaptics or ELAN trackpad on that
 bus makes the device come back as `Synaptics SMBus Driver` rather than
 `Intel(R) SMBus Controller`. That is the machine saying which bus its trackpad
 is on, and it outranks the PS/2 controller also being there - on these laptops
-both are, and only one is carrying the pad. The kext `data/input.toml` quotes for
-that vendor is then offered, not added silently: a Windows driver name is good
-enough to ask on and not good enough to decide with.
+both are, and only one is carrying the pad. The kexts `data/input.toml` quotes for
+that vendor are then offered, not added silently, for three reasons that are all
+in the project's own README:
+
+* The Windows signal is upstream's own test - *"Check under Device Manager for a
+  Synaptics SMBus device"* - but upstream also gives a **macOS** confirmation,
+  `Intertouch Support=True` in IORegistry, and that one cannot be seen from
+  Windows. So the evidence is the right evidence and it is not the last word.
+* A Synaptics pad works over SMBus *or* I2C, *"though not both"*, and the PS/2
+  path is there as a fallback on the same machine. Both show up in Windows.
+* Saying yes is not "add one kext". The Installation section gives four in a
+  fixed order and requires **disabling** the profile's
+  `VoodooPS2Controller.kext/Contents/PlugIns/VoodooInput.kext`, because two
+  VoodooInput kexts must not load at once. That set is what goes in, in that
+  order, and the disabled one stays in the config turned off so putting it back
+  is one edit.
 
 `NEXT-STEPS.txt` names the per-family plugins in the same release, the two SMBus
 paths for when neither signal is there, and the fact that some trackpads need an

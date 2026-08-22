@@ -193,6 +193,34 @@ jobs:
           print('SMBus and PS/2 are told apart')
           CHECK
 
+      - name: Choosing SMBus follows the project's own install order
+        run: |
+          E570='--machine tools/fixtures/thinkpad-e570.json'
+          python3 - <<'MAKE'
+          import json
+          d = json.load(open('tools/fixtures/thinkpad-e570.json'))
+          d['device_names']['8086:9d23'] = 'Synaptics SMBus Driver'
+          json.dump(d, open('/tmp/smbus.json', 'w'))
+          MAKE
+          python3 tools/setup.py --machine /tmp/smbus.json --answers 1,1,1,1 \
+            --out /tmp/smbus/EFI
+          python3 - <<'CHECK'
+          import plistlib
+          d = plistlib.load(open('/tmp/smbus/EFI/OC/config.plist', 'rb'))
+          by = {k['BundlePath']: k for k in d['Kernel']['Add']}
+          for want in ('VoodooRMI.kext',
+                       'VoodooRMI.kext/Contents/PlugIns/VoodooInput.kext',
+                       'VoodooSMBus.kext',
+                       'VoodooRMI.kext/Contents/PlugIns/RMISMBus.kext'):
+              assert by[want]['Enabled'], want
+          off = 'VoodooPS2Controller.kext/Contents/PlugIns/VoodooInput.kext'
+          assert by[off]['Enabled'] is False, 'two VoodooInput kexts would load'
+          for keep in ('VoodooPS2Controller.kext',
+                       'VoodooPS2Controller.kext/Contents/PlugIns/VoodooPS2Trackpad.kext'):
+              assert by[keep]['Enabled'], keep
+          print('the SMBus set is complete and VoodooInput is not doubled')
+          CHECK
+
       - name: The card reader has three answers, not one
         run: |
           python3 - <<'CHECK'

@@ -648,6 +648,7 @@ def main():
                   f'there with\n      detect.py --report machine.json --acpi ACPI/'
                   f'{RESET}')
 
+    smbus_disable = []
     usb_implies = None
     queued = []
     if interactive and not a.usb_map and usbmap.available() and usbmap.runnable_here():
@@ -762,8 +763,17 @@ def main():
                   f'bound to it, which\n      is this machine saying the trackpad is '
                   f'on SMBus and not PS/2.{RESET}')
             print(f'      {DIM}"{rule["quote"]}"{RESET}')
-            if ask(0, 0, f'Add {", ".join(rule["kexts"])} for it?',
-                   [('yes', f'Yes, add {", ".join(rule["kexts"])}'),
+            print(f'      {DIM}{len(rule["kexts"])} kexts in the order the project '
+                  f'gives, and {len(rule.get("disable", []))} of the profile\'s '
+                  f'turned off:\n'
+                  + '\n'.join(f'        + {k}' for k in rule['kexts'])
+                  + ''.join(f'\n        - {k}' for k in rule.get('disable', []))
+                  + RESET)
+            if rule.get('macos_check'):
+                print(f'      {DIM}Confirm it in macOS afterwards: '
+                      f'"{rule["macos_check"]}"{RESET}')
+            if ask(0, 0, 'Set the trackpad up for SMBus?',
+                   [('yes', 'Yes, as the project says'),
                     ('no', 'No, VoodooPS2 alone')]) == 'yes':
                 for bundle in rule['kexts']:
                     entry = {'Arch': 'x86_64', 'BundlePath': bundle,
@@ -772,6 +782,7 @@ def main():
                                  rule.get('min_kernel', ''), 'MaxKernel': '',
                              'PlistPath': 'Contents/Info.plist'}
                     input_kexts.append(entry)
+                smbus_disable = list(rule.get('disable', []))
         if input_lines:
             print('\n'.join(input_lines))
         elif pointing and not bus:
@@ -908,6 +919,8 @@ def main():
         cmd += ['--oem', row['oem']]
     if acpi_results:
         cmd += ['--acpi', acpi_results]
+    if smbus_disable:
+        cmd += ['--disable-kexts', ','.join(smbus_disable)]
 
     print(f'\n{BOLD}Building{RESET}')
     print(f'  {DIM}build {" ".join(cmd)}{RESET}\n')
