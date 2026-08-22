@@ -245,7 +245,31 @@ device located - no fake needed"*, *"No patching or SSDT needed"*, *"Could not
 locate a valid bus device! Aborting"*. The choice stays the tool's; what goes
 away is a person pressing the same keys.
 
-The rest stay in the menus because they ask real questions - PNLF asks five,
+The flow is one question, then the facts, then one question about what is left:
+
+    Work out the SSDTs for this machine?
+       1) Yes
+       2) No, the profile's generic SSDTs will do
+
+           SSDT-EC          written
+           SSDT-PLUG        written
+           SSDT-AWAC        not needed on this machine
+           SSDT-HPET        needs a choice
+           4 written, 1 not needed, 1 waiting on a choice
+
+           8 more need an answer only you can give:
+             SSDT-HPET   IRQ conflicts, if there are any
+             SSDT-PNLF   laptop backlight; asks about the panel
+             ...
+
+    Open SSDTTime to work through those too?
+
+Three answers up front - automatic, menu, no - read as a puzzle to solve before
+anything has happened. This way the choice comes after the outcomes, and every
+patch the tool can do is named whether it ran or not, so nothing is invisible.
+
+"Written" means a file appeared, judged from the folder rather than from what
+the tool printed. The rest stay in the menus because they ask real questions - PNLF asks five,
 XOSI and USBX and DMAR one each - and answering those for somebody is what this
 must not do. The laptop profiles already carry a generic XOSI and PNLF, so that
 gap is smaller than it looks.

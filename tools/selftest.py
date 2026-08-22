@@ -742,11 +742,48 @@ def unattended_ssdts():
         ssdt.u.grab = acpi._auto_grab
         with contextlib.redirect_stdout(io.StringIO()):
             ssdt.dsdt = ssdt.load_dsdt(str(Path('tools/fixtures/acpi').resolve()))
-            outcomes = dict(acpi.automatic(ssdt))
+            outcomes = {n: o for n, o, _ in acpi.automatic(ssdt)}
         check('a patch that asks is reported, not answered',
-              'needs a choice' in outcomes.get('SSDT-HPET', ''), outcomes)
+              outcomes.get('SSDT-HPET') == acpi.ASKED, outcomes)
         check('and the ones that do not ask still ran',
-              'Done' in outcomes.get('SSDT-EC', ''), outcomes)
+              outcomes.get('SSDT-EC') in (acpi.WROTE, acpi.NOT_NEEDED), outcomes)
+
+
+def ssdt_flow():
+    """One question, then the facts, then one question about what is left.
+
+    Three answers up front read as a puzzle to solve before anything has
+    happened. The choice belongs after the outcomes, not before them."""
+    import acpi
+    src = Path('tools/setup.py').read_text()
+    check('there is one question to start with, not three',
+          "'Work out the SSDTs for this machine?'" in src)
+    check('and one about the rest, after the outcomes',
+          "'Open SSDTTime to work through those too?'" in src)
+    check('every patch never attempted is named',
+          len(acpi.ASKS) >= 6 and all(len(x) == 2 and all(x) for x in acpi.ASKS),
+          acpi.ASKS)
+    named = {n for n, _ in acpi.ASKS} | {n for _, n, _ in acpi.AUTOMATIC}
+    check('so nothing the tool can do is invisible', len(named) >= 12, sorted(named))
+
+    if not acpi.available():
+        return
+    import contextlib
+    import io
+    with tempfile.TemporaryDirectory() as tmp:
+        outcomes = []
+        with contextlib.redirect_stdout(io.StringIO()):
+            acpi.run(Path(tmp) / 'a', tables='tools/fixtures/acpi',
+                     unattended=True, outcomes=outcomes)
+        kinds = {o for _, o, _ in outcomes}
+        check('the outcomes are the three plain ones',
+              kinds <= {acpi.WROTE, acpi.NOT_NEEDED, acpi.ASKED}, kinds)
+        wrote = [n for n, o, _ in outcomes if o == acpi.WROTE]
+        check('and "written" means a file appeared', wrote, outcomes)
+        # the fixture's HPET conflicts, so exactly this is what the person sees
+        asked = [n for n, o, _ in outcomes if o == acpi.ASKED]
+        check('a patch that wants an answer is one of them', asked == ['SSDT-HPET'],
+              asked)
 
 
 def frozen_names():
@@ -1207,7 +1244,7 @@ if __name__ == '__main__':
                     device_names, broadcom_wifi, detection_gaps, provenance,
                     framebuffers, native_device_ids, field_reports, load_order,
                     smbus_trackpad, macos_window, card_readers, third_party,
-                    usb_mapping, acpi_tables, unattended_ssdts, window_stays_open,
+                    usb_mapping, acpi_tables, unattended_ssdts, ssdt_flow, window_stays_open,
                     frozen_names, frozen_build, workflow_flags,
                     runner_independence, tables_match_sources):
         print(f'\n{section.__name__}')
