@@ -237,6 +237,32 @@ OpenCore requires and the plist lacks is filled with OpenCore's own default -
 a patch missing one does not fail loudly, it makes ocvalidate reject the whole
 config while the build that produced it looked fine.
 
+**Six of the patches decide entirely from the tables**, and those can run
+without anybody pressing a key: EC, PLUG, AWAC, PMC, HPET and SBUS-MCHC. That is
+not this repository deciding which patches a machine needs - each one inspects
+the DSDT and produces nothing when it is not wanted, and says so: *"Named EC
+device located - no fake needed"*, *"No patching or SSDT needed"*, *"Could not
+locate a valid bus device! Aborting"*. The choice stays the tool's; what goes
+away is a person pressing the same keys.
+
+The rest stay in the menus because they ask real questions - PNLF asks five,
+XOSI and USBX and DMAR one each - and answering those for somebody is what this
+must not do. The laptop profiles already carry a generic XOSI and PNLF, so that
+gap is smaller than it looks.
+
+Unattended runs replace the tool's prompt handler with one that answers "press
+enter" and **raises on anything else**. That guard is not theoretical: `fix_hpet`
+was in the automatic list because a scan of its source found no questions, and
+the first run against a DSDT with conflicting IRQs had it ask which devices to
+patch. It was refused and reported rather than sent a blank line, which is the
+whole reason the guard exists. It stays in the list: with no conflicts it says
+so and writes nothing, and with conflicts it now says which menu to use.
+
+`tools/fixtures/acpi/DSDT.dsl` is a table written here, not dumped, holding just
+what those patches look for - an EC, an RTC, a HPET with conflicting IRQs, an
+SMBus device, two Processors. It is what lets this be tested on a machine that
+cannot dump its own tables, which is every Mac.
+
 **Two SSDTs doing the same job is not additive.** The profiles ship generic ones
 - `SSDT-PLUG-DRTNIA`, `SSDT-EC-USBX-LAPTOP` - and SSDTTime writes `SSDT-PLUG`
 and `SSDT-EC` built against this machine. Neither pair is a duplicate by name

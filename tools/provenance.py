@@ -196,9 +196,9 @@ def catalogue():
              count='SSDTTime and 5 compilers, pinned by hash',
              covers='the SSDTs the tool writes against a machine\'s own tables, '
                     'and the patches it writes with them',
-             gap='Nothing here decides which patches a machine needs. Dumping '
-                 'tables needs Windows or Linux; macOS cannot and would be the '
-                 'wrong machine anyway.'),
+             gap='Nothing here decides which patches a machine needs: six run '
+                 'unattended because they decide from the tables, the rest ask. '
+                 'Dumping tables needs Windows or Linux.'),
         dict(area='USB port mapping', kind=DERIVED, file='vendor/tools.lock',
              source='USBToolBox, vendored whole and driven',
              tool='tools/usbmap.py',

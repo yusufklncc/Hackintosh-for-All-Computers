@@ -696,6 +696,59 @@ def window_stays_open():
     check('and says why', 'does not exist' in (r.stdout + r.stderr))
 
 
+def unattended_ssdts():
+    """Six patches decide from the tables alone; the rest ask, and must not be
+    answered for somebody.
+
+    Run against tools/fixtures/acpi, a DSDT written here rather than dumped, so
+    this works on every platform and not only where tables can be read."""
+    import acpi
+    check('the automatic set is named and described',
+          all(len(row) == 3 and all(row) for row in acpi.AUTOMATIC), acpi.AUTOMATIC)
+    check('a press-enter is answered', acpi._auto_grab('Press [enter] to go on') == '')
+    for prompt in ('Please select an option:', 'Enter the model identifier: ', ''):
+        try:
+            acpi._auto_grab(prompt)
+            check(f'a real question is refused: {prompt!r}', False, 'it answered')
+        except acpi._Unattended:
+            check(f'a real question is refused: {prompt!r}', True)
+
+    if not acpi.available():
+        return
+    import contextlib
+    import io
+    with tempfile.TemporaryDirectory() as tmp:
+        with contextlib.redirect_stdout(io.StringIO()):
+            results, complaint = acpi.run(Path(tmp) / 'acpi',
+                                          tables='tools/fixtures/acpi',
+                                          unattended=True)
+        check('it runs against a DSDT and writes a Results folder',
+              results is not None, complaint)
+        if not results:
+            return
+        made = {p.name for p in Path(results).iterdir()}
+        # the fixture has an EC, an RTC, an SMBus device and two Processors
+        for want in ('SSDT-EC.aml', 'SSDT-PLUG.aml', 'SSDT-SBUS-MCHC.aml'):
+            check(f'{want} was worked out from the tables', want in made, sorted(made))
+        aml, add, patches = acpi.collect(results)
+        check('and they collect into Add entries', len(add) == len(aml) and add)
+
+    # the fixture's HPET IRQs conflict on purpose, which makes fix_hpet ask -
+    # and the guard has to refuse rather than send it a blank line
+    with tempfile.TemporaryDirectory() as tmp:
+        work = acpi.prepare(Path(tmp) / 'w')
+        module = acpi.load(work)
+        ssdt = module.SSDT()
+        ssdt.u.grab = acpi._auto_grab
+        with contextlib.redirect_stdout(io.StringIO()):
+            ssdt.dsdt = ssdt.load_dsdt(str(Path('tools/fixtures/acpi').resolve()))
+            outcomes = dict(acpi.automatic(ssdt))
+        check('a patch that asks is reported, not answered',
+              'needs a choice' in outcomes.get('SSDT-HPET', ''), outcomes)
+        check('and the ones that do not ask still ran',
+              'Done' in outcomes.get('SSDT-EC', ''), outcomes)
+
+
 def frozen_names():
     """Names a frozen build takes away, which the vendored code still uses.
 
@@ -1152,9 +1205,10 @@ if __name__ == '__main__':
                     trackpad, framebuffer, boot_args, other_machine,
                     undecodable_output, scripted_answers, hardware_summary,
                     device_names, broadcom_wifi, detection_gaps, provenance,
-                    framebuffers, native_device_ids, field_reports, load_order, smbus_trackpad, macos_window,
-                    card_readers, third_party, usb_mapping, acpi_tables,
-                    window_stays_open, frozen_names, frozen_build, workflow_flags,
+                    framebuffers, native_device_ids, field_reports, load_order,
+                    smbus_trackpad, macos_window, card_readers, third_party,
+                    usb_mapping, acpi_tables, unattended_ssdts, window_stays_open,
+                    frozen_names, frozen_build, workflow_flags,
                     runner_independence, tables_match_sources):
         print(f'\n{section.__name__}')
         section()
