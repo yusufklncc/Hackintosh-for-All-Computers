@@ -221,6 +221,58 @@ def check_tools():
     return 0
 
 
+def run_ssdts(a, where):
+    """Work out the SSDTs, in one pass a person can follow.
+
+    The automatic ones first, then a plain list of what happened, then one
+    question about the rest. Three answers up front - automatic, menu, no - read
+    as a puzzle to solve before anything has happened; this way the choice comes
+    after the facts."""
+    outcomes = []
+    got, complaint = acpi.run(Path(a.out).parent / 'acpi', a.acpi_tables,
+                              unattended=True, outcomes=outcomes)
+    if not got and not outcomes:
+        print(f'      {YELLOW}{complaint}{RESET}')
+        return None
+
+    for name, outcome, detail in outcomes:
+        colour = GREEN if outcome == acpi.WROTE else DIM
+        print(f'      {colour}{name:16s} {outcome}{RESET}')
+    tally = {o: sum(1 for x in outcomes if x[1] == o) for o in
+             (acpi.WROTE, acpi.NOT_NEEDED, acpi.ASKED)}
+    print('      ' + DIM + ', '.join(
+        f'{n} {word}' for word, n in
+        (('written', tally[acpi.WROTE]),
+         ('not needed', tally[acpi.NOT_NEEDED]),
+         ('waiting on a choice', tally[acpi.ASKED])) if n) + RESET)
+
+    # anything that turned out to want an answer, plus everything never
+    # attempted. The description is the patch's own job, not the prompt it
+    # happened to print, which reads as an error rather than a choice.
+    why_asked = {name: what for _, name, what in acpi.AUTOMATIC}
+    asks = [(n, why_asked.get(n, d)) for n, o, d in outcomes if o == acpi.ASKED]
+    asks += list(acpi.ASKS)
+    print(f'\n      {DIM}{len(asks)} more need an answer only you can give:{RESET}')
+    for name, why in asks:
+        print(f'      {DIM}  {name:16s} {why}{RESET}')
+    print(f'      {DIM}The laptop profiles already carry a generic XOSI and PNLF, '
+          f'so\n      most machines need none of these.{RESET}')
+
+    if ask(0, 0, 'Open SSDTTime to work through those too?',
+           [('no', 'No, what came out is enough'),
+            ('yes', 'Yes, open the menus')]) == 'yes':
+        more, complaint = acpi.run(Path(a.out).parent / 'acpi', a.acpi_tables)
+        if more:
+            got = more
+        else:
+            print(f'      {YELLOW}{complaint}{RESET}')
+    if not got:
+        return None
+    aml, add, patches = acpi.collect(got)
+    print(f'      {GREEN}{len(aml)} SSDTs and {len(patches)} patches going in{RESET}')
+    return str(got)
+
+
 def profile_from(hw):
     """(platform, vendor, cpu, cores, oem) when detection answers all of it.
 
@@ -639,30 +691,16 @@ def main():
         where = a.acpi_tables or ('this machine' if not manual and source ==
                                   'this machine' else None)
         if where:
-            print(f'  {DIM}A laptop usually needs a few SSDTs - a fake EC, PLUG for '
-                  f'power\n  management, PNLF for the backlight - and each is written '
-                  f'against the\n  machine\'s own tables. SSDTTime does that and is '
-                  f'bundled here.{RESET}')
-            print(f'      {DIM}Six of them decide entirely from the tables and ask '
-                  f'nothing:\n      {", ".join(n for _, n, _ in acpi.AUTOMATIC)}.\n'
-                  f'      The rest ask questions only you can answer, so they are '
-                  f'in the menus.{RESET}')
-            picked = ask(0, 0, 'Work out the SSDTs now?',
-                         [('auto', 'Yes, the six that decide for themselves'),
-                          ('menu', f'Yes, and let me choose, against {where}'),
-                          ('no', 'No, the profile\'s generic SSDTs will do')])
-            if picked != 'no':
-                got, complaint = acpi.run(Path(a.out).parent / 'acpi',
-                                          a.acpi_tables,
-                                          unattended=picked == 'auto')
-                if got:
-                    aml, add, patches = acpi.collect(got)
-                    print(f'      {GREEN}{len(aml)} SSDTs and {len(patches)} '
-                          f'patches{RESET}')
-                    acpi_results = str(got)
-                else:
-                    print(f'      {YELLOW}{complaint}; the profile\'s SSDTs stay'
-                          f'{RESET}')
+            print(f'  {DIM}A machine usually needs a few SSDTs - a fake EC, PLUG '
+                  f'for power\n  management - and each is written against its own '
+                  f'tables. SSDTTime\n  does that and is bundled here. It works most '
+                  f'of them out by itself;\n  the ones that need an answer are listed '
+                  f'afterwards.{RESET}')
+            if ask(0, 0, 'Work out the SSDTs for this machine?',
+                   [('yes', 'Yes'),
+                    ('no', "No, the profile's generic SSDTs will do")]) == 'yes':
+                acpi_results = run_ssdts(a, where)
+
         else:
             print(f'  {DIM}SSDTs need the target machine\'s ACPI tables. Take them '
                   f'there with\n      detect.py --report machine.json --acpi ACPI/'

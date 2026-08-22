@@ -166,7 +166,7 @@ def load(work):
     return module
 
 
-def run(work, tables=None, unattended=False):
+def run(work, tables=None, unattended=False, outcomes=None):
     """Drive the tool. Returns the Results folder it wrote into, or None.
 
     unattended runs the self-deciding patches and returns, instead of handing
@@ -180,6 +180,7 @@ def run(work, tables=None, unattended=False):
 
     work = prepare(work)
     here = Path.cwd()
+    outcomes = outcomes if outcomes is not None else []
     module = load(work)
     ssdt = module.SSDT()
     if tables:
@@ -200,8 +201,7 @@ def run(work, tables=None, unattended=False):
         if unattended:
             if not ssdt.dsdt:
                 return None, 'no ACPI tables were loaded, so there is nothing to read'
-            for name, outcome in automatic(ssdt):
-                print(f'      {name:16s} {outcome}')
+            outcomes.extend(automatic(ssdt, work / 'Results'))
             raise SystemExit(0)
         while True:
             ssdt.main()
@@ -295,6 +295,20 @@ AUTOMATIC = [
 ]
 
 
+# The ones never attempted unattended, and what they would ask about. Named so
+# that choosing the automatic run does not leave them invisible: somebody who
+# needs PNLF should be told it exists, not left to find out.
+ASKS = [
+    ('SSDT-PNLF', 'laptop backlight; asks about the panel'),
+    ('SSDT-XOSI', 'which Windows versions _OSI should answer to'),
+    ('SSDT-USBX', 'USB power properties'),
+    ('DMAR', 'reserved memory regions; asks which to drop'),
+    ('SSDT-USB-Reset', 'for USB port mapping, which is its own step'),
+    ('SSDT-Bridge', 'needs the device path of the bridge to create'),
+    ('SSDT-IMEI', 'asks which bridge to define'),
+]
+
+
 class _Unattended(Exception):
     """Raised when a patch asks something a person would have to answer."""
 
@@ -310,47 +324,57 @@ def _auto_grab(prompt=''):
     raise _Unattended(str(prompt).strip() or 'a question with no prompt')
 
 
-def automatic(ssdt):
-    """Run the self-deciding patches. Returns [(name, what happened)]."""
+def automatic(ssdt, results=None):
+    """Run the self-deciding patches. Returns [(name, outcome, detail)]."""
     import contextlib
     import io
+    results = Path(results) if results else None
     done = []
     original = ssdt.u.grab
+
+    def files():
+        return set(results.glob('*.aml')) if results and results.exists() else set()
+
     try:
         ssdt.u.grab = _auto_grab
         for method, name, what in AUTOMATIC:
             run = getattr(ssdt, method, None)
             if not run:
-                done.append((name, 'not in this version of the tool'))
+                done.append((name, NOT_NEEDED, 'not in this version of the tool'))
                 continue
+            before = files()
             printed = io.StringIO()
             try:
                 with contextlib.redirect_stdout(printed):
                     run()
-                done.append((name, _summarise(printed.getvalue(), what)))
+                done.append((name, *_outcome(printed.getvalue(), before, files())))
             except _Unattended as exc:
-                # not a failure: the patch found something that needs a choice.
+                # not a failure: the patch found something that needs an answer.
                 # fix_hpet does this the moment there is an IRQ conflict, which
-                # is the only time it has anything to do.
-                done.append((name, f'needs a choice, so it is in the menu: '
-                                   f'"{exc}"'))
+                # is the only time it has anything to do at all.
+                done.append((name, ASKED, str(exc)))
             except Exception as exc:                # noqa: BLE001
-                done.append((name, f'stopped: {exc!r}'))
+                done.append((name, 'stopped', repr(exc)))
     finally:
         ssdt.u.grab = original
     return done
 
+# Three outcomes, and they are the whole story: it wrote something, it looked
+# and there was nothing to write, or it wanted an answer. Anything else is the
+# tool falling over, which is reported as itself.
+WROTE, NOT_NEEDED, ASKED = 'written', 'not needed on this machine', 'needs a choice'
 
-def _summarise(output, what):
-    """One line from a screenful, preferring what the tool said it did."""
+
+def _outcome(output, before, after):
+    """What happened, judged by whether a file appeared rather than by the screen."""
+    fresh = after - before
+    if fresh:
+        return WROTE, ', '.join(sorted(p.name for p in fresh))
     for line in reversed(output.splitlines()):
-        line = line.strip()
-        if not line or line.startswith(('#', 'Press')):
-            continue
-        if 'Done' in line or '.aml' in line or 'no ' in line.lower():
-            return line
-    return what
-
+        line = line.strip().lstrip('->  ')
+        if line and not line.startswith(('#', 'Press')):
+            return NOT_NEEDED, line
+    return NOT_NEEDED, ''
 
 def collect(results):
     """(aml files, ACPI.Add entries, ACPI.Patch entries) from a Results folder.
