@@ -182,6 +182,15 @@ def catalogue():
                     'and does not',
              gap='Realtek only, and the kext is not shipped here - the row says so. '
                  'The project calls itself pre-1.0 beta and last moved in 2022.'),
+        dict(area='ACPI and SSDTs', kind=DERIVED, file='vendor/tools.lock',
+             source='SSDTTime, vendored whole and driven',
+             tool='tools/acpi.py',
+             count='SSDTTime and 5 compilers, pinned by hash',
+             covers='the SSDTs the tool writes against a machine\'s own tables, '
+                    'and the patches it writes with them',
+             gap='Nothing here decides which patches a machine needs. Dumping '
+                 'tables needs Windows or Linux; macOS cannot and would be the '
+                 'wrong machine anyway.'),
         dict(area='USB port mapping', kind=DERIVED, file='vendor/tools.lock',
              source='USBToolBox, vendored whole and driven',
              tool='tools/usbmap.py',

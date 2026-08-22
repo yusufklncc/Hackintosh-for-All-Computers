@@ -17,10 +17,12 @@ happen somewhere else:
 """
 import argparse
 import datetime
+import os
 import json
 import platform
 import re
 import subprocess
+import sys
 from pathlib import Path
 
 
@@ -537,6 +539,9 @@ if __name__ == '__main__':
     ap.add_argument('--report', metavar='FILE',
                     help='write what was found to a file, to build for this '
                          'machine from a different one')
+    ap.add_argument('--acpi', metavar='DIR',
+                    help='dump this machine\'s ACPI tables too, which is what '
+                         'the SSDTs have to be written against')
     args = ap.parse_args()
     if args.report:
         written = write_report(args.report)
@@ -544,8 +549,15 @@ if __name__ == '__main__':
         print(f'  {describe(written)}')
         print(f'  {len(written["pci_ids"])} PCI, {len(written["usb_ids"])} USB, '
               f'{len(written["hda_ids"])} audio ids')
+        tables = None
+        if args.acpi:
+            sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+            import acpi
+            tables, complaint = acpi.dump('build/acpi-dump', args.acpi)
+            print(f'  {"dumped ACPI tables to " + str(tables) if tables else complaint}')
         print(f'\n  Copy it to the machine you build on and run:'
-              f'\n      setup.py --machine {args.report}')
+              f'\n      setup.py --machine {args.report}'
+              + (f' --acpi-tables {args.acpi}' if tables else ''))
         raise SystemExit(0)
     for k, v in probe().items():
         if k == 'pci':

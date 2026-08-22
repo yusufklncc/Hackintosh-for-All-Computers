@@ -574,6 +574,85 @@ def native_device_ids():
           gpu.native_ids('rocket-lake') == set())
 
 
+def acpi_tables():
+    """SSDTTime is driven, not reimplemented, so the wiring is what is checked."""
+    import acpi
+    check('the tree is vendored', (Path('vendor/tools/SSDTTime/SSDTTime.py')).exists())
+    check('with its licence beside it',
+          (Path('vendor/tools/SSDTTime/LICENSE')).exists())
+    check('and the ACPICA notice travels with the binaries, as 3.3 requires',
+          'Intel Corp' in Path('vendor/tools/iasl/ACPICA-LICENSE.txt').read_text())
+    if acpi.available():
+        ok, detail = acpi.verify()
+        check('every compiler is the file that was checked', ok, detail)
+        with tempfile.TemporaryDirectory() as tmp:
+            work = acpi.prepare(Path(tmp) / 'w')
+            names = {p.name for p in (work / 'Scripts').iterdir()}
+            # the tool looks for iasl beside its own Scripts and nowhere else
+            check('the compiler lands where the tool looks for it',
+                  any(n.startswith('iasl') for n in names), sorted(names))
+            # and the legacy one is there so it never reaches for the network
+            check('including the legacy one, so nothing is downloaded',
+                  any('legacy' in n for n in names), sorted(names))
+            module = acpi.load(work)
+            ssdt = module.SSDT()
+            check('which the tool then finds', ssdt.d.iasl and
+                  str(work) in str(ssdt.d.iasl), ssdt.d.iasl)
+            check('and the legacy one too', bool(ssdt.d.iasl_legacy))
+
+    # two SSDTs doing the same job is not additive
+    check('a generic SSDT and a tailored one are the same job',
+          acpi.same_purpose('SSDT-PLUG-DRTNIA.aml', 'SSDT-PLUG.aml'))
+    check('so are the EC ones',
+          acpi.same_purpose('SSDT-EC-USBX-LAPTOP.aml', 'SSDT-EC.aml'))
+    check('but PNLF and PLUG are not',
+          not acpi.same_purpose('SSDT-PNLF.aml', 'SSDT-PLUG.aml'))
+
+    with tempfile.TemporaryDirectory() as tmp:
+        results = Path(tmp) / 'Results'
+        results.mkdir()
+        (results / 'SSDT-PLUG.aml').write_bytes(b'SSDT' + bytes(32))
+        import plistlib
+        with open(results / 'patches_OC.plist', 'wb') as fh:
+            plistlib.dump({'ACPI': {'Patch': [{'Comment': 'x', 'Find': b'EC0_',
+                                               'Replace': b'EC__'}]}}, fh)
+        aml, add, patches = acpi.collect(results)
+        check('the SSDTs and the patches are read out of what it wrote',
+              [p.name for p in aml] == ['SSDT-PLUG.aml'] and len(patches) == 1,
+              (aml, patches))
+        # the fixture above writes three keys of the fifteen OpenCore wants,
+        # which is what a config that ocvalidate rejects looks like
+        check('a patch missing keys is completed rather than passed through',
+              set(patches[0]) == set(acpi.PATCH_DEFAULTS), sorted(patches[0]))
+        check('and the Add entry points at the file by name',
+              add[0]['Path'] == 'SSDT-PLUG.aml' and add[0]['Enabled'])
+
+        out = Path(tmp) / 'EFI'
+        r = run([sys.executable, 'tools/build.py', '--platform', 'laptop',
+                 '--cpu', 'kaby-lake', '--acpi', str(results), '--out', str(out)])
+        check('a build folds them in', r.returncode == 0)
+        if r.returncode == 0:
+            cfg = ocgen.load_plist(out / 'OC' / 'config.plist')
+            by_path = {e['Path']: e for e in cfg['ACPI']['Add']}
+            check('the tailored SSDT goes in',
+                  by_path.get('SSDT-PLUG.aml', {}).get('Enabled'), sorted(by_path))
+            check('the generic one it replaces is turned off, not left fighting it',
+                  by_path.get('SSDT-PLUG-DRTNIA.aml', {}).get('Enabled') is False,
+                  sorted(by_path))
+            check('and the file is copied in beside the others',
+                  (out / 'OC' / 'ACPI' / 'SSDT-PLUG.aml').exists())
+            found = [p for p in cfg['ACPI']['Patch'] if bytes(p['Find']) == b'EC0_']
+            check('the patch is the tool\'s own, not one rebuilt from reading it',
+                  len(found) == 1, found)
+            again = run([sys.executable, 'tools/build.py', '--platform', 'laptop',
+                         '--cpu', 'kaby-lake', '--acpi', str(results),
+                         '--out', str(Path(tmp) / 'twice')])
+            cfg2 = ocgen.load_plist(Path(tmp) / 'twice' / 'OC' / 'config.plist')
+            check('and building twice does not add it twice',
+                  len([p for p in cfg2['ACPI']['Patch']
+                       if bytes(p['Find']) == b'EC0_']) == 1)
+
+
 def usb_mapping():
     """The tool is vendored whole and driven, so what matters is the wiring."""
     import usbmap
@@ -803,7 +882,7 @@ if __name__ == '__main__':
     for section in (graphics, graphics_advice, audio_advice, storage, peripherals,
                     trackpad, framebuffer, boot_args, other_machine, undecodable_output, scripted_answers,
                     hardware_summary, device_names, broadcom_wifi,
-                    detection_gaps, provenance, framebuffers, native_device_ids, field_reports, macos_window, card_readers, third_party, usb_mapping,
+                    detection_gaps, provenance, framebuffers, native_device_ids, field_reports, macos_window, card_readers, third_party, usb_mapping, acpi_tables,
                     tables_match_sources):
         print(f'\n{section.__name__}')
         section()

@@ -73,7 +73,7 @@ def apply_identity(config, mode, warn):
     return serial
 
 
-def copy_payload(config, out, warn, overrides=None):
+def copy_payload(config, out, warn, overrides=None, extra_acpi=None):
     """Copy only what the config references, plus the two mandatory binaries.
 
     overrides maps a bundle name to a path outside EFI/OC/Kexts, which is how a
@@ -81,6 +81,9 @@ def copy_payload(config, out, warn, overrides=None):
     having to carry all eight of them."""
     n = 0
     overrides = overrides or {}
+    # an SSDT that was just compiled is not in the repository, so it is copied
+    # from where it was written rather than looked for under EFI/
+    outside = {p.name: p for p in (extra_acpi or [])}
 
     def take(rel, dest_rel=None):
         nonlocal n
@@ -88,6 +91,8 @@ def copy_payload(config, out, warn, overrides=None):
         bundle = rel.split('/')[-1]
         if bundle in overrides:
             src = Path(overrides[bundle])
+        elif bundle in outside:
+            src = outside[bundle]
         if not src.exists():
             warn(f'referenced but missing from the repository: {rel}')
             return
@@ -137,6 +142,8 @@ def main(argv=None):
     ap.add_argument('--boot-args', help='extra boot arguments to append to the config')
     ap.add_argument('--notes', help='file of follow-up notes to write beside the EFI')
     ap.add_argument('--device-props', help='JSON of DeviceProperties to merge in')
+    ap.add_argument('--acpi', metavar='DIR',
+                    help='a SSDTTime Results folder: its SSDTs and patches go in')
     ap.add_argument('--drop-kexts', help='bundle names to disable, comma separated')
     a = ap.parse_args(argv)
 
@@ -247,6 +254,41 @@ def main(argv=None):
                 if old is not None and old != target[k]:
                     warn(f'{path} {k}: replaced {bytes(old).hex() if isinstance(old, bytes) else old}')
 
+    acpi_extra = []
+    if a.acpi:
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        import acpi as acpi_tool
+        acpi_extra, add, patches = acpi_tool.collect(a.acpi)
+        for entry in add:
+            # the profiles ship generic SSDTs - SSDT-PLUG-DRTNIA, SSDT-EC-USBX-
+            # LAPTOP - and SSDTTime writes ones built against this machine's own
+            # tables. Two SSDTs doing the same job is not additive, so the one
+            # made for the machine wins and the generic one is turned off, out
+            # loud, because that is a decision and not a merge.
+            for old_entry in config['ACPI']['Add']:
+                if acpi_tool.same_purpose(old_entry['Path'], entry['Path']):
+                    if old_entry.get('Enabled'):
+                        warn(f'{old_entry["Path"]} disabled: {entry["Path"]} is '
+                             f'built for this machine and does the same job')
+                    old_entry['Enabled'] = False
+            config['ACPI']['Add'] = [e for e in config['ACPI']['Add']
+                                     if e['Path'] != entry['Path']]
+            config['ACPI']['Add'].append(entry)
+        # the patches are the tool's own, written as OpenCore wants them, so
+        # they go in as they are rather than being rebuilt from a reading of it
+        seen = {(bytes(e.get('Find') or b''), bytes(e.get('Replace') or b''))
+                for e in config['ACPI']['Patch']}
+        fresh = [p_ for p_ in patches
+                 if (bytes(p_.get('Find') or b''),
+                     bytes(p_.get('Replace') or b'')) not in seen]
+        if len(fresh) != len(patches):
+            warn(f'{len(patches) - len(fresh)} ACPI patches were already in the '
+                 f'config and were not added twice')
+        config['ACPI']['Patch'].extend(fresh)
+        if add or fresh:
+            print(f'  ACPI         {len(add)} SSDTs, {len(fresh)} patches from '
+                  f'{a.acpi}')
+
     if a.drop_kexts:
         drop = {x.strip() for x in a.drop_kexts.split(',') if x.strip()}
         before = len(config['Kernel']['Add'])
@@ -263,7 +305,8 @@ def main(argv=None):
     out.mkdir(parents=True)
     copied = copy_payload(config, out, warn,
                           {e['BundlePath']: e['SourcePath']
-                           for e in added if e.get('SourcePath')})
+                           for e in added if e.get('SourcePath')},
+                          extra_acpi=acpi_extra)
     cfg = out / 'OC' / 'config.plist'
     cfg.parent.mkdir(parents=True, exist_ok=True)
     with open(cfg, 'wb') as fh:
