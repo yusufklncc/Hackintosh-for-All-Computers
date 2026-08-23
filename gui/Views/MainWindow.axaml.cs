@@ -1,4 +1,6 @@
+using System.Threading.Tasks;
 using Avalonia.Controls;
+using Shell.Engine;
 
 namespace Shell.Views;
 
@@ -7,15 +9,43 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
-        // what the program carries, said once and not repeated on every pane
-        Standing.Text = "179 configs\n41 kexts vendored\nno network needed";
+        foreach (var nav in new[] { ToMachine, ToBuilder, ToReport, ToKexts, ToAbout })
+            nav.IsCheckedChanged += async (_, _) => await Swap();
+        _ = Standing();
+    }
 
-        ToMachine.IsCheckedChanged += (_, _) => Swap();
-        ToBuilder.IsCheckedChanged += (_, _) => Swap();
+    /// <summary>The numbers under the nav, read from the tree rather than typed here.
+    ///
+    /// They were typed here once - "OpenCore 1.0.6", "41 kexts" - and the tree
+    /// said 1.0.5 and 42. A number nobody can check is a number nobody should
+    /// believe.</summary>
+    async Task Standing()
+    {
+        var engine = Builder.Find(out _);
+        if (engine is null) return;
+        var (about, _) = await Inventory.Facts(engine);
+        if (about is null) return;
+        Version.Text = about.OpenCore is { } v ? $"OpenCore {v}" : "OpenCore, version unread";
+        StandingFacts.Text = $"{about.Configs} configs\n{about.Kexts} kexts vendored\n"
+                           + (about.Offline ? "no network needed" : "");
+    }
+
+    /// <summary>Switch panes, and let the one being shown read what it needs.</summary>
+    async Task Swap()
+    {
+        MachinePane.IsVisible = ToMachine.IsChecked == true;
+        BuilderPane.IsVisible = ToBuilder.IsChecked == true;
+        ReportPane.IsVisible = ToReport.IsChecked == true;
+        KextsPane.IsVisible = ToKexts.IsChecked == true;
+        AboutPane.IsVisible = ToAbout.IsChecked == true;
+        // read on first sight rather than at startup: opening the program
+        // should not wait on three documents nobody has asked for yet
+        if (ToKexts.IsChecked == true) await KextsPane.Load();
+        if (ToAbout.IsChecked == true) await AboutPane.Load();
     }
 
     /// <summary>Switch to the builder and start one, for the screenshot pass.</summary>
-    public async System.Threading.Tasks.Task ShowBuilder()
+    public async Task ShowBuilder()
     {
         ToBuilder.IsChecked = true;
         await BuilderPane.StartForRender();
@@ -23,12 +53,17 @@ public partial class MainWindow : Window
 
     public string BuilderState() => BuilderPane.State();
 
-    public System.Threading.Tasks.Task<string> DriveBuilder() =>
-        BuilderPane.DriveToEnd();
+    public Task<string> DriveBuilder() => BuilderPane.DriveToEnd();
 
-    void Swap()
+    /// <summary>Show one pane by name, for the screenshot pass.</summary>
+    public async Task Show(string pane)
     {
-        MachinePane.IsVisible = ToMachine.IsChecked == true;
-        BuilderPane.IsVisible = ToBuilder.IsChecked == true;
+        var nav = pane switch
+        {
+            "report" => ToReport, "kexts" => ToKexts, "about" => ToAbout,
+            "builder" => ToBuilder, _ => ToMachine,
+        };
+        nav.IsChecked = true;
+        await Swap();
     }
 }

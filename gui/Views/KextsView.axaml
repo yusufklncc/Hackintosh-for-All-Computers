@@ -1,0 +1,57 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:v="clr-namespace:Shell.Views"
+             x:Class="Shell.Views.KextsView"
+             x:DataType="v:KextsView">
+  <Grid RowDefinitions="Auto,*" Margin="28,24">
+    <StackPanel Grid.Row="0" Spacing="8" Margin="0,0,0,16">
+      <TextBlock Classes="eyebrow" Text="WHAT IS VENDORED HERE" />
+      <TextBlock Name="Blurb" FontSize="13.5" TextWrapping="Wrap" MaxWidth="720"
+                 HorizontalAlignment="Left" Foreground="{DynamicResource Muted}" />
+    </StackPanel>
+
+    <Border Grid.Row="1" BorderBrush="{DynamicResource Line}" BorderThickness="1"
+            CornerRadius="8" ClipToBounds="True">
+      <DockPanel>
+        <Border DockPanel.Dock="Top" Background="{DynamicResource Surface2}"
+                BorderBrush="{DynamicResource Line}" BorderThickness="0,0,0,1"
+                Padding="14,10">
+          <Grid ColumnDefinitions="260,*,120,150">
+            <TextBlock Grid.Column="0" Classes="eyebrow" Text="KEXT" />
+            <TextBlock Grid.Column="1" Classes="eyebrow" Text="DRIVES" />
+            <TextBlock Grid.Column="2" Classes="eyebrow" Text="VERSION" />
+            <TextBlock Grid.Column="3" Classes="eyebrow" Text="LICENCE" />
+          </Grid>
+        </Border>
+        <ScrollViewer>
+          <ItemsControl Name="Rows">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="v:KextItem">
+                <Border BorderBrush="{DynamicResource Line}" BorderThickness="0,0,0,1"
+                        Padding="14,9">
+                  <Grid ColumnDefinitions="260,*,120,150">
+                    <StackPanel Grid.Column="0" Margin="0,0,12,0">
+                      <TextBlock Classes="mono kext" Text="{Binding Bundle}" />
+                      <TextBlock Classes="mono" FontSize="10.5" Text="{Binding Upstream}"
+                                 Foreground="{DynamicResource Faint}" />
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Margin="0,0,12,0">
+                      <TextBlock Text="{Binding Drives}" FontSize="13"
+                                 Foreground="{DynamicResource Ink}" TextWrapping="Wrap" />
+                      <TextBlock Text="{Binding Devices}" FontSize="12"
+                                 Foreground="{DynamicResource Muted}"
+                                 IsVisible="{Binding HasDevices}" />
+                    </StackPanel>
+                    <TextBlock Grid.Column="2" Classes="mono" Text="{Binding Version}" />
+                    <TextBlock Grid.Column="3" Classes="mono" Text="{Binding Licence}"
+                               TextWrapping="Wrap" />
+                  </Grid>
+                </Border>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </ScrollViewer>
+      </DockPanel>
+    </Border>
+  </Grid>
+</UserControl>

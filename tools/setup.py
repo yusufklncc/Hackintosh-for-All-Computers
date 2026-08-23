@@ -32,6 +32,7 @@ import igpu
 import inputdev
 import netkexts
 import ocgen
+import inventory
 import summary
 import ui
 import usbmap
@@ -479,6 +480,9 @@ def main():
     ap.add_argument('--usb-map', help='a UTBMap.kext made with the USBToolBox tool')
     ap.add_argument('--answers', help='answer the menus non-interactively, comma separated; '
                                       'for scripting and for CI')
+    ap.add_argument('--inventory', metavar='WHAT', choices=('kexts', 'about'),
+                    help='write what this repository carries as JSON and stop: '
+                         'the vendored kexts, or the standing facts')
     ap.add_argument('--describe', action='store_true',
                     help='write this machine as one JSON document and stop, for '
                          'a front end to draw')
@@ -513,6 +517,13 @@ def main():
 
     if a.check_tools:
         return check_tools()
+
+    if a.inventory:
+        import json as _json
+        document = (inventory.kexts() if a.inventory == 'kexts'
+                    else inventory.about())
+        sys.stdout.write(_json.dumps(document, ensure_ascii=False) + '\n')
+        return 0
 
     if a.describe:
         # A front end opens on the machine, not on a question, so the first

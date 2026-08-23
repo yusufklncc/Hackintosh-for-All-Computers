@@ -58,6 +58,15 @@ public partial class App : Application
                 try
                 {
                     Console.WriteLine("drive: " + await window.DriveBuilder());
+                    foreach (var pane in new[] { "report", "kexts", "about" })
+                    {
+                        await window.Show(pane);
+                        // one turn of the loop, so what was just loaded is laid
+                        // out before its picture is taken
+                        await Task.Delay(1200);
+                        Save(window, into.Replace(".png", $"-{pane}.png",
+                                                  StringComparison.Ordinal));
+                    }
                 }
                 catch (Exception e)
                 {

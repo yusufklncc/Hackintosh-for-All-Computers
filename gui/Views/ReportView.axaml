@@ -1,0 +1,41 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:v="clr-namespace:Shell.Views"
+             x:Class="Shell.Views.ReportView"
+             x:DataType="v:ReportView">
+  <StackPanel Margin="28,24" Spacing="20" MaxWidth="740" HorizontalAlignment="Left">
+    <StackPanel Spacing="8">
+      <TextBlock Classes="eyebrow" Text="TAKE A REPORT" />
+      <TextBlock FontSize="15" TextWrapping="Wrap" Foreground="{DynamicResource Ink}"
+                 Text="Read this machine, and write what was read to a file." />
+      <TextBlock FontSize="13.5" TextWrapping="Wrap" Foreground="{DynamicResource Muted}"
+                 Text="A USB stick is usually made on a computer that already works, not on the one being converted. Run this there, carry the file back, and the builder can answer for that machine instead of this one - graphics, audio, network and the trackpad included." />
+    </StackPanel>
+
+    <Border Classes="panel">
+      <StackPanel Spacing="12">
+        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+          <TextBlock Grid.Column="0" Classes="eyebrow" Text="WRITE TO"
+                     VerticalAlignment="Center" />
+          <TextBlock Grid.Column="1" Name="Where" Classes="mono"
+                     VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+          <Button Grid.Column="2" Name="Choose" Content="Change…" />
+        </Grid>
+        <TextBlock FontSize="12.5" TextWrapping="Wrap" Foreground="{DynamicResource Faint}"
+                   Text="The machine's ACPI tables are dumped beside it where that is possible, because the SSDTs have to be written against the tables of the machine they are for." />
+        <Button Name="Take" Content="Take the report" Classes="accent"
+                HorizontalAlignment="Left" />
+      </StackPanel>
+    </Border>
+
+    <Border Name="Result" Classes="panel" IsVisible="False">
+      <StackPanel Spacing="8">
+        <TextBlock Name="ResultTitle" FontSize="15" FontWeight="SemiBold"
+                   Foreground="{DynamicResource Ink}" />
+        <TextBlock Name="ResultText" Classes="mono" TextWrapping="Wrap" />
+        <TextBlock Name="ResultNext" FontSize="12.5" TextWrapping="Wrap"
+                   Foreground="{DynamicResource Muted}" IsVisible="False" />
+      </StackPanel>
+    </Border>
+  </StackPanel>
+</UserControl>

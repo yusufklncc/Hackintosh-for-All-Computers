@@ -23,7 +23,7 @@
           <StackPanel>
             <TextBlock Text="EFI Builder" FontSize="14" FontWeight="SemiBold"
                        Foreground="{DynamicResource Ink}" />
-            <TextBlock Text="OpenCore 1.0.6" FontSize="11"
+            <TextBlock Name="Version" FontSize="11"
                        FontFamily="{DynamicResource Mono}"
                        Foreground="{DynamicResource Faint}" />
           </StackPanel>
@@ -31,7 +31,7 @@
 
         <StackPanel DockPanel.Dock="Bottom" Margin="10,12,10,2">
           <Border Height="1" Background="{DynamicResource Line}" Margin="0,0,0,10" />
-          <TextBlock Name="Standing" FontSize="11" LineHeight="17"
+          <TextBlock Name="StandingFacts" FontSize="11" LineHeight="17"
                      FontFamily="{DynamicResource Mono}"
                      Foreground="{DynamicResource Faint}" />
         </StackPanel>
@@ -40,12 +40,9 @@
           <RadioButton Name="ToMachine" Classes="nav" GroupName="pane" IsChecked="True"
                        Content="Machine" />
           <RadioButton Name="ToBuilder" Classes="nav" GroupName="pane" Content="Builder" />
-          <!-- Not yet written. Disabled rather than absent: what the program
-               will do is part of what it is, and an empty pane says less than
-               a name that is not ready. -->
-          <RadioButton Classes="nav" GroupName="pane" Content="Report" IsEnabled="False" />
-          <RadioButton Classes="nav" GroupName="pane" Content="Kexts" IsEnabled="False" />
-          <RadioButton Classes="nav" GroupName="pane" Content="About" IsEnabled="False" />
+          <RadioButton Name="ToReport" Classes="nav" GroupName="pane" Content="Report" />
+          <RadioButton Name="ToKexts" Classes="nav" GroupName="pane" Content="Kexts" />
+          <RadioButton Name="ToAbout" Classes="nav" GroupName="pane" Content="About" />
         </StackPanel>
       </DockPanel>
     </Border>
@@ -58,6 +55,9 @@
         <v:MachineView />
       </ScrollViewer>
       <v:BuilderView Name="BuilderPane" IsVisible="False" />
+      <v:ReportView Name="ReportPane" IsVisible="False" />
+      <v:KextsView Name="KextsPane" IsVisible="False" />
+      <v:AboutView Name="AboutPane" IsVisible="False" />
     </Panel>
   </Grid>
 </Window>

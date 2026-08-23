@@ -75,6 +75,9 @@ jobs:
           # and it has to be able to finish one, not only start it
           grep -q 'drive: rc=0 Written:' render.log \
             || { echo 'the builder pane never finished a build'; cat render.log; exit 1; }
+          for pane in report kexts about; do
+            test -s "shell-$pane.png" || { echo "no $pane screenshot"; exit 1; }
+          done
 
       # A font that failed to load falls back to the system's, and the window
       # still looks reasonable. That is the whole problem: it has to be checked,
@@ -108,4 +111,7 @@ jobs:
             shell.png
             shell-dark.png
             shell-builder.png
+            shell-report.png
+            shell-kexts.png
+            shell-about.png
             out/${{ matrix.exe }}
