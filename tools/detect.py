@@ -313,6 +313,29 @@ def _text(value):
     return str(value).strip() if value else ''
 
 
+def _pci_name(node):
+    """What the registry calls a device, in the plainest form it offers.
+
+    `model` where there is one. Otherwise the entry's own name - "wlan",
+    "pcie-sdreader" - and the chip out of `compatible`, which is where the
+    part number lives: "wlan-pcie,bcm4387".  Neither is a marketing name and
+    neither is invented."""
+    model = _text(node.get('model'))
+    if model:
+        return model
+    name = _text(node.get('IORegistryEntryName') or node.get('name'))
+    chip = _text(node.get('compatible')).split(',')[-1]
+    # no brackets: the name reader strips those, because on an lspci line they
+    # hold "(rev 04)" and nothing worth keeping
+    worth_saying = (chip and chip.lower() not in name.lower()
+                    # a part number has letters in it. "9755" is the device id
+                    # again, and "pcie-bridge" is what the name already said
+                    and any(c.isalpha() for c in chip)
+                    and any(c.isdigit() for c in chip)
+                    and 'bridge' not in chip.lower())
+    return f'{name}, {chip}' if worth_saying else name
+
+
 def macos_devices():
     """This Mac's PCI, USB and audio devices, in the shapes the parsers expect.
 
@@ -329,9 +352,8 @@ def macos_devices():
         vendor, device = _le(node.get('vendor-id')), _le(node.get('device-id'))
         if not (vendor and device):
             continue
-        # "model" is the only field that carries a name; IOName is the id again
-        name = _text(node.get('model'))
-        pci.append(f'[{vendor}:{device}]' + (f'|{name}' if name else ''))
+        pci.append(f'[{vendor}:{device}]' + (f'|{_pci_name(node)}'
+                                             if _pci_name(node) else ''))
 
     usb = []
     for node in _ioreg('IOUSBHostDevice'):
@@ -348,6 +370,29 @@ def macos_devices():
             hda.append(f'Vendor Id: 0x{codec:08x}')
 
     return '\n'.join(pci), '\n'.join(usb), '\n'.join(hda)
+
+
+def _macos_peripherals():
+    """The camera and the card reader, as their own sections report them.
+
+    Written in the same "class|id|name" shape the Windows query produces, so
+    the one parser reads both. PCI rather than USB on Apple silicon, which is
+    the distinction the camera row turns on."""
+    lines = []
+    camera = _run(['system_profiler', 'SPCameraDataType'])
+    for name in re.findall(r'^\s{4}(\S.*?):$', camera, re.M):
+        # a built-in Mac camera is on neither bus this knows; PCI is the honest
+        # half of the answer, since what matters downstream is "not USB"
+        lines.append(f'Camera|PCI\\{name.strip()}|{name.strip()}')
+    reader = _run(['system_profiler', 'SPCardReaderDataType'])
+    names = re.findall(r'^\s{4}(\S.*?):$', reader, re.M)
+    ids = re.findall(r'Vendor ID:\s*0x([0-9a-fA-F]{4}).*?Device ID:\s*0x([0-9a-fA-F]{4})',
+                     reader, re.S)
+    for i, name in enumerate(names):
+        ident = (f'PCI\\VEN_{ids[i][0].upper()}&DEV_{ids[i][1].upper()}'
+                 if i < len(ids) else f'PCI\\{name.strip()}')
+        lines.append(f'SDHost|{ident}|{name.strip()}')
+    return '\n'.join(lines)
 
 
 def _macos():
@@ -367,9 +412,10 @@ def _macos():
     out['pci'] = pci + '\n' + _run(['system_profiler', 'SPPCIDataType'])
     out['usb'] = usb + '\n' + _run(['system_profiler', 'SPUSBDataType'])
     out['hda'] = hda
+    nvme = _run(['system_profiler', 'SPNVMeDataType'])
     out['storage'] = '\n'.join(
-        f'17|{m}' for m in re.findall(r'^\s{6}(\S.*?):$',
-                                      _run(['system_profiler', 'SPNVMeDataType']), re.M))
+        f'17|{m.strip()}' for m in re.findall(r'^\s+Model:\s*(.+)$', nvme, re.M))
+    out['peripherals'] = _macos_peripherals()
     out['gpu'] = [f'PCI|{m.strip()}' for m in re.findall(
         r'^\s*Chipset Model:\s*(.+)$',
         _run(['system_profiler', 'SPDisplaysDataType']), re.M)]

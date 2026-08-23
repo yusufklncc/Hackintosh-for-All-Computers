@@ -4,6 +4,16 @@
              x:Class="Shell.Views.MachineView"
              x:DataType="v:MachineView">
   <StackPanel Margin="28,24,28,32" Spacing="22">
+
+    <!-- Said before the table, because it is about the whole of it -->
+    <Border Name="Trouble" Classes="panel" IsVisible="False">
+      <StackPanel Spacing="6">
+        <TextBlock Name="TroubleTitle" Classes="eyebrow" Text="NO MACHINE TO SHOW" />
+        <TextBlock Name="TroubleText" FontSize="13" TextWrapping="Wrap"
+                   Foreground="{DynamicResource Muted}" />
+      </StackPanel>
+    </Border>
+
    <StackPanel Name="Content" Spacing="22">
 
     <!-- The machine, before any question about it -->
@@ -168,14 +178,5 @@
     </Border>
 
    </StackPanel>
-
-    <!-- Only when there is no machine to show -->
-    <Border Name="Trouble" Classes="panel" IsVisible="False">
-      <StackPanel Spacing="6">
-        <TextBlock Classes="eyebrow" Text="NO MACHINE TO SHOW" />
-        <TextBlock Name="TroubleText" FontSize="13" TextWrapping="Wrap"
-                   Foreground="{DynamicResource Muted}" />
-      </StackPanel>
-    </Border>
   </StackPanel>
 </UserControl>

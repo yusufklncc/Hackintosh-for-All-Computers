@@ -49,7 +49,10 @@ public partial class MachineView : UserControl
 
         var (machine, complaint) = await Builder.Describe(engine, Program.MachineFile);
         if (machine is null) { NoMachine(complaint); return; }
-        if (!machine.WorthShowing)
+        // A Mac gets the note and the table both: the table is what it has,
+        // and the note is why none of it is claimed here. Hiding the table
+        // because nothing matched threw away the answer to "what is in it".
+        if (machine.Profile.System == "Darwin")
         {
             // Read and unmatched is not the same as unreadable, and on a Mac
             // it is the ordinary case: the hardware is Apple's and nothing
@@ -59,16 +62,16 @@ public partial class MachineView : UserControl
             // machine five devices had just been read from
             var ids = machine.Read.GetValueOrDefault("pci")
                     + machine.Read.GetValueOrDefault("usb");
-            NoMachine(machine.Profile.System == "Darwin"
-                ? $"This is a {machine.Profile.Model ?? "Mac"}. " +
-                  (ids > 0
-                      ? $"{ids} device ids were read from it and nothing here claims "
-                      + "any of them, which is what a Mac looks like - its hardware "
-                      + "is Apple's."
-                      : "Nothing was readable on it.") +
-                  " It needs no EFI from this program: take a Report on the machine " +
-                  "you are converting, or open the Builder with its report."
-                : "Nothing on this machine could be read.");
+            Note("THIS IS A MAC",
+                 $"{machine.Profile.Model ?? "A Mac"}, and its hardware is Apple's - "
+                 + $"{ids} device ids were read and nothing here claims them, which is "
+                 + "the expected answer. A Mac needs no EFI from this program. Take a "
+                 + "Report on the machine you are converting, or open the Builder with "
+                 + "its report.");
+        }
+        else if (!machine.WorthShowing)
+        {
+            NoMachine("Nothing on this machine could be read.");
             return;
         }
         Show(machine);
@@ -76,12 +79,19 @@ public partial class MachineView : UserControl
 
     // named for what it says, not for the panel it says it in: the generated
     // field for that panel is already called Trouble
+    /// <summary>Something to say about the whole table, above it.</summary>
+    void Note(string title, string text)
+    {
+        Trouble.IsVisible = true;
+        TroubleTitle.Text = title;
+        TroubleText.Text = text;
+    }
+
     void NoMachine(string why)
     {
         // the empty table underneath is not a table of nothing, it is furniture
         Content.IsVisible = false;
-        Trouble.IsVisible = true;
-        TroubleText.Text = why;
+        Note("NO MACHINE TO SHOW", why);
     }
 
     void Show(MachineDocument m)

@@ -258,6 +258,15 @@ def peripheral_rows(hw):
     out = []
     real = [d for d in hw.get('peripherals', []) if not d.get('virtual')]
     for dev in [d for d in real if d['kind'] == 'camera']:
+        if hw.get('system') == 'Darwin':
+            # on a PC a camera off the USB bus is an IPU or MIPI sensor with no
+            # macOS driver. On a Mac it is Apple's own and already working, and
+            # saying "not supported" about it would be a claim about the wrong
+            # machine.
+            out.append(row('Camera', dev['name'], UNKNOWN,
+                           "a Mac's own camera, which this repository has no "
+                           'data for either way'))
+            continue
         if dev['usb']:
             out.append(row('Camera', dev['name'], SUPPORTED,
                            'USB, so the class driver macOS has handles it'))
