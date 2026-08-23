@@ -2,6 +2,7 @@ using System;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Styling;
 using Avalonia.Threading;
@@ -31,6 +32,7 @@ public partial class App : Application
     void Capture(MainWindow window, string into,
                  IClassicDesktopStyleApplicationLifetime desktop)
     {
+        ReportTypefaces();
         // both themes, because both are shipped and only one of them is the one
         // being looked at when a colour is chosen
         Save(window, into);
@@ -40,6 +42,28 @@ public partial class App : Application
             Save(window, into.Replace(".png", "-dark.png", StringComparison.Ordinal));
             desktop.Shutdown();
         }, TimeSpan.FromSeconds(2));
+    }
+
+    /// <summary>Say which faces actually got used.
+    ///
+    /// A font that failed to load falls back to whatever the system has, and
+    /// the window still looks reasonable - which is the problem. This prints
+    /// what was resolved so a build can fail on it instead of a person
+    /// squinting at a screenshot.</summary>
+    void ReportTypefaces()
+    {
+        foreach (var (key, weight) in new[]
+                 {
+                     ("Sans", FontWeight.Normal), ("Sans", FontWeight.SemiBold),
+                     ("Mono", FontWeight.Normal),
+                 })
+        {
+            var family = (FontFamily)Resources[key]!;
+            var found = FontManager.Current.TryGetGlyphTypeface(
+                new Typeface(family, FontStyle.Normal, weight), out var face);
+            Console.WriteLine($"typeface {key}/{weight} -> " +
+                              (found ? $"{face!.FamilyName} {face.Weight}" : "NOT FOUND"));
+        }
     }
 
     static void Save(MainWindow window, string into)

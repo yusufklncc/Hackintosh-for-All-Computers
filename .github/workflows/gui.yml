@@ -56,9 +56,21 @@ jobs:
         run: |
           ${{ runner.os == 'Linux' && 'xvfb-run -a -s "-screen 0 1440x1000x24" ' || '' }}dotnet run --project gui/Shell.csproj \
             -c Release --no-build -- \
-            --machine tools/fixtures/thinkpad-e570.json --render "$PWD/shell.png"
+            --machine tools/fixtures/thinkpad-e570.json --render "$PWD/shell.png" \
+            | tee render.log
           test -s shell.png || { echo 'no light screenshot'; exit 1; }
           test -s shell-dark.png || { echo 'no dark screenshot'; exit 1; }
+
+      # A font that failed to load falls back to the system's, and the window
+      # still looks reasonable. That is the whole problem: it has to be checked,
+      # not eyeballed.
+      - name: In the faces it was set in
+        shell: bash
+        run: |
+          cat render.log
+          grep -q 'typeface Sans/Normal -> Instrument Sans 400' render.log
+          grep -q 'typeface Sans/SemiBold -> Instrument Sans 600' render.log
+          grep -q 'typeface Mono/Normal -> IBM Plex Mono 400' render.log
 
       - name: And it publishes as one file
         run: >
