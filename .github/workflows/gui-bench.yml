@@ -1,0 +1,98 @@
+name: gui-bench
+
+# What a GUI shell would cost, measured rather than guessed.
+#
+# The question this answers is narrow: how much memory does an empty Avalonia
+# window use, and how large is the thing you have to ship. It is measured on
+# the platforms the builder actually runs on, next to the same measurement for
+# today's console build, so the two numbers can be compared.
+#
+# This workflow exists to inform one decision. Once that decision is made it
+# should be deleted, along with bench/.
+
+on:
+  workflow_dispatch:
+
+jobs:
+  avalonia:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            rid: win-x64
+            exe: Bench.exe
+          - os: ubuntu-latest
+            rid: linux-x64
+            exe: Bench
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      # Avalonia on a headless Linux runner still wants an X server; xvfb is
+      # the whole of what it needs.
+      - name: X server for the Linux run
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y xvfb
+
+      # Framework-dependent: small on disk, but the machine needs .NET already.
+      # That is the wrong assumption for this project - people run the builder
+      # on a Windows install they are about to replace - so the number that
+      # matters is the self-contained one below. Both are reported anyway.
+      - name: Publish, framework-dependent
+        run: dotnet publish bench/avalonia/Bench.csproj -c Release -o out/fdd
+
+      - name: Publish, self-contained and trimmed
+        run: >
+          dotnet publish bench/avalonia/Bench.csproj -c Release -o out/sc
+          -r ${{ matrix.rid }} --self-contained true
+          -p:PublishTrimmed=true -p:PublishSingleFile=true
+          -p:EnableCompressionInSingleFile=true
+
+      - name: Run it and read its memory
+        env:
+          BENCH_OUT: ${{ github.workspace }}/peak.txt
+        run: ${{ runner.os == 'Linux' && 'xvfb-run -a ' || '' }}out/sc/${{ matrix.exe }}
+
+      - name: Report
+        shell: bash
+        run: |
+          echo "### Avalonia on ${{ matrix.os }}" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          cat peak.txt >> $GITHUB_STEP_SUMMARY
+          echo "self_contained_single_file_bytes=$(find out/sc -name '${{ matrix.exe }}' -exec stat -c %s {} \; 2>/dev/null || stat -f %z out/sc/${{ matrix.exe }})" >> $GITHUB_STEP_SUMMARY
+          echo "framework_dependent_dir_bytes=$(du -sb out/fdd 2>/dev/null | cut -f1 || du -sk out/fdd | cut -f1)" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          cat $GITHUB_STEP_SUMMARY
+
+  # The same measurement for what ships today, so the comparison is like for
+  # like: one process, one full run, peak working set.
+  console-today:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install pyinstaller
+      - run: pyinstaller --clean --noconfirm --distpath dist tools/pyinstaller.spec
+
+      - name: Peak memory of a full scripted build
+        run: |
+          $p = Start-Process -FilePath dist/HackintoshEFIBuilder.exe `
+                 -ArgumentList '--no-detect','--answers','2,10,3','--out','smoke/EFI' `
+                 -PassThru -Wait -NoNewWindow
+          if (-not (Test-Path smoke/EFI/OC/config.plist)) { Write-Error 'no build'; exit 1 }
+          $size = (Get-Item dist/HackintoshEFIBuilder.exe).Length
+          $lines = @(
+            "peak_working_set_bytes=$($p.PeakWorkingSet64)",
+            "single_file_bytes=$size"
+          )
+          "### Console build today (Windows)" | Out-File -Append $env:GITHUB_STEP_SUMMARY
+          '```' | Out-File -Append $env:GITHUB_STEP_SUMMARY
+          $lines | Out-File -Append $env:GITHUB_STEP_SUMMARY
+          '```' | Out-File -Append $env:GITHUB_STEP_SUMMARY
+          $lines

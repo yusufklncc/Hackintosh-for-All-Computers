@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- A window and one line of text: the floor for an Avalonia shell.
+       Whatever this costs, the real application costs more - never less. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>            <!-- Exe, not WinExe: the measurement is printed -->
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <AssemblyName>Bench</AssemblyName>
+    <RootNamespace>Bench</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Avalonia" Version="11.*" />
+    <PackageReference Include="Avalonia.Desktop" Version="11.*" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.*" />
+  </ItemGroup>
+</Project>
