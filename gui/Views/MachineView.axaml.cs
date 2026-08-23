@@ -51,11 +51,20 @@ public partial class MachineView : UserControl
         if (machine is null) { NoMachine(complaint); return; }
         if (!machine.WorthShowing)
         {
-            // a Mac reports none of its own hardware to these queries, and
-            // eight rows of "unknown" is not a report
-            NoMachine("Nothing on this machine could be read. That is what a Mac " +
-                    "looks like here: it reports its hardware in a way these " +
-                    "queries do not reach.");
+            // Read and unmatched is not the same as unreadable, and on a Mac
+            // it is the ordinary case: the hardware is Apple's and nothing
+            // this ships claims any of it.
+            var ids = machine.Rows.Sum(r => r.Ids.Count);
+            NoMachine(machine.Profile.System == "Darwin"
+                ? $"This is a {machine.Profile.Model ?? "Mac"}. " +
+                  (ids > 0
+                      ? $"{ids} device ids were read from it and nothing here claims "
+                      + "any of them, which is what a Mac looks like - its hardware "
+                      + "is Apple's."
+                      : "Nothing was readable on it.") +
+                  " It needs no EFI from this program: take a Report on the machine " +
+                  "you are converting, or open the Builder with its report."
+                : "Nothing on this machine could be read.");
             return;
         }
         Show(machine);
@@ -65,6 +74,8 @@ public partial class MachineView : UserControl
     // field for that panel is already called Trouble
     void NoMachine(string why)
     {
+        // the empty table underneath is not a table of nothing, it is furniture
+        Content.IsVisible = false;
         Trouble.IsVisible = true;
         TroubleText.Text = why;
     }

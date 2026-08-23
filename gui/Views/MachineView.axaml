@@ -4,6 +4,7 @@
              x:Class="Shell.Views.MachineView"
              x:DataType="v:MachineView">
   <StackPanel Margin="28,24,28,32" Spacing="22">
+   <StackPanel Name="Content" Spacing="22">
 
     <!-- The machine, before any question about it -->
     <Grid ColumnDefinitions="Auto,*" ColumnSpacing="22">
@@ -165,6 +166,8 @@
                    Text="&quot;unknown&quot; means nothing here claims the device - not that it fails." />
       </StackPanel>
     </Border>
+
+   </StackPanel>
 
     <!-- Only when there is no machine to show -->
     <Border Name="Trouble" Classes="panel" IsVisible="False">
