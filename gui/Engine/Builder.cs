@@ -1,0 +1,103 @@
+// Finding the engine and asking it something.
+//
+// The engine is the program that already exists: one executable beside this
+// one when both are installed, and tools/setup.py from a clone when somebody
+// is working on it. Nothing here reimplements any part of it - if this cannot
+// find it, it says so rather than filling the window with what it guessed.
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Text;
+using System.Text.Json;
+using System.Threading.Tasks;
+
+namespace Shell.Engine;
+
+public sealed record Located(string Program, IReadOnlyList<string> Prefix, string Where);
+
+public static class Builder
+{
+    static readonly string ExeName =
+        OperatingSystem.IsWindows() ? "HackintoshEFIBuilder.exe" : "HackintoshEFIBuilder";
+
+    /// <summary>Where the engine is, or null with a sentence saying where it was looked for.</summary>
+    public static Located? Find(out string complaint)
+    {
+        var beside = AppContext.BaseDirectory;
+        var packaged = Path.Combine(beside, ExeName);
+        if (File.Exists(packaged))
+        {
+            complaint = "";
+            return new Located(packaged, Array.Empty<string>(), "beside this window");
+        }
+
+        // a clone: walk up for the tools directory rather than assuming how
+        // deep the build output happens to be
+        for (var dir = new DirectoryInfo(beside); dir is not null; dir = dir.Parent)
+        {
+            var script = Path.Combine(dir.FullName, "tools", "setup.py");
+            if (!File.Exists(script)) continue;
+            var python = OperatingSystem.IsWindows() ? "python" : "python3";
+            complaint = "";
+            return new Located(python, new[] { script }, "a clone at " + dir.FullName);
+        }
+
+        complaint = $"No engine found. Looked for {ExeName} beside this window, " +
+                    $"and for tools/setup.py above {beside}.";
+        return null;
+    }
+
+    /// <summary>Run the engine once and hand back what it wrote to stdout.</summary>
+    public static async Task<(string output, string error, int code)> Run(
+        Located engine, params string[] arguments)
+    {
+        var info = new ProcessStartInfo
+        {
+            FileName = engine.Program,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false,
+            CreateNoWindow = true,
+            StandardOutputEncoding = Encoding.UTF8,
+            StandardErrorEncoding = Encoding.UTF8,
+        };
+        foreach (var a in engine.Prefix) info.ArgumentList.Add(a);
+        foreach (var a in arguments) info.ArgumentList.Add(a);
+        // the engine reads its own tables from beside itself; a clone needs the
+        // repository root as the working directory or none of them are found
+        var root = engine.Prefix.Count > 0
+            ? Directory.GetParent(Path.GetDirectoryName(engine.Prefix[0])!)!.FullName
+            : Path.GetDirectoryName(engine.Program)!;
+        info.WorkingDirectory = root;
+
+        using var process = new Process { StartInfo = info };
+        process.Start();
+        var stdout = process.StandardOutput.ReadToEndAsync();
+        var stderr = process.StandardError.ReadToEndAsync();
+        await process.WaitForExitAsync();
+        return (await stdout, await stderr, process.ExitCode);
+    }
+
+    /// <summary>The machine, as the engine describes it.</summary>
+    public static async Task<(MachineDocument? machine, string complaint)> Describe(
+        Located engine, string? report = null)
+    {
+        var arguments = report is null
+            ? new[] { "--describe" }
+            : new[] { "--describe", "--machine", report };
+        var (output, error, code) = await Run(engine, arguments);
+        if (code != 0)
+            return (null, error.Trim() is { Length: > 0 } said ? said
+                                                              : $"the engine exited {code}");
+        try
+        {
+            var doc = JsonSerializer.Deserialize(output, Payload.Default.MachineDocument);
+            return doc is null ? (null, "the engine wrote nothing") : (doc, "");
+        }
+        catch (JsonException e)
+        {
+            return (null, "could not read what the engine wrote: " + e.Message);
+        }
+    }
+}

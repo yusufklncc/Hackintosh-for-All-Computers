@@ -1,0 +1,80 @@
+name: gui
+
+# Builds the window and takes its picture.
+#
+# A window is the deliverable here, and nobody can review a window from a build
+# log. Every run renders both themes against a fixture - a real laptop, not
+# whatever the runner happens to be - and uploads them, so a change to the
+# layout can be looked at the way a change to the code is read.
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ['beta/**']
+    paths: ['gui/**', '.github/workflows/gui.yml']
+  pull_request:
+    paths: ['gui/**']
+
+jobs:
+  shell:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            rid: win-x64
+            exe: HackintoshEFIBuilderShell.exe
+          - os: ubuntu-latest
+            rid: linux-x64
+            exe: HackintoshEFIBuilderShell
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      # the shell runs the engine rather than reimplementing it, so the engine
+      # has to be runnable here: from a clone that means Python
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: X server for the Linux run
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y xvfb
+
+      - name: It builds
+        run: dotnet build gui/Shell.csproj -c Release --nologo
+
+      # Against a fixture, not against the runner. A Hyper-V VM has almost no
+      # hardware to describe, and a screenshot of an empty table reviews nothing.
+      - name: It draws a machine
+        shell: bash
+        run: |
+          ${{ runner.os == 'Linux' && 'xvfb-run -a ' || '' }}dotnet run --project gui/Shell.csproj \
+            -c Release --no-build -- \
+            --machine tools/fixtures/thinkpad-e570.json --render "$PWD/shell.png"
+          test -s shell.png || { echo 'no light screenshot'; exit 1; }
+          test -s shell-dark.png || { echo 'no dark screenshot'; exit 1; }
+
+      - name: And it publishes as one file
+        run: >
+          dotnet publish gui/Shell.csproj -c Release -o out
+          -r ${{ matrix.rid }} --self-contained true
+          -p:PublishTrimmed=true -p:PublishSingleFile=true
+          -p:EnableCompressionInSingleFile=true
+
+      - name: What it costs
+        shell: bash
+        run: |
+          size=$(stat -c %s "out/${{ matrix.exe }}" 2>/dev/null || stat -f %z "out/${{ matrix.exe }}")
+          echo "### ${{ matrix.os }}" >> $GITHUB_STEP_SUMMARY
+          echo "single file: $size bytes" >> $GITHUB_STEP_SUMMARY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: shell-${{ matrix.rid }}
+          path: |
+            shell.png
+            shell-dark.png
+            out/${{ matrix.exe }}

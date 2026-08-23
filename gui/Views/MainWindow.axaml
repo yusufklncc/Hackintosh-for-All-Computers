@@ -1,0 +1,53 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:v="clr-namespace:Shell.Views"
+        x:Class="Shell.Views.MainWindow"
+        x:DataType="v:MainWindow"
+        Title="Hackintosh EFI Builder"
+        Width="1180" Height="780" MinWidth="880" MinHeight="600"
+        Background="{DynamicResource Ground}"
+        Foreground="{DynamicResource Ink}">
+  <Grid ColumnDefinitions="216,*">
+
+    <!-- Sidebar. The panes are named for what a person came to do, not for
+         which part of the program answers them. -->
+    <Border Grid.Column="0" Background="{DynamicResource Surface2}"
+            BorderBrush="{DynamicResource Line}" BorderThickness="0,0,1,0">
+      <DockPanel Margin="12,16">
+        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="10"
+                    Margin="10,6,10,18">
+          <Path Width="26" Height="26" Stretch="Uniform"
+                Stroke="{DynamicResource Accent}" StrokeThickness="1.4"
+                Fill="Transparent"
+                Data="M4.5,4.5 H21.5 V21.5 H4.5 Z M9,1.8 V4.5 M13,1.8 V4.5 M17,1.8 V4.5 M9,21.5 V24.2 M13,21.5 V24.2 M17,21.5 V24.2 M1.8,9 H4.5 M1.8,13 H4.5 M1.8,17 H4.5 M21.5,9 H24.2 M21.5,13 H24.2 M21.5,17 H24.2" />
+          <StackPanel>
+            <TextBlock Text="EFI Builder" FontSize="14" FontWeight="SemiBold"
+                       Foreground="{DynamicResource Ink}" />
+            <TextBlock Text="OpenCore 1.0.6" FontSize="11"
+                       FontFamily="{DynamicResource Mono}"
+                       Foreground="{DynamicResource Faint}" />
+          </StackPanel>
+        </StackPanel>
+
+        <StackPanel DockPanel.Dock="Bottom" Margin="10,12,10,2">
+          <Border Height="1" Background="{DynamicResource Line}" Margin="0,0,0,10" />
+          <TextBlock Name="Standing" FontSize="11" LineHeight="17"
+                     FontFamily="{DynamicResource Mono}"
+                     Foreground="{DynamicResource Faint}" />
+        </StackPanel>
+
+        <StackPanel Spacing="2">
+          <RadioButton Classes="nav" GroupName="pane" IsChecked="True" Content="Machine" />
+          <RadioButton Classes="nav" GroupName="pane" Content="Builder" IsEnabled="False" />
+          <RadioButton Classes="nav" GroupName="pane" Content="Report" IsEnabled="False" />
+          <RadioButton Classes="nav" GroupName="pane" Content="Kexts" IsEnabled="False" />
+          <RadioButton Classes="nav" GroupName="pane" Content="About" IsEnabled="False" />
+        </StackPanel>
+      </DockPanel>
+    </Border>
+
+    <ScrollViewer Grid.Column="1" Background="{DynamicResource Surface}">
+      <v:MachineView Name="Machine" />
+    </ScrollViewer>
+  </Grid>
+</Window>
