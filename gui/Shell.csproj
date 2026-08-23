@@ -17,6 +17,11 @@
          through a generated context instead. Without this the published build
          reads every field as null and the window comes up empty. -->
     <JsonSerializerIsReflectionEnabledByDefault>false</JsonSerializerIsReflectionEnabledByDefault>
+    <!-- Skia is a native library, and a single-file publish leaves native
+         libraries beside the executable unless told otherwise. The file then
+         looks complete, is the size you would expect, and dies on the first
+         line that needs to draw anything. -->
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
   </PropertyGroup>
   <ItemGroup>
     <AvaloniaResource Include="Assets/Fonts/*.ttf" />

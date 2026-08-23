@@ -54,6 +54,17 @@ jobs:
       - name: It builds
         run: dotnet build gui/Shell.csproj -c Release --nologo
 
+      # Published before it is drawn, because the published file is what people
+      # get. Rendering with `dotnet run` tested a layout that was never shipped:
+      # the single file was missing its native Skia library and died on startup,
+      # and nothing here noticed for four green runs.
+      - name: And it publishes as one file
+        run: >
+          dotnet publish gui/Shell.csproj -c Release -o out
+          -r ${{ matrix.rid }} --self-contained true
+          -p:PublishTrimmed=true -p:PublishSingleFile=true
+          -p:EnableCompressionInSingleFile=true
+
       # Against a fixture, not against the runner. A Hyper-V VM has almost no
       # hardware to describe, and a screenshot of an empty table reviews nothing.
       # Two widths on purpose: the Linux runner gets a screen big enough for the
@@ -62,8 +73,7 @@ jobs:
       - name: It draws a machine
         shell: bash
         run: |
-          ${{ runner.os == 'Linux' && 'xvfb-run -a -s "-screen 0 1440x1000x24" ' || '' }}dotnet run --project gui/Shell.csproj \
-            -c Release --no-build -- \
+          ${{ runner.os == 'Linux' && 'xvfb-run -a -s "-screen 0 1440x1000x24" ' || '' }}"out/${{ matrix.exe }}" \
             --machine tools/fixtures/thinkpad-e570.json --render "$PWD/shell.png" \
             | tee render.log
           test -s shell.png || { echo 'no light screenshot'; exit 1; }
@@ -91,13 +101,6 @@ jobs:
           grep -q 'typeface Sans/400 -> Instrument Sans 400' render.log
           grep -q 'typeface Sans/600 -> Instrument Sans 600' render.log
           grep -q 'typeface Mono/400 -> IBM Plex Mono 400' render.log
-
-      - name: And it publishes as one file
-        run: >
-          dotnet publish gui/Shell.csproj -c Release -o out
-          -r ${{ matrix.rid }} --self-contained true
-          -p:PublishTrimmed=true -p:PublishSingleFile=true
-          -p:EnableCompressionInSingleFile=true
 
       - name: What it costs
         shell: bash
