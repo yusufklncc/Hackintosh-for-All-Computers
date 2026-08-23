@@ -13,7 +13,9 @@ using System.Threading.Tasks;
 
 namespace Shell.Engine;
 
-public sealed record Span(string Tone, string Text);
+// TextSpan rather than Span: Avalonia.Controls.Documents has one of its own,
+// and the transcript uses both.
+public sealed record TextSpan(string Tone, string Text);
 
 public sealed record Option(int Number, string Label, bool Detected);
 
@@ -26,7 +28,7 @@ public sealed class Session
 
     Session(Process process) => _process = process;
 
-    public event Action<IReadOnlyList<Span>>? Said;
+    public event Action<IReadOnlyList<TextSpan>>? Said;
     public event Action<Question>? Asked;
     public event Action<int, string?>? Finished;
 
@@ -73,7 +75,7 @@ public sealed class Session
             {
                 // not ours: an engine that crashed writes a traceback, and the
                 // person reading the transcript should see it
-                Said?.Invoke(new[] { new Span("warn", line) });
+                Said?.Invoke(new[] { new TextSpan("warn", line) });
                 continue;
             }
 
@@ -97,7 +99,7 @@ public sealed class Session
                         built = Text(root, "out");
                         break;
                     case "fatal":
-                        Said?.Invoke(new[] { new Span("bad", Text(root, "message") ?? "") });
+                        Said?.Invoke(new[] { new TextSpan("bad", Text(root, "message") ?? "") });
                         break;
                     case "done":
                         Finished?.Invoke(root.GetProperty("rc").GetInt32(), built);
@@ -132,12 +134,12 @@ public sealed class Session
         element.TryGetProperty(name, out var value) && value.ValueKind == JsonValueKind.String
             ? value.GetString() : null;
 
-    static IReadOnlyList<Span> Spans(JsonElement root)
+    static IReadOnlyList<TextSpan> Spans(JsonElement root)
     {
-        var out_ = new List<Span>();
+        var out_ = new List<TextSpan>();
         if (root.TryGetProperty("spans", out var spans))
             foreach (var span in spans.EnumerateArray())
-                out_.Add(new Span(Text(span, "tone") ?? "plain", Text(span, "text") ?? ""));
+                out_.Add(new TextSpan(Text(span, "tone") ?? "plain", Text(span, "text") ?? ""));
         return out_;
     }
 

@@ -51,7 +51,7 @@ public partial class BuilderView : UserControl
         {
             // a folder the picker can name but the filesystem cannot - a phone,
             // a network location the engine has no path for
-            Say(new[] { new Span("warn", "That folder has no path this can write to.") });
+            Say(new[] { new TextSpan("warn", "That folder has no path this can write to.") });
             return;
         }
         _out = Path.Combine(path, "EFI");
@@ -84,7 +84,7 @@ public partial class BuilderView : UserControl
         }
         catch (IOException e)
         {
-            Say(new[] { new Span("bad", "the engine stopped talking: " + e.Message) });
+            Say(new[] { new TextSpan("bad", "the engine stopped talking: " + e.Message) });
             Done(1, null);
         }
     }
@@ -110,7 +110,7 @@ public partial class BuilderView : UserControl
         ["warn"] = "Warn", ["bad"] = "Bad",
     };
 
-    void Say(IReadOnlyList<Span> spans)
+    void Say(IReadOnlyList<TextSpan> spans)
     {
         var line = new TextBlock
         {
