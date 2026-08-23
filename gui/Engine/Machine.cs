@@ -74,6 +74,7 @@ public sealed class MachineDocument
     [JsonPropertyName("rows")] public List<Row> Rows { get; set; } = new();
     [JsonPropertyName("macos")] public MacosWindow Macos { get; set; } = new();
     [JsonPropertyName("worth_showing")] public bool WorthShowing { get; set; }
+    [JsonPropertyName("read")] public Dictionary<string, int> Read { get; set; } = new();
 }
 
 [JsonSerializable(typeof(MachineDocument))]

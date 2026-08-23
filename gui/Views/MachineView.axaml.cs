@@ -54,7 +54,11 @@ public partial class MachineView : UserControl
             // Read and unmatched is not the same as unreadable, and on a Mac
             // it is the ordinary case: the hardware is Apple's and nothing
             // this ships claims any of it.
-            var ids = machine.Rows.Sum(r => r.Ids.Count);
+            // from the probe, not from the rows: a row that recognised nothing
+            // carries no id, and summing those said nothing was readable on a
+            // machine five devices had just been read from
+            var ids = machine.Read.GetValueOrDefault("pci")
+                    + machine.Read.GetValueOrDefault("usb");
             NoMachine(machine.Profile.System == "Darwin"
                 ? $"This is a {machine.Profile.Model ?? "Mac"}. " +
                   (ids > 0

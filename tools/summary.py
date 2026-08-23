@@ -450,6 +450,11 @@ def document(hw, source='this machine'):
                     # only the probe knows what it ran on
                     'system': hw.get('system')},
         'rows': parts,
+        # how much was read, which is not the same as how much was recognised:
+        # a row says "nothing recognised" and carries no id, and counting the
+        # rows' ids then says nothing was readable when five devices were
+        'read': {kind: len(hw.get(kind + '_ids') or [])
+                 for kind in ('pci', 'usb', 'hda', 'acpi')},
         'macos': {
             # the floor is whichever part needs the newest macOS, the ceiling
             # whichever stops first; both name the part, because "10.12 or
