@@ -86,15 +86,26 @@ jobs:
       - run: pip install pyinstaller
       - run: pyinstaller --clean --noconfirm --distpath dist tools/pyinstaller.spec
 
+      # Read while it is alive. PeakWorkingSet64 is cumulative, so the last
+      # reading before it exits is the peak - but the property is backed by a
+      # process handle, and after the process has gone it comes back empty,
+      # which is exactly what the first run of this reported.
       - name: Peak memory of a full scripted build
         run: |
           $p = Start-Process -FilePath dist/HackintoshEFIBuilder.exe `
                  -ArgumentList '--no-detect','--answers','2,10,3','--out','smoke/EFI' `
-                 -PassThru -Wait -NoNewWindow
+                 -PassThru -NoNewWindow
+          $peak = 0
+          while (-not $p.HasExited) {
+            try { $p.Refresh(); $peak = [Math]::Max($peak, $p.PeakWorkingSet64) } catch { }
+            Start-Sleep -Milliseconds 50
+          }
+          $p.WaitForExit()
+          if ($peak -eq 0) { Write-Error 'never managed to read the process'; exit 1 }
           if (-not (Test-Path smoke/EFI/OC/config.plist)) { Write-Error 'no build'; exit 1 }
           $size = (Get-Item dist/HackintoshEFIBuilder.exe).Length
           $lines = @(
-            "peak_working_set_bytes=$($p.PeakWorkingSet64)",
+            "peak_working_set_bytes=$peak",
             "single_file_bytes=$size"
           )
           "### Console build today (Windows)" | Out-File -Append $env:GITHUB_STEP_SUMMARY
@@ -102,3 +113,31 @@ jobs:
           $lines | Out-File -Append $env:GITHUB_STEP_SUMMARY
           '```' | Out-File -Append $env:GITHUB_STEP_SUMMARY
           $lines
+
+  tkinter:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: X server and Tk for the Linux run
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y xvfb python3-tk
+      - name: Run it and read its memory
+        env:
+          BENCH_OUT: ${{ github.workspace }}/peak.txt
+        shell: bash
+        run: ${{ runner.os == 'Linux' && 'xvfb-run -a ' || '' }}python bench/tk/window.py
+      - name: Report
+        shell: bash
+        run: |
+          echo "### Tk on ${{ matrix.os }}" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          cat peak.txt >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          cat peak.txt
