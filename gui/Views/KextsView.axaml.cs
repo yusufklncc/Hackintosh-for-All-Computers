@@ -16,9 +16,10 @@ public sealed class KextItem
         // "none stated" is the absence of a licence, not a permissive one, and
         // the table says so in the same words the licence file does
         Licence = row.Licence ?? "unread";
-        // a kext with no devices is not idle: Lilu and VirtualSMC are what the
-        // ones with devices are built on
-        Drives = row.Label ?? "a dependency of the ones that do";
+        // The table is generated from what each kext binds to by device id.
+        // AppleALC matches on a layout, Lilu on nothing at all - neither is
+        // idle, and neither has a row, so this says what is true of both.
+        Drives = row.Label ?? "not matched by device id";
         Devices = row.Devices == 1 ? "1 device id" : $"{row.Devices} device ids";
         HasDevices = row.Devices > 0;
     }

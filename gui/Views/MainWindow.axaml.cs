@@ -53,6 +53,8 @@ public partial class MainWindow : Window
 
     public string BuilderState() => BuilderPane.State();
 
+    public Task<string> TakeReport() => ReportPane.TakeForRender();
+
     public Task<string> DriveBuilder() => BuilderPane.DriveToEnd();
 
     /// <summary>Show one pane by name, for the screenshot pass.</summary>

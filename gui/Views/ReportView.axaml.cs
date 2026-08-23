@@ -23,6 +23,15 @@ public partial class ReportView : UserControl
         Take.Click += async (_, _) => await Take_();
     }
 
+    /// <summary>Take one without a click, and say what came of it.
+    ///
+    /// A pane with a button nobody has pressed is a pane nobody has tested.</summary>
+    public async Task<string> TakeForRender()
+    {
+        await Take_();
+        return $"{ResultTitle.Text} -> {_to}";
+    }
+
     async Task Pick()
     {
         var top = TopLevel.GetTopLevel(this);

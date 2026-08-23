@@ -61,6 +61,10 @@ public partial class App : Application
                     foreach (var pane in new[] { "report", "kexts", "about" })
                     {
                         await window.Show(pane);
+                        // the report pane's whole job is behind a button, so
+                        // the pass presses it rather than photographing it idle
+                        if (pane == "report")
+                            Console.WriteLine("report: " + await window.TakeReport());
                         // one turn of the loop, so what was just loaded is laid
                         // out before its picture is taken
                         await Task.Delay(1200);
