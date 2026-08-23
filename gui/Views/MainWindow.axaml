@@ -42,7 +42,7 @@
           <RadioButton Name="ToBuilder" Classes="nav" GroupName="pane" Content="Builder" />
           <RadioButton Name="ToReport" Classes="nav" GroupName="pane" Content="Report" />
           <RadioButton Name="ToDevices" Classes="nav" GroupName="pane"
-                       Content="Devices" />
+                       Content="Compatible Hardware" />
           <RadioButton Name="ToKexts" Classes="nav" GroupName="pane" Content="Kexts" />
           <RadioButton Name="ToAbout" Classes="nav" GroupName="pane" Content="About" />
         </StackPanel>

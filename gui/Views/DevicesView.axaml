@@ -25,8 +25,14 @@
                 BorderBrush="{DynamicResource Line}" BorderThickness="0,0,0,1"
                 Padding="14,10">
           <Grid ColumnDefinitions="120,*,220,110,150">
-            <TextBlock Grid.Column="0" Classes="eyebrow" Text="CATEGORY" />
-            <TextBlock Grid.Column="1" Classes="eyebrow" Text="DEVICE" />
+            <!-- The two columns worth ordering by. The rest are a vendor name
+                 repeated hundreds of times, a hex id, and a kext name. -->
+            <Button Grid.Column="0" Name="SortCategory" Classes="sorter">
+              <TextBlock Name="SortCategoryLabel" Classes="eyebrow" Text="CATEGORY" />
+            </Button>
+            <Button Grid.Column="1" Name="SortName" Classes="sorter">
+              <TextBlock Name="SortNameLabel" Classes="eyebrow" Text="DEVICE" />
+            </Button>
             <TextBlock Grid.Column="2" Classes="eyebrow" Text="VENDOR" />
             <TextBlock Grid.Column="3" Classes="eyebrow" Text="ID" />
             <TextBlock Grid.Column="4" Classes="eyebrow" Text="DRIVER" />
