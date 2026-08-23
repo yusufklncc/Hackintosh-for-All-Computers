@@ -120,3 +120,57 @@ jobs:
             shell-kexts.png
             shell-about.png
             out/${{ matrix.exe }}
+
+  # What a person on Windows actually downloads: the window and the engine in
+  # one folder. The window runs the engine rather than reimplementing it, so
+  # shipping one without the other ships nothing that works.
+  package:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install pyinstaller
+
+      - name: The engine
+        run: pyinstaller --clean --noconfirm --distpath package tools/pyinstaller.spec
+
+      - name: The window, beside it
+        run: >
+          dotnet publish gui/Shell.csproj -c Release -o package
+          -r win-x64 --self-contained true
+          -p:PublishTrimmed=true -p:PublishSingleFile=true
+          -p:EnableCompressionInSingleFile=true
+
+      # The window looks for the engine beside itself first and falls back to a
+      # clone. On this runner a clone is right there, so the check is not that
+      # it worked - it is that it used the packaged engine and not the source.
+      - name: It uses the engine it shipped with
+        shell: bash
+        run: |
+          cd package
+          ./HackintoshEFIBuilderShell.exe \
+            --machine ../tools/fixtures/thinkpad-e570.json --render "$PWD/shot.png" \
+            | tee render.log
+          grep -q 'engine: beside this window' render.log \
+            || { echo 'it did not use the packaged engine'; cat render.log; exit 1; }
+          test -s shot.png || { echo 'it drew nothing'; exit 1; }
+          rm -f render.log shot.png shot-dark.png shot-builder.png shot-report.png \
+                shot-kexts.png shot-about.png machine.json
+          rm -rf EFI ACPI
+
+      - name: What it weighs
+        shell: bash
+        run: |
+          echo "### Windows package" >> $GITHUB_STEP_SUMMARY
+          du -sh package >> $GITHUB_STEP_SUMMARY
+          ls -la package | head -20 >> $GITHUB_STEP_SUMMARY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-package
+          path: package/

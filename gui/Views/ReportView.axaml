@@ -23,8 +23,10 @@
         </Grid>
         <TextBlock FontSize="12.5" TextWrapping="Wrap" Foreground="{DynamicResource Faint}"
                    Text="The machine's ACPI tables are dumped beside it where that is possible, because the SSDTs have to be written against the tables of the machine they are for." />
-        <Button Name="Take" Content="Take the report" Classes="accent"
-                HorizontalAlignment="Left" />
+        <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Left">
+          <Button Name="Take" Content="Take the report" Classes="accent" />
+          <Button Name="Open" Content="Show the file" IsVisible="False" />
+        </StackPanel>
       </StackPanel>
     </Border>
 

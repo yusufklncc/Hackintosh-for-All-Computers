@@ -61,8 +61,11 @@
                      Foreground="{DynamicResource Muted}"
                      Text="This builds for the machine it runs on." />
         </StackPanel>
-        <Button Grid.Column="1" Name="Begin" Content="Start" Classes="accent"
-                VerticalAlignment="Center" />
+        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8"
+                    VerticalAlignment="Center">
+          <Button Name="Open" Content="Show the EFI folder" IsVisible="False" />
+          <Button Name="Begin" Content="Start" Classes="accent" />
+        </StackPanel>
       </Grid>
     </Border>
   </Grid>

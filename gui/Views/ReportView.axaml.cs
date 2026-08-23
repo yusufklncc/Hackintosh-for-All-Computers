@@ -21,6 +21,7 @@ public partial class ReportView : UserControl
         Where.Text = _to;
         Choose.Click += async (_, _) => await Pick();
         Take.Click += async (_, _) => await Take_();
+        Open.Click += (_, _) => Reveal.Show(_to);
     }
 
     /// <summary>Take one without a click, and say what came of it.
@@ -60,10 +61,12 @@ public partial class ReportView : UserControl
 
         if (code != 0 || !File.Exists(_to))
         {
+            Open.IsVisible = false;
             Show("Nothing was written",
                  error.Trim() is { Length: > 0 } said ? said : output.Trim(), null);
             return;
         }
+        Open.IsVisible = true;
         // the engine prints what it read and where the tables went; that is the
         // useful part and it is already written for a person
         Show("Written", output.Trim(),

@@ -25,6 +25,7 @@ public partial class BuilderView : UserControl
     Question? _open;
     string _out = DefaultFolder();
     TaskCompletionSource<string>? _ended;
+    string? _built;
 
     /// <summary>Start a run without a click, for the screenshot pass.</summary>
     public Task StartForRender() => Run();
@@ -82,6 +83,7 @@ public partial class BuilderView : UserControl
         Choose.Click += async (_, _) => await Pick();
         Continue.Click += (_, _) => Send();
         Stop.Click += (_, _) => Halt();
+        Open.Click += (_, _) => Reveal.Show(_built ?? _out);
     }
 
     /// <summary>Beside the program, which is where somebody who double-clicked it is.</summary>
@@ -275,6 +277,8 @@ public partial class BuilderView : UserControl
         Standby.IsVisible = true;
         Begin.IsEnabled = true;
         Begin.Content = "Build again";
+        _built = built;
+        Open.IsVisible = code == 0 && built is not null;
         if (code == 0 && built is not null)
         {
             StandbyTitle.Text = "Written";

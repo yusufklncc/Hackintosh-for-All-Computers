@@ -606,6 +606,9 @@ def render(hw, source='this machine'):
     table = rows(hw)
     width = max(len(r['what']) for r in table)
     width = min(max(width, 24), 44)
+    # measured, not fixed at 14: "driven by macOS" is fifteen characters and ran
+    # straight into the sentence after it
+    verdict_width = max(14, max(len(r['verdict']) for r in table)) + 1
     lines = [f'{BOLD}Hardware for macOS{RESET}  {DIM}from {source}{RESET}', '']
     for r in table:
         what = _fit(r['what'], width)
@@ -615,8 +618,9 @@ def render(hw, source='this machine'):
         # supported family" - and half a sentence is worse than two lines.
         body = textwrap.wrap(r['detail'], DETAIL) or ['']
         lines.append(f'  {r["part"]:<12s} {what:<{width}s}  '
-                     f'{colour}{r["verdict"]:<14s}{RESET}{DIM}{body[0]}{RESET}'.rstrip())
-        pad = ' ' * (2 + 12 + 1 + width + 2 + 14)
+                     f'{colour}{r["verdict"]:<{verdict_width}s}{RESET}'
+                     f'{DIM}{body[0]}{RESET}'.rstrip())
+        pad = ' ' * (2 + 12 + 1 + width + 2 + verdict_width)
         for extra in body[1:]:
             lines.append(f'{pad}{DIM}{extra}{RESET}')
     bad = [r for r in table if r['verdict'] == UNSUPPORTED]

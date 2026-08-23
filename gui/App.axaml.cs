@@ -34,6 +34,8 @@ public partial class App : Application
                  IClassicDesktopStyleApplicationLifetime desktop)
     {
         ReportTypefaces();
+        var engine = Shell.Engine.Builder.Find(out var missing);
+        Console.WriteLine("engine: " + (engine?.Where ?? "not found - " + missing));
         // both themes, because both are shipped and only one of them is the one
         // being looked at when a colour is chosen
         Save(window, into);
