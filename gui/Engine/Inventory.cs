@@ -58,6 +58,31 @@ public sealed class About
     [JsonPropertyName("tools")] public List<ToolRow> Tools { get; set; } = new();
 }
 
+public sealed class MacosSpan
+{
+    [JsonPropertyName("from")] public string? From { get; set; }
+    [JsonPropertyName("to")] public string? To { get; set; }
+}
+
+public sealed class DeviceRow
+{
+    [JsonPropertyName("category")] public string Category { get; set; } = "";
+    [JsonPropertyName("id")] public string? Id { get; set; }
+    [JsonPropertyName("name")] public string Name { get; set; } = "";
+    [JsonPropertyName("vendor")] public string? Vendor { get; set; }
+    [JsonPropertyName("kext")] public string? Kext { get; set; }
+    [JsonPropertyName("note")] public string Note { get; set; } = "";
+    [JsonPropertyName("macos")] public MacosSpan? Macos { get; set; }
+}
+
+public sealed class DeviceList
+{
+    [JsonPropertyName("devices")] public List<DeviceRow> Devices { get; set; } = new();
+    [JsonPropertyName("categories")] public List<string> Categories { get; set; } = new();
+    [JsonPropertyName("vendors")] public List<string> Vendors { get; set; } = new();
+}
+
+[JsonSerializable(typeof(DeviceList))]
 [JsonSerializable(typeof(KextList))]
 [JsonSerializable(typeof(About))]
 public partial class Carried : JsonSerializerContext
@@ -73,6 +98,17 @@ public static class Inventory
         try
         {
             return (JsonSerializer.Deserialize(output, Carried.Default.KextList), "");
+        }
+        catch (JsonException e) { return (null, e.Message); }
+    }
+
+    public static async Task<(DeviceList? list, string complaint)> Devices(Located engine)
+    {
+        var (output, error, code) = await Builder.Run(engine, "--inventory", "devices");
+        if (code != 0) return (null, Said(error, code));
+        try
+        {
+            return (JsonSerializer.Deserialize(output, Carried.Default.DeviceList), "");
         }
         catch (JsonException e) { return (null, e.Message); }
     }

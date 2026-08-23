@@ -9,7 +9,8 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
-        foreach (var nav in new[] { ToMachine, ToBuilder, ToReport, ToKexts, ToAbout })
+        foreach (var nav in new[] { ToMachine, ToBuilder, ToReport, ToDevices,
+                                    ToKexts, ToAbout })
             nav.IsCheckedChanged += async (_, _) => await Swap();
         _ = Standing();
     }
@@ -36,10 +37,12 @@ public partial class MainWindow : Window
         MachinePane.IsVisible = ToMachine.IsChecked == true;
         BuilderPane.IsVisible = ToBuilder.IsChecked == true;
         ReportPane.IsVisible = ToReport.IsChecked == true;
+        DevicesPane.IsVisible = ToDevices.IsChecked == true;
         KextsPane.IsVisible = ToKexts.IsChecked == true;
         AboutPane.IsVisible = ToAbout.IsChecked == true;
         // read on first sight rather than at startup: opening the program
         // should not wait on three documents nobody has asked for yet
+        if (ToDevices.IsChecked == true) await DevicesPane.Load();
         if (ToKexts.IsChecked == true) await KextsPane.Load();
         if (ToAbout.IsChecked == true) await AboutPane.Load();
     }
@@ -62,7 +65,8 @@ public partial class MainWindow : Window
     {
         var nav = pane switch
         {
-            "report" => ToReport, "kexts" => ToKexts, "about" => ToAbout,
+            "report" => ToReport, "devices" => ToDevices, "kexts" => ToKexts,
+            "about" => ToAbout,
             "builder" => ToBuilder, _ => ToMachine,
         };
         nav.IsChecked = true;

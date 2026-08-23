@@ -60,7 +60,7 @@ public partial class App : Application
                 try
                 {
                     Console.WriteLine("drive: " + await window.DriveBuilder());
-                    foreach (var pane in new[] { "report", "kexts", "about" })
+                    foreach (var pane in new[] { "report", "devices", "kexts", "about" })
                     {
                         await window.Show(pane);
                         // the report pane's whole job is behind a button, so

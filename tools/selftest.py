@@ -1750,6 +1750,62 @@ def what_the_machine_calls_its_network():
           wifi['verdict'] == summary.UNKNOWN and not wifi['kexts'], wifi)
 
 
+def the_device_catalogue():
+    """Every device the tables know, in one list, once each.
+
+    The risk is a catalogue that disagrees with the build: it must read the
+    same tables rather than become a second copy of them, and it must not
+    invent a device or lose one."""
+    import deviceids
+    import inventory
+
+    named = deviceids.table()
+    check('the name table says where its names came from',
+          'pci-ids' in named.get('source', {}).get('pci', ''), named.get('source'))
+    check('and it took the USB list from a source that states a licence',
+          'hwdata' in named.get('source', {}).get('usb', ''), named.get('source'))
+    check('an id nobody has written a name for keeps its id',
+          isinstance(named.get('unnamed'), list))
+
+    catalogue = inventory.devices()
+    rows = catalogue['devices']
+    check('there are devices in it', len(rows) > 400, len(rows))
+    check('every one has a category the list declares',
+          all(r['category'] in catalogue['categories'] for r in rows))
+    check('and a name, never an empty cell',
+          all(r['name'] for r in rows))
+
+    # one row per device. Broadcom Bluetooth is three kexts in a relay and
+    # every adapter used to appear three times.
+    keyed = [(r['category'], r['id']) for r in rows if r['id'] and r['category'] != 'Graphics']
+    check('a device claimed by several kexts is listed once',
+          len(keyed) == len(set(keyed)),
+          [k for k in keyed if keyed.count(k) > 1][:3])
+
+    # graphics are keyed the other way: nine cards share 1002:67df and the
+    # model is the thing somebody is looking for
+    cards = [r for r in rows if r['category'] == 'Graphics' and r['id'] == '1002:67df']
+    check('cards sharing an id are listed by model', len(cards) > 1,
+          [c['name'] for c in cards])
+    check('and each model keeps its own verdict',
+          len({c['note'] for c in cards}) > 1, [c['note'] for c in cards])
+
+    # what the tables hold has to survive the trip
+    ids_in_table = {i.lower() for d in ocgen.read_toml(Path('data/hardware.toml'))['driver']
+                    for i in d['ids'] if d['role'] in inventory.ROLE_CATEGORY}
+    ids_in_catalogue = {r['id'].lower() for r in rows
+                        if r['id'] and r['category'] in inventory.ROLE_CATEGORY.values()}
+    check('no device the kexts claim is missing from the catalogue',
+          not (ids_in_table - ids_in_catalogue),
+          sorted(ids_in_table - ids_in_catalogue)[:5])
+    check('and none is invented',
+          not (ids_in_catalogue - ids_in_table),
+          sorted(ids_in_catalogue - ids_in_table)[:5])
+
+    check('the vendor filter has something to filter by',
+          len(catalogue['vendors']) > 5, catalogue['vendors'][:4])
+
+
 if __name__ == '__main__':
     for section in (graphics, graphics_advice, audio_advice, storage, peripherals,
                     trackpad, framebuffer, boot_args, other_machine,
@@ -1763,7 +1819,7 @@ if __name__ == '__main__':
                     front_end_protocol, machine_document, machine_name,
                     embedded_fonts, macos_registry, genuine_macs,
                     the_processor_bounds_it_too, graphics_and_the_range,
-                    what_the_machine_calls_its_network):
+                    what_the_machine_calls_its_network, the_device_catalogue):
         print(f'\n{section.__name__}')
         section()
     print()

@@ -81,6 +81,17 @@ def catalogue():
              gap='Only names that have been seen on a real machine are listed. '
                  'A Mac that calls its Wi-Fi something else gets no role, '
                  'which reads as "nothing recognised" rather than as a guess.'),
+        dict(area='Device names', kind=QUOTED, file='data/deviceids.toml',
+             source='the PCI ID Project, and hwdata for the USB list',
+             tool='tools/deviceids.py --refresh',
+             count=f'{rows_in("data/deviceids.toml", "device")} named, '
+                   f'{len(ocgen.read_toml(Path("data/deviceids.toml")).get("unnamed", [])) if Path("data/deviceids.toml").exists() else 0} not',
+             covers='what to call each id this repository already drives, and '
+                    'which vendor made it, so a catalogue can be read and filtered',
+             gap='Names only. An id the upstream lists do not carry keeps its '
+                 'id as its name - the kext still matches it. USB names come '
+                 'from hwdata rather than linux-usb.org, whose file states no '
+                 'licence at all.'),
         dict(area='Mac support', kind=DERIVED, file='data/mac.toml',
              source="Apple's own device metadata at gdmf.apple.com/v2/pmv",
              tool='tools/mactable.py --refresh',

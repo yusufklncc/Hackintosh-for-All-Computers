@@ -1,0 +1,67 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:v="clr-namespace:Shell.Views"
+             x:Class="Shell.Views.DevicesView"
+             x:DataType="v:DevicesView">
+  <Grid RowDefinitions="Auto,Auto,*" Margin="28,24">
+    <StackPanel Grid.Row="0" Spacing="8" Margin="0,0,0,14">
+      <TextBlock Classes="eyebrow" Text="EVERY DEVICE THIS PROGRAM KNOWS" />
+      <TextBlock Name="Blurb" FontSize="13.5" TextWrapping="Wrap" MaxWidth="760"
+                 HorizontalAlignment="Left" Foreground="{DynamicResource Muted}" />
+    </StackPanel>
+
+    <Grid Grid.Row="1" ColumnDefinitions="*,Auto,Auto" ColumnSpacing="10"
+          Margin="0,0,0,14">
+      <TextBox Grid.Column="0" Name="Search" Watermark="Search a name, an id or a kext"
+               MaxWidth="420" HorizontalAlignment="Left" />
+      <ComboBox Grid.Column="1" Name="Category" MinWidth="150" />
+      <ComboBox Grid.Column="2" Name="Vendor" MinWidth="190" />
+    </Grid>
+
+    <Border Grid.Row="2" BorderBrush="{DynamicResource Line}" BorderThickness="1"
+            CornerRadius="8" ClipToBounds="True">
+      <DockPanel>
+        <Border DockPanel.Dock="Top" Background="{DynamicResource Surface2}"
+                BorderBrush="{DynamicResource Line}" BorderThickness="0,0,0,1"
+                Padding="14,10">
+          <Grid ColumnDefinitions="120,*,220,110,150">
+            <TextBlock Grid.Column="0" Classes="eyebrow" Text="CATEGORY" />
+            <TextBlock Grid.Column="1" Classes="eyebrow" Text="DEVICE" />
+            <TextBlock Grid.Column="2" Classes="eyebrow" Text="VENDOR" />
+            <TextBlock Grid.Column="3" Classes="eyebrow" Text="ID" />
+            <TextBlock Grid.Column="4" Classes="eyebrow" Text="DRIVER" />
+          </Grid>
+        </Border>
+        <TextBlock DockPanel.Dock="Bottom" Name="Count" Classes="mono"
+                   Margin="14,8" />
+        <ScrollViewer>
+          <ItemsControl Name="Rows">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="v:DeviceItem">
+                <Border BorderBrush="{DynamicResource Line}" BorderThickness="0,0,0,1"
+                        Padding="14,8">
+                  <Grid ColumnDefinitions="120,*,220,110,150">
+                    <TextBlock Grid.Column="0" Text="{Binding Category}" FontSize="12.5"
+                               Foreground="{DynamicResource Muted}" />
+                    <StackPanel Grid.Column="1" Margin="0,0,12,0">
+                      <TextBlock Text="{Binding Name}" FontSize="13.5"
+                                 Foreground="{DynamicResource Ink}" TextWrapping="Wrap" />
+                      <TextBlock Text="{Binding Note}" FontSize="12"
+                                 Foreground="{DynamicResource Muted}" TextWrapping="Wrap" />
+                    </StackPanel>
+                    <TextBlock Grid.Column="2" Text="{Binding Vendor}" FontSize="12.5"
+                               Margin="0,0,12,0" TextWrapping="Wrap"
+                               Foreground="{DynamicResource Muted}" />
+                    <TextBlock Grid.Column="3" Classes="mono" Text="{Binding Id}" />
+                    <TextBlock Grid.Column="4" Classes="mono" Text="{Binding Kext}"
+                               TextWrapping="Wrap" Foreground="{DynamicResource Accent}" />
+                  </Grid>
+                </Border>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </ScrollViewer>
+      </DockPanel>
+    </Border>
+  </Grid>
+</UserControl>

@@ -85,7 +85,7 @@ jobs:
           # and it has to be able to finish one, not only start it
           grep -q 'drive: rc=0 Written:' render.log \
             || { echo 'the builder pane never finished a build'; cat render.log; exit 1; }
-          for pane in report kexts about; do
+          for pane in report devices kexts about; do
             test -s "shell-$pane.png" || { echo "no $pane screenshot"; exit 1; }
           done
           grep -q 'report: Written ->' render.log \
@@ -117,6 +117,7 @@ jobs:
             shell-dark.png
             shell-builder.png
             shell-report.png
+            shell-devices.png
             shell-kexts.png
             shell-about.png
             out/${{ matrix.exe }}

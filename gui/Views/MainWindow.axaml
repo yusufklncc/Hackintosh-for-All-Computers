@@ -41,6 +41,8 @@
                        Content="Machine" />
           <RadioButton Name="ToBuilder" Classes="nav" GroupName="pane" Content="Builder" />
           <RadioButton Name="ToReport" Classes="nav" GroupName="pane" Content="Report" />
+          <RadioButton Name="ToDevices" Classes="nav" GroupName="pane"
+                       Content="Devices" />
           <RadioButton Name="ToKexts" Classes="nav" GroupName="pane" Content="Kexts" />
           <RadioButton Name="ToAbout" Classes="nav" GroupName="pane" Content="About" />
         </StackPanel>
@@ -56,6 +58,7 @@
       </ScrollViewer>
       <v:BuilderView Name="BuilderPane" IsVisible="False" />
       <v:ReportView Name="ReportPane" IsVisible="False" />
+      <v:DevicesView Name="DevicesPane" IsVisible="False" />
       <v:KextsView Name="KextsPane" IsVisible="False" />
       <v:AboutView Name="AboutPane" IsVisible="False" />
     </Panel>

@@ -11,6 +11,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import deviceids
 import ocgen
 import provenance
 import summary
@@ -68,6 +69,110 @@ def kexts():
     return {'t': 'kexts', 'kexts': out}
 
 
+CATEGORIES = ('Ethernet', 'Wi-Fi', 'Bluetooth', 'Trackpad', 'Graphics',
+              'Audio', 'Card reader', 'Mac')
+
+ROLE_CATEGORY = {'ethernet': 'Ethernet', 'wifi': 'Wi-Fi',
+                 'bluetooth': 'Bluetooth', 'trackpad': 'Trackpad'}
+
+
+def _entry(category, ident, name, note, vendor=None, kext=None, macos=None):
+    return {'category': category, 'id': ident, 'name': name, 'vendor': vendor,
+            'kext': kext, 'note': note, 'macos': macos}
+
+
+def devices():
+    """Everything this repository has a name and a verdict for, as a flat list.
+
+    One row per device, in one shape, so a front end can search and filter it
+    without knowing which table each row came from. The tables themselves stay
+    where they are: this reads them, it does not become a second copy of them.
+
+    An id the upstream name lists do not carry keeps its id as its name. That
+    is not a gap in what this repository drives - the kext still matches it -
+    only in what anybody has written down about what to call it."""
+    named, vendor_names = deviceids.names(), deviceids.vendors()
+
+    def called(ident):
+        return named.get(ident.lower()), vendor_names.get(ident.split(':')[0].lower())
+
+    out = []
+
+    # what the kexts themselves bind to, read out of the kexts
+    for driver in ocgen.read_toml(HARDWARE).get('driver', []):
+        category = ROLE_CATEGORY.get(driver['role'])
+        if not category:
+            continue
+        for ident in driver['ids']:
+            name, vendor = called(ident)
+            out.append(_entry(category, ident, name or ident, driver['label'],
+                              vendor=vendor, kext=driver['kext']))
+
+    graphics = ocgen.read_toml(Path('data/gpu.toml'))
+    for card in graphics.get('card', []):
+        # the guide's own model name, not the upstream one: nine cards share
+        # the id 1002:67df and the upstream list calls all nine "Ellesmere
+        # [Radeon RX 470/480/570/580/590]". The model is the thing somebody is
+        # looking for.
+        _, vendor = called(card['id'])
+        note = card['status']
+        if card.get('family'):
+            note = f"{card['status']}, {card['family']}"
+        out.append(_entry('Graphics', card['id'], card.get('name') or card['id'],
+                          note, vendor=vendor))
+    for family in graphics.get('family', []):
+        out.append(_entry('Graphics', family.get('vendor'), family.get('label')
+                          or family.get('match'), family.get('note') or family['status']))
+    for igpu in graphics.get('igpu', []):
+        out.append(_entry('Graphics', None, igpu.get('label') or 'Intel iGPU',
+                          f"{igpu['status']}: " + ', '.join(igpu.get('profiles', []))))
+
+    for codec in ocgen.read_toml(Path('data/audio.toml')).get('audio', []):
+        layouts = codec.get('layout') or []
+        out.append(_entry('Audio', codec.get('id'),
+                          f"{codec.get('vendor', '')} {codec.get('codec', '')}".strip(),
+                          f'AppleALC, {len(layouts)} layout'
+                          + ('s' if len(layouts) != 1 else ''),
+                          kext='AppleALC.kext'))
+
+    readers = ocgen.read_toml(Path('data/cardreader.toml'))
+    driver = readers.get('driver', {})
+    for reader in readers.get('device', []):
+        name, vendor = called(reader['id'])
+        out.append(_entry('Card reader', reader['id'], name or reader['id'],
+                          ('driven since ' + str(reader.get('since'))
+                           if reader.get('supported') else 'listed, not driven yet'),
+                          vendor=vendor, kext=driver.get('kext')))
+
+    macs = ocgen.read_toml(Path('data/mac.toml'))
+    for mac in macs.get('mac', []):
+        out.append(_entry('Mac', mac['board'], mac['board'],
+                          'Apple silicon' if mac['board'].startswith('J') else 'Intel',
+                          vendor='Apple',
+                          macos={'from': mac['floor'], 'to': mac['ceiling'] or None}))
+    # One row per device, not one per kext that claims it. Broadcom Bluetooth
+    # is three kexts in a relay and every adapter was appearing three times;
+    # the same card listed twice in the card table appeared twice as well.
+    merged = {}
+    for entry in out:
+        # keyed on the name for graphics, where one id covers many models, and
+        # on the id everywhere else, where one device has many claimants
+        key = ((entry['category'], entry['name']) if entry['category'] == 'Graphics'
+               else (entry['category'], entry['id'] or entry['name']))
+        if key in merged:
+            kept = merged[key]
+            for kext in (entry['kext'] or '').split(', '):
+                if kext and kext not in (kept['kext'] or ''):
+                    kept['kext'] = f"{kept['kext']}, {kext}" if kept['kext'] else kext
+            continue
+        merged[key] = entry
+    out = list(merged.values())
+    return {'t': 'devices', 'devices': out,
+            'categories': [c for c in CATEGORIES
+                           if any(d['category'] == c for d in out)],
+            'vendors': sorted({d['vendor'] for d in out if d['vendor']})}
+
+
 def about():
     """The standing facts, each read from the file that decides it."""
     configs = (len(ocgen.read_toml(CATALOGUE)['config'])
@@ -101,9 +206,10 @@ def main(argv=None):
     import argparse
     import json
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument('what', choices=('kexts', 'about'))
+    ap.add_argument('what', choices=('kexts', 'about', 'devices'))
     a = ap.parse_args(argv)
-    print(json.dumps(kexts() if a.what == 'kexts' else about(),
+    document = {'kexts': kexts, 'about': about, 'devices': devices}[a.what]()
+    print(json.dumps(document,
                      ensure_ascii=False, indent=1))
     return 0
 
