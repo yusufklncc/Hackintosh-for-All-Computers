@@ -155,6 +155,11 @@ public static class Builder
             FileName = engine.Program,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
+            // and stdin, closed immediately. Without this the engine inherits
+            // whatever this window has, which when it was double-clicked is a
+            // handle nobody can read from - and a program that decides to wait
+            // on it waits for ever, printing nothing.
+            RedirectStandardInput = true,
             UseShellExecute = false,
             CreateNoWindow = true,
             StandardOutputEncoding = Encoding.UTF8,
@@ -171,9 +176,19 @@ public static class Builder
 
         using var process = new Process { StartInfo = info };
         process.Start();
+        process.StandardInput.Close();
         var stdout = process.StandardOutput.ReadToEndAsync();
         var stderr = process.StandardError.ReadToEndAsync();
-        await process.WaitForExitAsync();
+        // Bounded. Reading a machine is slow, not endless, and a window that
+        // waits for ever on one tells nobody anything.
+        var exited = process.WaitForExitAsync();
+        var finished = await Task.WhenAny(exited, Task.Delay(TimeSpan.FromMinutes(3)));
+        if (finished != exited)
+        {
+            try { process.Kill(entireProcessTree: true); } catch (Exception) { }
+            return ("", $"{Path.GetFileName(engine.Program)} did not answer within "
+                      + "three minutes, so it was stopped.", 1);
+        }
         return (await stdout, await stderr, process.ExitCode);
     }
 

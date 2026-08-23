@@ -39,7 +39,14 @@ public partial class MachineView : UserControl
         // loader on its own leaves every one of them null, and the first line
         // that touches one is where it shows.
         InitializeComponent();
-        Loaded += async (_, _) => await Load();
+        // An exception in an async event handler goes nowhere: the pane stays
+        // empty, the program keeps running, and there is nothing to read. That
+        // is how this failed on a real machine.
+        Loaded += async (_, _) =>
+        {
+            try { await Load(); }
+            catch (Exception e) { NoMachine("This went wrong: " + e); }
+        };
     }
 
     async System.Threading.Tasks.Task Load()
