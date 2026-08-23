@@ -111,31 +111,39 @@ public static class Builder
         if (OperatingSystem.IsWindows()) yield break;
         var shell = Environment.GetEnvironmentVariable("SHELL");
         if (string.IsNullOrEmpty(shell) || !File.Exists(shell)) yield break;
-        string found;
-        try
+        // -lic before -lc. A login shell reads .zprofile; the version managers
+        // put their activation in .zshrc, which only an interactive shell
+        // reads. Measured on a machine with mise: -lc answered /usr/bin/python3
+        // (3.9, no tomllib) and -lic answered the 3.12 that actually works.
+        foreach (var how in new[] { "-lic", "-lc" })
         {
-            using var ask = Process.Start(new ProcessStartInfo
+            string found;
+            try
             {
-                FileName = shell,
-                ArgumentList = { "-lc", "command -v python3" },
-                UseShellExecute = false,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                CreateNoWindow = true,
-            });
-            if (ask is null) yield break;
-            found = ask.StandardOutput.ReadToEnd().Trim();
-            ask.WaitForExit(8000);
-            if (!ask.HasExited || ask.ExitCode != 0) yield break;
+                using var ask = Process.Start(new ProcessStartInfo
+                {
+                    FileName = shell,
+                    ArgumentList = { how, "command -v python3" },
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    CreateNoWindow = true,
+                });
+                if (ask is null) continue;
+                found = ask.StandardOutput.ReadToEnd();
+                ask.WaitForExit(15000);
+                if (!ask.HasExited) continue;
+            }
+            catch (Exception e) when (e is System.ComponentModel.Win32Exception or IOException)
+            {
+                continue;
+            }
+            // the last line: an interactive profile printing a banner, or a
+            // warning on the way through, is normal
+            var last = found.Split('\n', StringSplitOptions.RemoveEmptyEntries)
+                            .LastOrDefault()?.Trim();
+            if (!string.IsNullOrEmpty(last) && File.Exists(last)) yield return last;
         }
-        catch (Exception e) when (e is System.ComponentModel.Win32Exception or IOException)
-        {
-            yield break;
-        }
-        // the last line: a profile that prints a banner is common enough
-        var last = found.Split('\n', StringSplitOptions.RemoveEmptyEntries)
-                        .LastOrDefault()?.Trim();
-        if (!string.IsNullOrEmpty(last) && File.Exists(last)) yield return last;
     }
 
     /// <summary>Run the engine once and hand back what it wrote to stdout.</summary>
