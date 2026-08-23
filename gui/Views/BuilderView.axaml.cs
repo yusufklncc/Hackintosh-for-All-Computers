@@ -37,8 +37,20 @@ public partial class BuilderView : UserControl
     public async Task<string> DriveToEnd()
     {
         var ended = _ended ?? throw new InvalidOperationException("nothing is running");
+        // bounded, and it says where it got to. An unattended pass that can
+        // hang is a build that hangs, and a build log with nothing in it is
+        // the worst way to find that out.
+        var deadline = DateTime.UtcNow.AddMinutes(4);
+        var last = "";
         while (!ended.Task.IsCompleted)
         {
+            if (DateTime.UtcNow > deadline)
+                return "gave up waiting, last state: " + State();
+            if (State() != last)
+            {
+                last = State();
+                Console.WriteLine("step: " + last);
+            }
             if (_open is not null)
             {
                 // a question with nothing detected leaves nothing checked, and

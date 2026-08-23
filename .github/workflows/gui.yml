@@ -35,6 +35,7 @@ jobs:
             rid: osx-arm64
             exe: HackintoshEFIBuilderShell
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-dotnet@v4
