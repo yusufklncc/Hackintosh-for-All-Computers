@@ -68,9 +68,10 @@ jobs:
         shell: bash
         run: |
           cat render.log
-          grep -q 'typeface Sans/Normal -> Instrument Sans 400' render.log
-          grep -q 'typeface Sans/SemiBold -> Instrument Sans 600' render.log
-          grep -q 'typeface Mono/Normal -> IBM Plex Mono 400' render.log
+          # DemiBold is what Avalonia calls 600 when it prints the enum back
+          grep -q 'typeface Sans/Normal -> Instrument Sans Normal' render.log
+          grep -q 'typeface Sans/SemiBold -> Instrument Sans DemiBold' render.log
+          grep -q 'typeface Mono/Normal -> IBM Plex Mono Normal' render.log
 
       - name: And it publishes as one file
         run: >
