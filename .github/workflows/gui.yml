@@ -67,6 +67,10 @@ jobs:
             | tee render.log
           test -s shell.png || { echo 'no light screenshot'; exit 1; }
           test -s shell-dark.png || { echo 'no dark screenshot'; exit 1; }
+          test -s shell-builder.png || { echo 'no builder screenshot'; exit 1; }
+          # the pane is only worth a picture if an engine answered into it
+          grep -qE 'builder: [1-9][0-9]* lines, asking ".+" with [1-9]' render.log \
+            || { echo 'the builder pane never got a question'; cat render.log; exit 1; }
 
       # A font that failed to load falls back to the system's, and the window
       # still looks reasonable. That is the whole problem: it has to be checked,
@@ -99,4 +103,5 @@ jobs:
           path: |
             shell.png
             shell-dark.png
+            shell-builder.png
             out/${{ matrix.exe }}

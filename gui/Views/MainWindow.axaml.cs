@@ -14,6 +14,15 @@ public partial class MainWindow : Window
         ToBuilder.IsCheckedChanged += (_, _) => Swap();
     }
 
+    /// <summary>Switch to the builder and start one, for the screenshot pass.</summary>
+    public async System.Threading.Tasks.Task ShowBuilder()
+    {
+        ToBuilder.IsChecked = true;
+        await BuilderPane.StartForRender();
+    }
+
+    public string BuilderState() => BuilderPane.State();
+
     void Swap()
     {
         MachinePane.IsVisible = ToMachine.IsChecked == true;

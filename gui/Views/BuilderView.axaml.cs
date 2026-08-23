@@ -25,6 +25,15 @@ public partial class BuilderView : UserControl
     Question? _open;
     string _out = DefaultFolder();
 
+    /// <summary>Start a run without a click, for the screenshot pass.</summary>
+    public Task StartForRender() => Run();
+
+    /// <summary>What is on screen, in one line a build log can assert on.</summary>
+    public string State() =>
+        $"builder: {Transcript.Children.Count} lines, " +
+        (_open is null ? "no question open"
+                       : $"asking \"{_open.Text}\" with {_open.Options.Count} options");
+
     public BuilderView()
     {
         InitializeComponent();

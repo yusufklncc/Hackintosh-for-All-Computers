@@ -40,7 +40,16 @@ public partial class App : Application
         DispatcherTimer.RunOnce(() =>
         {
             Save(window, into.Replace(".png", "-dark.png", StringComparison.Ordinal));
-            desktop.Shutdown();
+            RequestedThemeVariant = ThemeVariant.Light;
+            // and the other pane, with an engine actually running in it: a
+            // picture of an empty transcript would prove nothing
+            _ = window.ShowBuilder();
+            DispatcherTimer.RunOnce(() =>
+            {
+                Console.WriteLine(window.BuilderState());
+                Save(window, into.Replace(".png", "-builder.png", StringComparison.Ordinal));
+                desktop.Shutdown();
+            }, TimeSpan.FromSeconds(10));
         }, TimeSpan.FromSeconds(2));
     }
 
