@@ -95,10 +95,16 @@ jobs:
           $p = Start-Process -FilePath dist/HackintoshEFIBuilder.exe `
                  -ArgumentList '--no-detect','--answers','2,10,3','--out','smoke/EFI' `
                  -PassThru -NoNewWindow
+          # A onefile PyInstaller build is two processes: a small bootloader
+          # that unpacks, and the child that does the work. Measuring the one
+          # Start-Process handed back measures the bootloader, which is how
+          # this first reported 8 MB for a 60 MB program.
           $peak = 0
           while (-not $p.HasExited) {
-            try { $p.Refresh(); $peak = [Math]::Max($peak, $p.PeakWorkingSet64) } catch { }
-            Start-Sleep -Milliseconds 50
+            foreach ($q in (Get-Process -Name HackintoshEFIBuilder -ErrorAction SilentlyContinue)) {
+              try { $q.Refresh(); $peak = [Math]::Max($peak, $q.PeakWorkingSet64) } catch { }
+            }
+            Start-Sleep -Milliseconds 25
           }
           $p.WaitForExit()
           if ($peak -eq 0) { Write-Error 'never managed to read the process'; exit 1 }

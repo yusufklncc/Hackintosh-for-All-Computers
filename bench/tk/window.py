@@ -25,8 +25,17 @@ def peak_bytes():
                         ('PeakPagefileUsage', ctypes.c_size_t)]
         c = Counters()
         c.cb = ctypes.sizeof(c)
-        ctypes.windll.psapi.GetProcessMemoryInfo(
-            ctypes.windll.kernel32.GetCurrentProcess(), ctypes.byref(c), c.cb)
+        # The handle is 64 bits wide and the pseudo-handle is -1. Left at the
+        # default return type it comes back as a 32-bit int, the call fails,
+        # and what gets reported is a confident zero.
+        kernel32, psapi = ctypes.windll.kernel32, ctypes.windll.psapi
+        kernel32.GetCurrentProcess.restype = ctypes.c_void_p
+        psapi.GetProcessMemoryInfo.argtypes = [ctypes.c_void_p,
+                                               ctypes.POINTER(Counters),
+                                               ctypes.c_uint32]
+        if not psapi.GetProcessMemoryInfo(kernel32.GetCurrentProcess(),
+                                          ctypes.byref(c), c.cb):
+            raise OSError(f'GetProcessMemoryInfo failed: {ctypes.GetLastError()}')
         return c.PeakWorkingSetSize, c.WorkingSetSize
     import resource
     peak = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
