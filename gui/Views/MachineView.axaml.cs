@@ -62,12 +62,17 @@ public partial class MachineView : UserControl
             // machine five devices had just been read from
             var ids = machine.Read.GetValueOrDefault("pci")
                     + machine.Read.GetValueOrDefault("usb");
+            // what the SUPPORT column means changes on a Mac, and saying so is
+            // the difference between a table of verdicts and a table of them
+            // about the wrong question
+            var driven = machine.Rows.Count(r => r.Verdict == "driven by macOS");
             Note("THIS IS A MAC",
-                 $"{machine.Profile.Model ?? "A Mac"}, and its hardware is Apple's - "
-                 + $"{ids} device ids were read and nothing here claims them, which is "
-                 + "the expected answer. A Mac needs no EFI from this program. Take a "
-                 + "Report on the machine you are converting, or open the Builder with "
-                 + "its report.");
+                 $"{machine.Profile.Model ?? "A Mac"}, so the question is not which "
+                 + "kext would claim each device - none of them would - but which "
+                 + $"driver macOS has given it. {driven} of these were read from the "
+                 + $"running system, along with {ids} device ids. A Mac needs no EFI "
+                 + "from this program: take a Report on the machine you are "
+                 + "converting, or open the Builder with its report.");
         }
         else if (!machine.WorthShowing)
         {
@@ -115,7 +120,9 @@ public partial class MachineView : UserControl
         if (m.Profile.Oem is { } oem) spec.Add(new SpecView("board", oem));
         Spec.ItemsSource = spec;
 
-        var counts = new[] { ("supported", "supported"), ("not supported", "not supported"),
+        var counts = new[] { ("supported", "supported"),
+                             ("driven by macOS", "driven by macOS"),
+                             ("not supported", "not supported"),
                              ("unknown", "unknown"), ("-", "not present") };
         Tally.ItemsSource = counts
             .Select(c => (verdict: c.Item1, label: c.Item2,

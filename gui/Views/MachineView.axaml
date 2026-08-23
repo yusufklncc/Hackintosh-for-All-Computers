@@ -152,7 +152,11 @@
                           </DataTemplate>
                         </ItemsControl.ItemTemplate>
                       </ItemsControl>
-                      <TextBlock Classes="mono" Text="—" IsVisible="{Binding !HasKexts}"
+                      <TextBlock Classes="mono" Text="{Binding SystemDriver}"
+                                 IsVisible="{Binding HasSystemDriver}"
+                                 TextWrapping="Wrap"
+                                 Foreground="{DynamicResource Ink}" />
+                      <TextBlock Classes="mono" Text="—" IsVisible="{Binding HasNoDriver}"
                                  Foreground="{DynamicResource Faint}" />
                     </StackPanel>
 

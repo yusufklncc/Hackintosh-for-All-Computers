@@ -51,7 +51,7 @@ COLOUR = {SUPPORTED: GREEN, DRIVEN: GREEN, UNSUPPORTED: RED,
 AMD_GENERATIONS = ('ryzen-threadripper', 'bulldozer-jaguar')
 
 
-def row(part, what, verdict, detail='', kexts=(), ids=(), note=None):
+def row(part, what, verdict, detail='', kexts=(), ids=(), note=None, driver=None):
     """One line of the summary.
 
     `detail` is the sentence a person reads on a console that has one column.
@@ -66,6 +66,10 @@ def row(part, what, verdict, detail='', kexts=(), ids=(), note=None):
     sentence."""
     return {'part': part, 'what': what, 'verdict': verdict, 'detail': detail,
             'note': detail if note is None else note,
+            # the driver the running system gave the device to. Not a kext:
+            # nothing here ships it, and it belongs in its own field so a
+            # front end does not draw it as a project it can link to.
+            'driver': driver,
             'kexts': list(kexts), 'ids': list(ids)}
 
 
@@ -91,7 +95,8 @@ def cpu_row(hw):
         # whole of the answer about it.
         return row('CPU', name, DRIVEN,
                    'Apple silicon, running macOS natively; this program builds '
-                   'for Intel and AMD', note='Apple silicon')
+                   'for Intel and AMD', note='this program builds for Intel and AMD',
+                   driver='Apple silicon')
     if not gen:
         # the decoder returns nothing rather than a guess for Xeon, Pentium,
         # first generation Core and anything newer than it knows
@@ -108,7 +113,8 @@ def graphics_rows(hw):
     if _apple_silicon(hw):
         return [row('Graphics', hw.get('cpu') or 'Apple graphics', DRIVEN,
                     'part of the Apple silicon package, driven by macOS',
-                    note='Apple silicon')]
+                    note='part of the Apple silicon package',
+                    driver='Apple silicon')]
     out = []
     field = gpu.field_igpu(hw.get('cpu'))
     for device in hw.get('gpu_devices', []):
@@ -153,7 +159,8 @@ def audio_row(hw):
         # codec readable" on a machine whose speakers are working.
         return row('Audio', ', '.join(hw['audio_devices']), DRIVEN,
                    "macOS drives these; there is no HD audio codec to match",
-                   note='no HD audio codec on this machine')
+                   note='no HD audio codec on this machine',
+                   driver='macOS audio')
     if not ids:
         return row('Audio', 'no codec readable', UNKNOWN, '')
     found = audio.find(ids)
@@ -233,8 +240,9 @@ def network_rows(hw):
                                f'macOS has it on {driver}' if driver
                                else 'the machine names this device itself; no '
                                     'kext here claims it',
-                               ids=[device_id],
-                               note=f'on {driver}' if driver else ''))
+                               ids=[device_id], driver=driver,
+                               note='' if driver else 'the machine names this '
+                                    'device itself'))
         elif hw.get('system') == 'Darwin':
             # the registry named every device it has, and none of them is this
             out.append(row(label, 'none', ABSENT, 'this Mac has no such device'))
@@ -271,7 +279,7 @@ def input_row(hw):
         # a Mac's trackpad is neither PS/2 nor I2C; it is its own device class,
         # and the machine says whether it is there
         return row('Trackpad', 'Apple Multi-Touch', DRIVEN,
-                   'macOS drives it', note='')
+                   'macOS drives it', note='', driver='AppleMultitouchDevice')
     name = pointing[0]['name'] if pointing else ('I2C trackpad' if i2c else 'not readable')
     if i2c:
         return row('Trackpad', name, SUPPORTED, f'VoodooI2C  [{", ".join(i2c)}]',
@@ -313,7 +321,7 @@ def peripheral_rows(hw):
         if hw.get('system') == 'Darwin' and hw.get('camera_driver'):
             out.append(row('Camera', dev['name'], DRIVEN,
                            f"macOS has it on {hw['camera_driver']}",
-                           note=f"on {hw['camera_driver']}"))
+                           note='', driver=hw['camera_driver']))
             continue
         if hw.get('system') == 'Darwin':
             # on a PC a camera off the USB bus is an IPU or MIPI sensor with no
@@ -347,7 +355,8 @@ def peripheral_rows(hw):
             f'{own.group(1).lower()}:{own.group(2).lower()}' if own else None)
         if hw.get('system') == 'Darwin' and attached:
             out.append(row('Card reader', dev['name'], DRIVEN,
-                           f'macOS has it on {attached}', note=f'on {attached}',
+                           f'macOS has it on {attached}', note='',
+                           driver=attached,
                            ids=[found['id']] if found else ()))
             continue
         if found and found['supported']:

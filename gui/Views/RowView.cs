@@ -31,6 +31,11 @@ public sealed partial class RowView
         // through drew the type name in the column
         Kexts = row.Kexts.Select(k => new KextView(k)).ToList();
         HasKexts = row.Kexts.Count > 0;
+        // the driver the running system gave the device to, on a Mac. Plain
+        // text, not a link: it is Apple's and there is nowhere to send anyone.
+        SystemDriver = row.Driver ?? "";
+        HasSystemDriver = !HasKexts && SystemDriver.Length > 0;
+        HasNoDriver = !HasKexts && !HasSystemDriver;
         Icon = Icons.For(row.Part);
 
         (Label, IsOk, IsBad, IsUnknown) = row.Verdict switch
@@ -56,6 +61,9 @@ public sealed partial class RowView
     public bool IsBad { get; }
     public bool IsUnknown { get; }
     public bool HasKexts { get; }
+    public string SystemDriver { get; }
+    public bool HasSystemDriver { get; }
+    public bool HasNoDriver { get; }
     public Geometry? Icon { get; }
     public IReadOnlyList<KextView> Kexts { get; }
 }
