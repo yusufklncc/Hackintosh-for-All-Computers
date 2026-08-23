@@ -27,6 +27,13 @@ jobs:
           - os: ubuntu-latest
             rid: linux-x64
             exe: HackintoshEFIBuilderShell
+          # macOS is where an EFI often gets finished rather than started: the
+          # target machine's report travels to the Mac and the build happens
+          # there. The window has to open on it, so it is built and drawn here
+          # like the other two.
+          - os: macos-latest
+            rid: osx-arm64
+            exe: HackintoshEFIBuilderShell
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v5
