@@ -110,14 +110,16 @@ public sealed class Session
         await _process.WaitForExitAsync();
     }
 
-    /// <summary>Answer the question that is open, with what a person would have typed.</summary>
+    /// <summary>Answer the question that is open, with what a person would have typed.
+    ///
+    /// A typed record, not a dictionary of object. Reflection is off in the
+    /// published build, so serialising a boxed value throws at runtime - and
+    /// the throw landed in an unobserved task, which is why the first version
+    /// of this did not fail, it hung.</summary>
     public void Answer(int id, string value)
     {
         _process.StandardInput.WriteLine(
-            JsonSerializer.Serialize(new Dictionary<string, object>
-            {
-                ["id"] = id, ["value"] = value,
-            }, Replies.Default.DictionaryStringObject));
+            JsonSerializer.Serialize(new Reply(id, value), Replies.Default.Reply));
         _process.StandardInput.Flush();
     }
 
@@ -165,7 +167,9 @@ public sealed class Session
     }
 }
 
-[System.Text.Json.Serialization.JsonSerializable(typeof(Dictionary<string, object>))]
+public sealed record Reply(int id, string value);
+
+[System.Text.Json.Serialization.JsonSerializable(typeof(Reply))]
 public partial class Replies : System.Text.Json.Serialization.JsonSerializerContext
 {
 }

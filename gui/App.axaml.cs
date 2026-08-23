@@ -55,7 +55,16 @@ public partial class App : Application
                 // and then all the way through, answering the way the machine
                 // suggests. A pane that draws the first question and cannot
                 // finish a build has not been tested, only photographed.
-                Console.WriteLine("drive: " + await window.DriveBuilder());
+                try
+                {
+                    Console.WriteLine("drive: " + await window.DriveBuilder());
+                }
+                catch (Exception e)
+                {
+                    // an unobserved exception here is a hang, not a failure,
+                    // and a hang tells a build log nothing at all
+                    Console.WriteLine("drive: threw " + e);
+                }
                 desktop.Shutdown();
             });
         }, TimeSpan.FromSeconds(2));
