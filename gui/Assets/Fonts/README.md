@@ -8,8 +8,7 @@ a different name - which matters, because two of these are modified.
 |---|---|---|
 | `InstrumentSans-Regular.ttf` | google/fonts `ofl/instrumentsans` | one instance of the variable font |
 | `InstrumentSans-SemiBold.ttf` | same | same, and renamed so the weight resolves |
-| `IBMPlexMono-Regular.ttf` | google/fonts `ofl/ibmplexmono` | as published |
-| `IBMPlexMono-Medium.ttf` | same | as published |
+| `IBMPlexMono-Regular.ttf` | google/fonts `ofl/ibmplexmono` | as published, untouched |
 
 Both were taken at google/fonts commit `0b58fb370093f9a9f4ff785d94405710b79de67c`.
 
@@ -22,10 +21,14 @@ a heading set in SemiBold would come out Regular. These two are cut from it:
     fonttools varLib.instancer InstrumentSans[wdth,wght].ttf wght=400 wdth=100
     fonttools varLib.instancer InstrumentSans[wdth,wght].ttf wght=600 wdth=100
 
-SemiBold is not one of the four styles the legacy name fields can hold, so its
-family is `Instrument Sans SemiBold` with typographic names putting it back
-under `Instrument Sans`. That is the same arrangement IBM Plex Mono Medium
-ships with, and it is what lets `FontWeight="SemiBold"` find it.
+Avalonia's embedded font collection groups by the legacy family name rather
+than the typographic one, so both files share the family `Instrument Sans` and
+carry the weight in the subfamily. Instrument Sans has no Reserved Font Name,
+which is what makes keeping that name on a modified copy allowed.
+
+IBM Plex does have one - `Plex` - so nothing here modifies those files, and
+only the weight they publish under the plain family name is used. That is why
+there is one Plex file and not two.
 
 Regenerating them needs `fonttools`; nothing in this repository does at build
 or run time.

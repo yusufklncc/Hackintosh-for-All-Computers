@@ -35,7 +35,7 @@
               <StackPanel Orientation="Horizontal" Spacing="5" Margin="0,0,16,2">
                 <TextBlock Classes="mono" Text="{Binding Name}" />
                 <TextBlock Classes="mono" Text="{Binding Value}"
-                           Foreground="{DynamicResource Ink}" FontWeight="Medium" />
+                           Foreground="{DynamicResource Ink}" />
               </StackPanel>
             </DataTemplate>
           </ItemsControl.ItemTemplate>
@@ -75,7 +75,7 @@
               <DataTemplate x:DataType="v:BoundView">
                 <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,6">
                   <TextBlock Grid.Column="0" Text="{Binding What}" FontSize="13"
-                             FontWeight="Medium" Foreground="{DynamicResource Ink}" />
+                             Foreground="{DynamicResource Ink}" />
                   <TextBlock Grid.Column="1" Classes="mono" Text="{Binding Span}" />
                 </Grid>
               </DataTemplate>
@@ -115,7 +115,7 @@
                     </StackPanel>
 
                     <StackPanel Grid.Column="1" Margin="0,0,16,0" Spacing="2">
-                      <TextBlock Text="{Binding What}" FontSize="13.5" FontWeight="Medium"
+                      <TextBlock Text="{Binding What}" FontSize="13.5" FontWeight="SemiBold"
                                  Foreground="{DynamicResource Ink}" TextWrapping="Wrap" />
                       <TextBlock Text="{Binding Note}" IsVisible="{Binding HasNote}"
                                  FontSize="12.5"

@@ -1451,9 +1451,12 @@ def embedded_fonts():
         check('the fonts directory is there', False)
         return
     have = {p.name for p in fonts.glob('*.ttf')}
-    check('both weights of each face are present',
+    check('the faces the window asks for are present',
           have == {'InstrumentSans-Regular.ttf', 'InstrumentSans-SemiBold.ttf',
-                   'IBMPlexMono-Regular.ttf', 'IBMPlexMono-Medium.ttf'}, sorted(have))
+                   'IBMPlexMono-Regular.ttf'}, sorted(have))
+    # "Plex" is a Reserved Font Name, so that file has to be the published one
+    check('nothing asks for a Plex weight that is not published',
+          'IBMPlexMono-Medium' not in Path('gui/App.axaml').read_text())
     for licence in ('OFL-InstrumentSans.txt', 'OFL-IBMPlexMono.txt'):
         text = (fonts / licence).read_text(encoding='utf-8', errors='replace')
         check(f'{licence} is the licence it claims to be',
