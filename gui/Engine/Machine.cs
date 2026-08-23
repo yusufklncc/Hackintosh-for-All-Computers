@@ -35,6 +35,7 @@ public sealed class Row
     [JsonPropertyName("what")] public string What { get; set; } = "";
     [JsonPropertyName("verdict")] public string Verdict { get; set; } = "";
     [JsonPropertyName("detail")] public string Detail { get; set; } = "";
+    [JsonPropertyName("note")] public string Note { get; set; } = "";
     [JsonPropertyName("kexts")] public List<KextFacts> Kexts { get; set; } = new();
     [JsonPropertyName("ids")] public List<string> Ids { get; set; } = new();
 }

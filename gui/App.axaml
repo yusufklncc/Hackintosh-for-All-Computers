@@ -37,6 +37,9 @@
       <Setter Property="FontSize" Value="12" />
       <Setter Property="Foreground" Value="{DynamicResource Muted}" />
     </Style>
+    <Style Selector="TextBlock.kext">
+      <Setter Property="Foreground" Value="{DynamicResource Accent}" />
+    </Style>
     <Style Selector="Border.panel">
       <Setter Property="BorderBrush" Value="{DynamicResource Line}" />
       <Setter Property="BorderThickness" Value="1" />

@@ -44,14 +44,21 @@ COLOUR = {SUPPORTED: GREEN, UNSUPPORTED: RED, UNKNOWN: YELLOW, ABSENT: DIM}
 AMD_GENERATIONS = ('ryzen-threadripper', 'bulldozer-jaguar')
 
 
-def row(part, what, verdict, detail='', kexts=(), ids=()):
+def row(part, what, verdict, detail='', kexts=(), ids=(), note=None):
     """One line of the summary.
 
-    `detail` is the sentence a person reads. `kexts` and `ids` are the same
-    facts as values, for a front end that wants to draw a link to the project
-    rather than print its name in the middle of a sentence - pulling the kext
-    back out of the prose worked, right up until a sentence mentioned two."""
+    `detail` is the sentence a person reads on a console that has one column.
+    `kexts` and `ids` are the same facts as values, for a front end that draws
+    a link rather than printing a name mid-sentence - pulling the kext back out
+    of the prose worked, right up until a sentence mentioned two.
+
+    `note` is what is left when the columns have taken their share: a screen
+    that shows the kext in its own column and then repeats it in the sentence
+    underneath has said the same thing twice. Where nothing is left it is the
+    empty string, and where the sentence is all note it defaults to the
+    sentence."""
     return {'part': part, 'what': what, 'verdict': verdict, 'detail': detail,
+            'note': detail if note is None else note,
             'kexts': list(kexts), 'ids': list(ids)}
 
 
@@ -127,7 +134,8 @@ def audio_row(hw):
     layouts = len(codec['layout'])
     return row('Audio', f"{codec['vendor']} {codec['codec']}", SUPPORTED,
                f'AppleALC, {layouts} layout' + ('s to try' if layouts != 1 else ''),
-               kexts=['AppleALC.kext'], ids=ids)
+               kexts=['AppleALC.kext'], ids=ids,
+               note=f'{layouts} layout' + ('s to try' if layouts != 1 else ''))
 
 
 def _kext_note(match):
@@ -182,7 +190,7 @@ def network_rows(hw):
                 out.append(row(label, names.get(device_id) or d['label'], SUPPORTED,
                                f'{d["kext"]}  [{device_id}]'
                                + (f'  {note}' if note else ''),
-                               kexts=[d['kext']], ids=[device_id]))
+                               kexts=[d['kext']], ids=[device_id], note=note))
         elif hw.get('pci_ids') or hw.get('usb_ids'):
             # the devices were read and none of them matched, which is a fact
             # worth stating: either macOS needs no kext, or the card has to go
@@ -200,7 +208,7 @@ def storage_row(hw):
     third = [d for d in drives if 'apple' not in d.lower()]
     if third:
         return row('Storage', ', '.join(third), SUPPORTED, 'NVMeFix',
-                   kexts=['NVMeFix.kext'])
+                   kexts=['NVMeFix.kext'], note='')
     return row('Storage', ', '.join(drives), SUPPORTED,
                'Apple NVMe, which is the case NVMeFix is not for')
 
@@ -215,7 +223,7 @@ def input_row(hw):
     name = pointing[0]['name'] if pointing else ('I2C trackpad' if i2c else 'not readable')
     if i2c:
         return row('Trackpad', name, SUPPORTED, f'VoodooI2C  [{", ".join(i2c)}]',
-                   kexts=['VoodooI2C.kext'], ids=i2c)
+                   kexts=['VoodooI2C.kext'], ids=i2c, note='')
     # the machine names its own SMBus controller after whatever drives the
     # trackpad, which outranks the PS/2 controller also being there: on these
     # laptops both are, and only one of them is carrying the trackpad
@@ -224,11 +232,11 @@ def input_row(hw):
         rule = inputdev.smbus_rule(bus)
         return row('Trackpad', name, SUPPORTED,
                    f'{", ".join(rule["kexts"])} for {rule["label"]}  [{smbus_id}]',
-                   kexts=rule['kexts'], ids=[smbus_id])
+                   kexts=rule['kexts'], ids=[smbus_id], note=rule['label'])
     if hw.get('ps2'):
         return row('Trackpad', name, SUPPORTED,
                    'on PS/2; VoodooPS2Controller is in the laptop profile',
-                   kexts=['VoodooPS2Controller.kext'])
+                   kexts=['VoodooPS2Controller.kext'], note='on PS/2')
     return row('Trackpad', name, UNKNOWN, 'no I2C controller and nothing on PS/2')
 
 
@@ -276,11 +284,14 @@ def peripheral_rows(hw):
                            f'{driver["kext"]} since {found["since"]}'
                            f'  [{found["id"]}]{tail}',
                            kexts=[driver['kext']] if not tail else (),
-                           ids=[found['id']]))
+                           ids=[found['id']],
+                           note=f'since {found["since"]}'
+                                + (', not shipped here' if tail else '')))
         elif found:
             out.append(row('Card reader', dev['name'], UNSUPPORTED,
                            f'{driver["kext"]} lists it and does not drive it yet',
-                           ids=[found['id']]))
+                           ids=[found['id']],
+                           note=f'{driver["kext"]} lists it and does not drive it yet'))
         else:
             out.append(row('Card reader', dev['name'], UNKNOWN,
                            'not in the one driver this repository has data for'))

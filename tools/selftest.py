@@ -1368,6 +1368,18 @@ def machine_document():
                   k['bundle'].replace('.kext', '') in r['detail']
                   or k['bundle'] in r['detail'], r['detail'])
 
+    # the note is what the columns cannot say. A screen that draws the kext in
+    # its own column and repeats it underneath has said one thing twice.
+    for r in doc['rows']:
+        for k in r['kexts']:
+            check(f"{r['part']}: the note does not repeat {k['bundle']}",
+                  k['bundle'].replace('.kext', '') not in r['note'], r['note'])
+        for i in r['ids']:
+            check(f"{r['part']}: the note does not repeat {i}", i not in r['note'])
+    check('and the console sentence is untouched',
+          'AirportBrcmFixup.kext' in next(
+              r for r in doc['rows'] if r['part'] == 'Wi-Fi')['detail'])
+
     wifi = next(r for r in doc['rows'] if r['part'] == 'Wi-Fi')
     facts = wifi['kexts'][0]
     check('a vendored kext carries its upstream', facts['upstream'], facts)

@@ -21,7 +21,11 @@ public sealed partial class RowView
     {
         Part = row.Part;
         What = TrailingId().Replace(row.What, "");
-        Detail = row.Detail;
+        // the sentence is written for a console with one column; here the
+        // kext and the id have columns of their own, and repeating them
+        // underneath says the same thing twice
+        Note = row.Note;
+        HasNote = row.Note.Length > 0;
         Ids = string.Join("\n", row.Ids);
         // the view model, not the payload: binding the payload straight
         // through drew the type name in the column
@@ -41,7 +45,8 @@ public sealed partial class RowView
 
     public string Part { get; }
     public string What { get; }
-    public string Detail { get; }
+    public string Note { get; }
+    public bool HasNote { get; }
     public string Ids { get; }
     public string Label { get; }
     public bool IsOk { get; }

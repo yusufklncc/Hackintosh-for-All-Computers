@@ -117,7 +117,8 @@
                     <StackPanel Grid.Column="1" Margin="0,0,16,0" Spacing="2">
                       <TextBlock Text="{Binding What}" FontSize="13.5" FontWeight="Medium"
                                  Foreground="{DynamicResource Ink}" TextWrapping="Wrap" />
-                      <TextBlock Text="{Binding Detail}" FontSize="12.5"
+                      <TextBlock Text="{Binding Note}" IsVisible="{Binding HasNote}"
+                                 FontSize="12.5"
                                  Foreground="{DynamicResource Muted}" TextWrapping="Wrap" />
                     </StackPanel>
 
@@ -132,8 +133,7 @@
                         <ItemsControl.ItemTemplate>
                           <DataTemplate x:DataType="v:KextView">
                             <StackPanel Margin="0,0,0,6">
-                              <TextBlock Classes="mono" Text="{Binding Bundle}"
-                                         Foreground="{DynamicResource Accent}" />
+                              <TextBlock Classes="mono kext" Text="{Binding Bundle}" />
                               <TextBlock Classes="mono" FontSize="10.5"
                                          Foreground="{DynamicResource Faint}"
                                          Text="{Binding Aside}" />
