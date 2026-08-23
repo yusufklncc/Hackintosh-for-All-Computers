@@ -75,6 +75,12 @@ public sealed class MacSupport
     [JsonPropertyName("listed")] public bool Listed { get; set; }
 }
 
+public sealed class GraphicsAdvice
+{
+    [JsonPropertyName("tone")] public string Tone { get; set; } = "";
+    [JsonPropertyName("text")] public string Text { get; set; } = "";
+}
+
 public sealed class MachineDocument
 {
     [JsonPropertyName("source")] public string Source { get; set; } = "";
@@ -85,6 +91,7 @@ public sealed class MachineDocument
     [JsonPropertyName("worth_showing")] public bool WorthShowing { get; set; }
     [JsonPropertyName("read")] public Dictionary<string, int> Read { get; set; } = new();
     [JsonPropertyName("mac")] public MacSupport? Mac { get; set; }
+    [JsonPropertyName("graphics_advice")] public GraphicsAdvice? Graphics { get; set; }
 }
 
 [JsonSerializable(typeof(MachineDocument))]

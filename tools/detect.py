@@ -219,6 +219,14 @@ def _windows():
         '{ $_.PNPClass -in @("Camera","Image","SDHost","MTD","Mouse","Keyboard") } '
         '| ForEach-Object '
         '{ "$($_.PNPClass)|$($_.PNPDeviceID)|$($_.Name)|$($_.Service)" }')
+    # Windows classes every device it enumerates, and for a network card that
+    # class is the machine saying what the card is. A card no kext here claims
+    # would otherwise be read as "nothing recognised" when the machine knew
+    # perfectly well it was the Wi-Fi.
+    out['netclass'] = _ps(
+        'Get-CimInstance Win32_PnPEntity | Where-Object '
+        '{ $_.PNPClass -in @("Net","Bluetooth") } | ForEach-Object '
+        '{ "$($_.PNPClass)|$($_.PNPDeviceID)|$($_.Name)" }')
     # ACPI-enumerated devices, for the I2C controllers that have no PCI id at
     # all: on Haswell and Broadwell they are INT33C2 and friends, and AMD's are
     # only ever named this way.
@@ -256,6 +264,10 @@ def _linux():
     if chassis.isdigit():
         out['laptop'] = int(chassis) in {8, 9, 10, 11, 12, 14, 18, 21, 30, 31, 32}
     out['pci'] = _run(['lspci', '-nn'])
+    # lspci names the class before the model: "Network controller: Intel ..."
+    out['netclass'] = '\n'.join(
+        f'Net|{l}' for l in out['pci'].splitlines()
+        if re.search(r':\s*(Ethernet|Network) controller', l))
     out['gpu'] = [f"PCI|{l.split(': ', 1)[-1]}" for l in out['pci'].splitlines()
                   if 'VGA compatible controller' in l or '3D controller' in l]
     out['usb'] = _run(['lsusb'])
@@ -347,6 +359,38 @@ REGISTRY_ROLES = (
     ('ethernet', 'ethernet'),
     ('sdreader', 'card reader'), ('sdxc', 'card reader'),
 )
+
+
+WIRELESS_WORDS = ('wireless', 'wifi', 'wi-fi', 'wlan', '802.11')
+
+
+def named_roles(text, patterns):
+    """{id: role} for the devices a system classed as network hardware.
+
+    Windows gives every device a PNPClass and Linux puts the class in the lspci
+    line, so "this is a network card" is the machine's own word and not a
+    reading of the marketing name. Wi-Fi against Ethernet is not in the class,
+    though, and the model name is the only thing that separates them: a card
+    calling itself "Wireless LAN WiFi 6" is not an Ethernet port."""
+    out = {}
+    for line in (text or '').splitlines():
+        parts = line.split('|', 2)
+        if len(parts) < 2:
+            continue
+        kind, rest = parts[0].strip().lower(), '|'.join(parts[1:])
+        found = _pairs(rest, patterns)
+        if not found:
+            continue
+        name = rest.lower()
+        if kind == 'bluetooth' or 'bluetooth' in name:
+            role = 'bluetooth'
+        elif any(word in name for word in WIRELESS_WORDS):
+            role = 'wifi'
+        else:
+            role = 'ethernet'
+        for device_id in found:
+            out.setdefault(device_id, role)
+    return out
 
 
 def _pci_role(node):
@@ -738,7 +782,8 @@ def probe():
         'board_id': raw.get('board') if system == 'Darwin' else None,
         # {id: role}, where the machine itself said what a device is. Only
         # macOS answers this; everywhere else the kext tables do.
-        'machine_roles': raw.get('machine_roles') or {},
+        'machine_roles': (raw.get('machine_roles')
+                          or named_roles(raw.get('netclass'), PCI_PATTERNS + USB_PATTERNS)),
         # {id: driver}, from the system that is running while it is asked
         'machine_drivers': raw.get('machine_drivers') or {},
         'multitouch': raw.get('multitouch'),

@@ -1631,6 +1631,88 @@ def genuine_macs():
               mactable.window(board) is not None, board)
 
 
+def graphics_and_the_range():
+    """What the graphics mean for the macOS range: not a bound, a warning.
+
+    An unsupported card does not narrow which macOS runs - it decides whether
+    the machine has a display at all. Folding it into the range would read as a
+    version limit, which is a different and wrong thing to tell somebody."""
+    import summary
+
+    arc = {'id': '8086:56a0', 'name': 'Intel(R) Arc(TM) A770'}
+    igpu = {'id': '8086:9bc4', 'name': 'Intel(R) UHD Graphics'}
+    radeon = {'id': '1002:67df', 'name': 'Radeon RX 580'}
+
+    nothing = summary.graphics_advice({'generation': 'comet-lake',
+                                       'gpu_devices': [radeon]})
+    check('a supported card is not warned about', nothing is None, nothing)
+    check('and neither is a machine with no graphics at all',
+          summary.graphics_advice({'gpu_devices': []}) is None)
+
+    fallback = summary.graphics_advice({'generation': 'comet-lake',
+                                        'gpu_devices': [arc, igpu]})
+    check('an unsupported card with a working iGPU says to use the iGPU',
+          fallback['tone'] == summary.UNSUPPORTED
+          and 'UHD Graphics' in fallback['text']
+          and 'range above still holds' in fallback['text'], fallback)
+
+    alone = summary.graphics_advice({'generation': 'comet-lake',
+                                     'gpu_devices': [arc]})
+    check('an unsupported card with no iGPU says there is no fallback',
+          'no integrated graphics to fall back on' in alone['text'], alone)
+    check('and that it has to be replaced', 'replaced' in alone['text'])
+
+    # the field report about this processor says its iGPU does not accelerate,
+    # so the iGPU cannot be offered as the way out
+    dead = summary.graphics_advice({'cpu': 'i5-10200H', 'generation': 'comet-lake',
+                                    'gpu_devices': [arc, igpu]})
+    check('an unsupported card and a dead iGPU says neither is supported',
+          'neither is' in dead['text'] and 'cannot cover for it' in dead['text'], dead)
+
+    unheard = summary.graphics_advice({
+        'generation': 'comet-lake',
+        'gpu_devices': [{'id': 'abcd:1234', 'name': 'Something Nobody Ships'}]})
+    check('a card in no table is unknown and says that is not a verdict',
+          unheard['tone'] == summary.UNKNOWN
+          and 'not the same as unsupported' in unheard['text'], unheard)
+
+
+def what_the_machine_calls_its_network():
+    """A card no kext claims is still a card the machine can name.
+
+    Windows classes every device it enumerates and Linux puts the class in the
+    lspci line. Wi-Fi against Ethernet is not in the class, so the model name
+    settles that - a card calling itself "Wireless LAN WiFi 6" is not a port."""
+    import detect
+
+    lines = '\n'.join([
+        r'Net|PCI\VEN_10EC&DEV_B852&SUBSYS_1234|Realtek 8852BE Wireless LAN WiFi 6 PCI-E NIC',
+        r'Bluetooth|USB\VID_0BDA&PID_B85B|Realtek Bluetooth 5.3 Adapter',
+        r'Net|PCI\VEN_8086&DEV_15F3|Intel(R) Ethernet Controller I225-V',
+        r'Net|ROOT\VMS_MP|Hyper-V Virtual Switch Extension Adapter',
+    ])
+    found = detect.named_roles(lines, detect.PCI_PATTERNS + detect.USB_PATTERNS)
+    check('a Realtek card that says WiFi is Wi-Fi', found.get('10ec:b852') == 'wifi',
+          found)
+    check('its Bluetooth half is Bluetooth', found.get('0bda:b85b') == 'bluetooth')
+    check('a card that says Ethernet is Ethernet', found.get('8086:15f3') == 'ethernet')
+    check('and a virtual adapter with no hardware id is not a device',
+          len(found) == 3, found)
+
+    # and the row it produces
+    import summary
+    rows = summary.network_rows({
+        'pci_ids': ['10ec:b852'],
+        'machine_roles': {'10ec:b852': 'wifi'},
+        'device_names': {'10ec:b852': 'Realtek 8852BE Wireless LAN WiFi 6 PCI-E NIC'},
+    })
+    wifi = next(r for r in rows if r['part'] == 'Wi-Fi')
+    check('the card is named rather than called unrecognised',
+          '8852BE' in wifi['what'], wifi['what'])
+    check('and nothing is claimed to drive it',
+          wifi['verdict'] == summary.UNKNOWN and not wifi['kexts'], wifi)
+
+
 if __name__ == '__main__':
     for section in (graphics, graphics_advice, audio_advice, storage, peripherals,
                     trackpad, framebuffer, boot_args, other_machine,
@@ -1642,7 +1724,8 @@ if __name__ == '__main__':
                     frozen_names, frozen_build, workflow_flags,
                     runner_independence, tables_match_sources,
                     front_end_protocol, machine_document, machine_name,
-                    embedded_fonts, macos_registry, genuine_macs):
+                    embedded_fonts, macos_registry, genuine_macs,
+                    graphics_and_the_range, what_the_machine_calls_its_network):
         print(f'\n{section.__name__}')
         section()
     print()

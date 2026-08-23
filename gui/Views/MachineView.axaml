@@ -76,6 +76,11 @@
                      Foreground="{DynamicResource Ink}" TextWrapping="Wrap" />
           <TextBlock Name="WindowWhy" FontSize="12.5" Foreground="{DynamicResource Muted}"
                      TextWrapping="Wrap" />
+          <!-- Graphics do not narrow the range; they decide whether there is a
+               display at all. Beside it, not folded into it. -->
+          <TextBlock Name="GraphicsWarning" FontSize="12.5" TextWrapping="Wrap"
+                     IsVisible="False" Margin="0,4,0,0"
+                     Foreground="{DynamicResource Warn}" />
         </StackPanel>
       </Border>
       <Border Grid.Column="1" Classes="panel">

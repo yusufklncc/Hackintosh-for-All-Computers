@@ -238,11 +238,11 @@ def network_rows(hw):
                 out.append(row(label, names.get(device_id) or device_id,
                                DRIVEN if driver else UNKNOWN,
                                f'macOS has it on {driver}' if driver
-                               else 'the machine names this device itself; no '
+                               else 'this machine says what the device is; no '
                                     'kext here claims it',
                                ids=[device_id], driver=driver,
-                               note='' if driver else 'the machine names this '
-                                    'device itself'))
+                               note='' if driver else 'the machine says what it '
+                                    'is; nothing here drives it'))
         elif hw.get('system') == 'Darwin':
             # the registry named every device it has, and none of them is this
             out.append(row(label, 'none', ABSENT, 'this Mac has no such device'))
@@ -443,6 +443,71 @@ def macos_windows(hw):
     return out
 
 
+def graphics_advice(hw):
+    """What the graphics mean for the macOS range, or None if they mean nothing.
+
+    The range itself comes from the processor and the kexts, because those are
+    what the tables bound. Graphics do not narrow it - they decide whether the
+    machine has a display at all - so they belong beside the range as a warning
+    rather than folded into it, where an unsupported card would silently look
+    like a version limit.
+
+    Four cases, and each one ends in what to do about it:
+
+        card unsupported, iGPU works      run on the iGPU
+        card unsupported, iGPU does not   replace the card, nothing covers for it
+        card unsupported, no iGPU at all  replace the card, there is no fallback
+        card unknown                      say so, and say it is not a verdict
+    """
+    devices = hw.get('gpu_devices') or []
+    if not devices:
+        return None
+    generation = hw.get('generation')
+
+    discrete, integrated = [], []
+    for device in devices:
+        verdict = gpu.classify(device, generation)[0]
+        name = device.get('name') or 'graphics'
+        (integrated if gpu.looks_integrated(name) else discrete).append(
+            {'name': name, 'verdict': verdict})
+
+    # a field report about this exact processor outranks the generation rule
+    field = gpu.field_igpu(hw.get('cpu'))
+    for entry in integrated:
+        if field:
+            entry['verdict'] = field['status']
+
+    bad = [d for d in discrete if d['verdict'] == 'unsupported']
+    unclear = [d for d in discrete if d['verdict'] not in ('works', 'works-spoofed',
+                                                           'unsupported')]
+    if not bad:
+        if unclear:
+            return {'tone': UNKNOWN,
+                    'text': f'{unclear[0]["name"]} is in neither the card table nor '
+                            'the family rules, so nothing here can say whether macOS '
+                            'drives it. That is not the same as unsupported.'}
+        return None
+
+    named = ', '.join(d['name'] for d in bad)
+    usable = [d for d in integrated if d['verdict'] in ('works', 'works-spoofed')]
+    if usable:
+        return {'tone': UNSUPPORTED,
+                'text': f'{named} is not supported. macOS would run on '
+                        f'{usable[0]["name"]} instead, so the range above still '
+                        'holds - but the card gives you nothing and the display '
+                        'has to come off the integrated one.'}
+    if integrated:
+        return {'tone': UNSUPPORTED,
+                'text': f'{named} is not supported, and neither is '
+                        f'{integrated[0]["name"]}. The card has to be replaced '
+                        'with one macOS drives; the integrated graphics cannot '
+                        'cover for it.'}
+    return {'tone': UNSUPPORTED,
+            'text': f'{named} is not supported and there is no integrated graphics '
+                    'to fall back on. The card has to be replaced with one macOS '
+                    'drives, or this machine has no display under macOS.'}
+
+
 def macos_range(hw):
     """(min_darwin, max_darwin or None, what set each end) across the machine."""
     windows = macos_windows(hw)
@@ -589,6 +654,9 @@ def document(hw, source='this machine'):
         # a real Mac answers the macOS question from Apple rather than from the
         # kexts, which claim none of its hardware
         'mac': genuine_mac(hw),
+        # what the graphics mean for that range: not a bound on it, but the
+        # difference between a machine that boots to a display and one that does not
+        'graphics_advice': graphics_advice(hw),
     }
 
 

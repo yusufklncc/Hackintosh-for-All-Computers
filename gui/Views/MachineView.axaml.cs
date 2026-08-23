@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Avalonia.Controls;
+using Avalonia.Media;
 using Shell;
 using Shell.Engine;
 
@@ -184,6 +185,19 @@ public partial class MachineView : UserControl
             Window.Text = "Not bounded here";
             WindowWhy.Text = "Nothing on this machine narrows the range, which is not the " +
                        "same as saying every release works.";
+        }
+
+        if (m.Graphics is { } advice)
+        {
+            GraphicsWarning.Text = advice.Text;
+            GraphicsWarning.IsVisible = true;
+            GraphicsWarning.Foreground = (IBrush?)(
+                this.TryFindResource(advice.Tone == "unknown" ? "Warn" : "Bad",
+                                     out var brush) ? brush : null);
+        }
+        else
+        {
+            GraphicsWarning.IsVisible = false;
         }
 
         if (m.Mac is null)
