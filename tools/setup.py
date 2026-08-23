@@ -480,9 +480,11 @@ def main():
     ap.add_argument('--usb-map', help='a UTBMap.kext made with the USBToolBox tool')
     ap.add_argument('--answers', help='answer the menus non-interactively, comma separated; '
                                       'for scripting and for CI')
-    ap.add_argument('--inventory', metavar='WHAT', choices=('kexts', 'about'),
+    ap.add_argument('--inventory', metavar='WHAT',
+                    choices=('kexts', 'about', 'devices'),
                     help='write what this repository carries as JSON and stop: '
-                         'the vendored kexts, or the standing facts')
+                         'the vendored kexts, the standing facts, or every '
+                         'device the tables know')
     ap.add_argument('--describe', action='store_true',
                     help='write this machine as one JSON document and stop, for '
                          'a front end to draw')
@@ -520,8 +522,8 @@ def main():
 
     if a.inventory:
         import json as _json
-        document = (inventory.kexts() if a.inventory == 'kexts'
-                    else inventory.about())
+        document = {'kexts': inventory.kexts, 'about': inventory.about,
+                    'devices': inventory.devices}[a.inventory]()
         sys.stdout.write(_json.dumps(document, ensure_ascii=False) + '\n')
         return 0
 

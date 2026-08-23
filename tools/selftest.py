@@ -1805,6 +1805,17 @@ def the_device_catalogue():
     check('the vendor filter has something to filter by',
           len(catalogue['vendors']) > 5, catalogue['vendors'][:4])
 
+    # the builder takes --inventory and hands it to this module. The two lists
+    # of what that argument accepts were written twice and drifted: the window
+    # asked for "devices" and the builder had never heard of it.
+    source = Path('tools/setup.py').read_text()
+    for what in ('kexts', 'about', 'devices'):
+        check(f'the builder accepts --inventory {what}',
+              f"'{what}'" in source.split('--inventory')[1][:400], what)
+        r = run([sys.executable, 'tools/setup.py', '--inventory', what])
+        check(f'and answers it with JSON', r.returncode == 0
+              and r.stdout.lstrip().startswith('{'), r.stdout[:60])
+
 
 if __name__ == '__main__':
     for section in (graphics, graphics_advice, audio_advice, storage, peripherals,
