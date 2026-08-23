@@ -22,7 +22,10 @@
     <!-- What the engine has said so far, in the colours it said it in -->
     <Border Grid.Row="1" BorderBrush="{DynamicResource Line}" BorderThickness="1"
             CornerRadius="8" Background="{DynamicResource Surface2}" ClipToBounds="True">
-      <ScrollViewer Name="Scroll" Padding="16,12">
+      <!-- The console lines up its columns with spaces, so wrapping them would
+           take the alignment apart. It scrolls sideways instead. -->
+      <ScrollViewer Name="Scroll" Padding="16,12"
+                    HorizontalScrollBarVisibility="Auto">
         <StackPanel Name="Transcript" Spacing="1" />
       </ScrollViewer>
     </Border>

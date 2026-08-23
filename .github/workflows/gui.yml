@@ -71,6 +71,9 @@ jobs:
           # the pane is only worth a picture if an engine answered into it
           grep -qE 'builder: [1-9][0-9]* lines, asking ".+" with [1-9]' render.log \
             || { echo 'the builder pane never got a question'; cat render.log; exit 1; }
+          # and it has to be able to finish one, not only start it
+          grep -q 'drive: rc=0 Written:' render.log \
+            || { echo 'the builder pane never finished a build'; cat render.log; exit 1; }
 
       # A font that failed to load falls back to the system's, and the window
       # still looks reasonable. That is the whole problem: it has to be checked,

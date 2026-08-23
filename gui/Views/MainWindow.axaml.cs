@@ -23,6 +23,9 @@ public partial class MainWindow : Window
 
     public string BuilderState() => BuilderPane.State();
 
+    public System.Threading.Tasks.Task<string> DriveBuilder() =>
+        BuilderPane.DriveToEnd();
+
     void Swap()
     {
         MachinePane.IsVisible = ToMachine.IsChecked == true;

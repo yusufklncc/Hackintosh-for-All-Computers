@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
@@ -47,10 +48,14 @@ public partial class App : Application
             // waited for rather than timed: probing a machine takes as long as
             // that machine takes, and on Windows that is a good deal longer
             // than a number picked here would have guessed
-            WhenAsked(window, () =>
+            WhenAsked(window, async () =>
             {
                 Console.WriteLine(window.BuilderState());
                 Save(window, into.Replace(".png", "-builder.png", StringComparison.Ordinal));
+                // and then all the way through, answering the way the machine
+                // suggests. A pane that draws the first question and cannot
+                // finish a build has not been tested, only photographed.
+                Console.WriteLine("drive: " + await window.DriveBuilder());
                 desktop.Shutdown();
             });
         }, TimeSpan.FromSeconds(2));
@@ -82,12 +87,12 @@ public partial class App : Application
     }
 
     /// <summary>Run this once the builder has a question up, or give up.</summary>
-    static void WhenAsked(MainWindow window, Action then, int secondsLeft = 90)
+    static void WhenAsked(MainWindow window, Func<Task> then, int secondsLeft = 90)
     {
         DispatcherTimer.RunOnce(() =>
         {
             if (secondsLeft <= 0 || window.BuilderState().Contains("asking"))
-                then();
+                _ = then();
             else
                 WhenAsked(window, then, secondsLeft - 1);
         }, TimeSpan.FromSeconds(1));

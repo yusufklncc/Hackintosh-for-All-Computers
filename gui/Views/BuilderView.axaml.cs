@@ -24,9 +24,35 @@ public partial class BuilderView : UserControl
     Session? _session;
     Question? _open;
     string _out = DefaultFolder();
+    TaskCompletionSource<string>? _ended;
 
     /// <summary>Start a run without a click, for the screenshot pass.</summary>
     public Task StartForRender() => Run();
+
+    /// <summary>Answer every question the way the machine suggests, until it ends.
+    ///
+    /// Through the same two methods a click goes through, because a build that
+    /// only works when a person is watching is not a build that works. What
+    /// comes back is what the pane ends up saying.</summary>
+    public async Task<string> DriveToEnd()
+    {
+        var ended = _ended ?? throw new InvalidOperationException("nothing is running");
+        while (!ended.Task.IsCompleted)
+        {
+            if (_open is not null)
+            {
+                // a question with nothing detected leaves nothing checked, and
+                // Send is right to refuse it. This pass has no opinion, so it
+                // takes the first row rather than stopping there forever.
+                var rows = Options.Children.OfType<RadioButton>().ToList();
+                if (rows.Count > 0 && rows.All(r => r.IsChecked != true))
+                    rows[0].IsChecked = true;
+                Send();
+            }
+            await Task.Delay(150);
+        }
+        return await ended.Task;
+    }
 
     /// <summary>What is on screen, in one line a build log can assert on.</summary>
     public string State() =>
@@ -81,6 +107,7 @@ public partial class BuilderView : UserControl
         Transcript.Children.Clear();
         Standby.IsVisible = false;
         Begin.IsEnabled = false;
+        _ended = new TaskCompletionSource<string>();
 
         var session = Session.Start(engine, _out);
         _session = session;
@@ -126,7 +153,6 @@ public partial class BuilderView : UserControl
             FontFamily = this.TryFindResource("Mono", out var mono)
                 ? (FontFamily)mono! : FontFamily.Default,
             FontSize = 12,
-            TextWrapping = TextWrapping.Wrap,
         };
         foreach (var span in spans)
         {
@@ -251,5 +277,6 @@ public partial class BuilderView : UserControl
             StandbyTitle.Text = "Stopped with an error";
             StandbyText.Text = $"The engine exited {code}. The transcript says why.";
         }
+        _ended?.TrySetResult($"rc={code} {StandbyTitle.Text}: {built ?? "nothing written"}");
     }
 }
