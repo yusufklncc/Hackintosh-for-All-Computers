@@ -10,8 +10,14 @@ name: gui-bench
 # This workflow exists to inform one decision. Once that decision is made it
 # should be deleted, along with bench/.
 
+# workflow_dispatch alone cannot start this: GitHub only lists dispatchable
+# workflows that exist on the default branch, and this one deliberately does
+# not. A push trigger on the beta branches is what runs it.
 on:
   workflow_dispatch:
+  push:
+    branches: ['beta/**']
+    paths: ['bench/**', '.github/workflows/gui-bench.yml']
 
 jobs:
   avalonia:
