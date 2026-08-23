@@ -26,6 +26,7 @@ import advise
 import audio
 import detect
 import gpu
+import coverage
 import inputdev
 import mactable
 import netkexts
@@ -396,6 +397,30 @@ def _window(lo, hi):
     return (lo or 0, hi if hi else None)
 
 
+def profile_window(hw):
+    """What the CPU profile itself covers, in Darwin majors, or None.
+
+    The processor is the first thing that bounds macOS and it was the one thing
+    not counted here. An AMD machine runs on kernel patches, those patches carry
+    their own bounds, and above them it does not boot at all - a harder limit
+    than any kext imposes. A Ryzen desktop with no recognised network card
+    therefore read as "not bounded here" when its profile said 10.13 to 26."""
+    generation = hw.get('generation')
+    if not generation:
+        return None
+    row = {'path': '', 'platform': 'laptop' if hw.get('laptop') else 'desktop',
+           'vendor': None if hw.get('laptop') else
+                     ('amd' if generation in AMD_GENERATIONS else 'intel'),
+           'cpu': generation, 'chipset': None, 'oem': None, 'variant': None,
+           'cores': hw.get('cores')}
+    try:
+        return coverage.window_for(row)
+    except (KeyError, ValueError, FileNotFoundError):
+        # a core count with no variant, a generation with no profile: the rest
+        # of the screen is still worth drawing
+        return None
+
+
 def macos_windows(hw):
     """[(what, min_darwin, max_darwin or None)] for the parts that bound macOS.
 
@@ -404,6 +429,9 @@ def macos_windows(hw):
     anywhere in this repository, so neither narrows the answer and the caller
     has to say so rather than presenting this as the machine's true ceiling."""
     out = []
+    profile = profile_window(hw)
+    if profile:
+        out.append(('the kernel patches this CPU needs', profile[0], profile[1]))
     gen = hw.get('generation')
     if gen and any(gpu.looks_integrated(d.get('name'))
                    for d in hw.get('gpu_devices', [])):

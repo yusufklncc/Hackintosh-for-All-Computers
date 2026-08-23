@@ -1631,6 +1631,43 @@ def genuine_macs():
               mactable.window(board) is not None, board)
 
 
+def the_processor_bounds_it_too():
+    """An AMD machine runs on kernel patches, and those patches have bounds.
+
+    They were not counted, so a Ryzen desktop with no recognised network card
+    said "not bounded here" while its own profile said 10.13 to 26. Above the
+    patches the machine does not boot at all, which is a harder limit than any
+    kext imposes."""
+    import coverage
+    import summary
+
+    ryzen = {'cpu': 'AMD Ryzen 5 5600', 'generation': 'ryzen-threadripper',
+             'cores': 6, 'laptop': False}
+    window = summary.profile_window(ryzen)
+    check('a Ryzen profile is bounded by its patches', window is not None)
+    check('from High Sierra', window[0] == 17, window)
+    check('to whatever the newest patch covers', window[1] and window[1] >= 24, window)
+
+    named = summary.macos_range(ryzen)
+    check('and the machine range now says so rather than nothing', named is not None)
+    check('with the patches named as what set it',
+          'kernel patches' in named[0][0], named)
+
+    intel = {'cpu': 'i5', 'generation': 'comet-lake', 'laptop': False}
+    check('an Intel profile carries no kernel patches, so it bounds nothing',
+          summary.profile_window(intel) is None)
+
+    check('a machine whose generation is unknown is not guessed at',
+          summary.profile_window({'cpu': 'something'}) is None)
+
+    # the envelope, not the intersection: grouping by capability read a renamed
+    # successor patch as the capability having stopped, and bounded Ryzen at 11
+    row = dict(path='', platform='desktop', vendor='amd', cpu='ryzen-threadripper',
+               cores=6, chipset=None, oem=None, variant=None)
+    check('the ceiling is the furthest any patch reaches',
+          coverage.window_for(row)[1] >= 24, coverage.window_for(row))
+
+
 def graphics_and_the_range():
     """What the graphics mean for the macOS range: not a bound, a warning.
 
@@ -1725,7 +1762,8 @@ if __name__ == '__main__':
                     runner_independence, tables_match_sources,
                     front_end_protocol, machine_document, machine_name,
                     embedded_fonts, macos_registry, genuine_macs,
-                    graphics_and_the_range, what_the_machine_calls_its_network):
+                    the_processor_bounds_it_too, graphics_and_the_range,
+                    what_the_machine_calls_its_network):
         print(f'\n{section.__name__}')
         section()
     print()
