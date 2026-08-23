@@ -7,6 +7,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.IO;
 using System.Text;
 using System.Text.Json;
@@ -73,7 +74,7 @@ public static class Builder
                 // a file manager launch does not have these on the path
                 "/opt/homebrew/bin/python3", "/usr/local/bin/python3",
             };
-        foreach (var candidate in candidates)
+        foreach (var candidate in candidates.Concat(FromLoginShell()))
         {
             try
             {
@@ -97,6 +98,44 @@ public static class Builder
             }
         }
         return null;
+    }
+
+    /// <summary>Whatever the person's own shell calls python3, if anything.
+    ///
+    /// Version managers - mise, pyenv, asdf - put their interpreter on a path
+    /// that only exists once a login shell has run its profile. A window
+    /// started from a file manager never runs one, so the interpreter is there
+    /// and unreachable. Asking the shell is the only way to find out where.</summary>
+    static IEnumerable<string> FromLoginShell()
+    {
+        if (OperatingSystem.IsWindows()) yield break;
+        var shell = Environment.GetEnvironmentVariable("SHELL");
+        if (string.IsNullOrEmpty(shell) || !File.Exists(shell)) yield break;
+        string found;
+        try
+        {
+            using var ask = Process.Start(new ProcessStartInfo
+            {
+                FileName = shell,
+                ArgumentList = { "-lc", "command -v python3" },
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                CreateNoWindow = true,
+            });
+            if (ask is null) yield break;
+            found = ask.StandardOutput.ReadToEnd().Trim();
+            ask.WaitForExit(8000);
+            if (!ask.HasExited || ask.ExitCode != 0) yield break;
+        }
+        catch (Exception e) when (e is System.ComponentModel.Win32Exception or IOException)
+        {
+            yield break;
+        }
+        // the last line: a profile that prints a banner is common enough
+        var last = found.Split('\n', StringSplitOptions.RemoveEmptyEntries)
+                        .LastOrDefault()?.Trim();
+        if (!string.IsNullOrEmpty(last) && File.Exists(last)) yield return last;
     }
 
     /// <summary>Run the engine once and hand back what it wrote to stdout.</summary>

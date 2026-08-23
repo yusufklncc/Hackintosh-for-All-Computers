@@ -36,7 +36,9 @@ public partial class BuilderView : UserControl
     /// comes back is what the pane ends up saying.</summary>
     public async Task<string> DriveToEnd()
     {
-        var ended = _ended ?? throw new InvalidOperationException("nothing is running");
+        // nothing started, which the standby panel has already explained. An
+        // exception here would be a second, worse report of the same thing.
+        if (_ended is not { } ended) return "did not start: " + StandbyText.Text;
         // bounded, and it says where it got to. An unattended pass that can
         // hang is a build that hangs, and a build log with nothing in it is
         // the worst way to find that out.
