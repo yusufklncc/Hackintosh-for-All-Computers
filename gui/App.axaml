@@ -81,13 +81,18 @@
     <ResourceDictionary>
       <!-- Both faces travel inside the executable. Each names a fallback
            after it: a weight that cannot be found should leave the window
-           looking wrong, not stop it from opening at all. -->
+           looking wrong, not stop it from opening at all.
+
+           The authority in an avares URI is the assembly name, which is not
+           the namespace. Spelled wrong it resolves to nothing, the fallback
+           takes over, and the window looks fine in a screenshot while being
+           set in entirely the wrong face - which is what happened. -->
       <!-- Both faces travel inside the executable. Every machine-produced
            value is set in the monospace one, so a device id and the sentence
            about it can never be mistaken for each other. See
            Assets/Fonts/README.md for where they came from. -->
-      <FontFamily x:Key="Sans">avares://Shell/Assets/Fonts#Instrument Sans, $Default</FontFamily>
-      <FontFamily x:Key="Mono">avares://Shell/Assets/Fonts#IBM Plex Mono, monospace</FontFamily>
+      <FontFamily x:Key="Sans">avares://HackintoshEFIBuilderShell/Assets/Fonts#Instrument Sans, $Default</FontFamily>
+      <FontFamily x:Key="Mono">avares://HackintoshEFIBuilderShell/Assets/Fonts#IBM Plex Mono, monospace</FontFamily>
       <ResourceDictionary.ThemeDictionaries>
         <ResourceDictionary x:Key="Light">
           <SolidColorBrush x:Key="Ground" Color="#EEF1F5" />
