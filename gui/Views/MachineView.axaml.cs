@@ -128,10 +128,9 @@ public partial class MachineView : UserControl
         // claim none of its hardware, so they have nothing to say about it.
         if (m.Mac is { Listed: true, From: { } shipped })
         {
-            Window.Text = m.Mac.To is { } last
-                ? $"{shipped} to {last}"
-                : $"{shipped} and newer";
-            WindowWhy.Text = m.Mac.To is null
+            var last = m.Mac.To;
+            Window.Text = last is null ? $"{shipped} and newer" : $"{shipped} to {last}";
+            WindowWhy.Text = last is null
                 ? $"Apple still lists {m.Mac.Board} in the newest macOS it serves, "
                 + "so this Mac is supported."
                 : $"Apple no longer lists {m.Mac.Board} past {last}.";
