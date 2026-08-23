@@ -1313,13 +1313,25 @@ def front_end_protocol():
         check('and said where', built and Path(built).exists(), built)
 
         if typed.returncode == 0 and rc == 0:
-            a = (console / 'OC' / 'config.plist').read_text().splitlines()
-            b = (front / 'OC' / 'config.plist').read_text().splitlines()
-            differ = [x for x, y in zip(a, b) if x != y]
-            check('the two configs are the same length', len(a) == len(b))
-            # SystemUUID, SystemSerialNumber and MLB, and nothing else
-            check('and differ only in the three generated serials',
-                  len(differ) == 3, differ)
+            import plistlib
+
+            def without_serials(path):
+                """The config, minus what is generated fresh on every run.
+
+                Counting differing lines instead was wrong in a way that only
+                showed in CI: two runs can draw the same serial, and then two
+                lines match by luck and the count is short."""
+                with open(path, 'rb') as fh:
+                    plist = plistlib.load(fh)
+                generic = plist.get('PlatformInfo', {}).get('Generic', {})
+                for key in ('SystemUUID', 'SystemSerialNumber', 'MLB'):
+                    generic.pop(key, None)
+                return plist
+
+            a = without_serials(console / 'OC' / 'config.plist')
+            b = without_serials(front / 'OC' / 'config.plist')
+            check('the two configs are the same everywhere else', a == b,
+                  [k for k in set(a) | set(b) if a.get(k) != b.get(k)])
 
     # every module that prints in colour asks the same question about it
     for name in ('advise', 'kextorder', 'provenance', 'summary', 'thirdparty', 'setup'):
