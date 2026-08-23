@@ -44,12 +44,15 @@ public partial class App : Application
             // and the other pane, with an engine actually running in it: a
             // picture of an empty transcript would prove nothing
             _ = window.ShowBuilder();
-            DispatcherTimer.RunOnce(() =>
+            // waited for rather than timed: probing a machine takes as long as
+            // that machine takes, and on Windows that is a good deal longer
+            // than a number picked here would have guessed
+            WhenAsked(window, () =>
             {
                 Console.WriteLine(window.BuilderState());
                 Save(window, into.Replace(".png", "-builder.png", StringComparison.Ordinal));
                 desktop.Shutdown();
-            }, TimeSpan.FromSeconds(10));
+            });
         }, TimeSpan.FromSeconds(2));
     }
 
@@ -76,6 +79,18 @@ public partial class App : Application
                               (found ? $"{face!.FamilyName} {(int)face.Weight}"
                                      : "NOT FOUND"));
         }
+    }
+
+    /// <summary>Run this once the builder has a question up, or give up.</summary>
+    static void WhenAsked(MainWindow window, Action then, int secondsLeft = 90)
+    {
+        DispatcherTimer.RunOnce(() =>
+        {
+            if (secondsLeft <= 0 || window.BuilderState().Contains("asking"))
+                then();
+            else
+                WhenAsked(window, then, secondsLeft - 1);
+        }, TimeSpan.FromSeconds(1));
     }
 
     static void Save(MainWindow window, string into)
