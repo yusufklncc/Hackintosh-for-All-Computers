@@ -38,13 +38,64 @@ public static class Builder
         {
             var script = Path.Combine(dir.FullName, "tools", "setup.py");
             if (!File.Exists(script)) continue;
-            var python = OperatingSystem.IsWindows() ? "python" : "python3";
+            var python = Interpreter();
+            if (python is null)
+            {
+                complaint = "Found the engine at " + script + " but no Python that " +
+                            "can run it. It needs 3.11 or newer, for tomllib.";
+                return null;
+            }
             complaint = "";
             return new Located(python, new[] { script }, "a clone at " + dir.FullName);
         }
 
         complaint = $"No engine found. Looked for {ExeName} beside this window, " +
                     $"and for tools/setup.py above {beside}.";
+        return null;
+    }
+
+    static string? _python;
+
+    /// <summary>A Python that can actually run the engine, or null.
+    ///
+    /// "python3" is not enough. Launched from a file manager the search path is
+    /// the bare system one, and on macOS that is Python 3.9 - which has no
+    /// tomllib, so every table the engine reads fails to load. The same launch
+    /// from a terminal works, which is the worst way for this to be wrong.</summary>
+    static string? Interpreter()
+    {
+        if (_python is not null) return _python;
+        var candidates = OperatingSystem.IsWindows()
+            ? new[] { "python", "py" }
+            : new[]
+            {
+                "python3.13", "python3.12", "python3.11", "python3",
+                // a file manager launch does not have these on the path
+                "/opt/homebrew/bin/python3", "/usr/local/bin/python3",
+            };
+        foreach (var candidate in candidates)
+        {
+            try
+            {
+                using var probe = Process.Start(new ProcessStartInfo
+                {
+                    FileName = candidate,
+                    ArgumentList = { "-c", "import tomllib" },
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    CreateNoWindow = true,
+                });
+                if (probe is null) continue;
+                probe.WaitForExit(5000);
+                if (probe.HasExited && probe.ExitCode == 0) return _python = candidate;
+            }
+            catch (Exception e) when (e is System.ComponentModel.Win32Exception or IOException)
+            {
+                // not installed under that name, which is the common case for
+                // most of this list
+            }
+        }
         return null;
     }
 
