@@ -163,6 +163,20 @@ jobs:
                 shot-kexts.png shot-about.png machine.json
           rm -rf EFI ACPI
 
+      # The window tells people this is slow. How slow is worth knowing, and
+      # worth noticing if it ever becomes slower.
+      - name: How long reading a machine takes here
+        shell: bash
+        run: |
+          cd package
+          start=$(date +%s)
+          ./HackintoshEFIBuilder.exe --describe > described.json
+          echo "describe took $(( $(date +%s) - start ))s" >> $GITHUB_STEP_SUMMARY
+          python -c "import json,sys; d=json.load(open('described.json')); \
+            print('rows', len(d['rows']), 'read', d['read'])" \
+            >> $GITHUB_STEP_SUMMARY
+          rm -f described.json
+
       - name: What it weighs
         shell: bash
         run: |

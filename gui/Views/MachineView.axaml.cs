@@ -44,6 +44,15 @@ public partial class MachineView : UserControl
 
     async System.Threading.Tasks.Task Load()
     {
+        // Reading a machine takes as long as that machine takes, and on Windows
+        // the hardware queries are tens of seconds. An empty table for half a
+        // minute looks like a program that has failed, so it says what it is
+        // doing before it starts doing it.
+        Content.IsVisible = false;
+        Note("READING THIS MACHINE",
+             "Asking the system what it has. On Windows this takes a few tens of "
+             + "seconds the first time, because the hardware queries are slow.");
+
         var engine = Builder.Find(out var missing);
         if (engine is null) { NoMachine(missing); return; }
 
@@ -52,6 +61,7 @@ public partial class MachineView : UserControl
         // A Mac gets the note and the table both: the table is what it has,
         // and the note is why none of it is claimed here. Hiding the table
         // because nothing matched threw away the answer to "what is in it".
+        Show(machine);
         if (machine.Profile.System == "Darwin")
         {
             // Read and unmatched is not the same as unreadable, and on a Mac
@@ -77,9 +87,7 @@ public partial class MachineView : UserControl
         else if (!machine.WorthShowing)
         {
             NoMachine("Nothing on this machine could be read.");
-            return;
         }
-        Show(machine);
     }
 
     // named for what it says, not for the panel it says it in: the generated
@@ -101,6 +109,8 @@ public partial class MachineView : UserControl
 
     void Show(MachineDocument m)
     {
+        Content.IsVisible = true;
+        Trouble.IsVisible = false;
         Source.Text =
             m.Source.StartsWith("report", StringComparison.Ordinal)
                 ? "READ FROM " + m.Source.ToUpperInvariant()
