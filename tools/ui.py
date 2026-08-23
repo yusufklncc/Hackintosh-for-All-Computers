@@ -32,6 +32,10 @@ CODES = {
 TONES = {v: k for k, v in CODES.items()}
 ANSI = re.compile(r'\033\[[0-9;]*m')
 
+# Bumped when an event changes shape. A front end reads it from the hello line
+# and can say so rather than misreading a stream it does not understand.
+VERSION = 1
+
 # The modules pick their escape codes when they are imported, which is before
 # anything has parsed an argument. Reading the flag here is what lets a
 # protocol run keep its colour: without it stdout is a pipe, every code comes
@@ -88,10 +92,11 @@ class Console:
     def line(self, text=''):
         print(text)
 
-    def menu(self, event, render):
-        """Show a menu and return the typed answer. render() prints it."""
-        render()
-        return None                      # the caller reads the answer itself
+    def flush_text(self):
+        pass
+
+    def emit(self, **event):
+        pass
 
     def done(self, rc, out=None):
         pass
@@ -159,15 +164,23 @@ class Protocol:
 
     # --- answers in -------------------------------------------------------
 
-    def question(self, **event):
-        """Ask, and block until the front end answers this exact question.
+    def pose(self, **event):
+        """Send a question and hand back its id.
+
+        Posing and receiving are separate so a scripted run can still emit the
+        whole question: what a front end would have been shown is then in the
+        stream even when nobody was there to answer it, which is the only way
+        the stream itself can be checked."""
+        self.counter += 1
+        self.emit(id=self.counter, **event)
+        return self.counter
+
+    def receive(self, mine):
+        """Block until the front end answers this exact question.
 
         The id is checked rather than trusted. A front end that answers the
         question before last would otherwise put its answer into a menu it was
         never shown, and the build would be wrong in a way nobody could see."""
-        self.counter += 1
-        mine = self.counter
-        self.emit(id=mine, **event)
         while True:
             raw = self.inp.readline()
             if not raw:
@@ -184,6 +197,9 @@ class Protocol:
                 self.emit(t='error', message=f'expected an answer to {mine}')
                 continue
             return str(reply.get('value', '')).strip()
+
+    def question(self, **event):
+        return self.receive(self.pose(**event))
 
     def done(self, rc, out=None):
         self.emit(t='done', rc=rc, out=out)

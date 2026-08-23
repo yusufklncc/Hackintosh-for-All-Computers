@@ -683,7 +683,10 @@ def window_stays_open():
     import setup as guided
     src = Path('tools/setup.py').read_text()
     check('the pause is only for the frozen build',
-          "if not getattr(sys, 'frozen', False) or SCRIPTING:" in src)
+          "if not getattr(sys, 'frozen', False) or SCRIPTING or UI.protocol:" in src)
+    # a front end has no key to press and no window to keep open; waiting for
+    # one would hang the build behind a prompt nobody can see
+    check('and never when a front end is driving', 'or UI.protocol:' in src)
     check('and a refusal is printed before it, not swallowed',
           'if isinstance(exc.code, str):' in src)
 
@@ -1247,6 +1250,85 @@ def tables_match_sources():
                    if i.startswith('ffff') or i.endswith(':ffff')])
 
 
+def front_end_protocol():
+    """The same flow, driven as a front end would drive it.
+
+    Two surfaces is two things to get wrong, so what is checked here is that
+    there are not two: the same questions in the same order, and a config that
+    differs from the console's only where it is meant to - the SMBIOS serials,
+    which are generated fresh every run."""
+    import json
+    import ui
+
+    check('a line keeps the tone the console would have shown it in',
+          ui.spans('\033[32mdone\033[0m') == [{'tone': 'green', 'text': 'done'}],
+          ui.spans('\033[32mdone\033[0m'))
+    check('and a line with no codes is one plain span',
+          ui.spans('plain') == [{'tone': 'plain', 'text': 'plain'}])
+
+    with tempfile.TemporaryDirectory() as tmp:
+        console = Path(tmp) / 'console' / 'EFI'
+        front = Path(tmp) / 'front' / 'EFI'
+        typed = run([sys.executable, 'tools/setup.py', '--no-detect',
+                     '--answers', '2,10,3', '--out', str(console)])
+        check('the console still builds', typed.returncode == 0)
+
+        # answered by name rather than by number, which is the point of the
+        # event: a front end draws the rows and never has to count them
+        want = {'What kind of machine is this?': 'laptop',
+                'Which CPU generation?': 'kaby-lake',
+                'Board or laptop brand?': 'hp'}
+        proc = subprocess.Popen(
+            [sys.executable, 'tools/setup.py', '--no-detect', '--protocol',
+             '--out', str(front)],
+            stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True,
+            encoding='utf-8', bufsize=1)
+        asked, events, built, rc = [], [], None, None
+        for line in proc.stdout:
+            try:
+                event = json.loads(line)
+            except ValueError:
+                check('every line is one JSON object', False, line[:70])
+                break
+            events.append(event['t'])
+            if event['t'] == 'ask':
+                asked.append(event['question'])
+                pick = want.get(event['question'])
+                n = next((o['n'] for o in event['options'] if o['value'] == pick), 1)
+                proc.stdin.write(json.dumps({'id': event['id'], 'value': str(n)}) + '\n')
+                proc.stdin.flush()
+            elif event['t'] == 'prompt':
+                proc.stdin.write(json.dumps({'id': event['id'], 'value': ''}) + '\n')
+                proc.stdin.flush()
+            elif event['t'] == 'built':
+                built = event['out']
+            elif event['t'] == 'done':
+                rc = event['rc']
+        proc.wait()
+
+        check('it says what it is before anything else', events[:1] == ['hello'], events[:1])
+        check('and how it ended, last', events[-1] == 'done', events[-1])
+        check('the front end was asked the same three questions', len(asked) == 3, asked)
+        check('it built', rc == 0 and proc.returncode == 0, rc)
+        check('and said where', built and Path(built).exists(), built)
+
+        if typed.returncode == 0 and rc == 0:
+            a = (console / 'OC' / 'config.plist').read_text().splitlines()
+            b = (front / 'OC' / 'config.plist').read_text().splitlines()
+            differ = [x for x, y in zip(a, b) if x != y]
+            check('the two configs are the same length', len(a) == len(b))
+            # SystemUUID, SystemSerialNumber and MLB, and nothing else
+            check('and differ only in the three generated serials',
+                  len(differ) == 3, differ)
+
+    # every module that prints in colour asks the same question about it
+    for name in ('advise', 'kextorder', 'provenance', 'summary', 'thirdparty', 'setup'):
+        source = Path('tools') / f'{name}.py'
+        check(f'{name} takes its colours from one place',
+              'ui.colours(' in source.read_text()
+              and "os.environ.get('NO_COLOR')" not in source.read_text())
+
+
 if __name__ == '__main__':
     for section in (graphics, graphics_advice, audio_advice, storage, peripherals,
                     trackpad, framebuffer, boot_args, other_machine,
@@ -1256,7 +1338,8 @@ if __name__ == '__main__':
                     smbus_trackpad, macos_window, card_readers, third_party,
                     usb_mapping, acpi_tables, unattended_ssdts, ssdt_flow, window_stays_open,
                     frozen_names, frozen_build, workflow_flags,
-                    runner_independence, tables_match_sources):
+                    runner_independence, tables_match_sources,
+                    front_end_protocol):
         print(f'\n{section.__name__}')
         section()
     print()

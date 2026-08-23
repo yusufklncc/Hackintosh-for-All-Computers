@@ -36,15 +36,13 @@ import advise
 import detect
 import hwtable
 import ocgen
+import ui
 
 LOCK = Path('vendor/kexts.lock')
 LICENCES = Path('vendor/licences.toml')
 CANDIDATES = Path('data/candidates.toml')
 
-BOLD, DIM, GREEN, YELLOW, RED, RESET = (
-    '\033[1m', '\033[2m', '\033[32m', '\033[33m', '\033[31m', '\033[0m')
-if os.environ.get('NO_COLOR') or not sys.stdout.isatty():
-    BOLD = DIM = GREEN = YELLOW = RED = RESET = ''
+BOLD, DIM, GREEN, YELLOW, RED, RESET = ui.colours('bold', 'dim', 'green', 'yellow', 'red', 'reset')
 
 # A licence that grants nothing is not the same as a permissive one, and a
 # copyleft licence is not a problem - it is an obligation. Both are worth

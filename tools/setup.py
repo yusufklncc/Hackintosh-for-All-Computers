@@ -33,6 +33,7 @@ import inputdev
 import netkexts
 import ocgen
 import summary
+import ui
 import usbmap
 
 PROFILES = Path('profiles')
@@ -61,36 +62,47 @@ CPU_LABELS = {
     'bulldozer-jaguar': 'Bulldozer / Jaguar', 'ryzen-threadripper': 'Ryzen / Threadripper',
 }
 
-BOLD, DIM, GREEN, YELLOW, RESET = '\033[1m', '\033[2m', '\033[32m', '\033[33m', '\033[0m'
-if os.environ.get('NO_COLOR') or not sys.stdout.isatty():
-    BOLD = DIM = GREEN = YELLOW = RESET = ''
+BOLD, DIM, GREEN, YELLOW, RESET = ui.colours(
+    'bold', 'dim', 'green', 'yellow', 'reset')
 
 
 SCRIPTED = []
 SCRIPTING = False
 
+# The console, until --protocol swaps it for one that speaks JSON. Both are
+# asked the same questions in the same order; only the surface differs.
+UI = ui.Console()
 
-def _answer():
-    """The next scripted answer, or a typed one.
+
+def _answer(**event):
+    """The next scripted answer, or one from whoever is attached.
 
     Running out mid-run is a scripting mistake, not a prompt: with --answers the
     input is usually closed, so falling through to input() would end in an
-    EOFError several frames away from the cause."""
+    EOFError several frames away from the cause.
+
+    A question is posed to a front end even when a script is going to answer
+    it. Nobody reads it in that case, but it is then in the stream, and a
+    stream that is only produced when someone is watching cannot be tested."""
+    posed = UI.pose(**event) if UI.protocol else None
     if SCRIPTED:
         raw = SCRIPTED.pop(0)
         print(f'      > {raw}')
         return raw
     if SCRIPTING:
         sys.exit('--answers ran out: this run asks more questions than it was given')
+    if posed is not None:
+        return UI.receive(posed)
     return input('      > ').strip()
 
 
 def prompt(question, note=None):
     """A free-text answer. Empty means the person declined."""
-    print(f'\n{BOLD}{question}{RESET}')
-    if note:
-        print(f'      {DIM}{note}{RESET}')
-    return _answer().strip()
+    if not UI.protocol:
+        print(f'\n{BOLD}{question}{RESET}')
+        if note:
+            print(f'      {DIM}{note}{RESET}')
+    return _answer(t='prompt', question=question, note=note).strip()
 
 
 def ask(step, total, question, options, detected=None, allow_skip=False,
@@ -100,25 +112,37 @@ def ask(step, total, question, options, detected=None, allow_skip=False,
     `detected` is shown as a note and marks its row, but the person still types
     a number - the whole point is that the machine's guess is visible and
     overridable in the same glance."""
-    # the first question runs before the total is known, since a laptop asks
-    # fewer than a desktop; claiming a total there would only be wrong
-    if not step:
-        print(f'\n{BOLD}{question}{RESET}')            # a follow-up, not a numbered step
-    else:
-        counter = f'{step}/{total}' if total else f'{step}'
-        print(f'\n{BOLD}[{counter}] {question}{RESET}')
-    hint = dict(options).get(detected)
-    if hint:
-        print(f'      {GREEN}detected: {hint}{RESET}')
-    elif detected:
-        print(f'      {GREEN}detected: {detected}{RESET}')
-    for i, (value, label) in enumerate(options, 1):
-        mark = f' {GREEN}<- detected{RESET}' if value == detected else ''
-        print(f'      {i:2d}) {label}{mark}')
+    # A front end is sent the menu as an event and draws it itself, so printing
+    # it as well would show it twice - once as a list of rows it can click and
+    # once as the transcript of a program it is pretending not to be.
+    if not UI.protocol:
+        # the first question runs before the total is known, since a laptop asks
+        # fewer than a desktop; claiming a total there would only be wrong
+        if not step:
+            print(f'\n{BOLD}{question}{RESET}')        # a follow-up, not a numbered step
+        else:
+            counter = f'{step}/{total}' if total else f'{step}'
+            print(f'\n{BOLD}[{counter}] {question}{RESET}')
+        hint = dict(options).get(detected)
+        if hint:
+            print(f'      {GREEN}detected: {hint}{RESET}')
+        elif detected:
+            print(f'      {GREEN}detected: {detected}{RESET}')
+        for i, (value, label) in enumerate(options, 1):
+            mark = f' {GREEN}<- detected{RESET}' if value == detected else ''
+            print(f'      {i:2d}) {label}{mark}')
+        if allow_skip:
+            print(f'      {len(options) + 1:2d}) {skip_label}')
+    event = {
+        't': 'ask', 'step': step or None, 'total': total or None,
+        'question': question, 'detected': detected,
+        'options': [{'n': i, 'value': v, 'label': label, 'detected': v == detected}
+                    for i, (v, label) in enumerate(options, 1)],
+    }
     if allow_skip:
-        print(f'      {len(options) + 1:2d}) {skip_label}')
+        event['skip'] = {'n': len(options) + 1, 'label': skip_label}
     while True:
-        raw = _answer()
+        raw = _answer(**event)
         if raw.isdigit():
             n = int(raw)
             if 1 <= n <= len(options):
@@ -448,7 +472,19 @@ def main():
     ap.add_argument('--usb-map', help='a UTBMap.kext made with the USBToolBox tool')
     ap.add_argument('--answers', help='answer the menus non-interactively, comma separated; '
                                       'for scripting and for CI')
+    ap.add_argument('--protocol', action='store_true',
+                    help='talk JSON on stdin and stdout instead of printing menus, '
+                         'so a front end can drive this')
     a = ap.parse_args()
+
+    if a.protocol:
+        # installed before anything is printed, so the whole run is in the
+        # stream: a front end that misses the first section has to guess where
+        # it is, and guessing is what this program exists not to do
+        global UI
+        UI = ui.Protocol(out=sys.stdout)
+        ui.install(UI)
+        UI.emit(t='hello', version=ui.VERSION)
 
     if a.answers:
         global SCRIPTING
@@ -1020,6 +1056,9 @@ def main():
           f'partition of your USB drive.')
     print(f'  {DIM}ROM is still a placeholder - set it to your own MAC address, see the '
           f'README Post Installation section.{RESET}')
+    # where it went, as a value rather than as a sentence a front end would have
+    # to read back out of the transcript
+    UI.emit(t='built', out=str(Path(a.out).resolve()))
     return 0
 
 
@@ -1033,7 +1072,7 @@ def hold():
 
     Only there: from a shell the window outlives the program, and a run with
     --answers has nobody to press the key."""
-    if not getattr(sys, 'frozen', False) or SCRIPTING:
+    if not getattr(sys, 'frozen', False) or SCRIPTING or UI.protocol:
         return
     try:
         if not sys.stdin.isatty():
@@ -1051,11 +1090,16 @@ if __name__ == '__main__':
         # before the pause is the whole point of pausing
         if isinstance(exc.code, str):
             print(exc.code)
+            UI.fatal(exc.code)
             code = 1
         else:
             code = exc.code or 0
     except KeyboardInterrupt:
         print('\n  stopped')
         code = 130
+    # the last line of the stream says how it ended, so a front end never has to
+    # decide whether a process that stopped printing finished or died
+    UI.flush_text()
+    UI.done(code)
     hold()
     sys.exit(code)

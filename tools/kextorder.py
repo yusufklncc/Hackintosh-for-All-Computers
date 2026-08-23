@@ -30,12 +30,11 @@ from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import ocgen
+import ui
 
 KEXTS = Path('EFI/OC/Kexts')
 
-BOLD, DIM, GREEN, RED, RESET = '\033[1m', '\033[2m', '\033[32m', '\033[31m', '\033[0m'
-if os.environ.get('NO_COLOR') or not sys.stdout.isatty():
-    BOLD = DIM = GREEN = RED = RESET = ''
+BOLD, DIM, GREEN, RED, RESET = ui.colours('bold', 'dim', 'green', 'red', 'reset')
 
 
 def graph(root=KEXTS):

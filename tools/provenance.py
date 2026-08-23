@@ -31,10 +31,9 @@ from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import ocgen
+import ui
 
-BOLD, DIM, GREEN, YELLOW, RESET = '\033[1m', '\033[2m', '\033[32m', '\033[33m', '\033[0m'
-if os.environ.get('NO_COLOR') or not sys.stdout.isatty():
-    BOLD = DIM = GREEN = YELLOW = RESET = ''
+BOLD, DIM, GREEN, YELLOW, RESET = ui.colours('bold', 'dim', 'green', 'yellow', 'reset')
 
 DERIVED, QUOTED, MEASURED, REPORTED, NONE = (
     'derived', 'quoted', 'measured', 'reported', 'none')
