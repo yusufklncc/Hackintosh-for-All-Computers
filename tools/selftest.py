@@ -1606,17 +1606,25 @@ def genuine_macs():
     check('and no board at all is not either', mactable.window('') is None)
 
     # the floor and ceiling turn into releases people know by name
-    made = summary.genuine_mac({'board_id': silicon[0]['board']})
+    made = summary.genuine_mac({'system': 'Darwin', 'board_id': silicon[0]['board']})
     check('a listed board comes back with a named release',
           made['listed'] and made['from']['name'], made)
     check('a machine with no board is not a Mac',
           summary.genuine_mac({}) is None)
-    check('and a board nothing lists says so rather than nothing',
-          summary.genuine_mac({'board_id': 'nope'}) == {
+    check('and neither is a PC that happens to name its baseboard',
+          summary.genuine_mac({'system': 'Linux',
+                               'board_id': 'Microsoft Corporation Virtual Machine'})
+          is None)
+    check('a board nothing lists says so rather than nothing',
+          summary.genuine_mac({'system': 'Darwin', 'board_id': 'nope'}) == {
               'board': 'nope', 'from': None, 'to': None, 'listed': False})
 
-    # this machine, if it happens to be one
-    board = detect.probe().get('board_id')
+    # this machine, if it happens to be a Mac. A PC has a baseboard name and
+    # no board id, and asking Apple about one is the bug this used to have.
+    here = detect.probe()
+    board = here.get('board_id')
+    check('only a Mac has a board id',
+          board is None or here.get('system') == 'Darwin', (board, here.get('system')))
     if board:
         check('this Mac names its own board', board and ' ' not in board, board)
         check('and the table has something to say about it',

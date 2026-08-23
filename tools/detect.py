@@ -731,8 +731,11 @@ def probe():
         'oem': normalise_oem(raw.get('vendor')),
         'oem_raw': (raw.get('vendor') or '').strip() or None,
         'model': model_name(raw),
-        # only a Mac has one, and it is what Apple's support metadata is keyed on
-        'board_id': raw.get('board'),
+        # Only a Mac has one of these, and it is what Apple's support metadata
+        # is keyed on. Linux and Windows fill `board` with the baseboard name -
+        # "Microsoft Corporation Virtual Machine" - and letting that through
+        # made every PC a Mac that Apple had never heard of.
+        'board_id': raw.get('board') if system == 'Darwin' else None,
         # {id: role}, where the machine itself said what a device is. Only
         # macOS answers this; everywhere else the kext tables do.
         'machine_roles': raw.get('machine_roles') or {},

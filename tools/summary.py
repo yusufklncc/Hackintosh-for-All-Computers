@@ -526,6 +526,10 @@ def genuine_mac(hw):
     comes from what a kext claims; here it comes from Apple's own list of which
     machines each macOS line still runs on, because on a real Mac that is the
     only question worth asking."""
+    # both, not either: a probe from a report carries whatever the machine it
+    # came from had, and only a Mac's board means anything to Apple's list
+    if hw.get('system') != 'Darwin':
+        return None
     board = hw.get('board_id')
     if not board:
         return None
