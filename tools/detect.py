@@ -20,6 +20,7 @@ import datetime
 import os
 import json
 import platform
+import plistlib
 import re
 import subprocess
 import sys
@@ -275,6 +276,80 @@ def _linux():
     return out
 
 
+
+def _ioreg(cls):
+    """Every node of one IOKit class, flattened, as plain dictionaries.
+
+    -a asks for a plist, which is a tree of the same dictionaries ioreg would
+    otherwise pretty-print. Parsing that beats parsing the drawing of it."""
+    raw = _run(['ioreg', '-a', '-r', '-c', cls, '-l'])
+    if not raw.strip():
+        return []
+    try:
+        tree = plistlib.loads(raw.encode('utf-8', 'replace'))
+    except Exception:
+        return []
+    out = []
+
+    def walk(nodes):
+        for node in nodes or []:
+            if isinstance(node, dict):
+                out.append(node)
+                walk(node.get('IORegistryEntryChildren'))
+    walk(tree if isinstance(tree, list) else [tree])
+    return out
+
+
+def _le(value):
+    """A little-endian id as IOKit stores it: <e4140000> is 14e4."""
+    if not isinstance(value, bytes) or len(value) < 2:
+        return None
+    return f'{value[1]:02x}{value[0]:02x}'
+
+
+def _text(value):
+    if isinstance(value, bytes):
+        return value.split(b'\x00', 1)[0].decode('utf-8', 'replace').strip()
+    return str(value).strip() if value else ''
+
+
+def macos_devices():
+    """This Mac's PCI, USB and audio devices, in the shapes the parsers expect.
+
+    system_profiler is the wrong place to ask. SPPCIDataType reports nothing at
+    all on Apple silicon - measured on an M1 Pro, zero lines - while the same
+    machine's IORegistry has the Wi-Fi, the Bluetooth and the card reader with
+    their vendor and device ids. This matters most on a PC already running
+    macOS, which is a machine somebody may well be rebuilding an EFI for.
+
+    The lines come out looking like lspci and lsusb because those are already
+    parsed here; a third format would be a third thing to keep working."""
+    pci = []
+    for node in _ioreg('IOPCIDevice'):
+        vendor, device = _le(node.get('vendor-id')), _le(node.get('device-id'))
+        if not (vendor and device):
+            continue
+        # "model" is the only field that carries a name; IOName is the id again
+        name = _text(node.get('model'))
+        pci.append(f'[{vendor}:{device}]' + (f'|{name}' if name else ''))
+
+    usb = []
+    for node in _ioreg('IOUSBHostDevice'):
+        vendor, product = node.get('idVendor'), node.get('idProduct')
+        if not (isinstance(vendor, int) and isinstance(product, int)):
+            continue
+        name = _text(node.get('USB Product Name') or node.get('kUSBProductString'))
+        usb.append(f'ID {vendor:04x}:{product:04x}' + (f'|{name}' if name else ''))
+
+    hda = []
+    for node in _ioreg('IOHDACodecDevice'):
+        codec = node.get('IOHDACodecVendorID')
+        if isinstance(codec, int):
+            hda.append(f'Vendor Id: 0x{codec:08x}')
+
+    return '\n'.join(pci), '\n'.join(usb), '\n'.join(hda)
+
+
 def _macos():
     out = {}
     out['cpu'] = _run(['sysctl', '-n', 'machdep.cpu.brand_string']).strip()
@@ -285,8 +360,13 @@ def _macos():
     if model:
         out['laptop'] = model.startswith(('MacBook',))
     out['vendor'] = ''
-    out['pci'] = _run(['system_profiler', 'SPPCIDataType'])
-    out['usb'] = _run(['system_profiler', 'SPUSBDataType'])
+    # both sources: the registry is the one that answers on Apple silicon, and
+    # system_profiler is left in because an Intel Mac fills it in and no machine
+    # here can prove what it looks like there
+    pci, usb, hda = macos_devices()
+    out['pci'] = pci + '\n' + _run(['system_profiler', 'SPPCIDataType'])
+    out['usb'] = usb + '\n' + _run(['system_profiler', 'SPUSBDataType'])
+    out['hda'] = hda
     out['storage'] = '\n'.join(
         f'17|{m}' for m in re.findall(r'^\s{6}(\S.*?):$',
                                       _run(['system_profiler', 'SPNVMeDataType']), re.M))

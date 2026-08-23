@@ -1471,6 +1471,65 @@ def embedded_fonts():
           in Path('gui/Shell.csproj').read_text())
 
 
+def macos_registry():
+    """A Mac's own devices, read from the registry rather than the report of it.
+
+    system_profiler answers with nothing at all on Apple silicon - measured on
+    an M1 Pro, SPPCIDataType printed zero lines - while the IORegistry on the
+    same machine had the Wi-Fi, the Bluetooth and the card reader. This matters
+    on a PC already running macOS, where the machine being described is the
+    machine being converted."""
+    import detect
+
+    check('an id is little-endian in the registry and big-endian everywhere else',
+          detect._le(b'\xe4\x14\x00\x00') == '14e4', detect._le(b'\xe4\x14'))
+    check('and nothing is not an id', detect._le(None) is None and detect._le(b'\x01') is None)
+    check('a name stops at the first NUL', detect._text(b'BCM4387\x00junk') == 'BCM4387')
+
+    plist = b"""<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><array><dict>
+  <key>vendor-id</key><data>axAAAA==</data>
+  <key>device-id</key><data>DBAAAA==</data>
+  <key>IOName</key><string>pci-bridge</string>
+  <key>IORegistryEntryChildren</key><array><dict>
+    <key>vendor-id</key><data>5BQAAA==</data>
+    <key>device-id</key><data>M0QAAA==</data>
+    <key>model</key><data>QkNNNDM4NwA=</data>
+  </dict></array>
+</dict></array></plist>"""
+
+    was = detect._run
+    try:
+        detect._run = lambda cmd, shell=False: (
+            plist.decode() if 'IOPCIDevice' in cmd else '')
+        pci, usb, hda = detect.macos_devices()
+    finally:
+        detect._run = was
+
+    check('a nested device is found, not only the bridge above it',
+          '[14e4:4433]|BCM4387' in pci, pci)
+    check('and the bridge as well, since it is a device with an id',
+          '[106b:100c]' in pci, pci)
+    check('an id with no name has no trailing bar',
+          '[106b:100c]|' not in pci, pci)
+    check('the lines parse with the reader that already exists',
+          detect._pairs(pci, detect.PCI_PATTERNS) == {'14e4:4433', '106b:100c'},
+          detect._pairs(pci, detect.PCI_PATTERNS))
+    check('and the name comes back with the id it was beside',
+          detect._names(pci, detect.PCI_PATTERNS).get('14e4:4433') == 'BCM4387',
+          detect._names(pci, detect.PCI_PATTERNS))
+    check('nothing is invented for the classes that answered nothing',
+          usb == '' and hda == '')
+
+    # and on the machine this is running on, whatever that is
+    hw = detect.probe()
+    if hw.get('system') == 'Darwin':
+        check('this Mac reports at least its own PCI devices',
+              len(hw['pci_ids']) > 0, hw['pci_ids'])
+        check('and says which system it was read on', hw['system'] == 'Darwin')
+
+
 if __name__ == '__main__':
     for section in (graphics, graphics_advice, audio_advice, storage, peripherals,
                     trackpad, framebuffer, boot_args, other_machine,
@@ -1482,7 +1541,7 @@ if __name__ == '__main__':
                     frozen_names, frozen_build, workflow_flags,
                     runner_independence, tables_match_sources,
                     front_end_protocol, machine_document, machine_name,
-                    embedded_fonts):
+                    embedded_fonts, macos_registry):
         print(f'\n{section.__name__}')
         section()
     print()

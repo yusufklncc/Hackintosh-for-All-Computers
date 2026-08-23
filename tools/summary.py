@@ -445,7 +445,10 @@ def document(hw, source='this machine'):
                     'oem': hw.get('oem'), 'cores': hw.get('cores'),
                     # what the machine calls itself, where it calls itself
                     # anything: a name a person recognises beats a processor
-                    'model': hw.get('model')},
+                    'model': hw.get('model'),
+                    # a front end says something different about a Mac, and
+                    # only the probe knows what it ran on
+                    'system': hw.get('system')},
         'rows': parts,
         'macos': {
             # the floor is whichever part needs the newest macOS, the ceiling
