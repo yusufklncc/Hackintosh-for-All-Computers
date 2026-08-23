@@ -61,8 +61,11 @@ public partial class App : Application
             var family = (FontFamily)Resources[key]!;
             var found = FontManager.Current.TryGetGlyphTypeface(
                 new Typeface(family, FontStyle.Normal, weight), out var face);
-            Console.WriteLine($"typeface {key}/{weight} -> " +
-                              (found ? $"{face!.FamilyName} {face.Weight}" : "NOT FOUND"));
+            // numbers on both sides: the enum prints 600 as "DemiBold", which
+            // is a name for the weight and not the one that was asked for
+            Console.WriteLine($"typeface {key}/{(int)weight} -> " +
+                              (found ? $"{face!.FamilyName} {(int)face.Weight}"
+                                     : "NOT FOUND"));
         }
     }
 
