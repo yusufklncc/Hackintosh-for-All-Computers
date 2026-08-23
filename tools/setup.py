@@ -297,9 +297,16 @@ def run_ssdts(a, where):
     print(f'      {DIM}The laptop profiles already carry a generic XOSI and PNLF, '
           f'so\n      most machines need none of these.{RESET}')
 
-    if ask(0, 0, 'Open SSDTTime to work through those too?',
-           [('no', 'No, what came out is enough'),
-            ('yes', 'Yes, open the menus')]) == 'yes':
+    if UI.protocol:
+        # SSDTTime's menus are a console program driven by keystrokes. Stdio
+        # here belongs to the front end, so opening them would wait forever on
+        # a pipe. The automatic set is what a front end gets, and it is told so
+        # rather than being offered something that cannot happen.
+        print(f'      {DIM}The rest need SSDTTime\'s own menus, which need a '
+              f'terminal.\n      Run the console builder for those.{RESET}')
+    elif ask(0, 0, 'Open SSDTTime to work through those too?',
+             [('no', 'No, what came out is enough'),
+              ('yes', 'Yes, open the menus')]) == 'yes':
         more, complaint = acpi.run(Path(a.out).parent / 'acpi', tables)
         if more:
             got = more
@@ -780,7 +787,11 @@ def main():
     smbus_disable = []
     usb_implies = None
     queued = []
-    if interactive and not a.usb_map and usbmap.available() and usbmap.runnable_here():
+    # the mapper is a console program that asks you to plug a device into every
+    # port in turn. A front end cannot pass keystrokes to it, so it is not
+    # offered there - the paragraph below says how to do it instead.
+    if (interactive and not UI.protocol and not a.usb_map
+            and usbmap.available() and usbmap.runnable_here()):
         # the tool is here and this is the machine it runs on, so offer it
         # rather than describing it: the map has to be made somewhere and this
         # is the only place it can be

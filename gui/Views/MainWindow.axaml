@@ -37,8 +37,12 @@
         </StackPanel>
 
         <StackPanel Spacing="2">
-          <RadioButton Classes="nav" GroupName="pane" IsChecked="True" Content="Machine" />
-          <RadioButton Classes="nav" GroupName="pane" Content="Builder" IsEnabled="False" />
+          <RadioButton Name="ToMachine" Classes="nav" GroupName="pane" IsChecked="True"
+                       Content="Machine" />
+          <RadioButton Name="ToBuilder" Classes="nav" GroupName="pane" Content="Builder" />
+          <!-- Not yet written. Disabled rather than absent: what the program
+               will do is part of what it is, and an empty pane says less than
+               a name that is not ready. -->
           <RadioButton Classes="nav" GroupName="pane" Content="Report" IsEnabled="False" />
           <RadioButton Classes="nav" GroupName="pane" Content="Kexts" IsEnabled="False" />
           <RadioButton Classes="nav" GroupName="pane" Content="About" IsEnabled="False" />
@@ -46,8 +50,14 @@
       </DockPanel>
     </Border>
 
-    <ScrollViewer Grid.Column="1" Background="{DynamicResource Surface}">
-      <v:MachineView Name="Machine" />
-    </ScrollViewer>
+    <Panel Grid.Column="1" Background="{DynamicResource Surface}">
+      <!-- Both panes live for the whole session. The builder holds a running
+           engine and a transcript; rebuilding it on every click would throw
+           both away. -->
+      <ScrollViewer Name="MachinePane">
+        <v:MachineView />
+      </ScrollViewer>
+      <v:BuilderView Name="BuilderPane" IsVisible="False" />
+    </Panel>
   </Grid>
 </Window>
