@@ -48,10 +48,13 @@ jobs:
 
       # Against a fixture, not against the runner. A Hyper-V VM has almost no
       # hardware to describe, and a screenshot of an empty table reviews nothing.
+      # Two widths on purpose: the Linux runner gets a screen big enough for the
+      # window it asks for, and the Windows runner's 1024x768 shows what the
+      # same layout does when it cannot have it.
       - name: It draws a machine
         shell: bash
         run: |
-          ${{ runner.os == 'Linux' && 'xvfb-run -a ' || '' }}dotnet run --project gui/Shell.csproj \
+          ${{ runner.os == 'Linux' && 'xvfb-run -a -s "-screen 0 1440x1000x24" ' || '' }}dotnet run --project gui/Shell.csproj \
             -c Release --no-build -- \
             --machine tools/fixtures/thinkpad-e570.json --render "$PWD/shell.png"
           test -s shell.png || { echo 'no light screenshot'; exit 1; }

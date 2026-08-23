@@ -23,7 +23,9 @@ public sealed partial class RowView
         What = TrailingId().Replace(row.What, "");
         Detail = row.Detail;
         Ids = string.Join("\n", row.Ids);
-        Kexts = row.Kexts;
+        // the view model, not the payload: binding the payload straight
+        // through drew the type name in the column
+        Kexts = row.Kexts.Select(k => new KextView(k)).ToList();
         HasKexts = row.Kexts.Count > 0;
         Icon = Icons.For(row.Part);
 
@@ -47,7 +49,7 @@ public sealed partial class RowView
     public bool IsUnknown { get; }
     public bool HasKexts { get; }
     public Geometry? Icon { get; }
-    public IReadOnlyList<KextFacts> Kexts { get; }
+    public IReadOnlyList<KextView> Kexts { get; }
 }
 
 public sealed class KextView
