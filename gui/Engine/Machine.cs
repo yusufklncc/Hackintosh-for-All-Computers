@@ -66,6 +66,14 @@ public sealed class MacosWindow
     [JsonPropertyName("parts")] public List<Bound> Parts { get; set; } = new();
 }
 
+public sealed class MacSupport
+{
+    [JsonPropertyName("board")] public string Board { get; set; } = "";
+    [JsonPropertyName("from")] public Release? From { get; set; }
+    [JsonPropertyName("to")] public Release? To { get; set; }
+    [JsonPropertyName("listed")] public bool Listed { get; set; }
+}
+
 public sealed class MachineDocument
 {
     [JsonPropertyName("source")] public string Source { get; set; } = "";
@@ -75,6 +83,7 @@ public sealed class MachineDocument
     [JsonPropertyName("macos")] public MacosWindow Macos { get; set; } = new();
     [JsonPropertyName("worth_showing")] public bool WorthShowing { get; set; }
     [JsonPropertyName("read")] public Dictionary<string, int> Read { get; set; } = new();
+    [JsonPropertyName("mac")] public MacSupport? Mac { get; set; }
 }
 
 [JsonSerializable(typeof(MachineDocument))]

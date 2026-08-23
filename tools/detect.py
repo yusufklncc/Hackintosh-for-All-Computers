@@ -372,6 +372,27 @@ def macos_devices():
     return '\n'.join(pci), '\n'.join(usb), '\n'.join(hda)
 
 
+def macos_board():
+    """The name a Mac calls its own logic board.
+
+    Apple silicon puts it first in the platform node's `compatible` - the whole
+    property reads J314sAP, MacBookPro18,3, AppleARM - and Intel has a
+    `board-id` of the Mac-XXXXXXXX form. Apple's own support metadata is keyed
+    on exactly these, which is what makes it possible to say which macOS a
+    given Mac still runs.
+
+    The serial number is right beside both of these and is never read."""
+    nodes = _ioreg('IOPlatformExpertDevice')
+    if not nodes:
+        return None
+    node = nodes[0]
+    board = _text(node.get('board-id'))
+    if board:
+        return board
+    first = _text(node.get('compatible')).split(chr(0))[0].strip()
+    return first or None
+
+
 def _macos_peripherals():
     """The camera and the card reader, as their own sections report them.
 
@@ -416,6 +437,7 @@ def _macos():
     out['storage'] = '\n'.join(
         f'17|{m.strip()}' for m in re.findall(r'^\s+Model:\s*(.+)$', nvme, re.M))
     out['peripherals'] = _macos_peripherals()
+    out['board'] = macos_board()
     out['gpu'] = [f'PCI|{m.strip()}' for m in re.findall(
         r'^\s*Chipset Model:\s*(.+)$',
         _run(['system_profiler', 'SPDisplaysDataType']), re.M)]
@@ -636,6 +658,8 @@ def probe():
         'oem': normalise_oem(raw.get('vendor')),
         'oem_raw': (raw.get('vendor') or '').strip() or None,
         'model': model_name(raw),
+        # only a Mac has one, and it is what Apple's support metadata is keyed on
+        'board_id': raw.get('board'),
         'gpu': [g['name'] for g in split_graphics(raw.get('gpu'))[0]],
         'gpu_devices': split_graphics(raw.get('gpu'))[0],
         'gpu_virtual': [g['name'] for g in split_graphics(raw.get('gpu'))[1]],

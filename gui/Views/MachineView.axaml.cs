@@ -124,7 +124,31 @@ public partial class MachineView : UserControl
             .Select(c => new TallyView(c.n, c.label, c.verdict))
             .ToList();
 
-        if (m.Macos.From is { } from)
+        // A real Mac's answer comes from Apple, not from the kext tables: they
+        // claim none of its hardware, so they have nothing to say about it.
+        if (m.Mac is { Listed: true, From: { } shipped })
+        {
+            Window.Text = m.Mac.To is { } last
+                ? $"{shipped} to {last}"
+                : $"{shipped} and newer";
+            WindowWhy.Text = m.Mac.To is null
+                ? $"Apple still lists {m.Mac.Board} in the newest macOS it serves, "
+                + "so this Mac is supported."
+                : $"Apple no longer lists {m.Mac.Board} past {last}.";
+            Bounds.ItemsSource = new List<BoundView>
+            {
+                new(new Bound { What = "Apple, for " + m.Mac.Board,
+                                From = m.Mac.From, To = m.Mac.To }),
+            };
+        }
+        else if (m.Mac is { Listed: false })
+        {
+            Window.Text = "Not in Apple's list";
+            WindowWhy.Text = $"{m.Mac.Board} is not in any macOS line Apple still "
+                           + "serves, which happens to a Mac too old for all of them.";
+            Bounds.ItemsSource = new List<BoundView>();
+        }
+        else if (m.Macos.From is { } from)
         {
             Window.Text = m.Macos.To is { } to ? $"{from} – {to}" : $"{from} and newer";
             WindowWhy.Text = m.Macos.To is not null
@@ -139,8 +163,8 @@ public partial class MachineView : UserControl
                        "same as saying every release works.";
         }
 
-        Bounds.ItemsSource =
-            m.Macos.Parts.Select(b => new BoundView(b)).ToList();
+        if (m.Mac is null)
+            Bounds.ItemsSource = m.Macos.Parts.Select(b => new BoundView(b)).ToList();
         Rows.ItemsSource =
             m.Rows.Select(r => new RowView(r)).ToList();
     }

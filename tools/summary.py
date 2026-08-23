@@ -27,6 +27,7 @@ import audio
 import detect
 import gpu
 import inputdev
+import mactable
 import netkexts
 import ocgen
 import ui
@@ -433,6 +434,36 @@ def _release(darwin):
     return {'darwin': darwin, 'name': None, 'version': None}
 
 
+def _by_version(major):
+    """The release whose version string is this major, or None."""
+    if not major:
+        return None
+    for r in ocgen.read_toml(Path('data/macos.toml'))['release']:
+        if str(r['version']) == str(major):
+            return {'darwin': r['darwin'], 'name': r['name'],
+                    'version': str(r['version'])}
+    return {'darwin': None, 'name': None, 'version': str(major)}
+
+
+def genuine_mac(hw):
+    """What Apple says about this Mac, or None if it is not one.
+
+    A different question from the rest of this file. Everywhere else the answer
+    comes from what a kext claims; here it comes from Apple's own list of which
+    machines each macOS line still runs on, because on a real Mac that is the
+    only question worth asking."""
+    board = hw.get('board_id')
+    if not board:
+        return None
+    found = mactable.window(board)
+    if not found:
+        # a Mac too new or too old for the lines Apple still serves
+        return {'board': board, 'from': None, 'to': None, 'listed': False}
+    floor, ceiling = found
+    return {'board': board, 'from': _by_version(floor), 'to': _by_version(ceiling),
+            'listed': True}
+
+
 def document(hw, source='this machine'):
     """The whole summary as values, for a front end to draw.
 
@@ -477,6 +508,9 @@ def document(hw, source='this machine'):
         # a table of nothing but unknown is not a report; a front end should
         # say so rather than draw eight empty rows
         'worth_showing': worth_showing(hw),
+        # a real Mac answers the macOS question from Apple rather than from the
+        # kexts, which claim none of its hardware
+        'mac': genuine_mac(hw),
     }
 
 

@@ -71,6 +71,18 @@ def catalogue():
              covers='Sandy Bridge to Raptor Lake on Intel, Bulldozer and Ryzen on AMD',
              gap='Laptop profiles are Intel only. Nehalem and older, Core Ultra, '
                  'and Xeon decode to nothing rather than to a guess.'),
+        dict(area='Mac support', kind=DERIVED, file='data/mac.toml',
+             source="Apple's own device metadata at gdmf.apple.com/v2/pmv",
+             tool='tools/mactable.py --refresh',
+             count=f'{rows_in("data/mac.toml", "mac")} machines across '
+                   f'{len(ocgen.read_toml(Path("data/mac.toml"))["lines"]) if Path("data/mac.toml").exists() else 0} '
+                   f'macOS lines',
+             covers='which macOS a real Mac still runs, by the board name it '
+                    'reports of itself, Intel and Apple silicon alike',
+             gap='Only the lines Apple still serves. A Mac that stopped at '
+                 'Monterey reads as "12 and newer" because 11 is as far back '
+                 'as the endpoint goes - the floor is the oldest served '
+                 'release, not the one the machine shipped with.'),
         dict(area='AMD graphics', kind=DERIVED, file='data/gpu.toml',
              source='dortania.github.io/GPU-Buyers-Guide, parsed from its tables',
              tool='tools/gputable.py',

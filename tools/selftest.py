@@ -1530,6 +1530,59 @@ def macos_registry():
         check('and says which system it was read on', hw['system'] == 'Darwin')
 
 
+def genuine_macs():
+    """Which macOS a real Mac runs, from the list Apple publishes.
+
+    Every other verdict here comes from what a kext claims. A Mac's hardware is
+    claimed by nothing, so the only honest answer about it is Apple's own - and
+    it is keyed on the board name the machine reports of itself, which is the
+    same string on both sides."""
+    import detect
+    import mactable
+    import summary
+
+    table = mactable.table()
+    check('the table exists and names its source',
+          table.get('source', '').startswith('https://gdmf.apple.com'), table.get('source'))
+    check('with more than a handful of machines', len(table.get('mac', [])) > 50,
+          len(table.get('mac', [])))
+    check('and the lines are in order, oldest first',
+          [int(v.split('.')[0]) for v in table['lines']]
+          == sorted(int(v.split('.')[0]) for v in table['lines']), table['lines'])
+
+    # an Apple silicon board and an Intel board, both from the same file
+    silicon = [r for r in table['mac'] if r['board'].startswith('J')]
+    intel = [r for r in table['mac'] if r['board'].startswith('Mac-')]
+    check('both kinds of board are in it', silicon and intel,
+          (len(silicon), len(intel)))
+    check('a board with no ceiling is one the newest line still lists',
+          all(r['lines'][-1] == table['lines'][-1]
+              for r in table['mac'] if not r['ceiling']))
+    check('and a board with a ceiling is not in the newest line',
+          all(r['lines'][-1] != table['lines'][-1]
+              for r in table['mac'] if r['ceiling']))
+
+    check('an unknown board is not guessed at', mactable.window('nope') is None)
+    check('and no board at all is not either', mactable.window('') is None)
+
+    # the floor and ceiling turn into releases people know by name
+    made = summary.genuine_mac({'board_id': silicon[0]['board']})
+    check('a listed board comes back with a named release',
+          made['listed'] and made['from']['name'], made)
+    check('a machine with no board is not a Mac',
+          summary.genuine_mac({}) is None)
+    check('and a board nothing lists says so rather than nothing',
+          summary.genuine_mac({'board_id': 'nope'}) == {
+              'board': 'nope', 'from': None, 'to': None, 'listed': False})
+
+    # this machine, if it happens to be one
+    board = detect.probe().get('board_id')
+    if board:
+        check('this Mac names its own board', board and ' ' not in board, board)
+        check('and the table has something to say about it',
+              mactable.window(board) is not None, board)
+
+
 if __name__ == '__main__':
     for section in (graphics, graphics_advice, audio_advice, storage, peripherals,
                     trackpad, framebuffer, boot_args, other_machine,
@@ -1541,7 +1594,7 @@ if __name__ == '__main__':
                     frozen_names, frozen_build, workflow_flags,
                     runner_independence, tables_match_sources,
                     front_end_protocol, machine_document, machine_name,
-                    embedded_fonts, macos_registry):
+                    embedded_fonts, macos_registry, genuine_macs):
         print(f'\n{section.__name__}')
         section()
     print()
