@@ -104,7 +104,7 @@
         <StackPanel>
           <Border Background="{DynamicResource Surface2}" BorderBrush="{DynamicResource Line}"
                   BorderThickness="0,0,0,1" Padding="14,10">
-            <Grid ColumnDefinitions="118,*,112,196,108">
+            <Grid ColumnDefinitions="118,*,156,186,104">
               <TextBlock Grid.Column="0" Classes="eyebrow" Text="PART" />
               <TextBlock Grid.Column="1" Classes="eyebrow" Text="DEVICE" />
               <TextBlock Grid.Column="2" Classes="eyebrow" Text="SUPPORT" />
@@ -116,7 +116,7 @@
             <ItemsControl.ItemTemplate>
               <DataTemplate x:DataType="v:RowView">
                 <Border BorderBrush="{DynamicResource Line}" BorderThickness="0,0,0,1" Padding="14,11">
-                  <Grid ColumnDefinitions="118,*,112,196,108">
+                  <Grid ColumnDefinitions="118,*,156,186,104">
                     <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="9">
                       <Path Width="16" Height="16" Stretch="Uniform" Data="{Binding Icon}"
                             Stroke="{DynamicResource Faint}" StrokeThickness="1.2"
@@ -134,6 +134,7 @@
                     </StackPanel>
 
                     <Border Grid.Column="2" Classes="pill" VerticalAlignment="Top"
+                            Margin="0,0,16,0"
                             Classes.ok="{Binding IsOk}" Classes.bad="{Binding IsBad}"
                             Classes.warn="{Binding IsUnknown}">
                       <TextBlock Text="{Binding Label}" />

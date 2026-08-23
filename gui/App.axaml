@@ -14,12 +14,15 @@
          judgement about that hardware. -->
     <Style Selector="Border.pill">
       <Setter Property="CornerRadius" Value="10" />
-      <Setter Property="Padding" Value="9,3" />
+      <!-- room for the longest verdict, "driven by macOS", which was reaching
+           the edge of its own badge -->
+      <Setter Property="Padding" Value="10,3,11,4" />
       <Setter Property="Background" Value="{DynamicResource NoneSoft}" />
       <Setter Property="HorizontalAlignment" Value="Left" />
     </Style>
     <Style Selector="Border.pill > TextBlock">
       <Setter Property="FontSize" Value="12" />
+      <Setter Property="TextWrapping" Value="NoWrap" />
       <Setter Property="FontWeight" Value="SemiBold" />
       <Setter Property="Foreground" Value="{DynamicResource None}" />
     </Style>
