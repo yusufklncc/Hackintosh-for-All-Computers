@@ -7,7 +7,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Avalonia.Controls;
-using Avalonia.Markup.Xaml;
 using Shell;
 using Shell.Engine;
 
@@ -35,7 +34,11 @@ public partial class MachineView : UserControl
 {
     public MachineView()
     {
-        AvaloniaXamlLoader.Load(this);
+        // InitializeComponent, not AvaloniaXamlLoader.Load: the generated
+        // method loads the XAML *and* assigns the named controls. Calling the
+        // loader on its own leaves every one of them null, and the first line
+        // that touches one is where it shows.
+        InitializeComponent();
         Loaded += async (_, _) => await Load();
     }
 
