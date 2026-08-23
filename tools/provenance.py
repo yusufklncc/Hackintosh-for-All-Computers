@@ -71,13 +71,13 @@ def catalogue():
              covers='Sandy Bridge to Raptor Lake on Intel, Bulldozer and Ryzen on AMD',
              gap='Laptop profiles are Intel only. Nehalem and older, Core Ultra, '
                  'and Xeon decode to nothing rather than to a guess.'),
-        dict(area='A Mac\'s own devices', kind=DERIVED, file='tools/detect.py',
-             source="the machine's IORegistry, which names its own hardware",
+        dict(area='A Mac\'s own devices', kind=MEASURED, file='tools/detect.py',
+             source="the machine's IORegistry, read while it is running macOS",
              tool='tools/detect.py --report',
-             count='6 name fragments',
-             covers='Wi-Fi, Bluetooth, Ethernet and the card reader on a Mac, '
-                    'where no kext claims the device and nothing else can say '
-                    'what it is',
+             count='6 name fragments, plus whichever driver is attached',
+             covers='what each device is and which macOS driver has it, on a '
+                    'Mac where no kext claims anything and the running system '
+                    'is the only thing that can say',
              gap='Only names that have been seen on a real machine are listed. '
                  'A Mac that calls its Wi-Fi something else gets no role, '
                  'which reads as "nothing recognised" rather than as a guess.'),

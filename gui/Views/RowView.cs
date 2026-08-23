@@ -36,6 +36,9 @@ public sealed partial class RowView
         (Label, IsOk, IsBad, IsUnknown) = row.Verdict switch
         {
             "supported" => ("supported", true, false, false),
+            // only ever said about a Mac, and it answers a different question:
+            // not "does a kext here claim it" but "is macOS driving it"
+            "driven by macOS" => ("driven by macOS", true, false, false),
             "not supported" => ("not supported", false, true, false),
             "unknown" => ("unknown", false, false, true),
             "-" => ("not present", false, false, false),

@@ -366,6 +366,21 @@ def _pci_role(node):
     return None
 
 
+def _pci_driver(node):
+    """The macOS driver attached to this device, or None.
+
+    A PCI node's first child is whatever claimed it. That is not a guess about
+    whether the device works - it is the running system saying which driver it
+    handed the device to, on a machine that is running macOS while being asked."""
+    for child in node.get('IORegistryEntryChildren') or []:
+        found = _text(child.get('IOClass') or child.get('IORegistryEntryName'))
+        if found:
+            # a DriverKit driver is a userspace one and the registry names the
+            # wrapper rather than the driver; saying so beats saying IOUserService
+            return 'a DriverKit driver' if found == 'IOUserService' else found
+    return None
+
+
 def macos_devices():
     """This Mac's PCI, USB and audio devices, in the shapes the parsers expect.
 
@@ -377,7 +392,7 @@ def macos_devices():
 
     The lines come out looking like lspci and lsusb because those are already
     parsed here; a third format would be a third thing to keep working."""
-    pci, roles = [], {}
+    pci, roles, drivers = [], {}, {}
     for node in _ioreg('IOPCIDevice'):
         vendor, device = _le(node.get('vendor-id')), _le(node.get('device-id'))
         if not (vendor and device):
@@ -387,6 +402,9 @@ def macos_devices():
         role = _pci_role(node)
         if role:
             roles[f'{vendor}:{device}'] = role
+        driver = _pci_driver(node)
+        if driver:
+            drivers[f'{vendor}:{device}'] = driver
 
     usb = []
     for node in _ioreg('IOUSBHostDevice'):
@@ -402,7 +420,21 @@ def macos_devices():
         if isinstance(codec, int):
             hda.append(f'Vendor Id: 0x{codec:08x}')
 
-    return '\n'.join(pci), '\n'.join(usb), '\n'.join(hda), roles
+    return '\n'.join(pci), '\n'.join(usb), '\n'.join(hda), roles, drivers
+
+
+CAMERA_DRIVER = re.compile(r'\+-o (\w*Cam\w*)\s+<class \1,[^>]*\bmatched\b')
+
+
+def macos_camera_driver():
+    """The class macOS matched to this Mac's camera, or None.
+
+    Read from the tree drawing rather than a plist, because the class name is
+    what has to be searched for and it changes with the chip - AppleH13CamIn
+    here, AppleH10CamIn on an older one. "matched" in the same line is the
+    registry saying a driver took the device, not merely that it exists."""
+    found = CAMERA_DRIVER.search(_run(['ioreg', '-l']))
+    return found.group(1) if found else None
 
 
 def macos_board():
@@ -462,7 +494,7 @@ def _macos():
     # both sources: the registry is the one that answers on Apple silicon, and
     # system_profiler is left in because an Intel Mac fills it in and no machine
     # here can prove what it looks like there
-    pci, usb, hda, roles = macos_devices()
+    pci, usb, hda, roles, drivers = macos_devices()
     out['pci'] = pci + '\n' + _run(['system_profiler', 'SPPCIDataType'])
     out['usb'] = usb + '\n' + _run(['system_profiler', 'SPUSBDataType'])
     out['hda'] = hda
@@ -472,6 +504,13 @@ def _macos():
     out['peripherals'] = _macos_peripherals()
     out['board'] = macos_board()
     out['machine_roles'] = roles
+    out['machine_drivers'] = drivers
+    # a MacBook's trackpad is not on PS/2 or I2C; it is its own device class
+    out['multitouch'] = bool(_ioreg('AppleMultitouchDevice'))
+    out['camera_driver'] = macos_camera_driver()
+    # the codec query finds nothing on Apple silicon, but the devices are named
+    out['audio_devices'] = [m.strip() for m in re.findall(
+        r'^\s{8}(\S.*?):$', _run(['system_profiler', 'SPAudioDataType']), re.M)]
     out['gpu'] = [f'PCI|{m.strip()}' for m in re.findall(
         r'^\s*Chipset Model:\s*(.+)$',
         _run(['system_profiler', 'SPDisplaysDataType']), re.M)]
@@ -697,6 +736,11 @@ def probe():
         # {id: role}, where the machine itself said what a device is. Only
         # macOS answers this; everywhere else the kext tables do.
         'machine_roles': raw.get('machine_roles') or {},
+        # {id: driver}, from the system that is running while it is asked
+        'machine_drivers': raw.get('machine_drivers') or {},
+        'multitouch': raw.get('multitouch'),
+        'camera_driver': raw.get('camera_driver'),
+        'audio_devices': raw.get('audio_devices') or [],
         'gpu': [g['name'] for g in split_graphics(raw.get('gpu'))[0]],
         'gpu_devices': split_graphics(raw.get('gpu'))[0],
         'gpu_virtual': [g['name'] for g in split_graphics(raw.get('gpu'))[1]],

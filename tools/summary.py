@@ -35,12 +35,18 @@ import ui
 PROFILES = Path('profiles')
 
 SUPPORTED, UNSUPPORTED, UNKNOWN, ABSENT = 'supported', 'not supported', 'unknown', '-'
+# Only ever said about a Mac, and only about a device the running system has
+# handed to a driver. It answers a different question from SUPPORTED: not "does
+# a kext here claim it" but "is macOS driving it", asked of a machine that is
+# running macOS at the time.
+DRIVEN = 'driven by macOS'
 
 BOLD, DIM, GREEN, YELLOW, RED, RESET = ui.colours('bold', 'dim', 'green', 'yellow', 'red', 'reset')
 
 DETAIL = 52
 
-COLOUR = {SUPPORTED: GREEN, UNSUPPORTED: RED, UNKNOWN: YELLOW, ABSENT: DIM}
+COLOUR = {SUPPORTED: GREEN, DRIVEN: GREEN, UNSUPPORTED: RED,
+          UNKNOWN: YELLOW, ABSENT: DIM}
 
 AMD_GENERATIONS = ('ryzen-threadripper', 'bulldozer-jaguar')
 
@@ -70,10 +76,22 @@ def platform_name(hw):
     return 'desktop-amd' if gen in AMD_GENERATIONS else 'desktop-intel'
 
 
+def _apple_silicon(hw):
+    return (hw.get('system') == 'Darwin'
+            and (hw.get('cpu') or '').startswith('Apple '))
+
+
 def cpu_row(hw):
     gen, name = hw.get('generation'), hw.get('cpu')
     if not name:
         return row('CPU', 'not readable', UNKNOWN, 'answer the question by hand')
+    if _apple_silicon(hw):
+        # There is no profile and there never will be: this program builds for
+        # Intel and AMD. macOS running on the chip while it is asked is the
+        # whole of the answer about it.
+        return row('CPU', name, DRIVEN,
+                   'Apple silicon, running macOS natively; this program builds '
+                   'for Intel and AMD', note='Apple silicon')
     if not gen:
         # the decoder returns nothing rather than a guess for Xeon, Pentium,
         # first generation Core and anything newer than it knows
@@ -87,6 +105,10 @@ def cpu_row(hw):
 
 
 def graphics_rows(hw):
+    if _apple_silicon(hw):
+        return [row('Graphics', hw.get('cpu') or 'Apple graphics', DRIVEN,
+                    'part of the Apple silicon package, driven by macOS',
+                    note='Apple silicon')]
     out = []
     field = gpu.field_igpu(hw.get('cpu'))
     for device in hw.get('gpu_devices', []):
@@ -125,6 +147,13 @@ def graphics_rows(hw):
 
 def audio_row(hw):
     ids = hw.get('hda_ids') or []
+    if not ids and hw.get('audio_devices'):
+        # Apple silicon has no HD audio codec to read, and AppleALC is about
+        # codecs. The devices are named though, and naming them beats "no
+        # codec readable" on a machine whose speakers are working.
+        return row('Audio', ', '.join(hw['audio_devices']), DRIVEN,
+                   "macOS drives these; there is no HD audio codec to match",
+                   note='no HD audio codec on this machine')
     if not ids:
         return row('Audio', 'no codec readable', UNKNOWN, '')
     found = audio.find(ids)
@@ -198,10 +227,17 @@ def network_rows(hw):
             # device is the only source there is for what it does.
             for device_id in [i for i, r in hw['machine_roles'].items()
                               if r == role]:
-                out.append(row(label, names.get(device_id) or device_id, UNKNOWN,
-                               'the machine names this device itself; no kext '
-                               'here claims it',
-                               ids=[device_id]))
+                driver = (hw.get('machine_drivers') or {}).get(device_id)
+                out.append(row(label, names.get(device_id) or device_id,
+                               DRIVEN if driver else UNKNOWN,
+                               f'macOS has it on {driver}' if driver
+                               else 'the machine names this device itself; no '
+                                    'kext here claims it',
+                               ids=[device_id],
+                               note=f'on {driver}' if driver else ''))
+        elif hw.get('system') == 'Darwin':
+            # the registry named every device it has, and none of them is this
+            out.append(row(label, 'none', ABSENT, 'this Mac has no such device'))
         elif hw.get('pci_ids') or hw.get('usb_ids'):
             # the devices were read and none of them matched, which is a fact
             # worth stating: either macOS needs no kext, or the card has to go
@@ -229,8 +265,13 @@ def input_row(hw):
     i2c = inputdev.controllers(hw.get('pci_ids') or [])
     pointing = [d for d in hw.get('peripherals', [])
                 if d.get('kind') == 'pointing device' and not d.get('virtual')]
-    if not (hw.get('laptop') or i2c or pointing):
+    if not (hw.get('laptop') or i2c or pointing or hw.get('multitouch')):
         return None
+    if hw.get('multitouch') and not pointing:
+        # a Mac's trackpad is neither PS/2 nor I2C; it is its own device class,
+        # and the machine says whether it is there
+        return row('Trackpad', 'Apple Multi-Touch', DRIVEN,
+                   'macOS drives it', note='')
     name = pointing[0]['name'] if pointing else ('I2C trackpad' if i2c else 'not readable')
     if i2c:
         return row('Trackpad', name, SUPPORTED, f'VoodooI2C  [{", ".join(i2c)}]',
@@ -269,6 +310,11 @@ def peripheral_rows(hw):
     out = []
     real = [d for d in hw.get('peripherals', []) if not d.get('virtual')]
     for dev in [d for d in real if d['kind'] == 'camera']:
+        if hw.get('system') == 'Darwin' and hw.get('camera_driver'):
+            out.append(row('Camera', dev['name'], DRIVEN,
+                           f"macOS has it on {hw['camera_driver']}",
+                           note=f"on {hw['camera_driver']}"))
+            continue
         if hw.get('system') == 'Darwin':
             # on a PC a camera off the USB bus is an IPU or MIPI sensor with no
             # macOS driver. On a Mac it is Apple's own and already working, and
@@ -295,6 +341,15 @@ def peripheral_rows(hw):
             found, driver = card_reader(i)
             if found:
                 break
+        # `attached`, not `driver`: the name below is the kext this repository
+        # would use, and shadowing it made the table's own driver disappear
+        attached = (hw.get('machine_drivers') or {}).get(
+            f'{own.group(1).lower()}:{own.group(2).lower()}' if own else None)
+        if hw.get('system') == 'Darwin' and attached:
+            out.append(row('Card reader', dev['name'], DRIVEN,
+                           f'macOS has it on {attached}', note=f'on {attached}',
+                           ids=[found['id']] if found else ()))
+            continue
         if found and found['supported']:
             # saying "supported" about a kext this repository does not ship would
             # promise something the build cannot deliver
@@ -530,7 +585,7 @@ def worth_showing(hw):
     A table of nothing but `unknown` is not a report, it is noise - and it is
     what a Mac produces, since it reports its own hardware and this reads none
     of it. One line saying so beats ten saying nothing."""
-    return any(r['verdict'] in (SUPPORTED, UNSUPPORTED) for r in rows(hw))
+    return any(r['verdict'] in (SUPPORTED, DRIVEN, UNSUPPORTED) for r in rows(hw))
 
 
 def _fit(text, width):

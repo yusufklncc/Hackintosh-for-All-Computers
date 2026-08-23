@@ -1503,7 +1503,7 @@ def macos_registry():
     try:
         detect._run = lambda cmd, shell=False: (
             plist.decode() if 'IOPCIDevice' in cmd else '')
-        pci, usb, hda, roles = detect.macos_devices()
+        pci, usb, hda, roles, drivers = detect.macos_devices()
     finally:
         detect._run = was
 
@@ -1544,6 +1544,23 @@ def macos_registry():
     check('a device only the machine named still gets a row',
           said['what'] == 'wlan, bcm4387' and said['verdict'] == summary.UNKNOWN, said)
     check('and it is not claimed to be supported', not said['kexts'])
+
+    # the same device, on a machine that has handed it to a driver
+    driven = summary.network_rows({
+        'system': 'Darwin', 'pci_ids': ['14e4:4433'],
+        'machine_roles': {'14e4:4433': 'wifi'},
+        'machine_drivers': {'14e4:4433': 'AppleBCMWLANCore'},
+        'device_names': {'14e4:4433': 'wlan, bcm4387'},
+    })
+    wifi_row = next(r for r in driven if r['part'] == 'Wi-Fi')
+    check('a device macOS is driving says which driver has it',
+          wifi_row['verdict'] == summary.DRIVEN
+          and 'AppleBCMWLANCore' in wifi_row['detail'], wifi_row)
+    check('and it is still not a kext this repository ships',
+          not wifi_row['kexts'])
+    check('"driven by macOS" is never said about a machine that is not one',
+          summary.DRIVEN not in [r['verdict'] for r in summary.rows(
+              {'pci_ids': ['8086:1559'], 'system': 'Windows'})])
 
     # and on the machine this is running on, whatever that is
     hw = detect.probe()
