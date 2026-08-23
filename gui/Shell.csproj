@@ -19,9 +19,11 @@
     <JsonSerializerIsReflectionEnabledByDefault>false</JsonSerializerIsReflectionEnabledByDefault>
   </PropertyGroup>
   <ItemGroup>
+    <AvaloniaResource Include="Assets/Fonts/*.ttf" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="Avalonia" Version="11.*" />
     <PackageReference Include="Avalonia.Desktop" Version="11.*" />
     <PackageReference Include="Avalonia.Themes.Fluent" Version="11.*" />
-    <PackageReference Include="Avalonia.Fonts.Inter" Version="11.*" />
   </ItemGroup>
 </Project>

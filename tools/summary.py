@@ -442,7 +442,10 @@ def document(hw, source='this machine'):
         'platform': ('laptop' if hw.get('laptop') else
                      'desktop' if hw.get('laptop') is False else None),
         'profile': {'cpu': hw.get('cpu'), 'generation': hw.get('generation'),
-                    'oem': hw.get('oem'), 'cores': hw.get('cores')},
+                    'oem': hw.get('oem'), 'cores': hw.get('cores'),
+                    # what the machine calls itself, where it calls itself
+                    # anything: a name a person recognises beats a processor
+                    'model': hw.get('model')},
         'rows': parts,
         'macos': {
             # the floor is whichever part needs the newest macOS, the ceiling

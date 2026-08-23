@@ -76,12 +76,14 @@ public partial class MachineView : UserControl
                 ? "READ FROM " + m.Source.ToUpperInvariant()
                 : "READ FROM THIS MACHINE";
 
-        // the processor is the only name this program can honestly give a
-        // machine: nothing here reads a model from the firmware
-        MachineName.Text =
-            m.Profile.Cpu ?? "Unnamed machine";
+        // the name the machine gives itself, where it gives one. Vendors leave
+        // that field at a placeholder often enough that the engine filters it,
+        // and then the processor is the only honest name left.
+        MachineName.Text = m.Profile.Model ?? m.Profile.Cpu ?? "Unnamed machine";
 
         var spec = new List<SpecView>();
+        if (m.Profile.Model is not null && m.Profile.Cpu is { } cpu)
+            spec.Add(new SpecView("", cpu));
         if (m.Profile.Generation is { } gen) spec.Add(new SpecView("generation", gen));
         if (m.Profile.Cores is { } cores) spec.Add(new SpecView("cores", cores.ToString()));
         if (m.Platform is { } platform) spec.Add(new SpecView("form factor", platform));

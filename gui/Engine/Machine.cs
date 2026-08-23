@@ -43,6 +43,7 @@ public sealed class Row
 public sealed class Profile
 {
     [JsonPropertyName("cpu")] public string? Cpu { get; set; }
+    [JsonPropertyName("model")] public string? Model { get; set; }
     [JsonPropertyName("generation")] public string? Generation { get; set; }
     [JsonPropertyName("oem")] public string? Oem { get; set; }
     [JsonPropertyName("cores")] public int? Cores { get; set; }

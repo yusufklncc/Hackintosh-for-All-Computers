@@ -125,6 +125,42 @@ OEM_ALIASES = {
 }
 
 
+
+# Names a machine reports of itself that name nothing. A field a vendor left at
+# its default is worse than an empty one: it looks like an answer.
+PLACEHOLDER_MODELS = {
+    'system product name', 'to be filled by o.e.m.', 'default string',
+    'not specified', 'not applicable', 'none', 'invalid', 'system name',
+    'to be filled by oem', 'oem', 'product name', 'system version',
+    'undefined', 'x.x', '123456789', 'na', 'n/a', '.',
+}
+
+
+def model_name(raw):
+    """What this machine calls itself, or None.
+
+    A laptop names itself in SMBIOS type 1 and that is the name people use for
+    it. A desktop is whatever board went into it, so the board is the more
+    useful of the two - and where the vendor never filled either in, this says
+    nothing rather than repeating their placeholder back."""
+    def usable(value):
+        text = (value or '').strip()
+        if not text or text.lower() in PLACEHOLDER_MODELS:
+            return None
+        # "1.0", "A1", "Rev 1.02" - a version, which is what most vendors put
+        # in the field Lenovo uses for the name
+        if re.fullmatch(r'(?i)(rev\.?\s*)?[vA-Z]?[\d.]+[a-z]?', text):
+            return None
+        return text
+
+    model, board = usable(raw.get('model')), usable(raw.get('board'))
+    version = usable(raw.get('version'))
+    if raw.get('laptop'):
+        return version or model or board
+    # a desktop's type 1 is often the board's name with less of it
+    return board or model
+
+
 def normalise_oem(vendor):
     if not vendor:
         return None
@@ -144,6 +180,17 @@ def _windows():
     cores = _ps('(Get-CimInstance Win32_Processor | Select-Object -First 1).NumberOfCores')
     out['cores'] = int(cores.strip()) if cores.strip().isdigit() else None
     out['vendor'] = _ps('(Get-CimInstance Win32_ComputerSystem).Manufacturer').strip()
+    # SMBIOS type 1 (the system) and type 2 (the board). A laptop puts its name
+    # in the first - "ThinkPad E570" - and a desktop usually has nothing there
+    # worth reading, because the machine is whatever board somebody chose.
+    out['model'] = _ps('(Get-CimInstance Win32_ComputerSystem).Model').strip()
+    # Lenovo puts the machine type in Model - "20H5006TTX" - and the name
+    # people know it by in the type 1 Version field. Most other vendors leave
+    # Version at something like "1.0", which is filtered out below rather than
+    # special-cased per vendor.
+    out['version'] = _ps('(Get-CimInstance Win32_ComputerSystemProduct).Version').strip()
+    out['board'] = _ps('$b = Get-CimInstance Win32_BaseBoard; '
+                       '"$($b.Manufacturer) $($b.Product)"').strip()
     chassis = _ps('(Get-CimInstance Win32_SystemEnclosure).ChassisTypes -join ","')
     types = {int(x) for x in re.findall(r'\d+', chassis)}
     if types:
@@ -199,6 +246,11 @@ def _linux():
     ids = set(re.findall(r'^core id\s*:\s*(\d+)$', cpuinfo, re.M))
     out['cores'] = len(ids) or None
     out['vendor'] = _read('/sys/class/dmi/id/sys_vendor')
+    # the same two SMBIOS records, as the kernel exposes them
+    out['model'] = _read('/sys/class/dmi/id/product_name')
+    out['version'] = _read('/sys/class/dmi/id/product_version')
+    out['board'] = ' '.join(x for x in (_read('/sys/class/dmi/id/board_vendor'),
+                                        _read('/sys/class/dmi/id/board_name')) if x)
     chassis = _read('/sys/class/dmi/id/chassis_type')
     if chassis.isdigit():
         out['laptop'] = int(chassis) in {8, 9, 10, 11, 12, 14, 18, 21, 30, 31, 32}
@@ -229,6 +281,7 @@ def _macos():
     cores = _run(['sysctl', '-n', 'hw.physicalcpu']).strip()
     out['cores'] = int(cores) if cores.isdigit() else None
     model = _run(['sysctl', '-n', 'hw.model']).strip()
+    out['model'] = model
     if model:
         out['laptop'] = model.startswith(('MacBook',))
     out['vendor'] = ''
@@ -456,6 +509,7 @@ def probe():
         'laptop': laptop,
         'oem': normalise_oem(raw.get('vendor')),
         'oem_raw': (raw.get('vendor') or '').strip() or None,
+        'model': model_name(raw),
         'gpu': [g['name'] for g in split_graphics(raw.get('gpu'))[0]],
         'gpu_devices': split_graphics(raw.get('gpu'))[0],
         'gpu_virtual': [g['name'] for g in split_graphics(raw.get('gpu'))[1]],
@@ -489,7 +543,8 @@ REPORT_VERSION = 1
 
 def describe(hw):
     """One line naming the machine a probe came from, for confirming it."""
-    parts = [hw.get('cpu') or 'unknown CPU']
+    parts = [hw['model']] if hw.get('model') else []
+    parts.append(hw.get('cpu') or 'unknown CPU')
     if hw.get('cores'):
         parts.append(f'{hw["cores"]} cores')
     if hw.get('oem_raw'):

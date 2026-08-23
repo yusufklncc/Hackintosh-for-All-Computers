@@ -1415,6 +1415,59 @@ def machine_document():
             check('and it is the same document', written['rows'] == doc['rows'])
 
 
+def machine_name():
+    """What a machine calls itself, and when that is worth repeating.
+
+    A vendor who left the field at its default has said nothing, and printing
+    "To Be Filled By O.E.M." as a machine's name is worse than printing the
+    processor: it looks like an answer."""
+    import detect
+
+    check('a laptop is named by the field Lenovo puts the name in',
+          detect.model_name({'laptop': True, 'version': 'ThinkPad E570',
+                             'model': '20H5006TTX'}) == 'ThinkPad E570')
+    check('and by the product name where that field is a version',
+          detect.model_name({'laptop': True, 'version': '1.0',
+                             'model': 'Inspiron 5570'}) == 'Inspiron 5570')
+    check('a desktop is named by its board, which is what it is',
+          detect.model_name({'laptop': False, 'model': 'System Product Name',
+                             'board': 'ASUSTeK PRIME Z390-A'}) == 'ASUSTeK PRIME Z390-A')
+    for empty in ('To Be Filled By O.E.M.', 'Default string', 'System Product Name',
+                  '', '   ', 'Rev 1.02', 'x.x'):
+        check(f'{empty!r} names nothing',
+              detect.model_name({'laptop': True, 'version': empty}) is None)
+    check('and nothing at all is nothing', detect.model_name({}) is None)
+
+    # this machine, whatever it is: the point is that it does not throw
+    named = detect.probe().get('model')
+    check('probing this machine returns a name or None',
+          named is None or isinstance(named, str), named)
+
+
+def embedded_fonts():
+    """Two faces travel inside the window, so two licences travel with them."""
+    fonts = Path('gui/Assets/Fonts')
+    if not fonts.exists():
+        check('the fonts directory is there', False)
+        return
+    have = {p.name for p in fonts.glob('*.ttf')}
+    check('both weights of each face are present',
+          have == {'InstrumentSans-Regular.ttf', 'InstrumentSans-SemiBold.ttf',
+                   'IBMPlexMono-Regular.ttf', 'IBMPlexMono-Medium.ttf'}, sorted(have))
+    for licence in ('OFL-InstrumentSans.txt', 'OFL-IBMPlexMono.txt'):
+        text = (fonts / licence).read_text(encoding='utf-8', errors='replace')
+        check(f'{licence} is the licence it claims to be',
+              'SIL OPEN FONT LICENSE' in text.upper())
+    # a modified font under the OFL may not keep the original's reserved name,
+    # and these two were cut from a variable font
+    readme = (fonts / 'README.md').read_text(encoding='utf-8')
+    check('the modified files say they are modified',
+          'instancer' in readme and 'renamed' in readme)
+    check('and the build embeds them rather than asking the system',
+          'AvaloniaResource Include="Assets/Fonts/*.ttf"'
+          in Path('gui/Shell.csproj').read_text())
+
+
 if __name__ == '__main__':
     for section in (graphics, graphics_advice, audio_advice, storage, peripherals,
                     trackpad, framebuffer, boot_args, other_machine,
@@ -1425,7 +1478,8 @@ if __name__ == '__main__':
                     usb_mapping, acpi_tables, unattended_ssdts, ssdt_flow, window_stays_open,
                     frozen_names, frozen_build, workflow_flags,
                     runner_independence, tables_match_sources,
-                    front_end_protocol, machine_document):
+                    front_end_protocol, machine_document, machine_name,
+                    embedded_fonts):
         print(f'\n{section.__name__}')
         section()
     print()

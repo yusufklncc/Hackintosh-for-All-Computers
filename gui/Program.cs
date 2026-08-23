@@ -33,8 +33,8 @@ static class Program
 
     public static AppBuilder BuildAvaloniaApp() => AppBuilder.Configure<App>()
         .UsePlatformDetect()
-        // embedded rather than asked for: a runner has almost no fonts, and a
-        // window whose text silently fell back is not the window being reviewed
-        .WithInterFont()
+        // The two faces are embedded as resources, so the window looks the
+        // same on a machine with no fonts installed as on one with all of
+        // them - and a runner rendering a screenshot is the machine with none.
         .LogToTrace();
 }
