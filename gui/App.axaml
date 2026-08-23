@@ -79,12 +79,15 @@
 
   <Application.Resources>
     <ResourceDictionary>
+      <!-- Both faces travel inside the executable. Each names a fallback
+           after it: a weight that cannot be found should leave the window
+           looking wrong, not stop it from opening at all. -->
       <!-- Both faces travel inside the executable. Every machine-produced
            value is set in the monospace one, so a device id and the sentence
            about it can never be mistaken for each other. See
            Assets/Fonts/README.md for where they came from. -->
-      <FontFamily x:Key="Sans">avares://Shell/Assets/Fonts#Instrument Sans</FontFamily>
-      <FontFamily x:Key="Mono">avares://Shell/Assets/Fonts#IBM Plex Mono</FontFamily>
+      <FontFamily x:Key="Sans">avares://Shell/Assets/Fonts#Instrument Sans, $Default</FontFamily>
+      <FontFamily x:Key="Mono">avares://Shell/Assets/Fonts#IBM Plex Mono, monospace</FontFamily>
       <ResourceDictionary.ThemeDictionaries>
         <ResourceDictionary x:Key="Light">
           <SolidColorBrush x:Key="Ground" Color="#EEF1F5" />
