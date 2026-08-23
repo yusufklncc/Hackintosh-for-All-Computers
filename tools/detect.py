@@ -336,6 +336,36 @@ def _pci_name(node):
     return f'{name}, {chip}' if worth_saying else name
 
 
+# What the IORegistry calls a device is the machine naming its own hardware,
+# and on a Mac it is the only thing that does: no kext here claims an Apple
+# chip, so nothing else can say which of them is the Wi-Fi. Only names that
+# have actually been seen are listed; a name nobody has observed would be a
+# guess with a table around it.
+REGISTRY_ROLES = (
+    ('wlan', 'wifi'), ('airport', 'wifi'),
+    ('bluetooth', 'bluetooth'),
+    ('ethernet', 'ethernet'),
+    ('sdreader', 'card reader'), ('sdxc', 'card reader'),
+)
+
+
+def _pci_role(node):
+    """What this device is, in the machine's own words, or None.
+
+    Substrings rather than exact names: the same part is "wlan" on one Mac and
+    "wlan-pcie" on another, and both are the machine saying Wi-Fi."""
+    # The entry name first and on its own. A combo chip gives both of its
+    # functions the same `compatible` - the Bluetooth half of a BCM4387 reads
+    # "wlan-pcie,bcm4387" too - so matching that first calls the Bluetooth
+    # Wi-Fi. The names are "wlan" and "bluetooth-pcie", and those are right.
+    for text in (_text(node.get('IORegistryEntryName') or node.get('name')),
+                 _text(node.get('compatible'))):
+        for fragment, role in REGISTRY_ROLES:
+            if fragment in text.lower():
+                return role
+    return None
+
+
 def macos_devices():
     """This Mac's PCI, USB and audio devices, in the shapes the parsers expect.
 
@@ -347,13 +377,16 @@ def macos_devices():
 
     The lines come out looking like lspci and lsusb because those are already
     parsed here; a third format would be a third thing to keep working."""
-    pci = []
+    pci, roles = [], {}
     for node in _ioreg('IOPCIDevice'):
         vendor, device = _le(node.get('vendor-id')), _le(node.get('device-id'))
         if not (vendor and device):
             continue
         pci.append(f'[{vendor}:{device}]' + (f'|{_pci_name(node)}'
                                              if _pci_name(node) else ''))
+        role = _pci_role(node)
+        if role:
+            roles[f'{vendor}:{device}'] = role
 
     usb = []
     for node in _ioreg('IOUSBHostDevice'):
@@ -369,7 +402,7 @@ def macos_devices():
         if isinstance(codec, int):
             hda.append(f'Vendor Id: 0x{codec:08x}')
 
-    return '\n'.join(pci), '\n'.join(usb), '\n'.join(hda)
+    return '\n'.join(pci), '\n'.join(usb), '\n'.join(hda), roles
 
 
 def macos_board():
@@ -429,7 +462,7 @@ def _macos():
     # both sources: the registry is the one that answers on Apple silicon, and
     # system_profiler is left in because an Intel Mac fills it in and no machine
     # here can prove what it looks like there
-    pci, usb, hda = macos_devices()
+    pci, usb, hda, roles = macos_devices()
     out['pci'] = pci + '\n' + _run(['system_profiler', 'SPPCIDataType'])
     out['usb'] = usb + '\n' + _run(['system_profiler', 'SPUSBDataType'])
     out['hda'] = hda
@@ -438,6 +471,7 @@ def _macos():
         f'17|{m.strip()}' for m in re.findall(r'^\s+Model:\s*(.+)$', nvme, re.M))
     out['peripherals'] = _macos_peripherals()
     out['board'] = macos_board()
+    out['machine_roles'] = roles
     out['gpu'] = [f'PCI|{m.strip()}' for m in re.findall(
         r'^\s*Chipset Model:\s*(.+)$',
         _run(['system_profiler', 'SPDisplaysDataType']), re.M)]
@@ -660,6 +694,9 @@ def probe():
         'model': model_name(raw),
         # only a Mac has one, and it is what Apple's support metadata is keyed on
         'board_id': raw.get('board'),
+        # {id: role}, where the machine itself said what a device is. Only
+        # macOS answers this; everywhere else the kext tables do.
+        'machine_roles': raw.get('machine_roles') or {},
         'gpu': [g['name'] for g in split_graphics(raw.get('gpu'))[0]],
         'gpu_devices': split_graphics(raw.get('gpu'))[0],
         'gpu_virtual': [g['name'] for g in split_graphics(raw.get('gpu'))[1]],

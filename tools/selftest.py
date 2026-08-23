@@ -1503,7 +1503,7 @@ def macos_registry():
     try:
         detect._run = lambda cmd, shell=False: (
             plist.decode() if 'IOPCIDevice' in cmd else '')
-        pci, usb, hda = detect.macos_devices()
+        pci, usb, hda, roles = detect.macos_devices()
     finally:
         detect._run = was
 
@@ -1521,6 +1521,29 @@ def macos_registry():
           detect._names(pci, detect.PCI_PATTERNS))
     check('nothing is invented for the classes that answered nothing',
           usb == '' and hda == '')
+
+    # a combo chip gives both halves the same `compatible`, so the entry name
+    # has to win or the Bluetooth is reported as a second Wi-Fi
+    wifi = {'IORegistryEntryName': 'wlan', 'compatible': b'wlan-pcie,bcm4387\x00'}
+    bt = {'IORegistryEntryName': 'bluetooth-pcie', 'compatible': b'wlan-pcie,bcm4387\x00'}
+    check('the machine naming a device wlan means Wi-Fi',
+          detect._pci_role(wifi) == 'wifi')
+    check('and naming one bluetooth means Bluetooth, whatever it is compatible with',
+          detect._pci_role(bt) == 'bluetooth', detect._pci_role(bt))
+    check('a device it does not name is not given a role',
+          detect._pci_role({'IORegistryEntryName': 'pci-bridge0'}) is None)
+
+    # and the row that comes of it
+    import summary
+    rows = summary.network_rows({
+        'pci_ids': ['14e4:4433'],
+        'machine_roles': {'14e4:4433': 'wifi'},
+        'device_names': {'14e4:4433': 'wlan, bcm4387'},
+    })
+    said = next(r for r in rows if r['part'] == 'Wi-Fi')
+    check('a device only the machine named still gets a row',
+          said['what'] == 'wlan, bcm4387' and said['verdict'] == summary.UNKNOWN, said)
+    check('and it is not claimed to be supported', not said['kexts'])
 
     # and on the machine this is running on, whatever that is
     hw = detect.probe()

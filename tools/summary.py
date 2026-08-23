@@ -192,6 +192,16 @@ def network_rows(hw):
                                f'{d["kext"]}  [{device_id}]'
                                + (f'  {note}' if note else ''),
                                kexts=[d['kext']], ids=[device_id], note=note))
+        elif [i for i, r in (hw.get('machine_roles') or {}).items() if r == role]:
+            # Nothing here claims it, but the machine said what it is. That is
+            # a Mac: no kext claims an Apple chip, and the registry naming the
+            # device is the only source there is for what it does.
+            for device_id in [i for i, r in hw['machine_roles'].items()
+                              if r == role]:
+                out.append(row(label, names.get(device_id) or device_id, UNKNOWN,
+                               'the machine names this device itself; no kext '
+                               'here claims it',
+                               ids=[device_id]))
         elif hw.get('pci_ids') or hw.get('usb_ids'):
             # the devices were read and none of them matched, which is a fact
             # worth stating: either macOS needs no kext, or the card has to go
