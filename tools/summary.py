@@ -14,6 +14,7 @@ is reading it.
     python3 tools/summary.py --machine report.json
 """
 import argparse
+import functools
 import os
 import re
 import sys
@@ -43,8 +44,15 @@ COLOUR = {SUPPORTED: GREEN, UNSUPPORTED: RED, UNKNOWN: YELLOW, ABSENT: DIM}
 AMD_GENERATIONS = ('ryzen-threadripper', 'bulldozer-jaguar')
 
 
-def row(part, what, verdict, detail=''):
-    return {'part': part, 'what': what, 'verdict': verdict, 'detail': detail}
+def row(part, what, verdict, detail='', kexts=(), ids=()):
+    """One line of the summary.
+
+    `detail` is the sentence a person reads. `kexts` and `ids` are the same
+    facts as values, for a front end that wants to draw a link to the project
+    rather than print its name in the middle of a sentence - pulling the kext
+    back out of the prose worked, right up until a sentence mentioned two."""
+    return {'part': part, 'what': what, 'verdict': verdict, 'detail': detail,
+            'kexts': list(kexts), 'ids': list(ids)}
 
 
 def platform_name(hw):
@@ -99,7 +107,8 @@ def graphics_rows(hw):
         name = device.get('name') or 'graphics'
         if device.get('id'):
             name = f'{name}  [{device["id"]}]'
-        out.append(row('Graphics', name, state, detail))
+        out.append(row('Graphics', name, state, detail,
+                       ids=[device['id']] if device.get('id') else ()))
     if not out:
         out.append(row('Graphics', 'none readable', UNKNOWN,
                        'nothing was reported on the graphics bus'))
@@ -117,7 +126,8 @@ def audio_row(hw):
     codec = found[0]
     layouts = len(codec['layout'])
     return row('Audio', f"{codec['vendor']} {codec['codec']}", SUPPORTED,
-               f'AppleALC, {layouts} layout' + ('s to try' if layouts != 1 else ''))
+               f'AppleALC, {layouts} layout' + ('s to try' if layouts != 1 else ''),
+               kexts=['AppleALC.kext'], ids=ids)
 
 
 def _kext_note(match):
@@ -171,7 +181,8 @@ def network_rows(hw):
                 note = _kext_note(d['kext'])
                 out.append(row(label, names.get(device_id) or d['label'], SUPPORTED,
                                f'{d["kext"]}  [{device_id}]'
-                               + (f'  {note}' if note else '')))
+                               + (f'  {note}' if note else ''),
+                               kexts=[d['kext']], ids=[device_id]))
         elif hw.get('pci_ids') or hw.get('usb_ids'):
             # the devices were read and none of them matched, which is a fact
             # worth stating: either macOS needs no kext, or the card has to go
@@ -188,7 +199,8 @@ def storage_row(hw):
         return row('Storage', 'no NVMe', ABSENT, 'nothing to add')
     third = [d for d in drives if 'apple' not in d.lower()]
     if third:
-        return row('Storage', ', '.join(third), SUPPORTED, 'NVMeFix')
+        return row('Storage', ', '.join(third), SUPPORTED, 'NVMeFix',
+                   kexts=['NVMeFix.kext'])
     return row('Storage', ', '.join(drives), SUPPORTED,
                'Apple NVMe, which is the case NVMeFix is not for')
 
@@ -202,7 +214,8 @@ def input_row(hw):
         return None
     name = pointing[0]['name'] if pointing else ('I2C trackpad' if i2c else 'not readable')
     if i2c:
-        return row('Trackpad', name, SUPPORTED, f'VoodooI2C  [{", ".join(i2c)}]')
+        return row('Trackpad', name, SUPPORTED, f'VoodooI2C  [{", ".join(i2c)}]',
+                   kexts=['VoodooI2C.kext'], ids=i2c)
     # the machine names its own SMBus controller after whatever drives the
     # trackpad, which outranks the PS/2 controller also being there: on these
     # laptops both are, and only one of them is carrying the trackpad
@@ -210,10 +223,12 @@ def input_row(hw):
     if bus:
         rule = inputdev.smbus_rule(bus)
         return row('Trackpad', name, SUPPORTED,
-                   f'{", ".join(rule["kexts"])} for {rule["label"]}  [{smbus_id}]')
+                   f'{", ".join(rule["kexts"])} for {rule["label"]}  [{smbus_id}]',
+                   kexts=rule['kexts'], ids=[smbus_id])
     if hw.get('ps2'):
         return row('Trackpad', name, SUPPORTED,
-                   'on PS/2; VoodooPS2 is in the laptop profile')
+                   'on PS/2; VoodooPS2Controller is in the laptop profile',
+                   kexts=['VoodooPS2Controller.kext'])
     return row('Trackpad', name, UNKNOWN, 'no I2C controller and nothing on PS/2')
 
 
@@ -259,10 +274,13 @@ def peripheral_rows(hw):
             tail = '' if here.exists() else ', not shipped here'
             out.append(row('Card reader', dev['name'], SUPPORTED,
                            f'{driver["kext"]} since {found["since"]}'
-                           f'  [{found["id"]}]{tail}'))
+                           f'  [{found["id"]}]{tail}',
+                           kexts=[driver['kext']] if not tail else (),
+                           ids=[found['id']]))
         elif found:
             out.append(row('Card reader', dev['name'], UNSUPPORTED,
-                           f'{driver["kext"]} lists it and does not drive it yet'))
+                           f'{driver["kext"]} lists it and does not drive it yet',
+                           ids=[found['id']]))
         else:
             out.append(row('Card reader', dev['name'], UNKNOWN,
                            'not in the one driver this repository has data for'))
@@ -346,6 +364,89 @@ def name_for(darwin):
         if r['darwin'] == darwin:
             return f'{r["name"]} {r["version"]}'
     return f'Darwin {darwin}'
+
+
+LOCK = Path('vendor/kexts.lock')
+LICENCES = Path('vendor/licences.toml')
+SHIPPED = Path('EFI/OC/Kexts')
+
+
+@functools.lru_cache(maxsize=1)
+def _lock():
+    return ocgen.read_toml(LOCK)['kext'] if LOCK.exists() else {}
+
+
+@functools.lru_cache(maxsize=1)
+def _licences():
+    if not LICENCES.exists():
+        return {}
+    return {u['repo']: u['licence']
+            for u in ocgen.read_toml(LICENCES).get('upstream', [])}
+
+
+def kext_facts(bundle):
+    """Everything this repository knows about one kext, by name.
+
+    The lock is written from the tree by tools/kexts.py, so the version and the
+    upstream are the ones actually vendored rather than the ones a table
+    remembers. A kext with no row is not an error: the profiles ship a few this
+    repository has never had to look up."""
+    entry = _lock().get(bundle) or {}
+    upstream = entry.get('upstream')
+    licence = _licences().get(upstream) if upstream else None
+    return {
+        'bundle': bundle,
+        'version': entry.get('version'),
+        'upstream': upstream,
+        'url': f'https://github.com/{upstream}' if upstream else None,
+        'licence': licence,
+        'shipped': (SHIPPED / bundle).exists(),
+    }
+
+
+def _release(darwin):
+    if darwin is None:
+        return None
+    for r in ocgen.read_toml(Path('data/macos.toml'))['release']:
+        if r['darwin'] == darwin:
+            return {'darwin': darwin, 'name': r['name'], 'version': r['version']}
+    return {'darwin': darwin, 'name': None, 'version': None}
+
+
+def document(hw, source='this machine'):
+    """The whole summary as values, for a front end to draw.
+
+    The same functions the printed table is built from, with the kexts resolved
+    against the lock. Nothing here is computed a second way: a screen that
+    disagreed with the text would be a second answer to the same question."""
+    parts = []
+    for r in rows(hw):
+        parts.append(dict(r, kexts=[kext_facts(k) for k in r['kexts']]))
+    windows = [{'what': w[0], 'from': _release(w[1] or None), 'to': _release(w[2])}
+               for w in macos_windows(hw)]
+    span = macos_range(hw)
+    return {
+        't': 'machine',
+        'source': source,
+        'platform': ('laptop' if hw.get('laptop') else
+                     'desktop' if hw.get('laptop') is False else None),
+        'profile': {'cpu': hw.get('cpu'), 'generation': hw.get('generation'),
+                    'oem': hw.get('oem'), 'cores': hw.get('cores')},
+        'rows': parts,
+        'macos': {
+            # the floor is whichever part needs the newest macOS, the ceiling
+            # whichever stops first; both name the part, because "10.12 or
+            # newer" without saying what decided it cannot be argued with
+            'from': _release(span[0][1]) if span and span[0][1] else None,
+            'from_because': span[0][0] if span else None,
+            'to': _release(span[1][2]) if span and span[1] else None,
+            'to_because': span[1][0] if span and span[1] else None,
+            'parts': windows,
+        },
+        # a table of nothing but unknown is not a report; a front end should
+        # say so rather than draw eight empty rows
+        'worth_showing': worth_showing(hw),
+    }
 
 
 def worth_showing(hw):

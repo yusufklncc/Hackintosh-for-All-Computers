@@ -472,6 +472,9 @@ def main():
     ap.add_argument('--usb-map', help='a UTBMap.kext made with the USBToolBox tool')
     ap.add_argument('--answers', help='answer the menus non-interactively, comma separated; '
                                       'for scripting and for CI')
+    ap.add_argument('--describe', action='store_true',
+                    help='write this machine as one JSON document and stop, for '
+                         'a front end to draw')
     ap.add_argument('--protocol', action='store_true',
                     help='talk JSON on stdin and stdout instead of printing menus, '
                          'so a front end can drive this')
@@ -503,6 +506,23 @@ def main():
 
     if a.check_tools:
         return check_tools()
+
+    if a.describe:
+        # A front end opens on the machine, not on a question, so the first
+        # thing it needs is an answer rather than a menu. Written and gone:
+        # the report it names can be handed straight back with --machine, so
+        # nothing is probed twice.
+        import json as _json
+        if a.machine:
+            described, complaint = load_machine(a.machine)
+            if described is None:
+                sys.exit(complaint)
+            where = f'report {Path(a.machine).name}'
+        else:
+            described, where = overrides(a, detect.probe()), 'this machine'
+        sys.stdout.write(_json.dumps(summary.document(described, where),
+                                     ensure_ascii=False) + '\n')
+        return 0
 
     if a.report:
         a.report = str(Path(a.report).expanduser().resolve())

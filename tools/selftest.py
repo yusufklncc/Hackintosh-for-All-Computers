@@ -1341,6 +1341,68 @@ def front_end_protocol():
               and "os.environ.get('NO_COLOR')" not in source.read_text())
 
 
+def machine_document():
+    """What a front end opens on: the same summary, as values.
+
+    The risk here is two answers to one question - a screen that says something
+    the printed table does not. So the document is built from the same rows,
+    and what is checked is that they cannot drift apart."""
+    import json
+    import summary
+
+    hw = json.loads(Path('tools/fixtures/thinkpad-e570.json').read_text())
+    hw = hw.get('hardware', hw)
+    doc = summary.document(hw, 'a fixture')
+
+    printed = summary.rows(hw)
+    check('a row for every row the table has', len(doc['rows']) == len(printed))
+    check('and the same verdicts',
+          [r['verdict'] for r in doc['rows']] == [r['verdict'] for r in printed])
+
+    # the sentence and the field have to agree: pulling the kext out of the
+    # prose is what this replaced, and a row where they disagree would be a
+    # screen contradicting the text underneath it
+    for r in doc['rows']:
+        for k in r['kexts']:
+            check(f"{r['part']}: {k['bundle']} is the one the sentence names",
+                  k['bundle'].replace('.kext', '') in r['detail']
+                  or k['bundle'] in r['detail'], r['detail'])
+
+    wifi = next(r for r in doc['rows'] if r['part'] == 'Wi-Fi')
+    facts = wifi['kexts'][0]
+    check('a vendored kext carries its upstream', facts['upstream'], facts)
+    check('and a link built from it',
+          facts['url'] == f"https://github.com/{facts['upstream']}", facts['url'])
+    check('and the licence this repository read from that project',
+          facts['licence'] and facts['licence'] != 'none stated', facts['licence'])
+    check('and whether it is actually here', facts['shipped'] is True)
+    check('the version is the vendored one, not a remembered one',
+          facts['version'] == ocgen.read_toml(
+              Path('vendor/kexts.lock'))['kext'][facts['bundle']]['version'])
+
+    check('the macOS floor names what set it',
+          doc['macos']['from']['version'] == '10.12'
+          and doc['macos']['from_because'] == 'Intel graphics', doc['macos'])
+
+    # a Mac reports none of its own hardware, and eight unknown rows is noise
+    blank = json.loads(Path('tools/fixtures/no-hardware.json').read_text())
+    blank = blank.get('hardware', blank)
+    check('a machine nothing is known about says so instead',
+          summary.document(blank)['worth_showing'] is False)
+
+    with tempfile.TemporaryDirectory() as tmp:
+        r = run([sys.executable, 'tools/setup.py', '--describe',
+                 '--machine', 'tools/fixtures/thinkpad-e570.json',
+                 '--out', str(Path(tmp) / 'EFI')])
+        check('--describe writes one JSON object and stops', r.returncode == 0
+              and len(r.stdout.strip().splitlines()) == 1, r.returncode)
+        if r.returncode == 0:
+            written = json.loads(r.stdout)
+            check('naming the report it was given as the source',
+                  written['source'].startswith('report'), written['source'])
+            check('and it is the same document', written['rows'] == doc['rows'])
+
+
 if __name__ == '__main__':
     for section in (graphics, graphics_advice, audio_advice, storage, peripherals,
                     trackpad, framebuffer, boot_args, other_machine,
@@ -1351,7 +1413,7 @@ if __name__ == '__main__':
                     usb_mapping, acpi_tables, unattended_ssdts, ssdt_flow, window_stays_open,
                     frozen_names, frozen_build, workflow_flags,
                     runner_independence, tables_match_sources,
-                    front_end_protocol):
+                    front_end_protocol, machine_document):
         print(f'\n{section.__name__}')
         section()
     print()
