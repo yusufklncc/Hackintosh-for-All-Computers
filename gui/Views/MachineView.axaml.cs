@@ -189,7 +189,8 @@ public partial class MachineView : UserControl
 
         if (m.Oclp.Count > 0)
         {
-            var said = m.Oclp.Select(p => $"{p.What} from macOS {p.From}");
+            var said = m.Oclp.Select(p => $"{p.What} from macOS {p.From}"
+                                        + (p.To is { } to ? $" to {to}" : ""));
             Patched.Text = "Past that: OpenCore Legacy Patcher restores "
                          + string.Join(", ", said)
                          + ". Those patches go on an installed macOS, not in the "

@@ -1907,6 +1907,15 @@ def nvidia_by_family():
           [r['macos'] for r in nvidia[:2]])
     check('with the patched range beside it where there is one',
           any((r['macos'] or {}).get('oclp') for r in nvidia))
+    check('and that range has both ends',
+          all(r['macos'].get('oclp_to') for r in nvidia
+              if (r['macos'] or {}).get('oclp')))
+
+    # AMD cards and Intel iGPUs are patched too, and the catalogue used to say
+    # so only for NVIDIA
+    polaris = next(r for r in rows if r['name'] == 'RX 580')
+    check('an AMD card OCLP patches says so as well',
+          (polaris['macos'] or {}).get('oclp') == '13.0', polaris['macos'])
 
     check('an id the name list does not carry gets no family',
           gpu.nvidia_family({'id': '10de:ffff'}) is None)
@@ -1951,6 +1960,18 @@ def what_oclp_restores():
     check('a family nobody patches gets nothing',
           oclptable.for_nvidia('AD') is None
           and oclptable.for_igpu('raptor-lake') is None)
+
+    # the patch page says where a set starts and never where it stops, so the
+    # ceiling comes from the shape of the documentation: one support page per
+    # macOS OCLP has added, and the newest of them is as far as it goes
+    top = oclptable.upper_bound()
+    check('there is a ceiling, and it is a macOS anybody would recognise',
+          top and top[0] and top[1].isdigit(), top)
+    check('and it is at least Ventura, or the pages were misread',
+          top and int(top[1]) >= 13, top)
+    check('the table says where the ceiling came from',
+          'MODELS' in oclptable.table().get('ceiling_source', ''),
+          oclptable.table().get('ceiling_source'))
 
     # and it reaches the machine screen, beside the range rather than inside it
     kepler_machine = {'generation': 'comet-lake', 'laptop': False,

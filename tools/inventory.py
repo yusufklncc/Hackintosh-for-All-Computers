@@ -132,9 +132,14 @@ def devices():
         note = card['status']
         if card.get('family'):
             note = f"{card['status']}, {card['family']}"
+        patched = oclptable.for_card_family(card.get('family') or '')
+        top = oclptable.upper_bound()
         out.append(_entry('Graphics', card['id'], card.get('name') or card['id'],
                           card.get('family') or '', vendor=vendor,
-                          status=card['status']))
+                          status=card['status'],
+                          macos=({'from': None, 'to': None, 'oclp': patched['from'],
+                                  'oclp_to': top[1] if top else None}
+                                 if patched else None)))
     for family in graphics.get('family', []):
         out.append(_entry('Graphics', family.get('vendor'), family.get('label')
                           or family.get('match'), family.get('note') or '',
@@ -151,9 +156,11 @@ def devices():
                    if family['chips'] else None)
         if patched:
             span += f", OCLP from macOS {patched['from']}"
+        top = oclptable.upper_bound()
         macos = (None if family['status'] != 'works' else
                  {'from': family['lowest_version'], 'to': family['highest_version'],
-                  'oclp': patched['from'] if patched else None})
+                  'oclp': patched['from'] if patched else None,
+                  'oclp_to': top[1] if (patched and top) else None})
         for card in family['cards']:
             out.append(_entry('Graphics', ', '.join(family['chips']), card, short,
                               vendor='NVIDIA Corporation', macos=macos,
@@ -163,9 +170,15 @@ def devices():
                               family['name'], short, vendor='NVIDIA Corporation',
                               macos=macos, status=family['status']))
     for igpu in graphics.get('igpu', []):
+        patched = next((oclptable.for_igpu(pr) for pr in igpu.get('profiles', [])
+                        if oclptable.for_igpu(pr)), None)
+        top = oclptable.upper_bound()
         out.append(_entry('Graphics', None, igpu.get('label') or 'Intel iGPU',
                           ', '.join(igpu.get('profiles', [])), vendor='Intel Corporation',
-                          status=igpu['status']))
+                          status=igpu['status'],
+                          macos=({'from': None, 'to': None, 'oclp': patched['from'],
+                                  'oclp_to': top[1] if top else None}
+                                 if patched else None)))
 
     for codec in ocgen.read_toml(Path('data/audio.toml')).get('audio', []):
         layouts = codec.get('layout') or []

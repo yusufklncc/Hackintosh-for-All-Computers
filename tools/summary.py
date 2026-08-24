@@ -512,20 +512,23 @@ def patched_further(hw):
             patch = oclptable.for_nvidia(family['chips'][0])
             if patch:
                 out.append({'what': family['name'].split('(')[0].strip(),
-                            'from': patch['from'], 'patch': patch['name']})
+                            'from': patch['from'], 'patch': patch['name'],
+                            'to': (oclptable.upper_bound() or (None, None))[1]})
     generation = hw.get('generation')
     if generation and any(gpu.looks_integrated(d.get('name'))
                           for d in hw.get('gpu_devices') or []):
         patch = oclptable.for_igpu(generation)
         if patch:
             out.append({'what': f'Intel {generation}', 'from': patch['from'],
-                        'patch': patch['name']})
+                        'patch': patch['name'],
+                        'to': (oclptable.upper_bound() or (None, None))[1]})
     for device in hw.get('gpu_devices') or []:
         entry = gpu.classify(device, generation)[1] or {}
         patch = oclptable.for_card_family(entry.get('family', ''))
         if patch:
             out.append({'what': entry['family'], 'from': patch['from'],
-                        'patch': patch['name']})
+                        'patch': patch['name'],
+                        'to': (oclptable.upper_bound() or (None, None))[1]})
     # one line per family, not per card in it
     seen, unique = set(), []
     for row in out:

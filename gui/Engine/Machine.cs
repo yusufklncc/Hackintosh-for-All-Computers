@@ -86,6 +86,7 @@ public sealed class Patched
     [JsonPropertyName("what")] public string What { get; set; } = "";
     [JsonPropertyName("from")] public string From { get; set; } = "";
     [JsonPropertyName("patch")] public string Patch { get; set; } = "";
+    [JsonPropertyName("to")] public string? To { get; set; }
 }
 
 public sealed class MachineDocument

@@ -28,10 +28,13 @@ public sealed class DeviceItem
         IsOk = row.Status == "supported";
         IsBad = row.Status == "unsupported";
         IsUnclear = row.Status is "untested" or "spoofed" or "dropped";
-        Macos = row.Macos is { From: { } from }
-            ? from + (row.Macos.To is { } to ? $" – {to}" : " +")
-              + (row.Macos.Oclp is { } oclp ? $"\nOCLP {oclp}+" : "")
+        // a range on each line: what macOS drove it, and where OCLP takes it
+        var native = row.Macos is { From: { } from }
+            ? from + (row.Macos.To is { } to ? $" – {to}" : " +") : "";
+        var patched = row.Macos is { Oclp: { } oclp }
+            ? "OCLP " + oclp + (row.Macos.OclpTo is { } until ? $" – {until}" : "+")
             : "";
+        Macos = string.Join("\n", new[] { native, patched }.Where(x => x.Length > 0));
         // one string to match against, lower-cased once rather than per
         // keystroke. The full vendor name goes in it even though the column
         // shows the short one, so searching "Advanced Micro" still finds them.
