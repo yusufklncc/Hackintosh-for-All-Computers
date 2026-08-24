@@ -1783,6 +1783,13 @@ def the_device_catalogue():
           all(r['category'] in catalogue['categories'] for r in rows))
     check('and a name, never an empty cell',
           all(r['name'] for r in rows))
+    # one vocabulary. The tables were written at different times and said
+    # "works" and "supported" for the same thing.
+    check('every verdict is one of the words the filter offers',
+          {r['status'] for r in rows} <= set(catalogue['statuses']),
+          sorted({r['status'] for r in rows}))
+    check('and "works" is not one of them, because "supported" is',
+          'works' not in catalogue['statuses'], catalogue['statuses'])
 
     # one row per device. Broadcom Bluetooth is three kexts in a relay and
     # every adapter used to appear three times.
@@ -1796,8 +1803,10 @@ def the_device_catalogue():
     cards = [r for r in rows if r['category'] == 'Graphics' and r['id'] == '1002:67df']
     check('cards sharing an id are listed by model', len(cards) > 1,
           [c['name'] for c in cards])
+    # the verdict is a field now, not the first word of the note, so that is
+    # where the models differ from each other
     check('and each model keeps its own verdict',
-          len({c['note'] for c in cards}) > 1, [c['note'] for c in cards])
+          len({c['status'] for c in cards}) > 1, [(c['name'], c['status']) for c in cards])
 
     # what the tables hold has to survive the trip
     ids_in_table = {i.lower() for d in ocgen.read_toml(Path('data/hardware.toml'))['driver']
@@ -1892,9 +1901,12 @@ def nvidia_by_family():
     rows = inventory.devices()['devices']
     nvidia = [r for r in rows if r['vendor'] == 'NVIDIA Corporation']
     check('the catalogue lists NVIDIA card by card', len(nvidia) > 100, len(nvidia))
-    check('each carrying its family and its range',
-          all(r['note'] for r in nvidia)
-          and any('Big Sur' in r['note'] for r in nvidia))
+    check('each carrying its family', all(r['note'] for r in nvidia))
+    check('and its range as values rather than prose',
+          any(r['macos'] and r['macos']['to'] == '11' for r in nvidia),
+          [r['macos'] for r in nvidia[:2]])
+    check('with the patched range beside it where there is one',
+          any((r['macos'] or {}).get('oclp') for r in nvidia))
 
     check('an id the name list does not carry gets no family',
           gpu.nvidia_family({'id': '10de:ffff'}) is None)
