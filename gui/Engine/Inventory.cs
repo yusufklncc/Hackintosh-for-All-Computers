@@ -40,10 +40,13 @@ public sealed class SourceRow
 
 public sealed class ToolRow
 {
+    // the lock spells these "upstream" and "license"; reading them as "repo"
+    // and "licence" gave nine rows of null and the page quietly showed nothing
     [JsonPropertyName("path")] public string Path { get; set; } = "";
-    [JsonPropertyName("repo")] public string? Repo { get; set; }
-    [JsonPropertyName("licence")] public string? Licence { get; set; }
+    [JsonPropertyName("upstream")] public string? Upstream { get; set; }
+    [JsonPropertyName("license")] public string? Licence { get; set; }
     [JsonPropertyName("version")] public string? Version { get; set; }
+    [JsonPropertyName("note")] public string? Note { get; set; }
 }
 
 public sealed class About
@@ -56,6 +59,8 @@ public sealed class About
     [JsonPropertyName("sources")] public List<SourceRow> Sources { get; set; } = new();
     [JsonPropertyName("tally")] public Dictionary<string, int> Tally { get; set; } = new();
     [JsonPropertyName("tools")] public List<ToolRow> Tools { get; set; } = new();
+    [JsonPropertyName("licence")] public string? Licence { get; set; }
+    [JsonPropertyName("repo")] public string? Repo { get; set; }
 }
 
 public sealed class MacosSpan

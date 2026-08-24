@@ -1996,6 +1996,60 @@ def what_oclp_restores():
           summary.patched_further(two_keplers))
 
 
+def the_about_page():
+    """What the program says about itself has to be true of the program.
+
+    Every number on it is counted from the tree, because a number typed into a
+    sentence goes stale silently - this page carried "OpenCore 1.0.6" and "41
+    kexts" while the tree held 1.0.5 and 42."""
+    import inventory
+
+    about = inventory.about()
+    check('the OpenCore version is the vendored one',
+          about['opencore'] == sorted(x.name for x in Path('vendor/opencore').iterdir()
+                                      if x.is_dir())[-1], about['opencore'])
+    check('the kext count is what the lock holds',
+          about['kexts'] == len(ocgen.read_toml(Path('vendor/kexts.lock'))['kext']))
+    check('and what is actually on disk agrees with it',
+          about['shipped'] == about['kexts'], (about['shipped'], about['kexts']))
+    check('the config count is the catalogue length',
+          about['configs'] == len(ocgen.read_toml(
+              Path('profiles/catalogue.toml'))['config']))
+
+    # the whole point of the page
+    check('every source area says what it covers and what it does not',
+          all(s['covers'] and s['gap'] for s in about['sources']),
+          [s['area'] for s in about['sources'] if not (s['covers'] and s['gap'])])
+    check('every one names a kind the page explains',
+          {s['kind'] for s in about['sources']}
+          <= {'derived', 'measured', 'quoted', 'reported', 'none'},
+          sorted({s['kind'] for s in about['sources']}))
+    check('and the tally adds up to the areas',
+          sum(about['tally'].values()) == len(about['sources']))
+
+    # vendored programs, which the page carried and never drew
+    check('the vendored programs are listed', len(about['tools']) >= 5,
+          len(about['tools']))
+    check('each with the licence its project states',
+          all(t.get('license') for t in about['tools']),
+          [t['path'] for t in about['tools'] if not t.get('license')])
+    check('and the upstream it came from',
+          all(t.get('upstream') for t in about['tools']))
+
+    check('this repository names its own licence',
+          about['licence'] and 'License' in about['licence'], about['licence'])
+
+    # the sentence about the network used to say "both ACPI tools" while nine
+    # programs travelled in the package, so it is counted now and not written
+    source = Path('gui/Views/AboutView.axaml.cs').read_text()
+    layout = Path('gui/Views/AboutView.axaml').read_text()
+    check('the offline sentence counts what it claims',
+          'about.Tools.Count' in source, 'about.Tools.Count' in source)
+    check('and is not a fixed sentence in the layout',
+          'ACPI tools travel' not in layout)
+    check('and the weakest sources are drawn first', '["none"] = 0' in source)
+
+
 if __name__ == '__main__':
     for section in (graphics, graphics_advice, audio_advice, storage, peripherals,
                     trackpad, framebuffer, boot_args, other_machine,
@@ -2010,7 +2064,7 @@ if __name__ == '__main__':
                     embedded_fonts, macos_registry, genuine_macs,
                     the_processor_bounds_it_too, graphics_and_the_range,
                     what_the_machine_calls_its_network, the_device_catalogue,
-                    nvidia_by_family, what_oclp_restores):
+                    nvidia_by_family, what_oclp_restores, the_about_page):
         print(f'\n{section.__name__}')
         section()
     print()

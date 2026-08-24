@@ -10,8 +10,10 @@
         <TextBlock Classes="eyebrow" Text="ABOUT" />
         <TextBlock FontSize="15" TextWrapping="Wrap" Foreground="{DynamicResource Ink}"
                    Text="An OpenCore EFI builder that answers from tables, and says where each table came from." />
-        <TextBlock FontSize="13.5" TextWrapping="Wrap" Foreground="{DynamicResource Muted}"
-                   Text="Nothing here reaches the network. The machine an EFI is prepared on is usually the machine about to be replaced, and it is often not online - so every kext, every profile and both ACPI tools travel inside the program." />
+        <TextBlock Name="Offline" FontSize="13.5" TextWrapping="Wrap"
+                   Foreground="{DynamicResource Muted}" />
+        <TextBlock Name="Licence" FontSize="12.5" TextWrapping="Wrap"
+                   Foreground="{DynamicResource Faint}" />
       </StackPanel>
 
       <ItemsControl Name="Counts">
@@ -30,6 +32,32 @@
           </DataTemplate>
         </ItemsControl.ItemTemplate>
       </ItemsControl>
+
+      <StackPanel Spacing="10">
+        <TextBlock Classes="eyebrow" Text="PROGRAMS THAT TRAVEL WITH IT" />
+        <TextBlock FontSize="12.5" TextWrapping="Wrap" MaxWidth="740"
+                   HorizontalAlignment="Left" Foreground="{DynamicResource Muted}"
+                   Text="Not kexts - whole programs, vendored and driven. Each is pinned by hash and carries the licence its project states." />
+        <ItemsControl Name="Tools">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="v:ToolItem">
+              <Grid ColumnDefinitions="*,150,170" Margin="0,0,0,6">
+                <StackPanel Grid.Column="0" Margin="0,0,12,0">
+                  <TextBlock Classes="mono" Text="{Binding Path}"
+                             Foreground="{DynamicResource Ink}" />
+                  <TextBlock Classes="mono" FontSize="10.5" Text="{Binding Note}"
+                             IsVisible="{Binding HasNote}"
+                             Foreground="{DynamicResource Faint}" TextWrapping="Wrap" />
+                </StackPanel>
+                <TextBlock Grid.Column="1" Classes="mono" Text="{Binding Upstream}"
+                           TextWrapping="Wrap" />
+                <TextBlock Grid.Column="2" Classes="mono" Text="{Binding Licence}"
+                           TextWrapping="Wrap" />
+              </Grid>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </StackPanel>
 
       <StackPanel Spacing="10">
         <TextBlock Classes="eyebrow" Text="WHERE THE ANSWERS COME FROM" />

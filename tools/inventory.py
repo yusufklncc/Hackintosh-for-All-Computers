@@ -22,6 +22,7 @@ LOCK = Path('vendor/kexts.lock')
 CATALOGUE = Path('profiles/catalogue.toml')
 SHIPPED = Path('EFI/OC/Kexts')
 OPENCORE = Path('vendor/opencore')
+LICENCE = Path('LICENSE')
 HARDWARE = Path('data/hardware.toml')
 
 
@@ -259,6 +260,11 @@ def about():
         'sources': sources,
         'tally': tally,
         'tools': thirdparty.vendored_tools(),
+        # the licence on this repository itself, read from the file rather
+        # than written into a sentence that can go stale
+        'licence': (LICENCE.read_text(encoding='utf-8').splitlines()[0].strip()
+                    if LICENCE.exists() else None),
+        'repo': 'https://github.com/yusufklncc/Hackintosh-for-All-Computers',
     }
 
 
