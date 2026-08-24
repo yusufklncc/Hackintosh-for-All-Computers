@@ -1986,6 +1986,15 @@ def the_tools_a_window_can_drive():
     check('nothing skips the step for being a front end',
           'not UI.protocol and not a.usb_map' not in builder)
 
+    # Opening it to a front end opened it to the unattended pass as well, which
+    # answered yes and waited for somebody to plug in a device. An unattended
+    # pass declines what it is offered.
+    drive = Path('gui/Views/BuilderView.axaml.cs').read_text()
+    check('an unattended pass declines rather than taking the first row',
+          'o.Value is "no" or "none"' in drive, 'declining option preferred')
+    check('and the value it declines by is in the question it was sent',
+          "'value': v" in Path('tools/setup.py').read_text())
+
 
 def what_oclp_restores():
     """Where the graphics go past their native ceiling, and whose doing it is.

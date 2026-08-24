@@ -56,12 +56,25 @@ public partial class BuilderView : UserControl
             }
             if (_open is not null)
             {
-                // a question with nothing detected leaves nothing checked, and
-                // Send is right to refuse it. This pass has no opinion, so it
-                // takes the first row rather than stopping there forever.
+                // A question with nothing detected leaves nothing checked, and
+                // Send is right to refuse it. This pass has no opinion - so it
+                // declines whatever it is offered, and only then falls back to
+                // the first row.
+                //
+                // Declining matters: one of these questions opens USBToolBox,
+                // which asks somebody to plug a device into every port. Taking
+                // the first row said yes to that on a build runner, and the
+                // run sat there until it was killed.
                 var rows = Options.Children.OfType<RadioButton>().ToList();
                 if (rows.Count > 0 && rows.All(r => r.IsChecked != true))
-                    rows[0].IsChecked = true;
+                {
+                    var declining = _open.Options
+                        .FirstOrDefault(o => o.Value is "no" or "none");
+                    var pick = declining is null ? rows[0]
+                        : rows.FirstOrDefault(r => (int)r.Tag! == declining.Number)
+                          ?? rows[0];
+                    pick.IsChecked = true;
+                }
                 Send();
             }
             await Task.Delay(150);

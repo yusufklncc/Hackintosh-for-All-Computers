@@ -17,7 +17,8 @@ namespace Shell.Engine;
 // and the transcript uses both.
 public sealed record TextSpan(string Tone, string Text);
 
-public sealed record Option(int Number, string Label, bool Detected);
+public sealed record Option(int Number, string Label, bool Detected,
+                            string? Value);
 
 public sealed record Question(
     int Id, string Text, IReadOnlyList<Option> Options, string? Note, bool FreeText);
@@ -151,11 +152,13 @@ public sealed class Session
         foreach (var option in root.GetProperty("options").EnumerateArray())
             options.Add(new Option(option.GetProperty("n").GetInt32(),
                                    Text(option, "label") ?? "",
-                                   option.GetProperty("detected").GetBoolean()));
+                                   option.GetProperty("detected").GetBoolean(),
+                                   Text(option, "value")));
         // the skip row is a row like any other once it is drawn
         if (root.TryGetProperty("skip", out var skip))
             options.Add(new Option(skip.GetProperty("n").GetInt32(),
-                                   Text(skip, "label") ?? "none of these", false));
+                                   Text(skip, "label") ?? "none of these", false,
+                                   "no"));
         var step = root.TryGetProperty("step", out var s) && s.ValueKind == JsonValueKind.Number
             ? s.GetInt32() : (int?)null;
         var total = root.TryGetProperty("total", out var t) && t.ValueKind == JsonValueKind.Number
