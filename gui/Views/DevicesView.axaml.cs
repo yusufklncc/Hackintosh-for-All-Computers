@@ -35,8 +35,12 @@ public sealed class DeviceItem
         // one string to match against, lower-cased once rather than per
         // keystroke. The full vendor name goes in it even though the column
         // shows the short one, so searching "Advanced Micro" still finds them.
-        Haystack = $"{Category} {Name} {row.Vendor} {Vendor} {Id} {Kext} {Note} "
-                 + $"{Status} {Macos}".ToLowerInvariant();
+        // The brackets matter. Written as two interpolated strings joined with
+        // +, ToLowerInvariant applied to the second one only, so half the
+        // haystack stayed capitalised and a lower-cased needle never met it:
+        // "conexant" found nothing while Conexant sat on the screen.
+        Haystack = ($"{Category} {Name} {row.Vendor} {Vendor} {Id} {Kext} "
+                  + $"{Note} {Status} {Macos}").ToLowerInvariant();
     }
 
     /// <summary>A vendor name short enough to read in a column.
