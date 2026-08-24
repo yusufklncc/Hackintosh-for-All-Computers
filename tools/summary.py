@@ -421,6 +421,21 @@ def profile_window(hw):
         return None
 
 
+def _darwin_of(version):
+    """The Darwin major for a macOS version string, or None.
+
+    "10.13.6" and "11" both appear on the guide's pages; the table here is
+    keyed on "10.13" and "11", so the third part is dropped."""
+    if not version:
+        return None
+    parts = version.split('.')
+    short = '.'.join(parts[:2]) if version.startswith('10.') else parts[0]
+    for release in ocgen.read_toml(Path('data/macos.toml'))['release']:
+        if str(release['version']) == short:
+            return release['darwin']
+    return None
+
+
 def macos_windows(hw):
     """[(what, min_darwin, max_darwin or None)] for the parts that bound macOS.
 
@@ -446,6 +461,18 @@ def macos_windows(hw):
                     out.append(('Intel graphics', *_window(s['min_darwin'],
                                                            s['max_darwin'])))
                     break
+
+    # a supported NVIDIA card really does bound macOS, and hard: Kepler ends at
+    # Big Sur and Pascal at High Sierra, which is older than anything else here
+    # is likely to say
+    for device in hw.get('gpu_devices') or []:
+        family = gpu.nvidia_family(device)
+        if not family or family['status'] != 'works':
+            continue
+        floor = _darwin_of(family.get('lowest_version'))
+        ceiling = _darwin_of(family.get('highest_version'))
+        if floor or ceiling:
+            out.append((family['name'].split('(')[0].strip(), floor or 0, ceiling))
 
     matched = advise.matched_kexts(hw.get('pci_ids') or [], hw.get('usb_ids') or [])
     third_party_nvme = [d for d in hw.get('nvme') or [] if 'apple' not in d.lower()]

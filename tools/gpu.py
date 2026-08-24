@@ -15,10 +15,12 @@ Everything comes from data/gpu.toml, which carries Dortania's verdict per PCI
 id for AMD and per family for the rest.
 """
 import os
+import re
 import sys
 from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import deviceids
 import ocgen
 
 TABLE = Path('data/gpu.toml')
@@ -41,7 +43,8 @@ def load():
     if not TABLE.exists():
         sys.exit(f'{TABLE} missing; run tools/gputable.py')
     d = ocgen.read_toml(TABLE)
-    return ({c['id']: c for c in d['card']}, d.get('family', []), d.get('igpu', []))
+    return ({c['id']: c for c in d['card']}, d.get('family', []), d.get('igpu', []),
+            d.get('nvidia', []))
 
 
 FIELD = Path('data/field.toml')
@@ -87,7 +90,7 @@ def igpu_verdict(generation):
     supported reading wins and the exception is named."""
     if not generation:
         return None, None
-    _, _, igpus = load()
+    _, _, igpus, _ = load()
     hits = [g for g in igpus if generation in g.get('profiles', [])]
     if not hits:
         return None, None
@@ -103,9 +106,51 @@ def looks_integrated(name):
     return any(h in n for h in IGPU_HINTS) and 'arc' not in n
 
 
+NVIDIA_CHIP = re.compile(r'\b(G[FKMPVA]|TU|AD|GB|GH)\d{3}\b')
+
+
+def nvidia_family(device):
+    """The NVIDIA family a card belongs to, from its chip codename, or None.
+
+    The guide states support by family and names no device ids. The PCI ID
+    Project puts the chip in the device name - 10de:1180 is "GK104 [GeForce GTX
+    680]" - and the first two letters are the family. Both halves are read: the
+    guide for what a family supports, the id list for which family a card is.
+
+    A card the id list has no name for gets no family, and falls through to the
+    whole-vendor rule rather than to a guess."""
+    if not (device.get('id') or '').lower().startswith('10de:'):
+        return None
+    _, name = deviceids.describe(device['id'])
+    found = NVIDIA_CHIP.search(name or '')
+    if not found:
+        return None
+    chip, prefix = found.group(0), found.group(1)
+    for family in load()[3]:
+        chips = family.get('chips', [])
+        # an exact chip beats a prefix: the rebranded-Fermi section names three
+        # parts, and every other section speaks for a whole two-letter family
+        if chip in chips or prefix in chips:
+            return family
+    return None
+
+
 def classify(device, generation=None):
     """(verdict, detail) for one detected graphics device."""
-    cards, families, _ = load()
+    cards, families, _, _ = load()
+    # before the whole-vendor rule, which says only "no NVIDIA GPU is currently
+    # supported" - true of what is on sale and useless about a GTX 680
+    nvidia = nvidia_family(device)
+    if nvidia:
+        entry = {'family': nvidia['name'], 'source': nvidia['source']}
+        if nvidia['status'] == 'works':
+            entry['note'] = (f"macOS {nvidia['lowest_name']} "
+                             f"{nvidia['lowest_version']} to "
+                             f"{nvidia['highest_name']} {nvidia['highest_version']}")
+            entry['macos'] = (nvidia['lowest_version'], nvidia['highest_version'])
+        else:
+            entry['note'] = 'no driver was ever written for this family'
+        return nvidia['status'], entry
     card = cards.get(device.get('id') or '')
     if card:
         return card['status'], card

@@ -123,6 +123,12 @@ def devices():
     for family in graphics.get('family', []):
         out.append(_entry('Graphics', family.get('vendor'), family.get('label')
                           or family.get('match'), family.get('note') or family['status']))
+    for family in graphics.get('nvidia', []):
+        span = ('never supported' if family['status'] != 'works'
+                else f"macOS {family['lowest_name']} {family['lowest_version']} to "
+                     f"{family['highest_name']} {family['highest_version']}")
+        out.append(_entry('Graphics', ', '.join(family['chips']), family['name'],
+                          span, vendor='NVIDIA Corporation'))
     for igpu in graphics.get('igpu', []):
         out.append(_entry('Graphics', None, igpu.get('label') or 'Intel iGPU',
                           f"{igpu['status']}: " + ', '.join(igpu.get('profiles', []))))

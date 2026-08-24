@@ -102,6 +102,14 @@ def parse(text):
     return vendors, devices
 
 
+# Every card this vendor has ever made, not only the ones already referenced.
+# NVIDIA support is stated by chip family and the family is only knowable from
+# the chip codename in the device name - "GK104 [GeForce GTX 680]" - so a card
+# nobody has written down yet still has to be nameable. Two thousand rows, and
+# the alternative is telling somebody with a GTX 680 that his card is a mystery.
+WHOLE_VENDORS = ('10de',)
+
+
 def wanted():
     """Every id this repository refers to, by bus."""
     pci, usb = set(), set()
@@ -124,6 +132,9 @@ def refresh():
     for source, url, ids in (('pci', PCI_SOURCE, pci_wanted),
                              ('usb', USB_SOURCE, usb_wanted)):
         found_vendors, found_devices = parse(fetch(url))
+        if source == 'pci':
+            ids = set(ids) | {i for i in found_devices
+                              if i.split(':')[0] in WHOLE_VENDORS}
         for device_id in sorted(ids):
             vendor = device_id.split(':')[0]
             if vendor in found_vendors:
@@ -132,6 +143,8 @@ def refresh():
                 rows.append({'id': device_id, 'bus': source,
                              'name': found_devices[device_id]})
     named = {r['id'] for r in rows}
+    # only the ids this repository referred to can be missing; a whole vendor
+    # taken from the list is by definition all in it
     missing = sorted((pci_wanted | usb_wanted) - named)
     tree = {
         'source': {'pci': PCI_SOURCE, 'usb': USB_SOURCE},

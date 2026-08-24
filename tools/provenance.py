@@ -110,12 +110,27 @@ def catalogue():
              count=f'{rows_in("data/gpu.toml", "card")} cards',
              covers='Polaris, Vega, Navi 10/21/23, per card, with boot arguments',
              gap='Cards the guide does not list are unknown, not unsupported.'),
+        dict(area='NVIDIA families', kind=DERIVED, file='data/gpu.toml',
+             source="the guide's NVIDIA page, which states each family's "
+                    'oldest and newest macOS on its own lines',
+             tool='tools/gputable.py',
+             count=f'{rows_in("data/gpu.toml", "nvidia")} families',
+             covers='every NVIDIA card, by the chip codename the PCI ID '
+                    'Project puts in its name: GK is Kepler and ends at Big '
+                    'Sur, GP is Pascal and ends at High Sierra, TU and newer '
+                    'never had a driver',
+             gap='A card the id list has no name for gets no family and falls '
+                 'back to the whole-vendor rule. The rebranded-Fermi section '
+                 'speaks for three named chips only, so a real Fermi is '
+                 'unclaimed rather than mislabelled.'),
         dict(area='NVIDIA and Arc', kind=QUOTED, file='data/gpu.toml',
              source='the same guide, which states these by family in prose',
              tool='tools/gputable.py',
              count=f'{rows_in("data/gpu.toml", "family")} family rules',
-             covers='every card of those vendors, by PCI vendor id',
-             gap='No per-card nuance: Kepler is in the note, not in a verdict.'),
+             covers='the fallback when no family claims a card, and every '
+                    'Intel Arc',
+             gap='A whole-vendor sentence. It is now the last resort rather '
+                 'than the only answer - see NVIDIA families above.'),
         dict(area='Intel iGPU', kind=DERIVED, file='data/gpu.toml',
              source='the same guide, per generation, with its framebuffer ids',
              tool='tools/gputable.py',

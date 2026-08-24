@@ -16,6 +16,7 @@ import html
 import os
 import re
 import sys
+import urllib.error
 import urllib.request
 from pathlib import Path
 
@@ -25,6 +26,7 @@ import ocgen
 BASE = 'https://dortania.github.io/GPU-Buyers-Guide'
 AMD_URL = f'{BASE}/modern-gpus/amd-gpu.html'
 INTEL_URL = f'{BASE}/modern-gpus/intel-gpu.html'
+NVIDIA_URL = f'{BASE}/modern-gpus/nvidia-gpu.html'
 
 # Dortania marks each card with one of these.
 STATUS = {'✅': 'works', '☑️': 'works-spoofed', '⚠️': 'untested',
@@ -43,8 +45,24 @@ FAMILY_ARGS = {
 
 
 def fetch(url):
-    with urllib.request.urlopen(url) as r:
-        return r.read().decode('utf-8', 'replace')
+    """The page, however this machine can read it.
+
+    Same fallback the other generators have: urllib carries its own trust
+    store and a network that inspects TLS refuses it, while curl uses the
+    system's."""
+    try:
+        with urllib.request.urlopen(url, timeout=40) as r:
+            return r.read().decode('utf-8', 'replace')
+    except urllib.error.URLError as first:
+        import shutil
+        import subprocess
+        if not shutil.which('curl'):
+            raise
+        got = subprocess.run(['curl', '-sS', '--max-time', '40', url],
+                             capture_output=True, text=True)
+        if got.returncode != 0 or not got.stdout.strip():
+            raise SystemExit(f'{first}\nand curl: {got.stderr.strip()}')
+        return got.stdout
 
 
 def cells(row):
@@ -170,6 +188,93 @@ def parse_intel(page):
     return out
 
 
+# NVIDIA names no device ids anywhere on its page - only card models under a
+# family heading. What ties a detected card to a family instead is the chip
+# codename, which the PCI ID Project puts in the device name: 10de:1180 is
+# "GK104 [GeForce GTX 680]", and GK is Kepler. Two letters, and both sides of
+# the join are read rather than typed.
+NVIDIA_CHIPS = {
+    'GF': 'Fermi', 'GK': 'Kepler', 'GM': 'Maxwell', 'GP': 'Pascal',
+    'GV': 'Volta', 'TU': 'Turing', 'GA': 'Ampere', 'AD': 'Ada', 'GB': 'Blackwell',
+}
+
+# Which heading on the page speaks for which chip family. The page groups by
+# marketing series, and a series is not a chip: the 700 series holds Kepler and
+# rebranded Fermi both, and the page says so in a section of its own.
+NVIDIA_SECTIONS = {
+    'Kepler Series': ('GK',),
+    'Maxwell Series': ('GM',),
+    'Pascal Series': ('GP',),
+    'Volta Series': ('GV',),
+    'Turing Series': ('TU',),
+    'Ampere Series': ('GA',),
+    'Hopper Series': ('GH',),
+    'Lovelace Series': ('AD',),
+    'Blackwell Series': ('GB',),
+    'Fermi rebranded': ('GF',),
+    # A warning about four Kepler cards, with no versions of its own. Listed so
+    # it opens a section of its own and is dropped, rather than being read as
+    # the Kepler heading and swallowing the next family's lines.
+    'Kepler Series(GK106': (),
+}
+
+# The asterisk on Volta's line is a footnote, not part of the version.
+MACOS_NAMED = re.compile(r'^(Highest|Initial) Supported OS:\s*(.+?)\s*\(([\d.]+)\)\s*\*?\s*$')
+# "Highest Supported OS: None" - Turing says it in the same place the others
+# say a version, and it is the clearest statement on the page.
+MACOS_NONE = re.compile(r'^(Highest|Initial) Supported OS:\s*None\s*$')
+
+
+def _plain_lines(page):
+    body = re.sub(r'<script.*?</script>', '', page, flags=re.S)
+    text = html.unescape(re.sub(r'<[^>]+>', '\n', body))
+    return [l.strip() for l in text.splitlines() if l.strip()]
+
+
+def parse_nvidia(page):
+    """Per-family support, from the page's own "Supported OS" lines.
+
+    Every family section states two of them - the oldest macOS that ever drove
+    the family and the newest that still does - and then lists the cards. Both
+    are read; nothing here decides what a family supports."""
+    lines = _plain_lines(page)
+    # Keyed by the heading, because the page prints every heading twice: once
+    # in its contents and once over the section itself. Appending both put the
+    # contents copies first and the "Supported OS" lines then landed on
+    # whichever of them happened to be open - Turing's "None" ended up on
+    # Kepler, and Kepler came out as a family that never worked.
+    sections, current = {}, None
+    for line in lines:
+        # Longest first: "Kepler Series(GK106" has to win over "Kepler Series",
+        # or the warning section is read as the family itself. The page writes
+        # a space before the bracket sometimes and not others.
+        heading = next((h for h in sorted(NVIDIA_SECTIONS, key=len, reverse=True)
+                        if line == h or line.startswith(h + ' ')
+                        or line.startswith(h + '(')), None)
+        if heading:
+            # Where the heading names its chips - "Fermi rebranded(GF108,
+            # GF117 and GF119)" - those are the chips, not the whole prefix.
+            # That section is about three rebadged parts, and reading it as
+            # every GF chip made a GTX 460 into a rebranded card.
+            named_chips = re.findall(r'\bG[FKMPVA]\d{3}\b', line)
+            current = sections.setdefault(heading, {
+                'family': tuple(named_chips) or NVIDIA_SECTIONS[heading],
+                'name': line, 'source': NVIDIA_URL})
+            continue
+        if not current:
+            continue
+        named = MACOS_NAMED.match(line)
+        if named:
+            which = 'highest' if named.group(1) == 'Highest' else 'lowest'
+            current[which] = {'name': named.group(2), 'version': named.group(3)}
+            continue
+        if MACOS_NONE.match(line):
+            current['highest'] = None
+            current['never'] = True
+    # a section with no "Supported OS" line under it said nothing to record
+    return [f for f in sections.values() if 'highest' in f and f['family']]
+
+
 # Families stated in prose. Each carries the sentence it rests on so the claim
 # can be checked without going back to the page.
 FAMILIES = [
@@ -194,6 +299,20 @@ FAMILIES = [
 ]
 
 
+def _flatten(family):
+    """One TOML table per family. Nested optional tables read worse than four
+    plain keys, and two of them are absent for a family that never worked."""
+    out = {'chips': list(family['family']), 'name': family['name'],
+           'source': family['source'],
+           'status': 'unsupported' if family.get('never') else 'works'}
+    for end in ('lowest', 'highest'):
+        value = family.get(end)
+        if value:
+            out[f'{end}_name'] = value['name']
+            out[f'{end}_version'] = value['version']
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--out', default='data/gpu.toml')
@@ -201,9 +320,13 @@ def main():
 
     cards = parse_amd(fetch(AMD_URL))
     igpus = parse_intel(fetch(INTEL_URL))
+    nvidia = parse_nvidia(fetch(NVIDIA_URL))
+    if len(nvidia) < 4:
+        sys.exit(f'only parsed {len(nvidia)} NVIDIA families; the page changed')
     if len(cards) < 40:
         sys.exit(f'only parsed {len(cards)} AMD cards; the page layout probably changed')
-    ocgen.write_toml(Path(a.out), {'card': cards, 'igpu': igpus, 'family': FAMILIES},
+    ocgen.write_toml(Path(a.out), {'card': cards, 'igpu': igpus, 'family': FAMILIES,
+                                   'nvidia': [_flatten(f) for f in nvidia]},
                      '# GPU support, from Dortania\'s GPU Buyers Guide.\n'
                      '#\n'
                      '# The AMD entries are parsed from the guide\'s own tables, which give a\n'

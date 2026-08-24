@@ -448,15 +448,24 @@ def detection_gaps():
                  'detail': 'x' * 40 + ' ' + 'y' * 40}
     out = summary.render({'cpu': None, 'pci_ids': []})
     check('the summary still renders with nothing to say', len(out) > 2)
+    # An NVIDIA id no name list carries, so no chip family can claim it and the
+    # whole-vendor rule is what answers. That rule used to need the word
+    # "nvidia" in the reported name, so a card the machine called anything else
+    # came out unknown.
     nvidia = {'generation': 'raptor-lake', 'laptop': False, 'pci_ids': [],
-              'gpu_devices': [{'id': '10de:1187', 'name': 'GTX 760'}]}
-    # the family rule used to need the word "nvidia" in the reported name, so a
-    # card the machine called anything else came out unknown
+              'gpu_devices': [{'id': '10de:ffff', 'name': 'Some Card'}]}
     graphics = [r for r in summary.rows(nvidia) if r['part'] == 'Graphics']
     check('a card is judged on its vendor id, not on what it happens to be called',
           graphics and graphics[0]['verdict'] == summary.UNSUPPORTED, graphics)
     check('a long verdict wraps instead of losing its caveat',
           any('Turing' in l for l in summary.render(nvidia)))
+
+    # and a card the chip family does claim is answered by the family, which is
+    # the whole point: a GTX 760 is Kepler and ran until Big Sur
+    kepler = dict(nvidia, gpu_devices=[{'id': '10de:1187', 'name': 'GTX 760'}])
+    row = [r for r in summary.rows(kepler) if r['part'] == 'Graphics'][0]
+    check('a card the family claims is not swept up by the vendor rule',
+          row['verdict'] == summary.SUPPORTED, row)
 
 
 def broadcom_wifi():
@@ -1817,6 +1826,63 @@ def the_device_catalogue():
               and r.stdout.lstrip().startswith('{'), r.stdout[:60])
 
 
+def nvidia_by_family():
+    """Which NVIDIA cards macOS drove, and until when.
+
+    The guide states this per family and names no device ids; the PCI ID
+    Project names the chip in every device name. Joining the two turns one
+    sentence about the whole vendor into a verdict per card - a GTX 680 ran
+    until Big Sur and an RTX 4090 never ran at all, and both used to read
+    the same."""
+    import gpu
+    import ocgen as _ocgen
+
+    families = _ocgen.read_toml(Path('data/gpu.toml')).get('nvidia', [])
+    check('the families were parsed from the page', len(families) >= 8, len(families))
+    named = {f['name'].split(' Series')[0].split('(')[0].strip() for f in families}
+    check('and the ones people actually own are among them',
+          {'Kepler', 'Maxwell', 'Pascal', 'Turing'} <= named, sorted(named))
+
+    def verdict(device_id):
+        return gpu.classify({'id': device_id, 'name': 'NVIDIA'})
+
+    kepler, entry = verdict('10de:1180')          # GK104, GTX 680
+    check('a Kepler card is supported', kepler == 'works', (kepler, entry))
+    check('and says where it stops', entry['macos'][1] == '11', entry.get('macos'))
+
+    pascal, entry = verdict('10de:1b06')          # GP102, GTX 1080 Ti
+    check('a Pascal card stops at High Sierra',
+          pascal == 'works' and entry['macos'][1] == '10.13.6', entry.get('macos'))
+
+    ada, entry = verdict('10de:2684')             # AD102, RTX 4090
+    check('a card whose family never had a driver says so',
+          ada == 'unsupported' and 'no driver was ever written' in entry['note'],
+          entry)
+
+    # the rebranded-Fermi section speaks for three chips it names, and a real
+    # Fermi is not one of them
+    fermi_rebrand, entry = verdict('10de:0f00')   # GF108, GT 630
+    check('a rebranded Fermi is claimed by the section that names its chip',
+          fermi_rebrand == 'works' and 'GF108' in str(entry['family']), entry)
+    real_fermi, entry = verdict('10de:0e22')      # GF104, GTX 460
+    check('and a real Fermi is left to the whole-vendor rule rather than mislabelled',
+          real_fermi == 'unsupported' and 'Fermi rebranded' not in str(entry), entry)
+
+    check('an id the name list does not carry gets no family',
+          gpu.nvidia_family({'id': '10de:ffff'}) is None)
+    check('and a card that is not NVIDIA is not looked up at all',
+          gpu.nvidia_family({'id': '1002:67df'}) is None)
+
+    # and it reaches the range the machine screen shows
+    import summary
+    machine = {'cpu': 'i5', 'generation': 'comet-lake', 'laptop': False,
+               'gpu_devices': [{'id': '10de:1180', 'name': 'GeForce GTX 680'}]}
+    window = summary.macos_range(machine)
+    check('a supported NVIDIA card bounds the machine range', window is not None)
+    check('at the release its family stops on',
+          window[1] and window[1][2] == 20, window)
+
+
 if __name__ == '__main__':
     for section in (graphics, graphics_advice, audio_advice, storage, peripherals,
                     trackpad, framebuffer, boot_args, other_machine,
@@ -1830,7 +1896,8 @@ if __name__ == '__main__':
                     front_end_protocol, machine_document, machine_name,
                     embedded_fonts, macos_registry, genuine_macs,
                     the_processor_bounds_it_too, graphics_and_the_range,
-                    what_the_machine_calls_its_network, the_device_catalogue):
+                    what_the_machine_calls_its_network, the_device_catalogue,
+                    nvidia_by_family):
         print(f'\n{section.__name__}')
         section()
     print()

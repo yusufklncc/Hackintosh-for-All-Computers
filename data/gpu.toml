@@ -584,3 +584,77 @@ status = "unsupported"
 quote = "So Intel finally made a discrete GPU. Lmao. All of them are unsupported."
 source = "https://dortania.github.io/GPU-Buyers-Guide/modern-gpus/intel-gpu.html"
 note = "The page names the Alchemist cards; Battlemage is not listed individually but falls under the same statement."
+
+[[nvidia]]
+chips = ["GK"]
+name = "Kepler Series (GTX 6xx, 7xx)"
+source = "https://dortania.github.io/GPU-Buyers-Guide/modern-gpus/nvidia-gpu.html"
+status = "works"
+lowest_name = "Mountain Lion"
+lowest_version = "10.8"
+highest_name = "Big Sur"
+highest_version = "11"
+
+[[nvidia]]
+chips = ["AD"]
+name = "Lovelace Series (RTX 40xx)"
+source = "https://dortania.github.io/GPU-Buyers-Guide/modern-gpus/nvidia-gpu.html"
+status = "unsupported"
+
+[[nvidia]]
+chips = ["GH"]
+name = "Hopper Series (H)"
+source = "https://dortania.github.io/GPU-Buyers-Guide/modern-gpus/nvidia-gpu.html"
+status = "unsupported"
+
+[[nvidia]]
+chips = ["GA"]
+name = "Ampere Series (RTX 30xx)"
+source = "https://dortania.github.io/GPU-Buyers-Guide/modern-gpus/nvidia-gpu.html"
+status = "unsupported"
+
+[[nvidia]]
+chips = ["TU"]
+name = "Turing Series (RTX 20xx, GTX 16xx)"
+source = "https://dortania.github.io/GPU-Buyers-Guide/modern-gpus/nvidia-gpu.html"
+status = "unsupported"
+
+[[nvidia]]
+chips = ["GV"]
+name = "Volta Series (V)"
+source = "https://dortania.github.io/GPU-Buyers-Guide/modern-gpus/nvidia-gpu.html"
+status = "works"
+lowest_name = "High Sierra 17G3025"
+lowest_version = "10.13.6"
+highest_name = "High Sierra 17G3025"
+highest_version = "10.13.6"
+
+[[nvidia]]
+chips = ["GF108", "GF117", "GF119"]
+name = "Fermi rebranded(GF108, GF117 and GF119)"
+source = "https://dortania.github.io/GPU-Buyers-Guide/modern-gpus/nvidia-gpu.html"
+status = "works"
+lowest_name = "Lion"
+lowest_version = "10.7"
+highest_name = "High Sierra"
+highest_version = "10.13.6"
+
+[[nvidia]]
+chips = ["GP"]
+name = "Pascal Series (GTX 10xx)"
+source = "https://dortania.github.io/GPU-Buyers-Guide/modern-gpus/nvidia-gpu.html"
+status = "works"
+lowest_name = "Sierra"
+lowest_version = "10.12.4"
+highest_name = "High Sierra"
+highest_version = "10.13.6"
+
+[[nvidia]]
+chips = ["GM"]
+name = "Maxwell Series (GTX 9xx, 745, 750/Ti)"
+source = "https://dortania.github.io/GPU-Buyers-Guide/modern-gpus/nvidia-gpu.html"
+status = "works"
+lowest_name = "Yosemite"
+lowest_version = "10.10.0"
+highest_name = "High Sierra"
+highest_version = "10.13.6"
