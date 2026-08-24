@@ -13,6 +13,7 @@ from pathlib import Path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import deviceids
 import ocgen
+import oclptable
 import provenance
 import summary
 import thirdparty
@@ -131,6 +132,10 @@ def devices():
         # a row per card, the way the AMD table reads. The page names no device
         # ids for NVIDIA, so the chip family stands in the id column - it is
         # what the verdict is actually keyed on.
+        patched = (oclptable.for_nvidia(family['chips'][0])
+                   if family['chips'] else None)
+        if patched:
+            span += f", OCLP from macOS {patched['from']}"
         for card in family['cards']:
             out.append(_entry('Graphics', ', '.join(family['chips']), card,
                               f'{short}, {span}', vendor='NVIDIA Corporation'))

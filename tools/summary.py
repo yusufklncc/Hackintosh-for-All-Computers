@@ -29,6 +29,7 @@ import gpu
 import coverage
 import inputdev
 import mactable
+import oclptable
 import netkexts
 import ocgen
 import ui
@@ -498,6 +499,43 @@ def macos_windows(hw):
     return out
 
 
+def patched_further(hw):
+    """Where OCLP's root patches take the graphics past the native ceiling.
+
+    Read from OCLP's own page and joined to whichever family this machine has.
+    It changes nothing a build produces - the patches go on an installed macOS
+    - so it is said beside the range and never folded into it."""
+    out = []
+    for device in hw.get('gpu_devices') or []:
+        family = gpu.nvidia_family(device)
+        if family and family.get('chips'):
+            patch = oclptable.for_nvidia(family['chips'][0])
+            if patch:
+                out.append({'what': family['name'].split('(')[0].strip(),
+                            'from': patch['from'], 'patch': patch['name']})
+    generation = hw.get('generation')
+    if generation and any(gpu.looks_integrated(d.get('name'))
+                          for d in hw.get('gpu_devices') or []):
+        patch = oclptable.for_igpu(generation)
+        if patch:
+            out.append({'what': f'Intel {generation}', 'from': patch['from'],
+                        'patch': patch['name']})
+    for device in hw.get('gpu_devices') or []:
+        entry = gpu.classify(device, generation)[1] or {}
+        patch = oclptable.for_card_family(entry.get('family', ''))
+        if patch:
+            out.append({'what': entry['family'], 'from': patch['from'],
+                        'patch': patch['name']})
+    # one line per family, not per card in it
+    seen, unique = set(), []
+    for row in out:
+        if row['what'] in seen:
+            continue
+        seen.add(row['what'])
+        unique.append(row)
+    return unique
+
+
 def graphics_advice(hw):
     """What the graphics mean for the macOS range, or None if they mean nothing.
 
@@ -712,6 +750,10 @@ def document(hw, source='this machine'):
         # what the graphics mean for that range: not a bound on it, but the
         # difference between a machine that boots to a display and one that does not
         'graphics_advice': graphics_advice(hw),
+        # where somebody else's patches take it past that, which is not a thing
+        # this program does and is worth knowing anyway
+        'oclp': patched_further(hw),
+        'oclp_source': oclptable.table().get('source'),
     }
 
 

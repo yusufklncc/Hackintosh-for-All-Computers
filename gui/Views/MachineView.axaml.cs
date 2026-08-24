@@ -187,6 +187,20 @@ public partial class MachineView : UserControl
                        "same as saying every release works.";
         }
 
+        if (m.Oclp.Count > 0)
+        {
+            var said = m.Oclp.Select(p => $"{p.What} from macOS {p.From}");
+            Patched.Text = "Past that: OpenCore Legacy Patcher restores "
+                         + string.Join(", ", said)
+                         + ". Those patches go on an installed macOS, not in the "
+                         + "EFI this builds, and OCLP is written for real Macs.";
+            Patched.IsVisible = true;
+        }
+        else
+        {
+            Patched.IsVisible = false;
+        }
+
         if (m.Graphics is { } advice)
         {
             GraphicsWarning.Text = advice.Text;

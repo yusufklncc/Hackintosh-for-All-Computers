@@ -22,6 +22,7 @@ from pathlib import Path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import deviceids
 import ocgen
+import oclptable
 
 TABLE = Path('data/gpu.toml')
 
@@ -150,6 +151,13 @@ def classify(device, generation=None):
             entry['macos'] = (nvidia['lowest_version'], nvidia['highest_version'])
         else:
             entry['note'] = 'no driver was ever written for this family'
+        # what happens past the native ceiling, where somebody else put the
+        # drivers back. Information about an installed macOS, not something a
+        # build does: OCLP patches the system after the fact.
+        patched = oclptable.for_nvidia(nvidia['chips'][0]) if nvidia['chips'] else None
+        if patched:
+            entry['oclp'] = {'from': patched['from'], 'name': patched['name'],
+                             'source': oclptable.table().get('source')}
         return nvidia['status'], entry
     card = cards.get(device.get('id') or '')
     if card:

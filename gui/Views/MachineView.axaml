@@ -81,6 +81,11 @@
           <TextBlock Name="GraphicsWarning" FontSize="12.5" TextWrapping="Wrap"
                      IsVisible="False" Margin="0,4,0,0"
                      Foreground="{DynamicResource Warn}" />
+          <!-- Somebody else's patches, on an installed macOS. Nothing a build
+               here produces changes because of it, so it sits apart. -->
+          <TextBlock Name="Patched" FontSize="12.5" TextWrapping="Wrap"
+                     IsVisible="False" Margin="0,6,0,0"
+                     Foreground="{DynamicResource Muted}" />
         </StackPanel>
       </Border>
       <Border Grid.Column="1" Classes="panel">

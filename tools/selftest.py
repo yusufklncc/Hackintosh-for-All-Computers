@@ -1911,6 +1911,58 @@ def nvidia_by_family():
           window[1] and window[1][2] == 20, window)
 
 
+def what_oclp_restores():
+    """Where the graphics go past their native ceiling, and whose doing it is.
+
+    OCLP publishes this: each patch set with the macOS it applies from. The
+    join between their prose and this repository's family names is the only
+    part written here, and it is the part worth pinning down."""
+    import oclptable
+    import summary
+
+    table = oclptable.table()
+    check('the table names its source',
+          'OpenCore-Legacy-Patcher' in table.get('source', ''), table.get('source'))
+    check('and holds the patch sets the page lists',
+          len(table.get('patch', [])) >= 8, len(table.get('patch', [])))
+
+    kepler = oclptable.for_nvidia('GK')
+    check('Kepler is restored from macOS 12',
+          kepler and kepler['from'] == '12.0', kepler)
+    check('and Pascal is not, because the page does not list it',
+          oclptable.for_nvidia('GP') is None)
+    check('Haswell graphics are restored from 13',
+          (oclptable.for_igpu('haswell') or {}).get('from') == '13.0')
+    check('and Polaris cards too',
+          (oclptable.for_card_family('Polaris 10 and 20 series') or {}).get('from')
+          == '13.0')
+    check('a family nobody patches gets nothing',
+          oclptable.for_nvidia('AD') is None
+          and oclptable.for_igpu('raptor-lake') is None)
+
+    # and it reaches the machine screen, beside the range rather than inside it
+    kepler_machine = {'generation': 'comet-lake', 'laptop': False,
+                      'gpu_devices': [{'id': '10de:1180', 'name': 'GTX 680'}]}
+    said = summary.patched_further(kepler_machine)
+    check('a Kepler machine is told where the patches take it',
+          said and said[0]['from'] == '12.0', said)
+    window = summary.macos_windows(kepler_machine)
+    check('and the range itself is untouched by it',
+          all('OCLP' not in w[0] for w in window), window)
+
+    modern = {'generation': 'comet-lake', 'laptop': False,
+              'gpu_devices': [{'id': '1002:73ff', 'name': 'RX 6600'}]}
+    check('a machine nothing patches is told nothing',
+          summary.patched_further(modern) == [], summary.patched_further(modern))
+
+    # one line per family, however many cards of it are in the machine
+    two_keplers = dict(kepler_machine, gpu_devices=[
+        {'id': '10de:1180', 'name': 'GTX 680'}, {'id': '10de:1187', 'name': 'GTX 760'}])
+    check('two cards of one family say it once',
+          len(summary.patched_further(two_keplers)) == 1,
+          summary.patched_further(two_keplers))
+
+
 if __name__ == '__main__':
     for section in (graphics, graphics_advice, audio_advice, storage, peripherals,
                     trackpad, framebuffer, boot_args, other_machine,
@@ -1925,7 +1977,7 @@ if __name__ == '__main__':
                     embedded_fonts, macos_registry, genuine_macs,
                     the_processor_bounds_it_too, graphics_and_the_range,
                     what_the_machine_calls_its_network, the_device_catalogue,
-                    nvidia_by_family):
+                    nvidia_by_family, what_oclp_restores):
         print(f'\n{section.__name__}')
         section()
     print()

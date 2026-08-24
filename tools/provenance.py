@@ -92,6 +92,19 @@ def catalogue():
                  'id as its name - the kext still matches it. USB names come '
                  'from hwdata rather than linux-usb.org, whose file states no '
                  'licence at all.'),
+        dict(area='What OCLP restores', kind=DERIVED, file='data/oclp.toml',
+             source="OpenCore Legacy Patcher's own PATCHEXPLAIN page, which "
+                    'lists each patch set with the macOS it applies from',
+             tool='tools/oclptable.py --refresh',
+             count=f'{rows_in("data/oclp.toml", "patch")} patch sets',
+             covers='where the graphics go past their native ceiling: Kepler '
+                    'from macOS 12, Haswell, Broadwell, Skylake, Polaris and '
+                    'Vega from 13',
+             gap='OCLP patches an installed macOS, not an EFI, so nothing a '
+                 'build produces changes. It is written for real Macs and says '
+                 'nothing about a PC running macOS - and neither does this. '
+                 'Three of its patch sets name no family this repository has a '
+                 'row for and are recorded unjoined.'),
         dict(area='Mac support', kind=DERIVED, file='data/mac.toml',
              source="Apple's own device metadata at gdmf.apple.com/v2/pmv",
              tool='tools/mactable.py --refresh',

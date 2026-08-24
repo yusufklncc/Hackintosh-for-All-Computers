@@ -81,6 +81,13 @@ public sealed class GraphicsAdvice
     [JsonPropertyName("text")] public string Text { get; set; } = "";
 }
 
+public sealed class Patched
+{
+    [JsonPropertyName("what")] public string What { get; set; } = "";
+    [JsonPropertyName("from")] public string From { get; set; } = "";
+    [JsonPropertyName("patch")] public string Patch { get; set; } = "";
+}
+
 public sealed class MachineDocument
 {
     [JsonPropertyName("source")] public string Source { get; set; } = "";
@@ -92,6 +99,7 @@ public sealed class MachineDocument
     [JsonPropertyName("read")] public Dictionary<string, int> Read { get; set; } = new();
     [JsonPropertyName("mac")] public MacSupport? Mac { get; set; }
     [JsonPropertyName("graphics_advice")] public GraphicsAdvice? Graphics { get; set; }
+    [JsonPropertyName("oclp")] public List<Patched> Oclp { get; set; } = new();
 }
 
 [JsonSerializable(typeof(MachineDocument))]
