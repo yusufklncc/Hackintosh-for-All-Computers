@@ -14,11 +14,12 @@
 # Only ids this repository already references are here. The upstream lists are
 # two megabytes of hardware nothing here drives.
 
-unnamed = ["0489:e030", "0489:e046", "0489:e047", "0489:e04f", "0489:e052", "0489:e059", "0489:e062", "0489:e079", "0489:e087", "0489:e096", "0489:e0a1", "04b4:f901", "04ca:2003", "04ca:2005", "04ca:2009", "04ca:200a", "04ca:200b", "04ca:200c", "04ca:200e", "04ca:200f", "04ca:2012", "04ca:2016", "04f2:b49d", "04f2:b4a1", "0930:021e", "0930:021f", "0930:0221", "0930:0223", "0930:0225", "0930:0226", "0930:0229", "0a5c:2167", "0a5c:2168", "0a5c:2169", "0a5c:216b", "0a5c:216e", "0a5c:21d3", "0a5c:21d6", "0a5c:21d8", "0a5c:21dc", "0a5c:21de", "0a5c:21f3", "0a5c:21f4", "0a5c:21fb", "0a5c:21fd", "0a5c:21fe", "0a5c:640b", "0a5c:6412", "0a5c:6413", "0a5c:6414", "0a5c:6417", "0a5c:6418", "0a5c:7460", "0a5c:828d", "0b05:178a", "0b05:17cf", "0bda:0129", "0bda:0139", "0bda:0140", "105b:e066", "10ec:2502", "1186:8125", "1186:8168", "13d3:3295", "13d3:3384", "13d3:3388", "13d3:3389", "13d3:3404", "13d3:3411", "13d3:3413", "13d3:3418", "13d3:3427", "13d3:3435", "13d3:3456", "13d3:3482", "13d3:3484", "13d3:3504", "13d3:3508", "13d3:3517", "145f:01a3", "14e4:431a", "14e4:43b2", "185f:2167", "33ba:03e8", "33ba:03e9", "8086:0060", "8086:0064", "8086:00a0", "8086:00a4", "8086:0260", "8086:0264", "8086:24f5", "8086:24f6", "8086:271b", "8086:271c", "8086:2720", "8086:2726", "8086:2729", "8086:30dc", "8086:3df0", "8086:40a4", "8086:42a4", "8086:9dea", "8086:9deb", "8087:0035", "8087:0038"]
+unnamed = ["0489:e030", "04b4:f901", "0a5c:828d", "0b05:178a", "0bda:0129", "0bda:0139", "0bda:0140", "10ec:2502", "1186:8125", "1186:8168", "13d3:3295", "14e4:431a", "14e4:43b2", "33ba:03e8", "33ba:03e9", "8086:0060", "8086:0064", "8086:00a0", "8086:00a4", "8086:0260", "8086:0264", "8086:24f5", "8086:24f6", "8086:271b", "8086:271c", "8086:2720", "8086:2726", "8086:2729", "8086:30dc", "8086:3df0", "8086:40a4", "8086:42a4", "8086:9dea", "8086:9deb", "8087:0035", "8087:0038"]
 
 [source]
 pci = "https://pci-ids.ucw.cz/v2.2/pci.ids"
 usb = "https://raw.githubusercontent.com/vcrhonek/hwdata/master/usb.ids"
+kext = "each vendored kext's own Info.plist"
 
 [[vendor]]
 id = "03f0"
@@ -11311,3 +11312,353 @@ name = "Wireless-AC 3168 Bluetooth"
 id = "8087:0aaa"
 bus = "usb"
 name = "Bluetooth 9460/9560 Jefferson Peak (JfP)"
+
+[[device]]
+id = "0489:e046"
+bus = "kext"
+name = "Bluetooth USB module, BCM20702A1"
+
+[[device]]
+id = "0489:e047"
+bus = "kext"
+name = "Bluetooth USB module, BCM20702A1"
+
+[[device]]
+id = "0489:e04f"
+bus = "kext"
+name = "Broadcom Bluetooth 4.0 USB, BCM20702A1"
+
+[[device]]
+id = "0489:e052"
+bus = "kext"
+name = "Broadcom BCM20702 Bluetooth USB Device, BCM20702A1"
+
+[[device]]
+id = "0489:e059"
+bus = "kext"
+name = "Bluetooth USB module, BCM20702A1"
+
+[[device]]
+id = "0489:e062"
+bus = "kext"
+name = "BCM43142 Bluetooth Adapter, BCM43142A0"
+
+[[device]]
+id = "0489:e079"
+bus = "kext"
+name = "Broadcom Bluetooth 4.0 USB, BCM4335C0"
+
+[[device]]
+id = "0489:e087"
+bus = "kext"
+name = "Bluetooth USB module, BCM20702A1"
+
+[[device]]
+id = "0489:e096"
+bus = "kext"
+name = "Broadcom Bluetooth 4.0 USB, BCM43142A0"
+
+[[device]]
+id = "0489:e0a1"
+bus = "kext"
+name = "Broadcom Bluetooth 4.1 USB, BCM20703A1"
+
+[[device]]
+id = "04ca:2003"
+bus = "kext"
+name = "Broadcom Bluetooth 4.0 USB, BCM20702A1"
+
+[[device]]
+id = "04ca:2005"
+bus = "kext"
+name = "Bluetooth Module, BCM20702A1"
+
+[[device]]
+id = "04ca:2009"
+bus = "kext"
+name = "Bluetooth USB module, BCM43142A0"
+
+[[device]]
+id = "04ca:200a"
+bus = "kext"
+name = "Bluetooth USB module, BCM20702A1"
+
+[[device]]
+id = "04ca:200b"
+bus = "kext"
+name = "Broadcom Bluetooth 4.0 USB, BCM20702A1"
+
+[[device]]
+id = "04ca:200c"
+bus = "kext"
+name = "Broadcom Bluetooth 4.0 USB, BCM20702A1"
+
+[[device]]
+id = "04ca:200e"
+bus = "kext"
+name = "Bluetooth USB module, BCM20702A1"
+
+[[device]]
+id = "04ca:200f"
+bus = "kext"
+name = "Broadcom Bluetooth 4.0 USB, BCM20702A1"
+
+[[device]]
+id = "04ca:2012"
+bus = "kext"
+name = "Broadcom Bluetooth 4.0 USB, BCM43142A0"
+
+[[device]]
+id = "04ca:2016"
+bus = "kext"
+name = "Broadcom Bluetooth 4.0 USB, BCM4335C0"
+
+[[device]]
+id = "04f2:b49d"
+bus = "kext"
+name = "Bluetooth USB module, BCM43142A0"
+
+[[device]]
+id = "04f2:b4a1"
+bus = "kext"
+name = "Bluetooth USB module, BCM43142A0"
+
+[[device]]
+id = "0930:021e"
+bus = "kext"
+name = "Broadcom BCM20702 Bluetooth USB Device, BCM20702A1"
+
+[[device]]
+id = "0930:021f"
+bus = "kext"
+name = "Bluetooth USB module, BCM43142A0"
+
+[[device]]
+id = "0930:0221"
+bus = "kext"
+name = "Broadcom BCM20702 Bluetooth 4.0 USB Device, BCM20702A1"
+
+[[device]]
+id = "0930:0223"
+bus = "kext"
+name = "Broadcom BCM20702 Bluetooth 4.0 USB Device, BCM20702A1"
+
+[[device]]
+id = "0930:0225"
+bus = "kext"
+name = "Broadcom Bluetooth 4.0 USB Device, BCM43142A0"
+
+[[device]]
+id = "0930:0226"
+bus = "kext"
+name = "Broadcom Bluetooth 4.0 USB Device, BCM43142A0"
+
+[[device]]
+id = "0930:0229"
+bus = "kext"
+name = "Broadcom Bluetooth 4.0 USB Device, BCM4335C0"
+
+[[device]]
+id = "0a5c:2167"
+bus = "kext"
+name = "BCM43142 Bluetooth 4.0 +HS USB Device, BCM43142A0"
+
+[[device]]
+id = "0a5c:2168"
+bus = "kext"
+name = "BCM43162 Bluetooth 4.0 +HS USB Device, BCM4335C0"
+
+[[device]]
+id = "0a5c:2169"
+bus = "kext"
+name = "Broadcom BCM20702 Bluetooth USB Device, BCM20702A1"
+
+[[device]]
+id = "0a5c:216b"
+bus = "kext"
+name = "Broadcom 20702 Bluetooth 4.0 Adapter, BCM20702A1"
+
+[[device]]
+id = "0a5c:216e"
+bus = "kext"
+name = "Broadcom 43162 Bluetooth 4.0 Adapter, BCM4335C0"
+
+[[device]]
+id = "0a5c:21d3"
+bus = "kext"
+name = "BCM43142 Bluetooth 4.0 +HS USB Device, BCM43142A0"
+
+[[device]]
+id = "0a5c:21d6"
+bus = "kext"
+name = "BCM43142 Bluetooth 4.0 +HS USB Device, BCM43142A0"
+
+[[device]]
+id = "0a5c:21d8"
+bus = "kext"
+name = "BCM43142 Bluetooth 4.0 +HS USB Device, BCM43142A0"
+
+[[device]]
+id = "0a5c:21dc"
+bus = "kext"
+name = "Broadcom 43142 Bluetooth 4.0 Adapter, BCM43142A0"
+
+[[device]]
+id = "0a5c:21de"
+bus = "kext"
+name = "Broadcom BCM20702 Bluetooth 4.0 +HS USB Device, BCM20702A1"
+
+[[device]]
+id = "0a5c:21f3"
+bus = "kext"
+name = "Broadcom Bluetooth 4.0, BCM20702A1"
+
+[[device]]
+id = "0a5c:21f4"
+bus = "kext"
+name = "Broadcom Bluetooth 4.0, BCM20702A1"
+
+[[device]]
+id = "0a5c:21fb"
+bus = "kext"
+name = "Broadcom 20702 Bluetooth 4.0 Adapter, BCM20702A1"
+
+[[device]]
+id = "0a5c:21fd"
+bus = "kext"
+name = "Broadcom BCM20702 Bluetooth 4.0 +HS USB Device, BCM20702A1"
+
+[[device]]
+id = "0a5c:21fe"
+bus = "kext"
+name = "Broadcom 43142 Bluetooth 4.0 Adapter, BCM43142A0"
+
+[[device]]
+id = "0a5c:640b"
+bus = "kext"
+name = "Broadcom Bluetooth 4.0 Adapter, BCM20702A1"
+
+[[device]]
+id = "0a5c:6412"
+bus = "kext"
+name = "Dell Wireless 1820A Bluetooth 4.1 LE, BCM4350C5"
+
+[[device]]
+id = "0a5c:6413"
+bus = "kext"
+name = "Broadcom Bluetooth 4.0 USB Device, BCM4350C5"
+
+[[device]]
+id = "0a5c:6414"
+bus = "kext"
+name = "Broadcom Bluetooth 4.1 USB, BCM4350C5"
+
+[[device]]
+id = "0a5c:6417"
+bus = "kext"
+name = "Broadcom 20702 Bluetooth 4.0, BCM20702A1"
+
+[[device]]
+id = "0a5c:6418"
+bus = "kext"
+name = "Broadcom 4371 Bluetooth 4.1 Adapter, BCM4371C2"
+
+[[device]]
+id = "0a5c:7460"
+bus = "kext"
+name = "Broadcom BCM20703 Bluetooth USB Device, BCM20703A1"
+
+[[device]]
+id = "0b05:17cf"
+bus = "kext"
+name = "Bluetooth USB module, BCM20702A1"
+
+[[device]]
+id = "105b:e066"
+bus = "kext"
+name = "Broadcom Bluetooth 4.0 USB, BCM20702A1"
+
+[[device]]
+id = "13d3:3384"
+bus = "kext"
+name = "Bluetooth USB module, BCM20702A1"
+
+[[device]]
+id = "13d3:3388"
+bus = "kext"
+name = "BCM43142 Bluetooth 4.0 +HS USB Device, BCM43142A0"
+
+[[device]]
+id = "13d3:3389"
+bus = "kext"
+name = "BCM43142 Bluetooth 4.0 +HS USB Device, BCM43142A0"
+
+[[device]]
+id = "13d3:3404"
+bus = "kext"
+name = "Bluetooth Module, BCM20702A1"
+
+[[device]]
+id = "13d3:3411"
+bus = "kext"
+name = "Broadcom BCM20702 Bluetooth 4.0 +HS USB Device, BCM20702A1"
+
+[[device]]
+id = "13d3:3413"
+bus = "kext"
+name = "Bluetooth USB module, BCM20702A1"
+
+[[device]]
+id = "13d3:3418"
+bus = "kext"
+name = "Bluetooth USB module, BCM20702A1"
+
+[[device]]
+id = "13d3:3427"
+bus = "kext"
+name = "Broadcom Bluetooth 4.0 USB Device, BCM43142A0"
+
+[[device]]
+id = "13d3:3435"
+bus = "kext"
+name = "Bluetooth USB module, BCM20702A1"
+
+[[device]]
+id = "13d3:3456"
+bus = "kext"
+name = "Bluetooth USB module, BCM20702A1"
+
+[[device]]
+id = "13d3:3482"
+bus = "kext"
+name = "Bluetooth USB module, BCM43142A0"
+
+[[device]]
+id = "13d3:3484"
+bus = "kext"
+name = "Bluetooth USB module, BCM43142A0"
+
+[[device]]
+id = "13d3:3504"
+bus = "kext"
+name = "Bluetooth USB module, BCM4371C2"
+
+[[device]]
+id = "13d3:3508"
+bus = "kext"
+name = "Bluetooth USB module, BCM4371C2"
+
+[[device]]
+id = "13d3:3517"
+bus = "kext"
+name = "Bluetooth USB module, BCM20702A1"
+
+[[device]]
+id = "145f:01a3"
+bus = "kext"
+name = "Trust Bluetooth 4.0 Adapter, BCM20702A1"
+
+[[device]]
+id = "185f:2167"
+bus = "kext"
+name = "Broadcom Bluetooth 4.0 USB, BCM43142A0"

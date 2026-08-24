@@ -82,16 +82,17 @@ def catalogue():
                  'A Mac that calls its Wi-Fi something else gets no role, '
                  'which reads as "nothing recognised" rather than as a guess.'),
         dict(area='Device names', kind=QUOTED, file='data/deviceids.toml',
-             source='the PCI ID Project, and hwdata for the USB list',
+             source='the PCI ID Project, hwdata for the USB list, and each '
+                    "kext's own Info.plist for what neither carries",
              tool='tools/deviceids.py --refresh',
              count=f'{rows_in("data/deviceids.toml", "device")} named, '
                    f'{len(ocgen.read_toml(Path("data/deviceids.toml")).get("unnamed", [])) if Path("data/deviceids.toml").exists() else 0} not',
              covers='what to call each id this repository already drives, and '
                     'which vendor made it, so a catalogue can be read and filtered',
-             gap='Names only. An id the upstream lists do not carry keeps its '
-                 'id as its name - the kext still matches it. USB names come '
-                 'from hwdata rather than linux-usb.org, whose file states no '
-                 'licence at all.'),
+             gap='Names only. What is left unnamed is a device no public list '
+                 'and no kext names - the kext still matches it. USB names '
+                 'come from hwdata rather than linux-usb.org, whose file '
+                 'states no licence at all.'),
         dict(area='What OCLP restores', kind=DERIVED, file='data/oclp.toml',
              source="OpenCore Legacy Patcher's own PATCHEXPLAIN page, which "
                     'lists each patch set with the macOS it applies from',

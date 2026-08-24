@@ -1776,6 +1776,20 @@ def the_device_catalogue():
     check('an id nobody has written a name for keeps its id',
           isinstance(named.get('unnamed'), list))
 
+    # a module soldered into a laptop is in no public list, but the kext that
+    # claims it names it: BrcmPatchRAM carries a DisplayName per device
+    import deviceids
+    by_kext = [r for r in named.get('device', []) if r.get('bus') == 'kext']
+    check('what the public lists miss is asked of the kext that claims it',
+          len(by_kext) > 40, len(by_kext))
+    check('and the kext source is named', 'Info.plist' in
+          named.get('source', {}).get('kext', ''), named.get('source'))
+    check('a real laptop module comes back with its own name',
+          'Bluetooth' in (deviceids.describe('0a5c:6412')[1] or ''),
+          deviceids.describe('0a5c:6412'))
+    check('and fewer than fifty are left with no name at all',
+          len(named.get('unnamed', [])) < 50, len(named.get('unnamed', [])))
+
     catalogue = inventory.devices()
     rows = catalogue['devices']
     check('there are devices in it', len(rows) > 400, len(rows))

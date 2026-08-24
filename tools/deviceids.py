@@ -20,6 +20,7 @@ whole would be carrying a hardware database to answer nine hundred questions.
 """
 import argparse
 import os
+import plistlib
 import re
 import sys
 import urllib.error
@@ -126,6 +127,40 @@ def wanted():
     return pci, usb
 
 
+KEXTS = Path('EFI/OC/Kexts')
+
+
+def from_the_kexts():
+    """{id: name} for devices a vendored kext names itself.
+
+    The upstream lists carry the chips people buy in a box. A Bluetooth module
+    soldered into a laptop is not one of those, and a hundred of the ids here
+    are exactly that - which is why they had no name.
+
+    BrcmPatchRAM does carry them: every personality has a DisplayName and the
+    firmware it loads, and the firmware key starts with the chip. So the kext
+    that claims the device is also the thing that can say what it is."""
+    out = {}
+    for info in sorted(KEXTS.glob('*.kext/Contents/Info.plist')):
+        try:
+            with open(info, 'rb') as fh:
+                bundle = plistlib.load(fh)
+        except (OSError, ValueError):
+            continue
+        for personality in (bundle.get('IOKitPersonalities') or {}).values():
+            if not isinstance(personality, dict):
+                continue
+            vendor = personality.get('idVendor')
+            product = personality.get('idProduct')
+            shown = personality.get('DisplayName')
+            if not (isinstance(vendor, int) and isinstance(product, int) and shown):
+                continue
+            chip = str(personality.get('FirmwareKey', '')).split('_')[0]
+            name = f'{shown}, {chip}' if chip else shown
+            out.setdefault(f'{vendor:04x}:{product:04x}', name)
+    return out
+
+
 def refresh():
     pci_wanted, usb_wanted = wanted()
     rows, vendors = [], {}
@@ -142,12 +177,21 @@ def refresh():
             if device_id in found_devices:
                 rows.append({'id': device_id, 'bus': source,
                              'name': found_devices[device_id]})
+    # what the upstream lists do not carry, asked of the kext that claims it
+    named = {r['id'] for r in rows}
+    from_kexts = from_the_kexts()
+    for device_id in sorted((pci_wanted | usb_wanted) - named):
+        if device_id in from_kexts:
+            rows.append({'id': device_id, 'bus': 'kext',
+                         'name': from_kexts[device_id]})
+
     named = {r['id'] for r in rows}
     # only the ids this repository referred to can be missing; a whole vendor
     # taken from the list is by definition all in it
     missing = sorted((pci_wanted | usb_wanted) - named)
     tree = {
-        'source': {'pci': PCI_SOURCE, 'usb': USB_SOURCE},
+        'source': {'pci': PCI_SOURCE, 'usb': USB_SOURCE,
+                   'kext': "each vendored kext's own Info.plist"},
         'vendor': [{'id': v, 'name': n} for v, n in sorted(vendors.items())],
         'device': rows,
         # said rather than hidden: an id the upstream lists do not carry is
@@ -155,8 +199,9 @@ def refresh():
         'unnamed': missing,
     }
     ocgen.write_toml(TABLE, tree, HEADER)
-    print(f'{len(rows)} named, {len(missing)} not in the upstream lists, '
-          f'{len(vendors)} vendors -> {TABLE}')
+    by_kext = sum(1 for r in rows if r['bus'] == 'kext')
+    print(f'{len(rows)} named ({by_kext} by the kext that claims them), '
+          f'{len(missing)} still unnamed, {len(vendors)} vendors -> {TABLE}')
     return 0
 
 
