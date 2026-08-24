@@ -10,12 +10,13 @@
                  HorizontalAlignment="Left" Foreground="{DynamicResource Muted}" />
     </StackPanel>
 
-    <Grid Grid.Row="1" ColumnDefinitions="*,Auto,Auto" ColumnSpacing="10"
+    <Grid Grid.Row="1" ColumnDefinitions="*,Auto,Auto,Auto" ColumnSpacing="10"
           Margin="0,0,0,14">
       <TextBox Grid.Column="0" Name="Search" Watermark="Search a name, an id or a kext"
-               MaxWidth="420" HorizontalAlignment="Left" />
-      <ComboBox Grid.Column="1" Name="Category" MinWidth="150" />
-      <ComboBox Grid.Column="2" Name="Vendor" MinWidth="190" />
+               MaxWidth="360" HorizontalAlignment="Left" />
+      <ComboBox Grid.Column="1" Name="Category" MinWidth="140" />
+      <ComboBox Grid.Column="2" Name="Status" MinWidth="130" />
+      <ComboBox Grid.Column="3" Name="Vendor" MinWidth="170" />
     </Grid>
 
     <Border Grid.Row="2" BorderBrush="{DynamicResource Line}" BorderThickness="1"
@@ -24,7 +25,7 @@
         <Border DockPanel.Dock="Top" Background="{DynamicResource Surface2}"
                 BorderBrush="{DynamicResource Line}" BorderThickness="0,0,0,1"
                 Padding="14,10">
-          <Grid ColumnDefinitions="120,*,220,110,150">
+          <Grid ColumnDefinitions="112,*,124,110,132,150">
             <!-- The two columns worth ordering by. The rest are a vendor name
                  repeated hundreds of times, a hex id, and a kext name. -->
             <Button Grid.Column="0" Name="SortCategory" Classes="sorter">
@@ -33,40 +34,51 @@
             <Button Grid.Column="1" Name="SortName" Classes="sorter">
               <TextBlock Name="SortNameLabel" Classes="eyebrow" Text="DEVICE" />
             </Button>
-            <TextBlock Grid.Column="2" Classes="eyebrow" Text="VENDOR" />
-            <TextBlock Grid.Column="3" Classes="eyebrow" Text="ID" />
-            <TextBlock Grid.Column="4" Classes="eyebrow" Text="DRIVER" />
+            <TextBlock Grid.Column="2" Classes="eyebrow" Text="SUPPORT" />
+            <TextBlock Grid.Column="3" Classes="eyebrow" Text="MACOS" />
+            <TextBlock Grid.Column="4" Classes="eyebrow" Text="VENDOR" />
+            <TextBlock Grid.Column="5" Classes="eyebrow" Text="ID / DRIVER" />
           </Grid>
         </Border>
         <TextBlock DockPanel.Dock="Bottom" Name="Count" Classes="mono"
                    Margin="14,8" />
-        <ScrollViewer>
-          <ItemsControl Name="Rows">
-            <ItemsControl.ItemTemplate>
-              <DataTemplate x:DataType="v:DeviceItem">
-                <Border BorderBrush="{DynamicResource Line}" BorderThickness="0,0,0,1"
-                        Padding="14,8">
-                  <Grid ColumnDefinitions="120,*,220,110,150">
-                    <TextBlock Grid.Column="0" Text="{Binding Category}" FontSize="12.5"
-                               Foreground="{DynamicResource Muted}" />
-                    <StackPanel Grid.Column="1" Margin="0,0,12,0">
-                      <TextBlock Text="{Binding Name}" FontSize="13.5"
-                                 Foreground="{DynamicResource Ink}" TextWrapping="Wrap" />
-                      <TextBlock Text="{Binding Note}" FontSize="12"
-                                 Foreground="{DynamicResource Muted}" TextWrapping="Wrap" />
-                    </StackPanel>
-                    <TextBlock Grid.Column="2" Text="{Binding Vendor}" FontSize="12.5"
-                               Margin="0,0,12,0" TextWrapping="Wrap"
-                               Foreground="{DynamicResource Muted}" />
-                    <TextBlock Grid.Column="3" Classes="mono" Text="{Binding Id}" />
-                    <TextBlock Grid.Column="4" Classes="mono" Text="{Binding Kext}"
-                               TextWrapping="Wrap" Foreground="{DynamicResource Accent}" />
-                  </Grid>
+        <!-- A ListBox, not an ItemsControl in a ScrollViewer: that builds a
+             control for all seven hundred rows on every keystroke. This one
+             builds the dozen on screen. -->
+        <ListBox Name="Rows" Background="Transparent" BorderThickness="0"
+                 SelectionMode="Single" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+          <ListBox.ItemTemplate>
+            <DataTemplate x:DataType="v:DeviceItem">
+              <Grid ColumnDefinitions="112,*,124,110,132,150" Margin="0,3">
+                <TextBlock Grid.Column="0" Text="{Binding Category}" FontSize="12.5"
+                           Foreground="{DynamicResource Muted}" />
+                <StackPanel Grid.Column="1" Margin="0,0,12,0">
+                  <TextBlock Text="{Binding Name}" FontSize="13.5"
+                             Foreground="{DynamicResource Ink}" TextWrapping="Wrap" />
+                  <TextBlock Text="{Binding Note}" FontSize="12"
+                             IsVisible="{Binding HasNote}"
+                             Foreground="{DynamicResource Muted}" TextWrapping="Wrap" />
+                </StackPanel>
+                <Border Grid.Column="2" Classes="pill" VerticalAlignment="Top"
+                        Margin="0,0,12,0"
+                        Classes.ok="{Binding IsOk}" Classes.bad="{Binding IsBad}"
+                        Classes.warn="{Binding IsUnclear}">
+                  <TextBlock Text="{Binding Status}" />
                 </Border>
-              </DataTemplate>
-            </ItemsControl.ItemTemplate>
-          </ItemsControl>
-        </ScrollViewer>
+                <TextBlock Grid.Column="3" Classes="mono" Text="{Binding Macos}"
+                           TextWrapping="Wrap" Margin="0,0,12,0" />
+                <TextBlock Grid.Column="4" Text="{Binding Vendor}" FontSize="12.5"
+                           Margin="0,0,12,0" TextWrapping="Wrap"
+                           Foreground="{DynamicResource Muted}" />
+                <StackPanel Grid.Column="5">
+                  <TextBlock Classes="mono" Text="{Binding Id}" TextWrapping="Wrap" />
+                  <TextBlock Classes="mono kext" Text="{Binding Kext}"
+                             IsVisible="{Binding HasKext}" TextWrapping="Wrap" />
+                </StackPanel>
+              </Grid>
+            </DataTemplate>
+          </ListBox.ItemTemplate>
+        </ListBox>
       </DockPanel>
     </Border>
   </Grid>

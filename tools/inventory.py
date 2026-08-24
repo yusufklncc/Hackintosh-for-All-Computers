@@ -77,9 +77,21 @@ ROLE_CATEGORY = {'ethernet': 'Ethernet', 'wifi': 'Wi-Fi',
                  'bluetooth': 'Bluetooth', 'trackpad': 'Trackpad'}
 
 
-def _entry(category, ident, name, note, vendor=None, kext=None, macos=None):
+# The tables were written at different times and say the same thing two ways.
+# A filter offering both "works" and "supported" asks the reader to know that.
+ONE_WORD = {'works': 'supported', 'works-spoofed': 'spoofed'}
+
+
+def _entry(category, ident, name, note, vendor=None, kext=None, macos=None,
+           status='supported'):
+    """One row. `status` is its own field, not the first word of a sentence.
+
+    It was inside the note - "works, Polaris 10 and 20 series" - which reads
+    fine and cannot be filtered on or coloured. A catalogue of seven hundred
+    rows where the verdict is prose is a catalogue nobody can scan."""
     return {'category': category, 'id': ident, 'name': name, 'vendor': vendor,
-            'kext': kext, 'note': note, 'macos': macos}
+            'kext': kext, 'note': note, 'macos': macos,
+            'status': ONE_WORD.get(status, status)}
 
 
 def devices():
@@ -106,6 +118,7 @@ def devices():
             continue
         for ident in driver['ids']:
             name, vendor = called(ident)
+            # a kext here binds to this id: that is the whole claim
             out.append(_entry(category, ident, name or ident, driver['label'],
                               vendor=vendor, kext=driver['kext']))
 
@@ -120,10 +133,12 @@ def devices():
         if card.get('family'):
             note = f"{card['status']}, {card['family']}"
         out.append(_entry('Graphics', card['id'], card.get('name') or card['id'],
-                          note, vendor=vendor))
+                          card.get('family') or '', vendor=vendor,
+                          status=card['status']))
     for family in graphics.get('family', []):
         out.append(_entry('Graphics', family.get('vendor'), family.get('label')
-                          or family.get('match'), family.get('note') or family['status']))
+                          or family.get('match'), family.get('note') or '',
+                          status=family['status']))
     for family in graphics.get('nvidia', []):
         span = ('never supported' if family['status'] != 'works'
                 else f"macOS {family['lowest_name']} {family['lowest_version']} to "
@@ -136,22 +151,28 @@ def devices():
                    if family['chips'] else None)
         if patched:
             span += f", OCLP from macOS {patched['from']}"
+        macos = (None if family['status'] != 'works' else
+                 {'from': family['lowest_version'], 'to': family['highest_version'],
+                  'oclp': patched['from'] if patched else None})
         for card in family['cards']:
-            out.append(_entry('Graphics', ', '.join(family['chips']), card,
-                              f'{short}, {span}', vendor='NVIDIA Corporation'))
+            out.append(_entry('Graphics', ', '.join(family['chips']), card, short,
+                              vendor='NVIDIA Corporation', macos=macos,
+                              status=family['status']))
         if not family['cards']:
             out.append(_entry('Graphics', ', '.join(family['chips']),
-                              family['name'], span, vendor='NVIDIA Corporation'))
+                              family['name'], short, vendor='NVIDIA Corporation',
+                              macos=macos, status=family['status']))
     for igpu in graphics.get('igpu', []):
         out.append(_entry('Graphics', None, igpu.get('label') or 'Intel iGPU',
-                          f"{igpu['status']}: " + ', '.join(igpu.get('profiles', []))))
+                          ', '.join(igpu.get('profiles', [])), vendor='Intel Corporation',
+                          status=igpu['status']))
 
     for codec in ocgen.read_toml(Path('data/audio.toml')).get('audio', []):
         layouts = codec.get('layout') or []
         out.append(_entry('Audio', codec.get('id'),
                           f"{codec.get('vendor', '')} {codec.get('codec', '')}".strip(),
-                          f'AppleALC, {len(layouts)} layout'
-                          + ('s' if len(layouts) != 1 else ''),
+                          f'{len(layouts)} layout'
+                          + ('s' if len(layouts) != 1 else '') + ' to try',
                           kext='AppleALC.kext'))
 
     readers = ocgen.read_toml(Path('data/cardreader.toml'))
@@ -159,16 +180,20 @@ def devices():
     for reader in readers.get('device', []):
         name, vendor = called(reader['id'])
         out.append(_entry('Card reader', reader['id'], name or reader['id'],
-                          ('driven since ' + str(reader.get('since'))
+                          ('since ' + str(reader.get('since'))
                            if reader.get('supported') else 'listed, not driven yet'),
-                          vendor=vendor, kext=driver.get('kext')))
+                          vendor=vendor, kext=driver.get('kext'),
+                          status='supported' if reader.get('supported')
+                                 else 'unsupported'))
 
     macs = ocgen.read_toml(Path('data/mac.toml'))
     for mac in macs.get('mac', []):
         out.append(_entry('Mac', mac['board'], mac['board'],
                           'Apple silicon' if mac['board'].startswith('J') else 'Intel',
                           vendor='Apple',
-                          macos={'from': mac['floor'], 'to': mac['ceiling'] or None}))
+                          macos={'from': mac['floor'], 'to': mac['ceiling'] or None},
+                          # Apple still lists it, or it fell off the list
+                          status='supported' if not mac['ceiling'] else 'dropped'))
     # One row per device, not one per kext that claims it. Broadcom Bluetooth
     # is three kexts in a relay and every adapter was appearing three times;
     # the same card listed twice in the card table appeared twice as well.
@@ -189,7 +214,8 @@ def devices():
     return {'t': 'devices', 'devices': out,
             'categories': [c for c in CATEGORIES
                            if any(d['category'] == c for d in out)],
-            'vendors': sorted({d['vendor'] for d in out if d['vendor']})}
+            'vendors': sorted({d['vendor'] for d in out if d['vendor']}),
+            'statuses': sorted({d['status'] for d in out})}
 
 
 def about():

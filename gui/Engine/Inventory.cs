@@ -62,6 +62,7 @@ public sealed class MacosSpan
 {
     [JsonPropertyName("from")] public string? From { get; set; }
     [JsonPropertyName("to")] public string? To { get; set; }
+    [JsonPropertyName("oclp")] public string? Oclp { get; set; }
 }
 
 public sealed class DeviceRow
@@ -73,6 +74,7 @@ public sealed class DeviceRow
     [JsonPropertyName("kext")] public string? Kext { get; set; }
     [JsonPropertyName("note")] public string Note { get; set; } = "";
     [JsonPropertyName("macos")] public MacosSpan? Macos { get; set; }
+    [JsonPropertyName("status")] public string Status { get; set; } = "";
 }
 
 public sealed class DeviceList
@@ -80,6 +82,7 @@ public sealed class DeviceList
     [JsonPropertyName("devices")] public List<DeviceRow> Devices { get; set; } = new();
     [JsonPropertyName("categories")] public List<string> Categories { get; set; } = new();
     [JsonPropertyName("vendors")] public List<string> Vendors { get; set; } = new();
+    [JsonPropertyName("statuses")] public List<string> Statuses { get; set; } = new();
 }
 
 [JsonSerializable(typeof(DeviceList))]

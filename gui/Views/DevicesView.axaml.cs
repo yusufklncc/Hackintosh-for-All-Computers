@@ -18,14 +18,43 @@ public sealed class DeviceItem
     {
         Category = row.Category;
         Name = row.Name;
-        Vendor = row.Vendor ?? "";
+        Vendor = Short(row.Vendor ?? "");
         Id = row.Id ?? "";
         Kext = row.Kext ?? "";
-        Note = row.Macos is { From: { } from }
-            ? $"{row.Note} · macOS {from}" + (row.Macos.To is { } to ? $"–{to}" : " and newer")
-            : row.Note;
-        // one string to match against, lower-cased once rather than per keystroke
-        Haystack = $"{Category} {Name} {Vendor} {Id} {Kext} {Note}".ToLowerInvariant();
+        HasKext = Kext.Length > 0;
+        Note = row.Note;
+        HasNote = Note.Length > 0;
+        Status = row.Status;
+        IsOk = row.Status == "supported";
+        IsBad = row.Status == "unsupported";
+        IsUnclear = row.Status is "untested" or "spoofed" or "dropped";
+        Macos = row.Macos is { From: { } from }
+            ? from + (row.Macos.To is { } to ? $" – {to}" : " +")
+              + (row.Macos.Oclp is { } oclp ? $"\nOCLP {oclp}+" : "")
+            : "";
+        // one string to match against, lower-cased once rather than per
+        // keystroke. The full vendor name goes in it even though the column
+        // shows the short one, so searching "Advanced Micro" still finds them.
+        Haystack = $"{Category} {Name} {row.Vendor} {Vendor} {Id} {Kext} {Note} "
+                 + $"{Status} {Macos}".ToLowerInvariant();
+    }
+
+    /// <summary>A vendor name short enough to read in a column.
+    ///
+    /// The PCI ID Project writes them in full - "Advanced Micro Devices, Inc.
+    /// [AMD/ATI]" - which wrapped to two lines on every one of sixty rows. The
+    /// full name is still what a search matches on.</summary>
+    public static string ShortName(string vendor) => Short(vendor);
+
+    static string Short(string vendor)
+    {
+        if (vendor.Length == 0) return vendor;
+        // the bracketed alias is the name everybody uses, where there is one
+        var alias = System.Text.RegularExpressions.Regex.Match(vendor, @"\[([^\]]+)\]");
+        if (alias.Success) return alias.Groups[1].Value.Split('/')[0];
+        var cut = vendor.Split(new[] { ", Inc", " Inc", " Corp", " Technolog", " Co.," },
+                               StringSplitOptions.None)[0];
+        return cut.Trim().TrimEnd(',');
     }
 
     public string Category { get; }
@@ -33,7 +62,14 @@ public sealed class DeviceItem
     public string Vendor { get; }
     public string Id { get; }
     public string Kext { get; }
+    public bool HasKext { get; }
     public string Note { get; }
+    public bool HasNote { get; }
+    public string Status { get; }
+    public bool IsOk { get; }
+    public bool IsBad { get; }
+    public bool IsUnclear { get; }
+    public string Macos { get; }
     public string Haystack { get; }
 }
 
@@ -53,6 +89,7 @@ public partial class DevicesView : UserControl
         Search.TextChanged += (_, _) => Draw();
         Category.SelectionChanged += (_, _) => Draw();
         Vendor.SelectionChanged += (_, _) => Draw();
+        Status.SelectionChanged += (_, _) => Draw();
         SortCategory.Click += (_, _) => SortOn("category");
         SortName.Click += (_, _) => SortOn("name");
     }
@@ -81,9 +118,13 @@ public partial class DevicesView : UserControl
                    + "means something in this repository claims it - not that every "
                    + "machine it sits in will work.";
         Category.ItemsSource = new[] { Everything }.Concat(list.Categories).ToList();
-        Vendor.ItemsSource = new[] { Everything }.Concat(list.Vendors).ToList();
+        Vendor.ItemsSource = new[] { Everything }
+            .Concat(list.Vendors.Select(DeviceItem.ShortName).Distinct().OrderBy(v => v))
+            .ToList();
+        Status.ItemsSource = new[] { Everything }.Concat(list.Statuses).ToList();
         Category.SelectedIndex = 0;
         Vendor.SelectedIndex = 0;
+        Status.SelectedIndex = 0;
         Draw();
     }
 
@@ -92,10 +133,12 @@ public partial class DevicesView : UserControl
         var needle = (Search.Text ?? "").Trim().ToLowerInvariant();
         var category = Category.SelectedItem as string ?? Everything;
         var vendor = Vendor.SelectedItem as string ?? Everything;
+        var status = Status.SelectedItem as string ?? Everything;
 
         var matching = _all.Where(d =>
             (category == Everything || d.Category == category) &&
             (vendor == Everything || d.Vendor == vendor) &&
+            (status == Everything || d.Status == status) &&
             (needle.Length == 0 || d.Haystack.Contains(needle, StringComparison.Ordinal)));
 
         // ordinal-ignore-case, so "BCM4311" and "bcm4311" sort together and a
