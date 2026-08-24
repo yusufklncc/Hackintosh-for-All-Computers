@@ -169,11 +169,13 @@ def devices():
 
     for codec in ocgen.read_toml(Path('data/audio.toml')).get('audio', []):
         layouts = codec.get('layout') or []
-        out.append(_entry('Audio', codec.get('id'),
+        # hda_id, not id: the codec table keys on the HD audio pair and the
+        # column was empty for all hundred and ten of them
+        out.append(_entry('Audio', codec.get('hda_id'),
                           f"{codec.get('vendor', '')} {codec.get('codec', '')}".strip(),
                           f'{len(layouts)} layout'
                           + ('s' if len(layouts) != 1 else '') + ' to try',
-                          kext='AppleALC.kext'))
+                          kext='AppleALC.kext', vendor=codec.get('vendor')))
 
     readers = ocgen.read_toml(Path('data/cardreader.toml'))
     driver = readers.get('driver', {})

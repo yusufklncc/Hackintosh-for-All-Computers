@@ -60,6 +60,19 @@
       <Setter Property="Foreground" Value="{DynamicResource Ink}" />
     </Style>
 
+    <!-- A table row, not a list item with room to breathe: the default padding
+         made a seven-hundred-row table twice as tall as it needed to be. -->
+    <Style Selector="ListBox.rows > ListBoxItem">
+      <Setter Property="Padding" Value="14,5" />
+      <Setter Property="MinHeight" Value="0" />
+      <Setter Property="BorderBrush" Value="{DynamicResource Line}" />
+      <Setter Property="BorderThickness" Value="0,0,0,1" />
+      <Setter Property="CornerRadius" Value="0" />
+    </Style>
+    <Style Selector="ListBox.rows > ListBoxItem:selected /template/ ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource Surface2}" />
+    </Style>
+
     <Style Selector="TextBlock.kext">
       <Setter Property="Foreground" Value="{DynamicResource Accent}" />
     </Style>

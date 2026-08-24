@@ -45,11 +45,11 @@
         <!-- A ListBox, not an ItemsControl in a ScrollViewer: that builds a
              control for all seven hundred rows on every keystroke. This one
              builds the dozen on screen. -->
-        <ListBox Name="Rows" Background="Transparent" BorderThickness="0"
+        <ListBox Name="Rows" Classes="rows" Background="Transparent" BorderThickness="0"
                  SelectionMode="Single" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
           <ListBox.ItemTemplate>
             <DataTemplate x:DataType="v:DeviceItem">
-              <Grid ColumnDefinitions="112,*,124,110,132,150" Margin="0,3">
+              <Grid ColumnDefinitions="112,*,124,110,132,150">
                 <TextBlock Grid.Column="0" Text="{Binding Category}" FontSize="12.5"
                            Foreground="{DynamicResource Muted}" />
                 <StackPanel Grid.Column="1" Margin="0,0,12,0">
