@@ -786,7 +786,20 @@ def ssdt_flow():
     check('the tables are dumped when none were handed in',
           'acpi.dump(' in flow and 'if not tables:' in flow)
     check('and the menu run uses the same ones',
-          "acpi.run(Path(a.out).parent / 'acpi', tables)" in flow)
+          "acpi.run(Path(a.out).parent / 'acpi', tables," in flow)
+    # the menus used to be refused under a front end, because the tool reads
+    # its own input and there was no terminal to read from. It has one input
+    # function and this passes a replacement into it.
+    check('a front end is offered the menus rather than sent to a console',
+          'ask=tool_answer if UI.protocol' in flow
+          and 'Run the console builder' not in src)
+    check('and the answer goes back through the same path as every other',
+          "_answer(t='prompt'" in src[src.index('def tool_answer('):
+                                      src.index('def run_ssdts(')])
+    import acpi as _acpi
+    import inspect
+    check('the tool takes the replacement where its own input goes',
+          'ask' in inspect.signature(_acpi.run).parameters)
 
     if not acpi.available():
         return
@@ -1946,6 +1959,34 @@ def nvidia_by_family():
           window[1] and window[1][2] == 20, window)
 
 
+def the_tools_a_window_can_drive():
+    """Both vendored tools reach a person, whichever surface is attached.
+
+    They read their own input, which a window has none of. One of them has a
+    single input function and takes a replacement; the other is somebody else's
+    executable and gets a console window of its own. Neither is refused now,
+    and being refused was the state this records the end of."""
+    import inspect
+    import usbmap
+
+    check('the mapper can be given a console of its own',
+          'own_console' in inspect.signature(usbmap.run).parameters)
+    source = Path('tools/usbmap.py').read_text()
+    check('and it asks for one the way Windows spells it',
+          'CREATE_NEW_CONSOLE' in source)
+    check('by name, not by number, so it reads as what it is',
+          '0x00000010' not in source)
+
+    builder = Path('tools/setup.py').read_text()
+    check('a front end is offered the mapper rather than skipped',
+          'own_console=UI.protocol' in builder)
+    check('and told where it will appear',
+          'window of its own' in builder)
+    # the guard that used to skip it entirely
+    check('nothing skips the step for being a front end',
+          'not UI.protocol and not a.usb_map' not in builder)
+
+
 def what_oclp_restores():
     """Where the graphics go past their native ceiling, and whose doing it is.
 
@@ -2078,7 +2119,8 @@ if __name__ == '__main__':
                     embedded_fonts, macos_registry, genuine_macs,
                     the_processor_bounds_it_too, graphics_and_the_range,
                     what_the_machine_calls_its_network, the_device_catalogue,
-                    nvidia_by_family, what_oclp_restores, the_about_page):
+                    nvidia_by_family, the_tools_a_window_can_drive,
+                    what_oclp_restores, the_about_page):
         print(f'\n{section.__name__}')
         section()
     print()

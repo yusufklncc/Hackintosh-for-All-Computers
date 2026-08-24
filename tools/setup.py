@@ -246,6 +246,17 @@ def check_tools():
     return 0
 
 
+def tool_answer(question=''):
+    """One line, for a vendored tool that reads its own input.
+
+    SSDTTime prints a menu and then reads a line. The printing already arrives
+    as text, so what is left is the line - posed as a free-text question so a
+    front end can put a box under the menu it has just drawn."""
+    asked = str(question).strip()
+    return _answer(t='prompt', question=asked or 'SSDTTime is waiting for an answer',
+                   note="from SSDTTime's own menu, above")
+
+
 def run_ssdts(a, where):
     """Work out the SSDTs, in one pass a person can follow.
 
@@ -298,17 +309,15 @@ def run_ssdts(a, where):
     print(f'      {DIM}The laptop profiles already carry a generic XOSI and PNLF, '
           f'so\n      most machines need none of these.{RESET}')
 
-    if UI.protocol:
-        # SSDTTime's menus are a console program driven by keystrokes. Stdio
-        # here belongs to the front end, so opening them would wait forever on
-        # a pipe. The automatic set is what a front end gets, and it is told so
-        # rather than being offered something that cannot happen.
-        print(f'      {DIM}The rest need SSDTTime\'s own menus, which need a '
-              f'terminal.\n      Run the console builder for those.{RESET}')
-    elif ask(0, 0, 'Open SSDTTime to work through those too?',
-             [('no', 'No, what came out is enough'),
-              ('yes', 'Yes, open the menus')]) == 'yes':
-        more, complaint = acpi.run(Path(a.out).parent / 'acpi', tables)
+    if ask(0, 0, 'Open SSDTTime to work through those too?',
+           [('no', 'No, what came out is enough'),
+            ('yes', 'Yes, open the menus')]) == 'yes':
+        # The tool prints its menus and then reads one line. Its printing is
+        # already coming through as text, so a front end only needs to answer -
+        # and it answers the same way it answers everything else. This used to
+        # send people to the console for this one step.
+        more, complaint = acpi.run(Path(a.out).parent / 'acpi', tables,
+                                   ask=tool_answer if UI.protocol else None)
         if more:
             got = more
         else:
@@ -800,10 +809,10 @@ def main():
     smbus_disable = []
     usb_implies = None
     queued = []
-    # the mapper is a console program that asks you to plug a device into every
-    # port in turn. A front end cannot pass keystrokes to it, so it is not
-    # offered there - the paragraph below says how to do it instead.
-    if (interactive and not UI.protocol and not a.usb_map
+    # The mapper asks somebody to plug a device into every port in turn, so it
+    # needs a place to be answered. Under a front end that place is a console
+    # window of its own - the one step here that cannot be drawn.
+    if (interactive and not a.usb_map
             and usbmap.available() and usbmap.runnable_here()):
         # the tool is here and this is the machine it runs on, so offer it
         # rather than describing it: the map has to be made somewhere and this
@@ -812,10 +821,14 @@ def main():
         print(f'  {DIM}UTBDefault turns every port on without mapping any. A real map '
               f'takes\n  plugging a device into each port in turn, which USBToolBox '
               f'does and this\n  cannot - so it is here, and it can run now.{RESET}')
+        if UI.protocol:
+            print(f'      {DIM}It opens in a window of its own; come back here when '
+                  f'it closes.{RESET}')
         if ask(0, 0, 'Map the USB ports now?',
                [('yes', 'Yes, run USBToolBox'),
                 ('no', 'No, use UTBDefault and map later')]) == 'yes':
-            made, implies = usbmap.run(Path(a.out).parent / 'usbmap')
+            made, implies = usbmap.run(Path(a.out).parent / 'usbmap',
+                                       own_console=UI.protocol)
             if made:
                 print(f'      {GREEN}{made.name} written{RESET}')
                 a.usb_map = str(made)

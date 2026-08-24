@@ -74,12 +74,18 @@ def runnable_here():
     return sys.platform == 'win32'
 
 
-def run(work_dir):
+def run(work_dir, own_console=False):
     """Run it in a directory of ours and return (kext path, what it implies).
 
     The directory is ours rather than the bundle's because the tool writes
     beside its own executable, and a frozen bundle is a temporary directory that
-    disappears."""
+    disappears.
+
+    `own_console` gives it a console window of its own. A window has none to
+    inherit, and the tool's whole job is asking somebody to plug a device into
+    each port in turn - it has to be somewhere a person can answer it. This is
+    the one step that cannot be drawn by a front end, so it is handed its own
+    window rather than refused."""
     tool = available()
     if not tool:
         return None, f'{VENDOR / TOOL} is not here'
@@ -93,8 +99,15 @@ def run(work_dir):
     shutil.copy2(tool, local)
     shutil.copy2(tool.parent / 'LICENSE', work / 'USBToolBox-LICENSE.txt')
 
-    # inherit the terminal: the whole point is that a person answers its menus
-    result = subprocess.run([str(local)], cwd=str(work), check=False)
+    # inherit the terminal, or make one. The whole point is that a person
+    # answers its menus, and CREATE_NEW_CONSOLE is how a windowed program hands
+    # a console program somewhere to be answered.
+    flags = 0
+    if own_console:
+        flags = getattr(subprocess, 'CREATE_NEW_CONSOLE', 0)
+    result = subprocess.run([str(local)], cwd=str(work), check=False,
+                            creationflags=flags) if flags else subprocess.run(
+        [str(local)], cwd=str(work), check=False)
     local.unlink(missing_ok=True)
 
     for name, implies in OUTPUTS.items():
