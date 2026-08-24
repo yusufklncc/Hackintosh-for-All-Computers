@@ -127,8 +127,16 @@ def devices():
         span = ('never supported' if family['status'] != 'works'
                 else f"macOS {family['lowest_name']} {family['lowest_version']} to "
                      f"{family['highest_name']} {family['highest_version']}")
-        out.append(_entry('Graphics', ', '.join(family['chips']), family['name'],
-                          span, vendor='NVIDIA Corporation'))
+        short = family['name'].split(' Series')[0].split('(')[0].strip()
+        # a row per card, the way the AMD table reads. The page names no device
+        # ids for NVIDIA, so the chip family stands in the id column - it is
+        # what the verdict is actually keyed on.
+        for card in family['cards']:
+            out.append(_entry('Graphics', ', '.join(family['chips']), card,
+                              f'{short}, {span}', vendor='NVIDIA Corporation'))
+        if not family['cards']:
+            out.append(_entry('Graphics', ', '.join(family['chips']),
+                              family['name'], span, vendor='NVIDIA Corporation'))
     for igpu in graphics.get('igpu', []):
         out.append(_entry('Graphics', None, igpu.get('label') or 'Intel iGPU',
                           f"{igpu['status']}: " + ', '.join(igpu.get('profiles', []))))

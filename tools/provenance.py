@@ -114,7 +114,9 @@ def catalogue():
              source="the guide's NVIDIA page, which states each family's "
                     'oldest and newest macOS on its own lines',
              tool='tools/gputable.py',
-             count=f'{rows_in("data/gpu.toml", "nvidia")} families',
+             count=f'{rows_in("data/gpu.toml", "nvidia")} families, '
+                   f'{sum(len(f["cards"]) for f in ocgen.read_toml(Path("data/gpu.toml")).get("nvidia", []))} '
+                   f'cards named under them',
              covers='every NVIDIA card, by the chip codename the PCI ID '
                     'Project puts in its name: GK is Kepler and ends at Big '
                     'Sur, GP is Pascal and ends at High Sierra, TU and newer '

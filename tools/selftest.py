@@ -1868,6 +1868,34 @@ def nvidia_by_family():
     check('and a real Fermi is left to the whole-vendor rule rather than mislabelled',
           real_fermi == 'unsupported' and 'Fermi rebranded' not in str(entry), entry)
 
+    # the page lists its cards under each family, so the catalogue reads card
+    # by card the way the AMD one does rather than family by family
+    listed = {c for f in families for c in f['cards']}
+    check('the families name their cards', len(listed) > 100, len(listed))
+    check('including the ones people ask about',
+          {'GTX 1080 Ti', 'GTX 980', 'RTX 4090'} <= listed,
+          sorted(c for c in listed if '1080' in c or '4090' in c))
+    check('and the section that lists them without a header is not empty',
+          any(f['cards'] for f in families if 'Fermi' in f['name']),
+          [f['name'] for f in families if 'Fermi' in f['name']])
+    check('no sub-heading was read as a card',
+          not [c for c in listed if c.endswith(':')],
+          [c for c in listed if c.endswith(':')][:3])
+    # a list ends where the prose resumes and the page marks that nowhere, so
+    # every entry has to look like a card or the footnote comes in with them
+    import gputable
+    check('and no prose was',
+          all(gputable.CARD_SHAPE.match(c) for c in listed),
+          [c for c in listed if not gputable.CARD_SHAPE.match(c)][:2])
+
+    import inventory
+    rows = inventory.devices()['devices']
+    nvidia = [r for r in rows if r['vendor'] == 'NVIDIA Corporation']
+    check('the catalogue lists NVIDIA card by card', len(nvidia) > 100, len(nvidia))
+    check('each carrying its family and its range',
+          all(r['note'] for r in nvidia)
+          and any('Big Sur' in r['note'] for r in nvidia))
+
     check('an id the name list does not carry gets no family',
           gpu.nvidia_family({'id': '10de:ffff'}) is None)
     check('and a card that is not NVIDIA is not looked up at all',

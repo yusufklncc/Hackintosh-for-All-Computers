@@ -223,12 +223,25 @@ MACOS_NAMED = re.compile(r'^(Highest|Initial) Supported OS:\s*(.+?)\s*\(([\d.]+)
 # "Highest Supported OS: None" - Turing says it in the same place the others
 # say a version, and it is the clearest statement on the page.
 MACOS_NONE = re.compile(r'^(Highest|Initial) Supported OS:\s*None\s*$')
+# What a card model looks like on this page. A list ends where the prose
+# resumes and the page does not mark that anywhere, so the shape is the only
+# thing separating "GT 720A" from the footnote under the Volta table.
+CARD_SHAPE = re.compile(r'^(?:GTX|GT|RTX|Titan|Quadro|Tesla|NVS)\b|^H\d')
 
 
 def _plain_lines(page):
     body = re.sub(r'<script.*?</script>', '', page, flags=re.S)
     text = html.unescape(re.sub(r'<[^>]+>', '\n', body))
     return [l.strip() for l in text.splitlines() if l.strip()]
+
+
+def _card_name(line):
+    """A card name with the page's own wrapping cleaned off.
+
+    The GTX 1060 entry carries a tooltip, and the plain text of it comes out as
+    "GTX 1060(" with the note on the following lines. The name is right; the
+    bracket is where the markup was."""
+    return line.rstrip(' (,')
 
 
 def parse_nvidia(page):
@@ -263,6 +276,29 @@ def parse_nvidia(page):
             continue
         if not current:
             continue
+        if line in ('Supported cards:', 'These cards include:'):
+            current['listing'] = True
+            continue
+        if current.get('listing'):
+            # The list runs until the next family or the next "Supported OS".
+            # Inside it are sub-headings - "700 Series:", "Quadro:" - which
+            # group the cards rather than ending them, and the page's own
+            # anchor marks, which are a single "#".
+            if MACOS_NAMED.match(line) or MACOS_NONE.match(line):
+                current['listing'] = False
+            elif line.endswith(':'):
+                # "Quadro:" groups the cards under it; "Needed kexts:" ends
+                # the list. Neither is a card, and both look like one.
+                continue
+            elif CARD_SHAPE.match(line):
+                current.setdefault('cards', []).append(_card_name(line))
+                continue
+            else:
+                # a sub-heading, an anchor mark, or the prose after the list
+                continue
+        if CARD_SHAPE.match(line) and not line.endswith(':'):
+            current.setdefault('shaped', []).append(_card_name(line))
+
         named = MACOS_NAMED.match(line)
         if named:
             which = 'highest' if named.group(1) == 'Highest' else 'lowest'
@@ -304,7 +340,10 @@ def _flatten(family):
     plain keys, and two of them are absent for a family that never worked."""
     out = {'chips': list(family['family']), 'name': family['name'],
            'source': family['source'],
-           'status': 'unsupported' if family.get('never') else 'works'}
+           'status': 'unsupported' if family.get('never') else 'works',
+           # the models the page lists under the family. No device ids: the
+           # page has none, and the name is what somebody is looking for.
+           'cards': family.get('cards') or family.get('shaped', [])}
     for end in ('lowest', 'highest'):
         value = family.get(end)
         if value:
