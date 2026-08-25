@@ -1990,6 +1990,19 @@ def the_vendored_opencore():
     check('the version reported is the one vendored',
           inventory.about()['opencore'] == versions[0])
 
+    # the write-up of how to do this next time names the tools that do it. A
+    # document that names a tool which does not exist is worse than none.
+    doc = Path('docs/RELEASING.md')
+    check('there is a write-up of how to move to the next one', doc.exists())
+    if doc.exists():
+        text = doc.read_text()
+        for tool in ('tools/opencore.py', 'tools/verify.py', 'tools/matrix.py',
+                     'tools/fetch_oc.py', 'tools/selftest.py'):
+            check(f'{tool} is named in it and exists',
+                  tool in text and Path(tool).exists())
+        check('and it says the release is tagged, not pushed by hand',
+              'git tag' in text and 'release.yml' in text)
+
 
 def the_tools_a_window_can_drive():
     """Both vendored tools reach a person, whichever surface is attached.
