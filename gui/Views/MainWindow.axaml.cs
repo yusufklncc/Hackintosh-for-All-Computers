@@ -10,7 +10,7 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
         foreach (var nav in new[] { ToMachine, ToBuilder, ToReport, ToRecovery,
-                                    ToDevices, ToKexts, ToAbout })
+                                    ToStick, ToDevices, ToKexts, ToAbout })
             nav.IsCheckedChanged += async (_, _) => await Swap();
         _ = Standing();
     }
@@ -38,12 +38,14 @@ public partial class MainWindow : Window
         BuilderPane.IsVisible = ToBuilder.IsChecked == true;
         ReportPane.IsVisible = ToReport.IsChecked == true;
         RecoveryPane.IsVisible = ToRecovery.IsChecked == true;
+        StickPane.IsVisible = ToStick.IsChecked == true;
         DevicesPane.IsVisible = ToDevices.IsChecked == true;
         KextsPane.IsVisible = ToKexts.IsChecked == true;
         AboutPane.IsVisible = ToAbout.IsChecked == true;
         // read on first sight rather than at startup: opening the program
         // should not wait on three documents nobody has asked for yet
         if (ToRecovery.IsChecked == true) await RecoveryPane.Load();
+        if (ToStick.IsChecked == true) await StickPane.Load();
         if (ToDevices.IsChecked == true) await DevicesPane.Load();
         if (ToKexts.IsChecked == true) await KextsPane.Load();
         if (ToAbout.IsChecked == true) await AboutPane.Load();
@@ -62,6 +64,8 @@ public partial class MainWindow : Window
 
     public Task<string> ListRecoveries() => RecoveryPane.ListForRender();
 
+    public Task<string> ListSticks() => StickPane.ListForRender();
+
     public Task<string> DriveBuilder() => BuilderPane.DriveToEnd();
 
     /// <summary>Show one pane by name, for the screenshot pass.</summary>
@@ -69,7 +73,7 @@ public partial class MainWindow : Window
     {
         var nav = pane switch
         {
-            "report" => ToReport, "recovery" => ToRecovery,
+            "report" => ToReport, "recovery" => ToRecovery, "stick" => ToStick,
             "devices" => ToDevices, "kexts" => ToKexts,
             "about" => ToAbout,
             "builder" => ToBuilder, _ => ToMachine,

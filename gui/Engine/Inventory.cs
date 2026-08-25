@@ -116,6 +116,36 @@ public sealed class RecoveryList
     [JsonPropertyName("choices")] public List<RecoveryChoice> Choices { get; set; } = new();
 }
 
+public sealed class Stick
+{
+    [JsonPropertyName("device")] public string Device { get; set; } = "";
+    [JsonPropertyName("name")] public string Name { get; set; } = "";
+    [JsonPropertyName("size")] public string Size { get; set; } = "";
+    [JsonPropertyName("bus")] public string Bus { get; set; } = "";
+    [JsonPropertyName("mounted")] public List<string> Mounted { get; set; } = new();
+    [JsonPropertyName("scheme")] public string Scheme { get; set; } = "";
+    // whether it can be copied to as it stands, where to, and why. The engine
+    // decides: "is this a USB stick" is not the question, "is this FAT32" is.
+    [JsonPropertyName("ready")] public bool Ready { get; set; }
+    [JsonPropertyName("write_to")] public string WriteTo { get; set; } = "";
+    [JsonPropertyName("why")] public string Why { get; set; } = "";
+
+    public string Titled => $"{Name} · {Size}".Trim();
+    public string Where => WriteTo.Length > 0 ? WriteTo
+                         : Mounted.Count > 0 ? Mounted[0] : "";
+    public string State => Ready ? "ready" : "needs formatting";
+}
+
+public sealed class StickList
+{
+    [JsonPropertyName("platform")] public string Platform { get; set; } = "";
+    [JsonPropertyName("booted")] public string? Booted { get; set; }
+    [JsonPropertyName("erasable")] public bool Erasable { get; set; }
+    [JsonPropertyName("recovery")] public string Recovery { get; set; } = "";
+    [JsonPropertyName("sticks")] public List<Stick> Sticks { get; set; } = new();
+}
+
+[JsonSerializable(typeof(StickList))]
 [JsonSerializable(typeof(RecoveryList))]
 [JsonSerializable(typeof(DeviceList))]
 [JsonSerializable(typeof(KextList))]
@@ -155,6 +185,17 @@ public static class Inventory
         try
         {
             return (JsonSerializer.Deserialize(output, Carried.Default.RecoveryList), "");
+        }
+        catch (JsonException e) { return (null, e.Message); }
+    }
+
+    public static async Task<(StickList? list, string complaint)> Sticks(Located engine)
+    {
+        var (output, error, code) = await Builder.Run(engine, "--usb-list");
+        if (code != 0) return (null, Said(error, code));
+        try
+        {
+            return (JsonSerializer.Deserialize(output, Carried.Default.StickList), "");
         }
         catch (JsonException e) { return (null, e.Message); }
     }

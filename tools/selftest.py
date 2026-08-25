@@ -824,6 +824,11 @@ def ssdt_flow():
 def frozen_names():
     """Names a frozen build takes away, which the vendored code still uses.
 
+    And names it takes for itself: PyInstaller ships hooks for packages on
+    PyPI, and a hook fires on the module name alone. `tools/usb.py` made the
+    frozen build die inside pyusb's hook, in a traceback naming a package this
+    repository has never heard of. It is `tools/stick.py` now.
+
     PyInstaller does not run site.py, so `exit` and `quit` do not exist. SSDTTime
     quits with `exit(0)`: unfrozen that is a SystemExit and is caught, frozen it
     is a NameError that killed the whole builder the moment somebody finished
@@ -848,6 +853,24 @@ def frozen_names():
         for name, value in had.items():
             if value is not None:
                 setattr(builtins, name, value)
+
+    # a module here that shares a name with a hooked package on PyPI breaks
+    # the frozen build and nothing else, so it is invisible until a release
+    try:
+        import _pyinstaller_hooks_contrib.stdhooks as hooks
+        where = Path(hooks.__file__).parent
+    except Exception:                               # noqa: BLE001 - optional
+        where = None
+    if where is None:
+        check('PyInstaller is not here, so its hook names cannot be checked',
+              True, 'skipped')
+    else:
+        hooked = {h.stem[len('hook-'):].split('.')[0]
+                  for h in where.glob('hook-*.py')}
+        ours = {f.stem for f in Path('tools').glob('*.py')}
+        clash = sorted(ours & hooked)
+        check('no module here is named after a package PyInstaller hooks',
+              not clash, clash)
 
     # the tool must not take the builder down with it whatever it does
     src = Path('tools/acpi.py').read_text()
@@ -2217,6 +2240,127 @@ def the_recovery_it_can_fetch():
           'about.Network' in drawn)
 
 
+def the_stick_it_writes_to():
+    """The only part of this that can destroy something.
+
+    Everything else writes into a folder. This erases a whole disk, so what is
+    checked here is the refusing: that the list is removable disks only, that
+    the disk this computer booted from is not in it, and that a device the list
+    did not offer cannot be erased by naming it."""
+    import stick
+
+    document = stick.document()
+    check('the stick list says which system it read', document['platform'])
+    check('and names what it booted from, or says it could not',
+          'booted' in document)
+    check('and whether it can erase here at all', 'erasable' in document)
+    check('the recovery folder is the one OpenCore looks for',
+          document['recovery'] == 'com.apple.recovery.boot')
+
+    booted = document['booted']
+    check('the disk this computer booted from is not offered',
+          not booted or all(s['device'] != booted for s in document['sticks']),
+          booted)
+    for found in document['sticks']:
+        check(f"{found['device']} is offered as removable", found['removable'],
+              found)
+        check(f"{found['device']} says whether it can be written to as it is",
+              'ready' in found and found['why'], found)
+
+    # the question a stick raises is whether it has to be formatted, and that
+    # is answered from what is on it rather than from it being a USB stick
+    for case, ready, says in (
+        ({'scheme': 'GUID_partition_scheme',
+          'volumes': [{'fs': 'msdos', 'called': 'MS-DOS FAT32',
+                       'mount': '/Volumes/USB'}]}, True, 'GPT'),
+        ({'scheme': 'FDisk_partition_scheme',
+          'volumes': [{'fs': 'msdos', 'called': 'MS-DOS FAT32',
+                       'mount': '/Volumes/USB'}]}, True, 'GPT'),
+        ({'scheme': 'GUID_partition_scheme',
+          'volumes': [{'fs': 'apfs', 'called': 'APFS',
+                       'mount': '/Volumes/Mac'}]}, False, 'APFS'),
+        ({'scheme': 'GUID_partition_scheme',
+          'volumes': [{'fs': 'exfat', 'called': 'ExFAT',
+                       'mount': '/Volumes/X'}]}, False, 'ExFAT'),
+        ({'scheme': 'GUID_partition_scheme',
+          'volumes': [{'fs': 'msdos', 'called': 'MS-DOS FAT32',
+                       'mount': ''}]}, False, 'not mounted'),
+        ({'scheme': '', 'volumes': []}, False, 'FAT32'),
+    ):
+        verdict, where, why = stick.verdict(case)
+        check(f'{case["scheme"] or "no scheme"} + '
+              f'{case["volumes"][0]["called"] if case["volumes"] else "nothing"}'
+              f' -> {"ready" if ready else "format it"}',
+              verdict is ready, why)
+        check('  and it says why in those words', says in why, why)
+        check('  ready means it names where to write',
+              bool(where) is ready, where)
+
+    # naming a disk nobody was offered does not erase it. This is the check
+    # that matters: the list is the gate, not the question in front of it.
+    for made_up in ('disk999', '/dev/disk999', 'sda', '0'):
+        if any(s['device'] == made_up.removeprefix('/dev/')
+               for s in document['sticks']):
+            continue
+        mount, complaint = stick.prepare(made_up)
+        check(f'{made_up} is refused, not erased', mount is None and complaint,
+              complaint)
+
+    with tempfile.TemporaryDirectory() as where:
+        root = Path(where)
+        # an EFI folder is one with a loader in it, not one with the right name
+        (root / 'notanefi').mkdir()
+        written, complaint = stick.place(root / 'stick', efi=root / 'notanefi')
+        check('a volume that is not there is refused', complaint)
+        (root / 'stick').mkdir()
+        written, complaint = stick.place(root / 'stick', efi=root / 'notanefi')
+        check('a folder with no BOOTx64.efi is not an EFI folder', complaint)
+        check('and nothing was copied when it complained', not written)
+
+        loader = root / 'EFI' / 'BOOT'
+        loader.mkdir(parents=True)
+        (loader / 'BOOTx64.efi').write_bytes(b'not really')
+        image = root / 'com.apple.recovery.boot'
+        image.mkdir()
+        (image / 'BaseSystem.dmg').write_bytes(b'not really either')
+        written, complaint = stick.place(root / 'stick', efi=root / 'EFI',
+                                       recovery=root)
+        check('both folders land at the root', not complaint
+              and [n for n, _ in written] == ['EFI', 'com.apple.recovery.boot'],
+              complaint or written)
+        check('the recovery is beside the EFI, not inside it',
+              (root / 'stick' / 'com.apple.recovery.boot').is_dir()
+              and not (root / 'stick' / 'EFI' / 'com.apple.recovery.boot').exists())
+        check('and it says whether what is there would boot',
+              stick.bootable(root / 'stick'))
+        check('a folder with no loader would not',
+              not stick.bootable(root / 'notanefi'))
+
+        # a recovery folder with nothing in it is not a recovery
+        (root / 'empty').mkdir()
+        _, complaint = stick.place(root / 'stick', recovery=root / 'empty')
+        check('an installer that is not there is refused', complaint)
+
+    # the builder offers all three, and does none of it itself
+    source = Path('tools/setup.py').read_text()
+    for flag in ('--usb-list', '--usb-place', '--usb-prepare'):
+        check(f'the builder offers {flag}', f"'{flag}'" in source)
+    check('and hands the work to the one tool that does it',
+          'stick.main(' in source and 'stick.document()' in source)
+
+    # the window
+    pane = Path('gui/Views/StickView.axaml.cs')
+    check('the window has a pane for it', pane.exists())
+    if pane.exists():
+        drawn = pane.read_text()
+        check('which reads the list from the engine', 'Inventory.Sticks' in drawn)
+        check('and asks for the disk by name before erasing',
+              'Typed.Text?.Trim() == s.Device' in drawn)
+    pass_ = Path('gui/App.axaml.cs').read_text()
+    check('the unattended pass lists and erases nothing',
+          'ListSticks' in pass_ and 'usb-prepare' not in pass_)
+
+
 def the_tools_a_window_can_drive():
     """Both vendored tools reach a person, whichever surface is attached.
 
@@ -2390,6 +2534,7 @@ if __name__ == '__main__':
                     the_vendored_opencore,
                     the_tools_a_window_can_drive,
                     the_recovery_it_can_fetch,
+                    the_stick_it_writes_to,
                     what_oclp_restores, the_about_page,
                     what_the_readme_shows):
         print(f'\n{section.__name__}')

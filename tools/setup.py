@@ -34,6 +34,7 @@ import netkexts
 import ocgen
 import inventory
 import recovery
+import stick
 import summary
 import ui
 import usbmap
@@ -520,6 +521,17 @@ def main():
     ap.add_argument('--recovery-to', metavar='DIR',
                     help='the drive the recovery folder goes on, at its root '
                          '(default: the folder --out sits in)')
+    ap.add_argument('--usb-list', action='store_true',
+                    help='the removable disks an EFI could be written to, as '
+                         'JSON, and stop')
+    ap.add_argument('--usb-place', metavar='VOLUME',
+                    help='copy the EFI and the recovery onto a stick that is '
+                         'already formatted')
+    ap.add_argument('--usb-prepare', metavar='DEVICE',
+                    help='ERASE that removable disk and format it FAT32 under '
+                         'GPT; only ever a disk --usb-list offered')
+    ap.add_argument('--recovery-from', metavar='DIR',
+                    help='where com.apple.recovery.boot already is, for --usb-place')
     ap.add_argument('--describe', action='store_true',
                     help='write this machine as one JSON document and stop, for '
                          'a front end to draw')
@@ -549,12 +561,32 @@ def main():
         # acpi_tables out of this meant the frozen build looked for the dumped
         # tables inside its own unpacked copy, where they never are.
         for opt in ('machine', 'report', 'usb_map', 'acpi_tables',
-                    'recovery_to'):
+                    'recovery_to', 'usb_place', 'recovery_from'):
             if getattr(a, opt):
                 setattr(a, opt, str((started_in / getattr(a, opt)).resolve()))
 
     if a.check_tools:
         return check_tools()
+
+    if a.usb_list:
+        import json as _json
+        sys.stdout.write(_json.dumps(stick.document(), ensure_ascii=False) + '\n')
+        return 0
+
+    if a.usb_place:
+        # the same tool the console drives, so a window and a terminal put the
+        # same things in the same places
+        argv = ['--place', a.usb_place, '--efi', a.out]
+        if a.recovery_from:
+            argv += ['--recovery', a.recovery_from]
+        return stick.main(argv)
+
+    if a.usb_prepare:
+        # --yes because the window has already asked, in front of the disk's
+        # name and size. What stops the wrong disk is not the question: it is
+        # that usb.prepare refuses anything --usb-list did not offer, checked
+        # again at the moment it runs.
+        return stick.main(['--prepare', a.usb_prepare, '--yes'])
 
     if a.recovery:
         # the EFI folder's parent is the drive, which is where OpenCore looks
