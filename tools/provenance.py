@@ -60,6 +60,12 @@ def ids_in(path, key='driver', role=None):
 
 # What each category rests on. The counts are read; everything else is the
 # provenance of the file, which has to be stated somewhere and is stated here.
+def _recoveries():
+    """How many macOS versions the vendored board list yields."""
+    import recovery
+    return len(recovery.choices())
+
+
 def catalogue():
     return [
         dict(area='CPU generation', kind=DERIVED, file='profiles/cpu/',
@@ -279,6 +285,15 @@ def catalogue():
              covers='the map the tool writes, on Windows, run from the builder',
              gap='Windows only, because that is the build the project publishes. '
                  'Nothing here can produce a map without a person at the machine.'),
+        dict(area='Recovery installers', kind=DERIVED,
+             file='vendor/opencore/', source="macrecovery's own boards.json",
+             tool='tools/recovery.py',
+             count=f'{_recoveries()} macOS versions, one board id each',
+             covers='which macOS Apple will serve, and the board the request '
+                    'is made with',
+             gap='What Apple actually returns is not known until it is asked. '
+                 'The version here is the newest that board is recorded to '
+                 'reach, not a promise about the download.'),
         dict(area='AMD graphics kexts', kind=NONE, file='-',
              source='out of scope by request', tool='-',
              count='-', covers='-',

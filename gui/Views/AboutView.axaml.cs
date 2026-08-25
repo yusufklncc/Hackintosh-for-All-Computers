@@ -78,7 +78,7 @@ public partial class AboutView : UserControl
             new("CONFIGS", about.Configs.ToString()),
             new("KEXTS", about.Kexts.ToString()),
             new("SOURCES", about.Sources.Count.ToString()),
-            new("NETWORK", about.Offline ? "never" : "sometimes"),
+            new("NETWORK", about.Network is null ? "never" : "when asked"),
         };
 
         // counted, not asserted. It used to say "both ACPI tools" while nine
@@ -88,7 +88,10 @@ public partial class AboutView : UserControl
                      + $"replaced, and it is often not online - so {about.Kexts} kexts, "
                      + $"{about.Configs} configs and {about.Tools.Count} whole programs "
                      + "travel inside it. The tables below were fetched once, by the "
-                     + "tool named beside each, and committed.";
+                     + "tool named beside each, and committed."
+                     + (about.Network is { } once
+                        ? $" The one thing that does open a connection is {once}."
+                        : "");
         Licence.Text = (about.Licence is { } licence ? licence + ". " : "")
                      + (about.Repo ?? "");
         Tools.ItemsSource = about.Tools.Select(t => new ToolItem(t)).ToList();

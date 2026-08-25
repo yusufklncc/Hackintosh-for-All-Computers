@@ -15,7 +15,7 @@ What it touches:
     EFI/OC/OpenCore.efi           replaced
     EFI/OC/Drivers/*.efi          the ones already here, replaced
     EFI/OC/Tools/*.efi            the ones already here, replaced
-    vendor/opencore/<version>/    Sample.plist and the two Utilities
+    vendor/opencore/<version>/    Sample.plist, the two Utilities, macrecovery
     profiles/catalogue.toml       rehashed, if the new sample changed anything
                                   the profiles actually layer onto
 
@@ -47,6 +47,12 @@ VENDOR = Path('vendor/opencore')
 # the boot files, and then whatever is already in these folders
 FIXED = ('BOOT/BOOTx64.efi', 'OC/OpenCore.efi')
 FOLDERS = ('OC/Drivers', 'OC/Tools')
+# Utilities that are programs, vendored whole so the build never needs a
+# download, and macrecovery, which is a script plus the board list it reads.
+# recovery.py drives it; boards.json is where the version list comes from, so
+# taking the script without it would leave us keeping a list of our own.
+PROGRAMS = ('ocvalidate', 'macserial')
+SCRIPTS = {'macrecovery': ('macrecovery.py', 'boards.json', 'README.md')}
 
 
 def binaries():
@@ -138,9 +144,13 @@ def check(release, changes):
             return f'the release does not carry {name}, which every EFI needs'
     if not (release / 'Docs' / 'Sample.plist').exists():
         return 'the release carries no Sample.plist'
-    for tool in ('ocvalidate', 'macserial'):
+    for tool in PROGRAMS:
         if not (release / 'Utilities' / tool / tool).exists():
             return f'the release carries no {tool}'
+    for tool, wanted in SCRIPTS.items():
+        for name in wanted:
+            if not (release / 'Utilities' / tool / name).exists():
+                return f'the release carries no {tool}/{name}'
     return None
 
 
@@ -150,7 +160,12 @@ def apply(version, release, changes):
     into = VENDOR / version
     into.mkdir(parents=True, exist_ok=True)
     shutil.copy2(release / 'Docs' / 'Sample.plist', into / 'Sample.plist')
-    for tool in ('ocvalidate', 'macserial'):
+    for tool, wanted in SCRIPTS.items():
+        target = into / 'Utilities' / tool
+        target.mkdir(parents=True, exist_ok=True)
+        for name in wanted:
+            shutil.copy2(release / 'Utilities' / tool / name, target / name)
+    for tool in PROGRAMS:
         target = into / 'Utilities' / tool
         target.mkdir(parents=True, exist_ok=True)
         for built in (release / 'Utilities' / tool).iterdir():

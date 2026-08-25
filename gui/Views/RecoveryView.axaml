@@ -1,0 +1,66 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:v="clr-namespace:Shell.Views"
+             xmlns:e="clr-namespace:Shell.Engine"
+             x:Class="Shell.Views.RecoveryView"
+             x:DataType="v:RecoveryView">
+  <ScrollViewer>
+    <StackPanel Margin="28,24" Spacing="20" MaxWidth="760" HorizontalAlignment="Left">
+      <StackPanel Spacing="8">
+        <TextBlock Classes="eyebrow" Text="RECOVERY INSTALLER" />
+        <TextBlock FontSize="15" TextWrapping="Wrap" Foreground="{DynamicResource Ink}"
+                   Text="Put Apple's own installer on the stick, beside the EFI." />
+        <TextBlock FontSize="13.5" TextWrapping="Wrap" Foreground="{DynamicResource Muted}"
+                   Text="A whole macOS image is larger than 4 GB and will not fit on the FAT32 partition an EFI lives on. Recovery is about 700 MB: it boots, connects, and downloads the rest of macOS itself. Everything else here works offline - this is the one thing that does not, and it only runs when you press the button." />
+      </StackPanel>
+
+      <Border Classes="panel">
+        <StackPanel Spacing="14">
+          <StackPanel Spacing="6">
+            <TextBlock Classes="eyebrow" Text="WHICH MACOS" />
+            <ComboBox Name="Which" HorizontalAlignment="Stretch"
+                      x:DataType="e:RecoveryChoice">
+              <ComboBox.ItemTemplate>
+                <DataTemplate x:DataType="e:RecoveryChoice">
+                  <Grid ColumnDefinitions="150,*" ColumnSpacing="10">
+                    <TextBlock Grid.Column="0" Text="{Binding Titled}" />
+                    <TextBlock Grid.Column="1" Text="{Binding Board}"
+                               Classes="mono" Foreground="{DynamicResource Faint}"
+                               VerticalAlignment="Center" />
+                  </Grid>
+                </DataTemplate>
+              </ComboBox.ItemTemplate>
+            </ComboBox>
+            <TextBlock Name="Provenance" FontSize="12" TextWrapping="Wrap"
+                       Foreground="{DynamicResource Faint}" />
+          </StackPanel>
+
+          <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+            <TextBlock Grid.Column="0" Classes="eyebrow" Text="ONTO"
+                       VerticalAlignment="Center" />
+            <TextBlock Grid.Column="1" Name="Where" Classes="mono"
+                       VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+            <Button Grid.Column="2" Name="Choose" Content="Change…" />
+          </Grid>
+          <TextBlock Name="Target" FontSize="12.5" TextWrapping="Wrap"
+                     Foreground="{DynamicResource Faint}" />
+
+          <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Left">
+            <Button Name="Fetch" Content="Download it" Classes="accent" />
+            <Button Name="Open" Content="Show the folder" IsVisible="False" />
+          </StackPanel>
+        </StackPanel>
+      </Border>
+
+      <Border Name="Result" Classes="panel" IsVisible="False">
+        <StackPanel Spacing="8">
+          <TextBlock Name="ResultTitle" FontSize="15" FontWeight="SemiBold"
+                     Foreground="{DynamicResource Ink}" />
+          <TextBlock Name="ResultText" Classes="mono" TextWrapping="Wrap" />
+          <TextBlock Name="ResultNext" FontSize="12.5" TextWrapping="Wrap"
+                     Foreground="{DynamicResource Muted}" IsVisible="False" />
+        </StackPanel>
+      </Border>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

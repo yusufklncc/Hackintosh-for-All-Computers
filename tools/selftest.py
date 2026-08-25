@@ -1853,13 +1853,17 @@ def the_device_catalogue():
 
     # the builder takes --inventory and hands it to this module. The two lists
     # of what that argument accepts were written twice and drifted: the window
-    # asked for "devices" and the builder had never heard of it.
+    # asked for "devices" and the builder had never heard of it. There is one
+    # list now, and this is what holds it to one.
+    import inventory as _inv
     source = Path('tools/setup.py').read_text()
-    for what in ('kexts', 'about', 'devices'):
-        check(f'the builder accepts --inventory {what}',
-              f"'{what}'" in source.split('--inventory')[1][:400], what)
+    check('the builder takes its choices from the one list',
+          'choices=inventory.WHAT' in source)
+    check('and every choice on it has a document',
+          set(_inv.WHAT) == set(_inv.DOCUMENTS), sorted(_inv.WHAT))
+    for what in _inv.WHAT:
         r = run([sys.executable, 'tools/setup.py', '--inventory', what])
-        check(f'and answers it with JSON', r.returncode == 0
+        check(f'--inventory {what} answers with JSON', r.returncode == 0
               and r.stdout.lstrip().startswith('{'), r.stdout[:60])
 
 
@@ -2075,6 +2079,97 @@ def what_the_readme_shows():
           'EFIBuilderEngine' in readme)
 
 
+def the_recovery_it_can_fetch():
+    """The one thing here that opens a connection, and what it offers.
+
+    A whole installer does not fit on FAT32, so the answer to that is Apple's
+    recovery - about 700 MB that boots and downloads the rest. OpenCore ships
+    the tool that asks for it, so nothing here reimplements the protocol; what
+    this checks is that the tool is vendored, that the list of what can be
+    fetched is read out of the tool's own data, and that the page which says
+    the program never reaches the network now says where it does."""
+    import json as _json
+    import inventory as _inv
+    import recovery
+
+    tool = recovery.vendored()
+    check('macrecovery is vendored', tool is not None)
+    if tool is None:
+        return
+    check('beside the OpenCore it came from',
+          tool.parents[2].parent.name == 'opencore', str(tool))
+    check('with the board list it reads', (tool.parent / 'boards.json').exists())
+
+    # and the bump is what puts it there. Vendoring it by hand once would work
+    # and then be forgotten at 1.0.8.
+    bump = Path('tools/opencore.py').read_text()
+    check('the OpenCore bump is what vendors it',
+          "'macrecovery'" in bump and 'boards.json' in bump)
+
+    boards = _json.loads((tool.parent / 'boards.json').read_text(encoding='utf-8'))
+    offered = recovery.choices()
+    check('there is something to fetch', len(offered) >= 5, len(offered))
+    check('newest first',
+          offered == sorted(offered, reverse=True,
+                            key=lambda c: [int(n) for n in c['version'].split('.')]))
+    check('one entry per macOS',
+          len({c['version'] for c in offered}) == len(offered))
+    for choice in offered:
+        # derived, not chosen: the board has to be one the list actually maps
+        # to that version, or the request asks Apple for something else
+        check(f"{choice['version']} names a board that yields it",
+              boards.get(choice['board']) == choice['version'], choice)
+        check(f"{choice['version']} has the name people know it by",
+              choice['name'], choice)
+    check('the boards Apple keeps moving are left out',
+          all(c['version'][0].isdigit() for c in offered))
+    check('and it lands where OpenCore looks',
+          recovery.FOLDER == 'com.apple.recovery.boot')
+
+    # sizes: a chunklist is kilobytes and an image is hundreds of megabytes,
+    # and one unit for both printed the chunklist as 0.0 MB
+    check('a small file reads in KB', recovery._size(2650).endswith('KB'))
+    check('and a large one in MB', recovery._size(650_000_000).endswith('MB'))
+
+    # a half-written image cannot be resumed, and leaving one there stops the
+    # next attempt before it starts
+    with tempfile.TemporaryDirectory() as where:
+        folder = Path(where) / recovery.FOLDER
+        folder.mkdir()
+        (folder / 'theirs.txt').write_text('not ours')
+        (folder / 'BaseSystem.dmg').write_bytes(b'half')
+        left = recovery._sweep(folder, {'theirs.txt'})
+        check('a failed run takes back what it wrote',
+              [n for n, _ in left] == ['theirs.txt'], left)
+
+    # the builder offers it, and hands the whole job to the tool
+    source = Path('tools/setup.py').read_text()
+    check('the builder has a --recovery', "'--recovery'" in source)
+    check('and does not do the download itself',
+          'recovery.main(' in source)
+
+    # the window: a pane that lists, and a pass that does not press the button
+    pane = Path('gui/Views/RecoveryView.axaml.cs')
+    check('the window has a pane for it', pane.exists())
+    if pane.exists():
+        drawn = pane.read_text()
+        check('which reads the list from the engine',
+              'Inventory.Recoveries' in drawn)
+        check('and streams the download rather than waiting on it',
+              'Builder.Stream' in drawn)
+    pass_ = Path('gui/App.axaml.cs').read_text()
+    check('the unattended pass lists and stops',
+          'ListRecoveries' in pass_ and 'TakeRecovery' not in pass_)
+
+    # and the page that used to say "never"
+    facts = _inv.about()
+    check('the About page names where the network is reached', facts.get('network'))
+    check('and still says a build needs none', facts['offline'] is True)
+    drawn = Path('gui/Views/AboutView.axaml.cs').read_text()
+    check('the window reads that sentence rather than keeping its own',
+          'about.Network' in drawn)
+
+
 def the_tools_a_window_can_drive():
     """Both vendored tools reach a person, whichever surface is attached.
 
@@ -2247,6 +2342,7 @@ if __name__ == '__main__':
                     nvidia_by_family, what_the_two_programs_are_called,
                     the_vendored_opencore,
                     the_tools_a_window_can_drive,
+                    the_recovery_it_can_fetch,
                     what_oclp_restores, the_about_page,
                     what_the_readme_shows):
         print(f'\n{section.__name__}')

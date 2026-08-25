@@ -20,10 +20,15 @@ hash, and names anything it will leave alone. `HfsPlus.efi` is left alone every
 time: it is acidanthera's OcBinaryData and ships on its own schedule, so an
 OpenCore bump has nothing to say about it.
 
-`--write` replaces the binaries, vendors the new `Sample.plist` and the two
-Utilities under `vendor/opencore/1.0.8/`, removes the version before it — one
-vendored version, so nobody has to know which sorts last — and rehashes
-`profiles/catalogue.toml`.
+`--write` replaces the binaries, vendors the new `Sample.plist`, the two
+Utilities and `macrecovery` under `vendor/opencore/1.0.8/`, removes the version
+before it — one vendored version, so nobody has to know which sorts last — and
+rehashes `profiles/catalogue.toml`.
+
+`macrecovery` travels with its `boards.json`, which is where the Recovery tab's
+list of macOS versions comes from. A new OpenCore usually brings a newer board
+list, so that list moves with the bump rather than on its own; if a macOS
+appears or disappears from the Recovery tab after an update, this is why.
 
 Whether any hash moves depends on the new sample. Going from 1.0.5 to 1.0.7
 moved none of the 179, because nothing the profiles layer onto had changed. If

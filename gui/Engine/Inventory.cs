@@ -56,6 +56,7 @@ public sealed class About
     [JsonPropertyName("kexts")] public int Kexts { get; set; }
     [JsonPropertyName("shipped")] public int Shipped { get; set; }
     [JsonPropertyName("offline")] public bool Offline { get; set; }
+    [JsonPropertyName("network")] public string? Network { get; set; }
     [JsonPropertyName("sources")] public List<SourceRow> Sources { get; set; } = new();
     [JsonPropertyName("tally")] public Dictionary<string, int> Tally { get; set; } = new();
     [JsonPropertyName("tools")] public List<ToolRow> Tools { get; set; } = new();
@@ -91,6 +92,24 @@ public sealed class DeviceList
     [JsonPropertyName("statuses")] public List<string> Statuses { get; set; } = new();
 }
 
+public sealed class RecoveryChoice
+{
+    [JsonPropertyName("version")] public string Version { get; set; } = "";
+    [JsonPropertyName("name")] public string Name { get; set; } = "";
+    [JsonPropertyName("board")] public string Board { get; set; } = "";
+    [JsonPropertyName("boards")] public int Boards { get; set; }
+
+    public string Titled => $"{Name} {Version}".Trim();
+}
+
+public sealed class RecoveryList
+{
+    [JsonPropertyName("folder")] public string Folder { get; set; } = "";
+    [JsonPropertyName("available")] public bool Available { get; set; }
+    [JsonPropertyName("choices")] public List<RecoveryChoice> Choices { get; set; } = new();
+}
+
+[JsonSerializable(typeof(RecoveryList))]
 [JsonSerializable(typeof(DeviceList))]
 [JsonSerializable(typeof(KextList))]
 [JsonSerializable(typeof(About))]
@@ -118,6 +137,17 @@ public static class Inventory
         try
         {
             return (JsonSerializer.Deserialize(output, Carried.Default.DeviceList), "");
+        }
+        catch (JsonException e) { return (null, e.Message); }
+    }
+
+    public static async Task<(RecoveryList? list, string complaint)> Recoveries(Located engine)
+    {
+        var (output, error, code) = await Builder.Run(engine, "--inventory", "recovery");
+        if (code != 0) return (null, Said(error, code));
+        try
+        {
+            return (JsonSerializer.Deserialize(output, Carried.Default.RecoveryList), "");
         }
         catch (JsonException e) { return (null, e.Message); }
     }

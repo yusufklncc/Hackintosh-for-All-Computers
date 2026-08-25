@@ -95,6 +95,12 @@ jobs:
           grep -q 'report: Written ->' render.log \
             || { echo 'the report pane wrote nothing'; cat render.log; exit 1; }
 
+          # the recovery pane offers a list and nothing else here presses its
+          # button: a build machine has no business pulling 700 MB off Apple
+          grep -qE 'recovery: [1-9][0-9]* recoveries, newest .+, into com.apple.recovery.boot' \
+            render.log \
+            || { echo 'the recovery pane listed nothing'; cat render.log; exit 1; }
+
       # A font that failed to load falls back to the system's, and the window
       # still looks reasonable. That is the whole problem: it has to be checked,
       # not eyeballed.

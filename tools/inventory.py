@@ -15,8 +15,13 @@ import deviceids
 import ocgen
 import oclptable
 import provenance
+import recovery
 import summary
 import thirdparty
+
+# One list, named once. It was written twice - the argument parser's and the
+# dispatch table's - and they drifted the first time a document was added.
+WHAT = ('kexts', 'about', 'devices', 'recovery')
 
 LOCK = Path('vendor/kexts.lock')
 CATALOGUE = Path('profiles/catalogue.toml')
@@ -254,9 +259,13 @@ def about():
         'configs': configs,
         'kexts': vendored,
         'shipped': len(list(SHIPPED.iterdir())) if SHIPPED.is_dir() else 0,
-        # the whole point of the thing: it never reaches the network, because
-        # the machine being converted usually cannot
+        # Building reaches nothing, because the machine being converted
+        # usually cannot. One thing does, and naming it is the point: a page
+        # that says "never" while a button downloads 700 MB is worse than a
+        # page that says nothing.
         'offline': True,
+        'network': ('the recovery installer on the Recovery tab, fetched from '
+                    'Apple only when asked for'),
         'sources': sources,
         'tally': tally,
         'tools': thirdparty.vendored_tools(),
@@ -268,13 +277,32 @@ def about():
     }
 
 
+def recoveries():
+    """What Apple will serve, and where it would go.
+
+    Offline: the list is macrecovery's own boards.json, which travels with the
+    OpenCore release. Only the download itself needs a network."""
+    return {
+        't': 'recovery',
+        'folder': recovery.FOLDER,
+        'available': recovery.vendored() is not None,
+        'choices': recovery.choices(),
+    }
+
+
+# the same names WHAT lists, so a document cannot be offered and then not
+# exist - which is how --inventory devices came to be rejected by the parser
+DOCUMENTS = {'kexts': kexts, 'about': about, 'devices': devices,
+             'recovery': recoveries}
+
+
 def main(argv=None):
     import argparse
     import json
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument('what', choices=('kexts', 'about', 'devices'))
+    ap.add_argument('what', choices=WHAT)
     a = ap.parse_args(argv)
-    document = {'kexts': kexts, 'about': about, 'devices': devices}[a.what]()
+    document = DOCUMENTS[a.what]()
     print(json.dumps(document,
                      ensure_ascii=False, indent=1))
     return 0
