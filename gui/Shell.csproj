@@ -10,7 +10,7 @@
     <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
     <InvariantGlobalization>true</InvariantGlobalization>
     <ApplicationManifest>app.manifest</ApplicationManifest>
-    <AssemblyName>HackintoshEFIBuilderShell</AssemblyName>
+    <AssemblyName>HackintoshEFIBuilder</AssemblyName>
     <RootNamespace>Shell</RootNamespace>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
     <!-- Reflection-based JSON does not survive trimming, so the payload is read

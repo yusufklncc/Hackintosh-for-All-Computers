@@ -38,10 +38,32 @@ a = Analysis(
     excludes=['tkinter', 'unittest', 'pydoc_data', 'test'],
 )
 pyz = PYZ(a.pure)
+# A folder, not one file. A one-file build unpacks sixty megabytes into a
+# temporary directory on every run and then executes out of it, which is what
+# ransomware does and what heuristic scanners are built to notice - Defender
+# called this Trojan:Win32/Bearfoos.B!ml on a real machine. A folder build
+# starts what is already on disk and gives the scanner nothing to react to.
+#
+# It costs the single-file download. The window has always been shipped as a
+# folder of two programs, so the only thing that changes shape is the console
+# build, which becomes a zip.
 exe = EXE(
-    pyz, a.scripts, a.binaries, a.datas, [],
-    name='HackintoshEFIBuilder',
+    pyz, a.scripts, [],
+    exclude_binaries=True,
+    # The window is the program somebody opens and carries the product
+    # name. This is the part of it that reads hardware and writes the
+    # EFI, and it is named for that: a folder holding two things called
+    # HackintoshEFIBuilder and HackintoshEFIBuilderShell said nothing
+    # about which one to open.
+    name='EFIBuilderEngine',
     console=True,
     upx=False,
     disable_windowed_traceback=False,
+)
+
+coll = COLLECT(
+    exe, a.binaries, a.datas,
+    strip=False,
+    upx=False,
+    name='EFIBuilderEngine',
 )

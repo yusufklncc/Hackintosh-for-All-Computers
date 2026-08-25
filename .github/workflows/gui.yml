@@ -27,17 +27,17 @@ jobs:
         include:
           - os: windows-latest
             rid: win-x64
-            exe: HackintoshEFIBuilderShell.exe
+            exe: HackintoshEFIBuilder.exe
           - os: ubuntu-latest
             rid: linux-x64
-            exe: HackintoshEFIBuilderShell
+            exe: HackintoshEFIBuilder
           # macOS is where an EFI often gets finished rather than started: the
           # target machine's report travels to the Mac and the build happens
           # there. The window has to open on it, so it is built and drawn here
           # like the other two.
           - os: macos-latest
             rid: osx-arm64
-            exe: HackintoshEFIBuilderShell
+            exe: HackintoshEFIBuilder
     runs-on: ${{ matrix.os }}
     timeout-minutes: 20
     steps:
@@ -136,16 +136,23 @@ jobs:
         include:
           - os: windows-latest
             rid: win-x64
-            shell_exe: HackintoshEFIBuilderShell.exe
-            engine_exe: HackintoshEFIBuilder.exe
+            shell_exe: HackintoshEFIBuilder.exe
+            engine_exe: EFIBuilderEngine.exe
           - os: ubuntu-latest
             rid: linux-x64
-            shell_exe: HackintoshEFIBuilderShell
-            engine_exe: HackintoshEFIBuilder
+            shell_exe: HackintoshEFIBuilder
+            engine_exe: EFIBuilderEngine
           - os: macos-latest
             rid: osx-arm64
-            shell_exe: HackintoshEFIBuilderShell
-            engine_exe: HackintoshEFIBuilder
+            shell_exe: HackintoshEFIBuilder
+            engine_exe: EFIBuilderEngine
+          # Intel Macs are the ones people still convert things for, and the
+          # arm64 build will not run on one
+          - os: macos-latest
+            rid: osx-x64
+            shell_exe: HackintoshEFIBuilder
+            engine_exe: EFIBuilderEngine
+            cross: true
     runs-on: ${{ matrix.os }}
     timeout-minutes: 25
     steps:
@@ -180,6 +187,7 @@ jobs:
       # clone. On this runner a clone is right there, so the check is not that
       # it worked - it is that it used the packaged engine and not the source.
       - name: It uses the engine it shipped with
+        if: ${{ !matrix.cross }}
         shell: bash
         run: |
           cd package
@@ -190,20 +198,40 @@ jobs:
             || { echo 'it did not use the packaged engine'; cat render.log; exit 1; }
           test -s shot.png || { echo 'it drew nothing'; exit 1; }
           rm -f render.log shot*.png machine.json described.json
-          rm -rf EFI ACPI
 
       - name: How long reading a machine takes here
+        if: ${{ !matrix.cross }}
         shell: bash
         run: |
           cd package
           start=$(date +%s)
-          ./${{ matrix.engine_exe }} --describe > described.json
+          ./EFIBuilderEngine/${{ matrix.engine_exe }} --describe > described.json
           echo "### ${{ matrix.os }}" >> $GITHUB_STEP_SUMMARY
           echo "describe took $(( $(date +%s) - start ))s" >> $GITHUB_STEP_SUMMARY
           python -c "import json; d=json.load(open('described.json')); \
             print('rows', len(d['rows']), 'read', d['read'])" \
             >> $GITHUB_STEP_SUMMARY
           rm -f described.json
+
+      # A package holds two programs and nothing else. Exercising it here wrote
+      # an EFI, a report and a NEXT-STEPS beside them, and all of that shipped:
+      # somebody unzipped the release and found notes about a machine that was
+      # not theirs. Keep what belongs, delete the rest, and say what went.
+      - name: Nothing a test run left behind
+        shell: bash
+        run: |
+          cd package
+          for leftover in *; do
+            case "$leftover" in
+              ${{ matrix.shell_exe }}|EFIBuilderEngine) ;;
+              *) echo "  removing $leftover"; rm -rf "$leftover" ;;
+            esac
+          done
+          ls -A | sort > /tmp/shipped
+          printf '%s\n%s\n' 'EFIBuilderEngine' '${{ matrix.shell_exe }}' \
+            | sort > /tmp/wanted
+          diff /tmp/wanted /tmp/shipped \
+            || { echo 'the package is not the two programs'; exit 1; }
 
       - name: What it weighs
         shell: bash

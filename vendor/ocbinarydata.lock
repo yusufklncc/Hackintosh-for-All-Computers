@@ -1,0 +1,19 @@
+# Drivers this repository ships that OpenCore does not build.
+#
+# Refreshed by tools/opencore.py alongside an OpenCore bump, because
+# they ship on their own schedule and would otherwise never move.
+#
+# The project states no licence. That is recorded rather than read as
+# permission: these files were already here before anybody looked, and
+# this says so instead of pretending the question was settled.
+
+source = "https://github.com/acidanthera/OcBinaryData"
+licence = "none stated"
+
+[[driver]]
+file = "OC/Drivers/HfsPlus.efi"
+sha256 = "a55b5fff36578864ba6792c4c6369c71f6f35b61dd5a853ddf8583cd36c31d8f"
+
+[[driver]]
+file = "OC/Drivers/HfsPlusLegacy.efi"
+sha256 = "a7185433aacf677268ccfd339b8adc27fa07f19149500a78d08bf79670c82c37"

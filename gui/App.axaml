@@ -123,8 +123,8 @@
            value is set in the monospace one, so a device id and the sentence
            about it can never be mistaken for each other. See
            Assets/Fonts/README.md for where they came from. -->
-      <FontFamily x:Key="Sans">avares://HackintoshEFIBuilderShell/Assets/Fonts#Instrument Sans, $Default</FontFamily>
-      <FontFamily x:Key="Mono">avares://HackintoshEFIBuilderShell/Assets/Fonts#IBM Plex Mono, monospace</FontFamily>
+      <FontFamily x:Key="Sans">avares://HackintoshEFIBuilder/Assets/Fonts#Instrument Sans, $Default</FontFamily>
+      <FontFamily x:Key="Mono">avares://HackintoshEFIBuilder/Assets/Fonts#IBM Plex Mono, monospace</FontFamily>
       <ResourceDictionary.ThemeDictionaries>
         <ResourceDictionary x:Key="Light">
           <SolidColorBrush x:Key="Ground" Color="#EEF1F5" />

@@ -26,7 +26,7 @@ jobs:
 
       - name: It builds an EFI from the bundle alone
         run: |
-          dist/HackintoshEFIBuilder.exe --no-detect --answers 2,10,3 --out smoke/EFI
+          dist/EFIBuilderEngine/EFIBuilderEngine.exe --no-detect --answers 2,10,3 --out smoke/EFI
           if (-not (Test-Path smoke/EFI/OC/config.plist)) { exit 1 }
 
       # --check reads this runner and prints what it means, with no questions
@@ -34,19 +34,19 @@ jobs:
       # be is what broke this job: a Hyper-V Xeon takes a different path through
       # the menus than a laptop does.
       - name: And detection runs without throwing
-        run: dist/HackintoshEFIBuilder.exe --check
+        run: dist/EFIBuilderEngine/EFIBuilderEngine.exe --check
 
       # SSDTTime is imported at runtime, so PyInstaller cannot see what it
       # imports. A missing module does not show until somebody answers yes to a
       # question, which is how it was found the first time. This answers it.
       - name: The vendored tools load inside the frozen build
-        run: dist/HackintoshEFIBuilder.exe --check-tools
+        run: dist/EFIBuilderEngine/EFIBuilderEngine.exe --check-tools
 
       - name: It can dump this runner's ACPI tables and compile against them
         run: |
           # the report dumps the tables beside itself; there is no flag for it,
           # and --acpi is ambiguous with --acpi-ids and --acpi-tables
-          dist/HackintoshEFIBuilder.exe --report machine.json
+          dist/EFIBuilderEngine/EFIBuilderEngine.exe --report machine.json
           if (-not (Test-Path machine.json)) { exit 1 }
           if (-not (Test-Path ACPI)) { Write-Error 'no ACPI tables were dumped'; exit 1 }
           Get-ChildItem ACPI | Select-Object -First 8 Name
@@ -55,7 +55,7 @@ jobs:
           # The machine is the fixture, not this runner: a Hyper-V Xeon answers
           # a different set of questions than a laptop does, and a fixed answer
           # string against whatever the runner happens to be is how this failed.
-          dist/HackintoshEFIBuilder.exe --machine tools/fixtures/no-hardware.json `
+          dist/EFIBuilderEngine/EFIBuilderEngine.exe --machine tools/fixtures/no-hardware.json `
             --acpi-tables ACPI --answers 2,10,3 --out acpi-smoke/EFI
           if (-not (Test-Path acpi-smoke/EFI/OC/config.plist)) { exit 1 }
           # the automatic set, against this runner's own tables. It asks nothing,
@@ -69,4 +69,4 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: windows-exe
-          path: dist/HackintoshEFIBuilder.exe
+          path: dist/EFIBuilderEngine

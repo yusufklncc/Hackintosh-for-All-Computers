@@ -38,10 +38,70 @@ import fetch_oc
 import ocgen
 
 EFI = Path('EFI')
+# The drivers OpenCore does not build. HfsPlus.efi lives in acidanthera's
+# OcBinaryData and ships on its own schedule, which is why an OpenCore bump
+# leaves it alone - and why it needs a step of its own or it never moves.
+BINARY_DATA = 'https://raw.githubusercontent.com/acidanthera/OcBinaryData/master'
+BINARY_LOCK = Path('vendor/ocbinarydata.lock')
 VENDOR = Path('vendor/opencore')
 # the boot files, and then whatever is already in these folders
 FIXED = ('BOOT/BOOTx64.efi', 'OC/OpenCore.efi')
 FOLDERS = ('OC/Drivers', 'OC/Tools')
+
+
+def binaries():
+    """Refresh the drivers that come from OcBinaryData, and record them.
+
+    Only the ones already here. Their repository states no licence at all, and
+    in this one the absence of a licence is not permission - so this updates
+    what is already shipped and writes down that nobody has said what may be
+    done with it, rather than quietly adding more."""
+    import hashlib
+    import urllib.error
+    import urllib.request
+
+    here = sorted(p for p in (EFI / 'OC' / 'Drivers').glob('Hfs*.efi'))
+    if not here:
+        return []
+    rows, moved = [], 0
+    for driver in here:
+        url = f'{BINARY_DATA}/Drivers/{driver.name}'
+        try:
+            with urllib.request.urlopen(url, timeout=60) as r:
+                incoming = r.read()
+        except urllib.error.URLError:
+            import shutil as _sh
+            import subprocess as _sub
+            if not _sh.which('curl'):
+                raise
+            got = _sub.run(['curl', '-sSL', '--max-time', '120', url],
+                           capture_output=True)
+            if got.returncode != 0 or not got.stdout:
+                sys.exit(f'could not read {url}')
+            incoming = got.stdout
+        before = hashlib.sha256(driver.read_bytes()).hexdigest()
+        after = hashlib.sha256(incoming).hexdigest()
+        if before != after:
+            driver.write_bytes(incoming)
+            moved += 1
+        rows.append({'file': f'OC/Drivers/{driver.name}', 'sha256': after})
+        print(f'  {"->  " if before != after else "same"}  '
+              f'OC/Drivers/{driver.name:<22} {before[:12]} '
+              f'{after[:12] if before != after else ""}')
+    ocgen.write_toml(BINARY_LOCK, {
+        'source': 'https://github.com/acidanthera/OcBinaryData',
+        'licence': 'none stated',
+        'driver': rows,
+    }, "# Drivers this repository ships that OpenCore does not build.\n"
+       "#\n"
+       "# Refreshed by tools/opencore.py alongside an OpenCore bump, because\n"
+       "# they ship on their own schedule and would otherwise never move.\n"
+       "#\n"
+       "# The project states no licence. That is recorded rather than read as\n"
+       "# permission: these files were already here before anybody looked, and\n"
+       "# this says so instead of pretending the question was settled.\n")
+    print(f'  {moved} of {len(rows)} moved -> {BINARY_LOCK}')
+    return rows
 
 
 def digest(path):
@@ -158,6 +218,8 @@ def main(argv=None):
         return 0
 
     apply(tag, release, changes)
+    print('\nthe drivers OpenCore does not build:')
+    binaries()
     print(f'\nvendored {tag}; regenerating every config against its Sample.plist')
     done = regenerate()
     sys.stdout.write(done.stdout[-2000:])

@@ -40,6 +40,13 @@ jobs:
           name: windows-exe
           path: dist
 
+      # the console program, named for what it is next to a window with the
+      # product name on it
+      # a folder now, so it ships as a zip like the others
+      - run: |
+          cd dist && zip -qr HackintoshEFIBuilder-console-win-x64.zip EFIBuilderEngine \
+            && rm -rf EFIBuilderEngine
+
       # Each package is a folder of two programs. A release carries files, so
       # each becomes one zip named for the system it runs on.
       - uses: actions/download-artifact@v4
@@ -52,7 +59,8 @@ jobs:
           cd packages
           for made in *-package; do
             system="${made%-package}"
-            chmod +x "$made"/HackintoshEFIBuilder* 2>/dev/null || true
+            chmod +x "$made"/EFIBuilderEngine/EFIBuilderEngine \
+                     "$made"/HackintoshEFIBuilder 2>/dev/null || true
             (cd "$made" && zip -qr "../../dist/HackintoshEFIBuilder-$system.zip" .)
             echo "  $system  $(du -sh "$made" | cut -f1)"
           done
@@ -63,17 +71,24 @@ jobs:
           tag_name: ${{ github.event.inputs.tag || github.ref_name }}
           files: |
             dist/*.zip
-            dist/HackintoshEFIBuilder.exe
+            dist/HackintoshEFIBuilder-console-win-x64.zip
           body: |
             **`HackintoshEFIBuilder-win-x64.zip`** is the easy path: unzip it and
-            run `HackintoshEFIBuilderShell.exe`. A window that reads your machine,
+            run `HackintoshEFIBuilder.exe`. A window that reads your machine,
             says what macOS will and will not drive in it, and writes the EFI
             folder. Nothing to install. The same package is there for
             `linux-x64` and `osx-arm64`.
 
-            **`HackintoshEFIBuilder.exe`** on its own is the console version of
-            the same thing, for anyone who prefers a terminal or is working over
-            one.
+            **`HackintoshEFIBuilder-console-win-x64.zip`** is the same builder
+            without a window, for anyone who prefers a terminal or is working
+            over one.
+
+            Everything ships as a folder rather than a single file. A one-file
+            build unpacks itself into a temporary directory on every run, which
+            is what Windows Defender flags as a trojan - it did, on a real
+            machine. Neither program is signed, so the first run may still need
+            "More info" then "Run anyway" on Windows, or an allow in System
+            Settings on macOS.
 
             The remaining two zips are the manual path. `EFI-base.zip` is the EFI folder;
             `configs.zip` holds one `config.plist` per supported machine.

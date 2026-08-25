@@ -1959,6 +1959,29 @@ def nvidia_by_family():
           window[1] and window[1][2] == 20, window)
 
 
+def what_the_two_programs_are_called():
+    """A folder of two programs has to say which one to open.
+
+    They were HackintoshEFIBuilder and HackintoshEFIBuilderShell, and the one
+    with the product name was the part nobody runs. The window carries the
+    name now; the engine is named for what it does."""
+    spec = Path('tools/pyinstaller.spec').read_text()
+    check('the engine is named for its job',
+          "name='EFIBuilderEngine'" in spec)
+    csproj = Path('gui/Shell.csproj').read_text()
+    check('and the window carries the product name',
+          '<AssemblyName>HackintoshEFIBuilder</AssemblyName>' in csproj)
+    check('the window looks for the engine under the name it is built with',
+          'EFIBuilderEngine' in Path('gui/Engine/Builder.cs').read_text())
+
+    # the avares authority is the assembly name; spelling it wrong loses the
+    # fonts silently, which is how this went wrong the first time
+    layout = Path('gui/App.axaml').read_text()
+    check('and the embedded fonts are addressed by that same name',
+          'avares://HackintoshEFIBuilder/Assets/Fonts' in layout
+          and 'HackintoshEFIBuilderShell' not in layout)
+
+
 def the_vendored_opencore():
     """One OpenCore release, whole, and runnable.
 
@@ -1989,6 +2012,19 @@ def the_vendored_opencore():
     import inventory
     check('the version reported is the one vendored',
           inventory.about()['opencore'] == versions[0])
+
+    # the drivers OpenCore does not build ship here too, and are recorded
+    lock = Path('vendor/ocbinarydata.lock')
+    check('the drivers from elsewhere are pinned', lock.exists())
+    if lock.exists():
+        recorded = ocgen.read_toml(lock)
+        check('by hash', all(len(d['sha256']) == 64 for d in recorded['driver']))
+        check('and their licence position is written down, not assumed',
+              recorded.get('licence') == 'none stated', recorded.get('licence'))
+        on_disk = {f"OC/Drivers/{p.name}" for p in
+                   Path('EFI/OC/Drivers').glob('Hfs*.efi')}
+        check('every one that ships is in the lock',
+              on_disk == {d['file'] for d in recorded['driver']}, sorted(on_disk))
 
     # the write-up of how to do this next time names the tools that do it. A
     # document that names a tool which does not exist is worse than none.
@@ -2173,7 +2209,8 @@ if __name__ == '__main__':
                     embedded_fonts, macos_registry, genuine_macs,
                     the_processor_bounds_it_too, graphics_and_the_range,
                     what_the_machine_calls_its_network, the_device_catalogue,
-                    nvidia_by_family, the_vendored_opencore,
+                    nvidia_by_family, what_the_two_programs_are_called,
+                    the_vendored_opencore,
                     the_tools_a_window_can_drive,
                     what_oclp_restores, the_about_page):
         print(f'\n{section.__name__}')

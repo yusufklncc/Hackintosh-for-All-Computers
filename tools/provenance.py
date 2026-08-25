@@ -225,6 +225,16 @@ def catalogue():
                     'published config and every build',
              gap='Only kexts vendored here. It reports and never reorders: the '
                  'order is a decision, and rewriting it would hide the mistake.'),
+        dict(area='Drivers OpenCore does not build', kind=NONE,
+             file='vendor/ocbinarydata.lock',
+             source='acidanthera/OcBinaryData, which states no licence',
+             tool='tools/opencore.py, alongside an OpenCore bump',
+             count=f'{rows_in("vendor/ocbinarydata.lock", "driver")} drivers',
+             covers='HfsPlus, which every EFI here needs to read a Mac volume, '
+                    'pinned by hash so a change is visible',
+             gap='The project states no licence at all, and here the absence '
+                 'of one is not permission. These files shipped before anybody '
+                 'looked; this records the question rather than settling it.'),
         dict(area='Third-party licences', kind=DERIVED, file='vendor/licences.toml',
              source="each project's own LICENSE file, read from GitHub",
              tool='tools/thirdparty.py --refresh',

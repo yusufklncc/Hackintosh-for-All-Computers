@@ -20,15 +20,22 @@ public sealed record Located(string Program, IReadOnlyList<string> Prefix, strin
 public static class Builder
 {
     static readonly string ExeName =
-        OperatingSystem.IsWindows() ? "HackintoshEFIBuilder.exe" : "HackintoshEFIBuilder";
+        OperatingSystem.IsWindows() ? "EFIBuilderEngine.exe" : "EFIBuilderEngine";
 
     /// <summary>Where the engine is, or null with a sentence saying where it was looked for.</summary>
     public static Located? Find(out string complaint)
     {
         var beside = AppContext.BaseDirectory;
-        var packaged = Path.Combine(beside, ExeName);
-        if (File.Exists(packaged))
+        // beside the window, or in the folder the engine ships as. It is a
+        // folder build now: a one-file build unpacked itself into a temporary
+        // directory on every run and Defender called that a trojan.
+        foreach (var packaged in new[]
+                 {
+                     Path.Combine(beside, ExeName),
+                     Path.Combine(beside, "EFIBuilderEngine", ExeName),
+                 })
         {
+            if (!File.Exists(packaged)) continue;
             complaint = "";
             return new Located(packaged, Array.Empty<string>(), "beside this window");
         }
