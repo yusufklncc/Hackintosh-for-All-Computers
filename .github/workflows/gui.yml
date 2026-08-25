@@ -122,11 +122,28 @@ jobs:
             shell-about.png
             out/${{ matrix.exe }}
 
-  # What a person on Windows actually downloads: the window and the engine in
-  # one folder. The window runs the engine rather than reimplementing it, so
-  # shipping one without the other ships nothing that works.
+  # What a person actually downloads: the window and the engine in one folder.
+  # The window runs the engine rather than reimplementing it, so shipping one
+  # without the other ships nothing that works.
   package:
-    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            rid: win-x64
+            shell_exe: HackintoshEFIBuilderShell.exe
+            engine_exe: HackintoshEFIBuilder.exe
+          - os: ubuntu-latest
+            rid: linux-x64
+            shell_exe: HackintoshEFIBuilderShell
+            engine_exe: HackintoshEFIBuilder
+          - os: macos-latest
+            rid: osx-arm64
+            shell_exe: HackintoshEFIBuilderShell
+            engine_exe: HackintoshEFIBuilder
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-dotnet@v4
@@ -137,13 +154,21 @@ jobs:
           python-version: '3.12'
       - run: pip install pyinstaller
 
+      - name: X server for the Linux run
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y xvfb
+
+      - name: The vendored tools are executable
+        if: runner.os != 'Windows'
+        run: chmod +x vendor/opencore/*/Utilities/*/* || true
+
       - name: The engine
         run: pyinstaller --clean --noconfirm --distpath package tools/pyinstaller.spec
 
       - name: The window, beside it
         run: >
           dotnet publish gui/Shell.csproj -c Release -o package
-          -r win-x64 --self-contained true
+          -r ${{ matrix.rid }} --self-contained true
           -p:PublishTrimmed=true -p:PublishSingleFile=true
           -p:EnableCompressionInSingleFile=true
 
@@ -154,26 +179,24 @@ jobs:
         shell: bash
         run: |
           cd package
-          ./HackintoshEFIBuilderShell.exe \
+          ${{ runner.os == 'Linux' && 'xvfb-run -a -s "-screen 0 1400x1000x24" ' || '' }}./${{ matrix.shell_exe }} \
             --machine ../tools/fixtures/thinkpad-e570.json --render "$PWD/shot.png" \
             | tee render.log
           grep -q 'engine: beside this window' render.log \
             || { echo 'it did not use the packaged engine'; cat render.log; exit 1; }
           test -s shot.png || { echo 'it drew nothing'; exit 1; }
-          rm -f render.log shot.png shot-dark.png shot-builder.png shot-report.png \
-                shot-kexts.png shot-about.png machine.json
+          rm -f render.log shot*.png machine.json described.json
           rm -rf EFI ACPI
 
-      # The window tells people this is slow. How slow is worth knowing, and
-      # worth noticing if it ever becomes slower.
       - name: How long reading a machine takes here
         shell: bash
         run: |
           cd package
           start=$(date +%s)
-          ./HackintoshEFIBuilder.exe --describe > described.json
+          ./${{ matrix.engine_exe }} --describe > described.json
+          echo "### ${{ matrix.os }}" >> $GITHUB_STEP_SUMMARY
           echo "describe took $(( $(date +%s) - start ))s" >> $GITHUB_STEP_SUMMARY
-          python -c "import json,sys; d=json.load(open('described.json')); \
+          python -c "import json; d=json.load(open('described.json')); \
             print('rows', len(d['rows']), 'read', d['read'])" \
             >> $GITHUB_STEP_SUMMARY
           rm -f described.json
@@ -181,11 +204,10 @@ jobs:
       - name: What it weighs
         shell: bash
         run: |
-          echo "### Windows package" >> $GITHUB_STEP_SUMMARY
           du -sh package >> $GITHUB_STEP_SUMMARY
           ls -la package | head -20 >> $GITHUB_STEP_SUMMARY
 
       - uses: actions/upload-artifact@v4
         with:
-          name: windows-package
+          name: ${{ matrix.rid }}-package
           path: package/

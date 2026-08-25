@@ -11,6 +11,7 @@ import argparse
 import json
 import os
 import sys
+import urllib.error
 import urllib.request
 import zipfile
 from pathlib import Path
@@ -19,10 +20,29 @@ API = 'https://api.github.com/repos/acidanthera/OpenCorePkg/releases'
 CACHE = Path(os.environ.get('OC_CACHE', '.oc-cache'))
 
 
+def _get(url):
+    """Read a URL, however this machine can.
+
+    urllib carries its own trust store and a network that inspects TLS refuses
+    it; curl uses the system's. Same fallback as the other fetchers here."""
+    try:
+        with urllib.request.urlopen(url, timeout=60) as r:
+            return r.read()
+    except urllib.error.URLError as first:
+        import shutil
+        import subprocess
+        if not shutil.which('curl'):
+            raise
+        got = subprocess.run(['curl', '-sSL', '--max-time', '300', url],
+                             capture_output=True)
+        if got.returncode != 0 or not got.stdout:
+            raise SystemExit(f'{first}\nand curl: {got.stderr.decode()[:200]}')
+        return got.stdout
+
+
 def resolve(version):
     url = f'{API}/latest' if version == 'latest' else f'{API}/tags/{version}'
-    with urllib.request.urlopen(url) as r:
-        rel = json.load(r)
+    rel = json.loads(_get(url))
     if 'tag_name' not in rel:
         sys.exit(f'no such OpenCore release: {version}')
     asset = next((a for a in rel['assets']
@@ -39,7 +59,7 @@ def fetch(version):
         dest.mkdir(parents=True, exist_ok=True)
         zpath = CACHE / f'OpenCore-{tag}-RELEASE.zip'
         if not zpath.exists():
-            urllib.request.urlretrieve(url, zpath)
+            zpath.write_bytes(_get(url))
         with zipfile.ZipFile(zpath) as z:
             z.extractall(dest)
         for tool in ('ocvalidate/ocvalidate', 'macserial/macserial'):
