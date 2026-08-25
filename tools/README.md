@@ -77,6 +77,8 @@ and identity falls back to a placeholder, each with a warning.
     python3 tools/fetch_oc.py 1.0.5           # cache another OpenCore release (network)
     python3 tools/recovery.py --list          # what Apple will serve
     python3 tools/recovery.py --macos 12.7.6 --out /Volumes/USB   # fetch it (network)
+    python3 tools/usb.py --list               # removable disks, never the boot one
+    python3 tools/usb.py --place /Volumes/USB --efi build/EFI --recovery .
 
 Both `extract` and `verify` take an optional Sample.plist path and otherwise use
 the vendored one. `fetch_oc.py` is how you move to a different OpenCore version:
@@ -132,6 +134,41 @@ attempt before it starts.
 This is the only thing in the repository that opens a connection on a person's
 behalf, and it does it when asked and not before. The About page says so rather
 than claiming the program never reaches the network.
+
+## The stick
+
+`usb.py` is the only part of this repository that can destroy something, so it
+is the one written to make that hard:
+
+    python3 tools/usb.py --list
+    python3 tools/usb.py --place /Volumes/USB --efi build/EFI --recovery .
+    python3 tools/usb.py --prepare disk4        # erases it
+
+Four rules, in the order they matter:
+
+  * only removable, external, physical disks are ever listed. An internal drive
+    is not behind a warning, it is not in the list,
+  * the disk this computer booted from is taken out by its own identifier -
+    `diskutil info /` on macOS, `findmnt` plus `lsblk` on Linux, the system
+    drive's disk number on Windows. Not "the first one", not "the internal one",
+  * the list is the gate. `prepare()` refuses any device the list did not
+    offer, so naming one that was never shown does nothing,
+  * and it reads the list again at the moment of erasing, because a stick can
+    be pulled out and another pushed in between being shown one and pressing.
+
+The console asks for the disk's own name to be typed, and the window does the
+same. Neither is what stops the wrong disk - the list is. The typing is so
+nobody is surprised.
+
+Copying is separate and destroys nothing, which is why it is a different flag:
+a stick that is already FAT32 needs no erasing. `--place` writes `EFI/` and
+`com.apple.recovery.boot/` side by side at the root and then says whether
+`EFI/BOOT/BOOTx64.efi` is there, because a stick without it does not boot
+whatever else was copied.
+
+Erasing works from here on macOS. On Linux it needs root and on Windows an
+administrator, and the engine has neither: it prints the exact `sgdisk`/`mkfs`
+or `diskpart` lines to run instead of failing halfway through a disk.
 
 ## The guided path
 

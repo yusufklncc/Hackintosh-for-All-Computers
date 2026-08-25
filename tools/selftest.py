@@ -2217,6 +2217,96 @@ def the_recovery_it_can_fetch():
           'about.Network' in drawn)
 
 
+def the_stick_it_writes_to():
+    """The only part of this that can destroy something.
+
+    Everything else writes into a folder. This erases a whole disk, so what is
+    checked here is the refusing: that the list is removable disks only, that
+    the disk this computer booted from is not in it, and that a device the list
+    did not offer cannot be erased by naming it."""
+    import usb
+
+    document = usb.document()
+    check('the stick list says which system it read', document['platform'])
+    check('and names what it booted from, or says it could not',
+          'booted' in document)
+    check('and whether it can erase here at all', 'erasable' in document)
+    check('the recovery folder is the one OpenCore looks for',
+          document['recovery'] == 'com.apple.recovery.boot')
+
+    booted = document['booted']
+    check('the disk this computer booted from is not offered',
+          not booted or all(s['device'] != booted for s in document['sticks']),
+          booted)
+    for stick in document['sticks']:
+        check(f"{stick['device']} is offered as removable", stick['removable'],
+              stick)
+
+    # naming a disk nobody was offered does not erase it. This is the check
+    # that matters: the list is the gate, not the question in front of it.
+    for made_up in ('disk999', '/dev/disk999', 'sda', '0'):
+        if any(s['device'] == made_up.removeprefix('/dev/')
+               for s in document['sticks']):
+            continue
+        mount, complaint = usb.prepare(made_up)
+        check(f'{made_up} is refused, not erased', mount is None and complaint,
+              complaint)
+
+    with tempfile.TemporaryDirectory() as where:
+        root = Path(where)
+        # an EFI folder is one with a loader in it, not one with the right name
+        (root / 'notanefi').mkdir()
+        written, complaint = usb.place(root / 'stick', efi=root / 'notanefi')
+        check('a volume that is not there is refused', complaint)
+        (root / 'stick').mkdir()
+        written, complaint = usb.place(root / 'stick', efi=root / 'notanefi')
+        check('a folder with no BOOTx64.efi is not an EFI folder', complaint)
+        check('and nothing was copied when it complained', not written)
+
+        loader = root / 'EFI' / 'BOOT'
+        loader.mkdir(parents=True)
+        (loader / 'BOOTx64.efi').write_bytes(b'not really')
+        image = root / 'com.apple.recovery.boot'
+        image.mkdir()
+        (image / 'BaseSystem.dmg').write_bytes(b'not really either')
+        written, complaint = usb.place(root / 'stick', efi=root / 'EFI',
+                                       recovery=root)
+        check('both folders land at the root', not complaint
+              and [n for n, _ in written] == ['EFI', 'com.apple.recovery.boot'],
+              complaint or written)
+        check('the recovery is beside the EFI, not inside it',
+              (root / 'stick' / 'com.apple.recovery.boot').is_dir()
+              and not (root / 'stick' / 'EFI' / 'com.apple.recovery.boot').exists())
+        check('and it says whether what is there would boot',
+              usb.bootable(root / 'stick'))
+        check('a folder with no loader would not',
+              not usb.bootable(root / 'notanefi'))
+
+        # a recovery folder with nothing in it is not a recovery
+        (root / 'empty').mkdir()
+        _, complaint = usb.place(root / 'stick', recovery=root / 'empty')
+        check('an installer that is not there is refused', complaint)
+
+    # the builder offers all three, and does none of it itself
+    source = Path('tools/setup.py').read_text()
+    for flag in ('--usb-list', '--usb-place', '--usb-prepare'):
+        check(f'the builder offers {flag}', f"'{flag}'" in source)
+    check('and hands the work to the one tool that does it',
+          'usb.main(' in source and 'usb.document()' in source)
+
+    # the window
+    pane = Path('gui/Views/StickView.axaml.cs')
+    check('the window has a pane for it', pane.exists())
+    if pane.exists():
+        drawn = pane.read_text()
+        check('which reads the list from the engine', 'Inventory.Sticks' in drawn)
+        check('and asks for the disk by name before erasing',
+              'Typed.Text?.Trim() == s.Device' in drawn)
+    pass_ = Path('gui/App.axaml.cs').read_text()
+    check('the unattended pass lists and erases nothing',
+          'ListSticks' in pass_ and 'usb-prepare' not in pass_)
+
+
 def the_tools_a_window_can_drive():
     """Both vendored tools reach a person, whichever surface is attached.
 
@@ -2390,6 +2480,7 @@ if __name__ == '__main__':
                     the_vendored_opencore,
                     the_tools_a_window_can_drive,
                     the_recovery_it_can_fetch,
+                    the_stick_it_writes_to,
                     what_oclp_restores, the_about_page,
                     what_the_readme_shows):
         print(f'\n{section.__name__}')

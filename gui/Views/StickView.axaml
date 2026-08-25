@@ -1,0 +1,94 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:v="clr-namespace:Shell.Views"
+             xmlns:e="clr-namespace:Shell.Engine"
+             x:Class="Shell.Views.StickView"
+             x:DataType="v:StickView">
+  <ScrollViewer>
+    <StackPanel Margin="28,24" Spacing="20" MaxWidth="760" HorizontalAlignment="Left">
+      <StackPanel Spacing="8">
+        <TextBlock Classes="eyebrow" Text="THE USB STICK" />
+        <TextBlock FontSize="15" TextWrapping="Wrap" Foreground="{DynamicResource Ink}"
+                   Text="Put the EFI and the installer on it." />
+        <TextBlock FontSize="13.5" TextWrapping="Wrap" Foreground="{DynamicResource Muted}"
+                   Text="Both folders go at the root of the stick, side by side - the recovery does not go inside the EFI folder, because OpenCore looks for it beside itself. Only removable disks are listed here, and never the one this computer booted from." />
+      </StackPanel>
+
+      <Border Classes="panel">
+        <StackPanel Spacing="14">
+          <StackPanel Spacing="6">
+            <Grid ColumnDefinitions="*,Auto">
+              <TextBlock Grid.Column="0" Classes="eyebrow" Text="WHICH STICK"
+                         VerticalAlignment="Center" />
+              <Button Grid.Column="1" Name="Again" Content="Look again" />
+            </Grid>
+            <ComboBox Name="Which" HorizontalAlignment="Stretch"
+                      x:DataType="e:Stick">
+              <ComboBox.ItemTemplate>
+                <DataTemplate x:DataType="e:Stick">
+                  <Grid ColumnDefinitions="260,*,Auto" ColumnSpacing="10">
+                    <TextBlock Grid.Column="0" Text="{Binding Titled}" />
+                    <TextBlock Grid.Column="1" Text="{Binding Where}"
+                               Classes="mono" Foreground="{DynamicResource Faint}"
+                               VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="2" Text="{Binding Device}"
+                               Classes="mono" Foreground="{DynamicResource Faint}"
+                               VerticalAlignment="Center" />
+                  </Grid>
+                </DataTemplate>
+              </ComboBox.ItemTemplate>
+            </ComboBox>
+            <TextBlock Name="Found" FontSize="12" TextWrapping="Wrap"
+                       Foreground="{DynamicResource Faint}" />
+          </StackPanel>
+
+          <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+            <TextBlock Grid.Column="0" Classes="eyebrow" Text="EFI"
+                       VerticalAlignment="Center" Width="70" />
+            <TextBlock Grid.Column="1" Name="EfiFrom" Classes="mono"
+                       VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+            <Button Grid.Column="2" Name="PickEfi" Content="Change…" />
+          </Grid>
+          <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+            <TextBlock Grid.Column="0" Classes="eyebrow" Text="INSTALLER"
+                       VerticalAlignment="Center" Width="70" />
+            <TextBlock Grid.Column="1" Name="RecoveryFrom" Classes="mono"
+                       VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+            <Button Grid.Column="2" Name="PickRecovery" Content="Change…" />
+          </Grid>
+
+          <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Left">
+            <Button Name="Copy" Content="Copy onto the stick" Classes="accent" />
+            <Button Name="Open" Content="Show the stick" IsVisible="False" />
+          </StackPanel>
+        </StackPanel>
+      </Border>
+
+      <!-- Erasing is the only thing here that destroys something, so it is
+           its own panel, folded away, and asks for the disk by name. -->
+      <Expander Name="EraseBox" Header="Erase and format it first">
+        <StackPanel Spacing="12" Margin="0,8,0,0">
+          <TextBlock Name="EraseWhat" FontSize="13.5" TextWrapping="Wrap"
+                     Foreground="{DynamicResource Ink}" />
+          <TextBlock Name="EraseHow" FontSize="12.5" TextWrapping="Wrap"
+                     Foreground="{DynamicResource Muted}" />
+          <StackPanel Name="EraseAsk" Spacing="8">
+            <TextBox Name="Typed" Watermark="type the disk name to confirm"
+                     HorizontalAlignment="Left" Width="260" />
+            <Button Name="Erase" Content="Erase it" IsEnabled="False" />
+          </StackPanel>
+        </StackPanel>
+      </Expander>
+
+      <Border Name="Result" Classes="panel" IsVisible="False">
+        <StackPanel Spacing="8">
+          <TextBlock Name="ResultTitle" FontSize="15" FontWeight="SemiBold"
+                     Foreground="{DynamicResource Ink}" />
+          <TextBlock Name="ResultText" Classes="mono" TextWrapping="Wrap" />
+          <TextBlock Name="ResultNext" FontSize="12.5" TextWrapping="Wrap"
+                     Foreground="{DynamicResource Muted}" IsVisible="False" />
+        </StackPanel>
+      </Border>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

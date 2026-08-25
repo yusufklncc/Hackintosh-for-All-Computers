@@ -81,6 +81,11 @@ open it.
 beside it. That is the file to carry to the computer you build on when the USB
 is being prepared somewhere else.
 
+**USB stick** finds the removable disks, formats one if you want, and copies
+both folders onto it in the right places. It lists removable disks only and
+never the one the computer booted from, and it asks for the disk by name before
+erasing anything.
+
 **Recovery** puts Apple's own installer on the stick beside the EFI - about
 700 MB that boots, connects, and downloads the rest of macOS itself. It is the
 answer when a whole image will not fit: the FAT32 partition an EFI lives on
@@ -328,6 +333,38 @@ To check if your hardware is incompatible, I leave links below.
 - Copy that file into `EFI/OC/` and rename it to `config.plist`.
 - Copy the `EFI` folder to the EFI partition.
 - Now you can boot from USB.
+
+<br>
+
+#### With the recovery installer instead of an image
+
+If you took the recovery from the app's Recovery tab, there is no macOS image
+to write and the stick is a plain one. Format it as **GUID Partition Map** with
+a single **MS-DOS (FAT)** partition - on macOS that is Disk Utility with
+*View → Show All Devices*, selecting the drive itself rather than the volume
+under it, or:
+
+```
+diskutil list                                        # find the disk number
+diskutil eraseDisk MS-DOS USB GPT /dev/diskN         # N is that number
+```
+
+Then put both folders at the root of it, side by side:
+
+```
+/Volumes/USB/
+├── EFI/                       the folder the builder wrote
+└── com.apple.recovery.boot/   BaseSystem.dmg + BaseSystem.chunklist
+```
+
+That is the whole stick. Nothing goes inside `EFI` that was not already there,
+and the recovery folder is not inside it either - OpenCore looks for that name
+beside itself. Boot from the USB and the OpenCore picker lists **macOS Base
+System**; pick it, and the installer downloads the rest of macOS itself.
+
+A 2 GB stick is enough: the recovery is under a gigabyte and the EFI is about
+7 MB. The machine needs Ethernet or a Wi-Fi card macOS already drives while it
+installs, because that download happens on the machine being converted.
 
 <br>
 

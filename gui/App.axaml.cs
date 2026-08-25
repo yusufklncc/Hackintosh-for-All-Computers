@@ -60,8 +60,8 @@ public partial class App : Application
                 try
                 {
                     Console.WriteLine("drive: " + await window.DriveBuilder());
-                    foreach (var pane in new[] { "report", "recovery", "devices",
-                                                 "kexts", "about" })
+                    foreach (var pane in new[] { "report", "recovery", "stick",
+                                                 "devices", "kexts", "about" })
                     {
                         await window.Show(pane);
                         // the report pane's whole job is behind a button, so
@@ -73,6 +73,11 @@ public partial class App : Application
                         // was up - the pane's own job is to offer the list.
                         if (pane == "recovery")
                             Console.WriteLine("recovery: " + await window.ListRecoveries());
+                        // listed, not written to. A build machine has no stick
+                        // in it, and the interesting thing is that the pane
+                        // says so rather than offering the disk it booted from.
+                        if (pane == "stick")
+                            Console.WriteLine("stick: " + await window.ListSticks());
                         // one turn of the loop, so what was just loaded is laid
                         // out before its picture is taken
                         await Task.Delay(1200);

@@ -29,3 +29,9 @@ __pycache__/
 
 # a published build dropped in for trying by hand
 gui/dist/
+
+# The window's build output. `dotnet build` writes it here, and an EFI or a
+# downloaded recovery lands beside the binary - a git add -A once swept a
+# 916 MB BaseSystem.dmg into a commit.
+gui/bin/
+gui/obj/

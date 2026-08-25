@@ -101,6 +101,13 @@ jobs:
             render.log \
             || { echo 'the recovery pane listed nothing'; cat render.log; exit 1; }
 
+          # the stick pane on a machine with no stick in it. Zero is the right
+          # answer here and the pane has to reach it rather than throw - and
+          # nothing in this pass erases anything.
+          grep -qE 'stick: [0-9]+ sticks, erasable=(True|False), into com.apple.recovery.boot' \
+            render.log \
+            || { echo 'the stick pane did not report'; cat render.log; exit 1; }
+
       # A font that failed to load falls back to the system's, and the window
       # still looks reasonable. That is the whole problem: it has to be checked,
       # not eyeballed.
