@@ -48,7 +48,15 @@ public partial class BuilderView : UserControl
         while (!ended.Task.IsCompleted)
         {
             if (DateTime.UtcNow > deadline)
-                return "gave up waiting, last state: " + State();
+            {
+                // the last thing the engine said, because a count of lines is
+                // not evidence and guessing from one wastes a build each time
+                var tail = Transcript.Children.OfType<TextBlock>()
+                    .TakeLast(8).Select(t => t.Text ?? string.Join("", t.Inlines!
+                        .OfType<Run>().Select(r => r.Text)));
+                return "gave up waiting, last state: " + State()
+                     + "\n  " + string.Join("\n  ", tail);
+            }
             if (State() != last)
             {
                 last = State();

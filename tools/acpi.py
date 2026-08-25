@@ -241,7 +241,14 @@ def dump(work, into):
     work = prepare(work)
     module = load(work)
     ssdt = module.SSDT()
-    out = ssdt.d.dump_tables(str(Path(into).resolve()))
+    # the dumper asks too - "press [enter]" on a table it could not read - and
+    # a window has no stdin to answer with. run() covers its own prompts and
+    # this one was left reading a closed pipe.
+    ssdt.u.grab = _auto_grab
+    try:
+        out = ssdt.d.dump_tables(str(Path(into).resolve()))
+    except _Unattended as exc:
+        return None, f'the tables could not be dumped without asking: {exc}' 
     return (Path(out) if out else None), ('' if out else 'nothing was dumped')
 
 
