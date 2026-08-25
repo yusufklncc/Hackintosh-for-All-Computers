@@ -62,10 +62,13 @@ def fetch(version):
             zpath.write_bytes(_get(url))
         with zipfile.ZipFile(zpath) as z:
             z.extractall(dest)
-        for tool in ('ocvalidate/ocvalidate', 'macserial/macserial'):
-            p = dest / 'Utilities' / tool
-            if p.exists():
-                p.chmod(0o755)
+        # every build of them, not only the one with no extension. The Linux
+        # ones came out of the zip unexecutable, were vendored that way, and
+        # the build that shells out to them stopped dead.
+        for tool in ('ocvalidate', 'macserial'):
+            for built in (dest / 'Utilities' / tool).glob(f'{tool}*'):
+                if built.is_file() and built.suffix != '.exe':
+                    built.chmod(0o755)
     return tag, dest
 
 

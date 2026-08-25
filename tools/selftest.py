@@ -1959,6 +1959,38 @@ def nvidia_by_family():
           window[1] and window[1][2] == 20, window)
 
 
+def the_vendored_opencore():
+    """One OpenCore release, whole, and runnable.
+
+    Everything a build rests on comes out of one release, so half an update is
+    worse than none. And a program has to be executable: git records the bit,
+    the release zip does not set it on the Linux builds, and a build that
+    shells out to an unrunnable ocvalidate stops with nothing to read."""
+    import subprocess as _sub
+
+    versions = sorted(p.name for p in Path('vendor/opencore').iterdir() if p.is_dir())
+    check('exactly one version is vendored', len(versions) == 1, versions)
+    here = Path('vendor/opencore') / versions[0]
+    check('with the sample every config is layered onto',
+          (here / 'Sample.plist').exists())
+
+    listed = _sub.run(['git', 'ls-files', '-s', str(here)],
+                      capture_output=True, text=True).stdout.splitlines()
+    programs = [l for l in listed
+                if any(f'/{t}' in l for t in ('ocvalidate', 'macserial'))
+                and not l.endswith(('.md', '.exe'))]
+    check('both tools are vendored for every system', len(programs) >= 4,
+          len(programs))
+    unrunnable = [l.split('\t')[-1] for l in programs if not l.startswith('100755')]
+    check('and every one of them is recorded executable', not unrunnable, unrunnable)
+
+    # the version the About page shows is this directory's name, so a stale
+    # number cannot survive an update
+    import inventory
+    check('the version reported is the one vendored',
+          inventory.about()['opencore'] == versions[0])
+
+
 def the_tools_a_window_can_drive():
     """Both vendored tools reach a person, whichever surface is attached.
 
@@ -2128,7 +2160,8 @@ if __name__ == '__main__':
                     embedded_fonts, macos_registry, genuine_macs,
                     the_processor_bounds_it_too, graphics_and_the_range,
                     what_the_machine_calls_its_network, the_device_catalogue,
-                    nvidia_by_family, the_tools_a_window_can_drive,
+                    nvidia_by_family, the_vendored_opencore,
+                    the_tools_a_window_can_drive,
                     what_oclp_restores, the_about_page):
         print(f'\n{section.__name__}')
         section()

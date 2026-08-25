@@ -103,13 +103,21 @@ public sealed class Session
                         Said?.Invoke(new[] { new TextSpan("bad", Text(root, "message") ?? "") });
                         break;
                     case "done":
+                        _finished = true;
                         Finished?.Invoke(root.GetProperty("rc").GetInt32(), built);
                         break;
                 }
             }
         }
         await _process.WaitForExitAsync();
+        // A protocol run ends with a "done" line. If the engine died before
+        // writing one - a traceback, a killed subprocess - nobody was told,
+        // and a front end waiting for that line waits for ever.
+        if (!_finished)
+            Finished?.Invoke(_process.ExitCode == 0 ? 1 : _process.ExitCode, built);
     }
+
+    bool _finished;
 
     /// <summary>Answer the question that is open, with what a person would have typed.
     ///

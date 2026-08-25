@@ -94,8 +94,14 @@ def apply(version, release, changes):
         target = into / 'Utilities' / tool
         target.mkdir(parents=True, exist_ok=True)
         for built in (release / 'Utilities' / tool).iterdir():
-            if built.is_file():
-                shutil.copy2(built, target / built.name)
+            if not built.is_file():
+                continue
+            copied = target / built.name
+            shutil.copy2(built, copied)
+            # a program has to be runnable wherever it came from. Git records
+            # the bit and a missing one is not visible until the build stops.
+            if copied.suffix != '.exe' and copied.name.startswith(tool):
+                copied.chmod(0o755)
     # The sample decides what every config is layered onto, and the newest
     # vendored one is the one a build picks. Two of them would mean the answer
     # depends on which sorts last, which is not a thing anybody should have to
