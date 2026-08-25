@@ -160,6 +160,19 @@ The console asks for the disk's own name to be typed, and the window does the
 same. Neither is what stops the wrong disk - the list is. The typing is so
 nobody is surprised.
 
+Whether a stick has to be formatted at all is answered from what is on it, not
+from it being a USB stick. `--list` says `ready` or `format` per disk and why:
+
+    ready   FAT32 under GPT, nothing to erase
+    ready   FAT32, but the scheme is FDisk_partition_scheme rather than GPT
+    format  this holds APFS, and OpenCore boots from a FAT32 partition
+    format  the FAT32 partition on it is not mounted
+
+A FAT32 stick under MBR boots on most firmware, so the scheme is a remark and
+not a refusal; a stick with no FAT32 on it cannot be written to at all. The
+window picks the ready one when there is one, and opens the erase panel when
+there is not.
+
 Copying is separate and destroys nothing, which is why it is a different flag:
 a stick that is already FAT32 needs no erasing. `--place` writes `EFI/` and
 `com.apple.recovery.boot/` side by side at the root and then says whether

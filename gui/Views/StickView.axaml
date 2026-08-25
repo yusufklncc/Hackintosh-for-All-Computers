@@ -28,7 +28,7 @@
                 <DataTemplate x:DataType="e:Stick">
                   <Grid ColumnDefinitions="260,*,Auto" ColumnSpacing="10">
                     <TextBlock Grid.Column="0" Text="{Binding Titled}" />
-                    <TextBlock Grid.Column="1" Text="{Binding Where}"
+                    <TextBlock Grid.Column="1" Text="{Binding State}"
                                Classes="mono" Foreground="{DynamicResource Faint}"
                                VerticalAlignment="Center" />
                     <TextBlock Grid.Column="2" Text="{Binding Device}"
@@ -38,6 +38,17 @@
                 </DataTemplate>
               </ComboBox.ItemTemplate>
             </ComboBox>
+            <!-- the answer to "do I need to format this?", which is the
+                 question a stick actually raises -->
+            <Border Name="VerdictBox" CornerRadius="6" Padding="12,10"
+                    IsVisible="False">
+              <StackPanel Spacing="4">
+                <TextBlock Name="VerdictWhat" FontSize="13.5" FontWeight="SemiBold"
+                           TextWrapping="Wrap" />
+                <TextBlock Name="VerdictWhy" FontSize="12.5" TextWrapping="Wrap"
+                           Foreground="{DynamicResource Muted}" />
+              </StackPanel>
+            </Border>
             <TextBlock Name="Found" FontSize="12" TextWrapping="Wrap"
                        Foreground="{DynamicResource Faint}" />
           </StackPanel>

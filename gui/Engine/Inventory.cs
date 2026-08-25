@@ -123,9 +123,17 @@ public sealed class Stick
     [JsonPropertyName("size")] public string Size { get; set; } = "";
     [JsonPropertyName("bus")] public string Bus { get; set; } = "";
     [JsonPropertyName("mounted")] public List<string> Mounted { get; set; } = new();
+    [JsonPropertyName("scheme")] public string Scheme { get; set; } = "";
+    // whether it can be copied to as it stands, where to, and why. The engine
+    // decides: "is this a USB stick" is not the question, "is this FAT32" is.
+    [JsonPropertyName("ready")] public bool Ready { get; set; }
+    [JsonPropertyName("write_to")] public string WriteTo { get; set; } = "";
+    [JsonPropertyName("why")] public string Why { get; set; } = "";
 
     public string Titled => $"{Name} · {Size}".Trim();
-    public string Where => Mounted.Count > 0 ? Mounted[0] : "";
+    public string Where => WriteTo.Length > 0 ? WriteTo
+                         : Mounted.Count > 0 ? Mounted[0] : "";
+    public string State => Ready ? "ready" : "needs formatting";
 }
 
 public sealed class StickList

@@ -112,6 +112,7 @@ def _macos_sticks():
         # they are what stops a Thunderbolt drive somebody works off
         if about.get('Internal'):
             continue
+        scheme, volumes = _macos_layout(device)
         out.append({
             'device': device,
             'name': (about.get('MediaName') or '').strip() or 'unnamed',
@@ -120,30 +121,57 @@ def _macos_sticks():
             'removable': bool(about.get('Removable')
                               or about.get('RemovableMediaOrExternalDevice')
                               or about.get('Ejectable')),
-            'mounted': _macos_mounts(device),
+            'scheme': scheme,
+            'volumes': volumes,
+            'mounted': [v['mount'] for v in volumes if v['mount']],
         })
     return out
 
 
-def _macos_mounts(device):
+def _macos_layout(device):
+    """(scheme, volumes) for one whole disk.
+
+    The scheme comes off the whole disk and the filesystem off each partition,
+    because "it is a USB stick" says nothing about either: a stick out of a
+    camera is FAT32 under MBR and one out of a Mac is APFS under GPT."""
     got = _run('diskutil', 'list', '-plist', f'/dev/{device}')
     if not got or got.returncode != 0:
-        return []
+        return '', []
     try:
         listed = plistlib.loads(got.stdout.encode())
     except Exception:                              # noqa: BLE001
-        return []
-    where = []
+        return '', []
+    scheme, volumes = '', []
     for disk in listed.get('AllDisksAndPartitions', []):
+        if disk.get('DeviceIdentifier') != device:
+            continue
+        scheme = disk.get('Content') or ''
         for part in disk.get('Partitions', []) or []:
-            if part.get('MountPoint'):
-                where.append(part['MountPoint'])
-    return where
+            about = _run('diskutil', 'info', '-plist',
+                         f"/dev/{part['DeviceIdentifier']}")
+            kind, named = '', ''
+            if about and about.returncode == 0:
+                try:
+                    read = plistlib.loads(about.stdout.encode())
+                    kind = read.get('FilesystemType') or ''
+                    named = read.get('FilesystemName') or ''
+                except Exception:                  # noqa: BLE001
+                    pass
+            volumes.append({
+                'name': part.get('VolumeName') or '',
+                'fs': kind, 'called': named,
+                'mount': part.get('MountPoint') or '',
+            })
+    return scheme, volumes
+
+
+def _macos_mounts(device):
+    return [v['mount'] for v in _macos_layout(device)[1] if v['mount']]
 
 
 def _linux_sticks():
     got = _run('lsblk', '-J', '-b', '-o',
-               'NAME,SIZE,RM,TRAN,MODEL,TYPE,MOUNTPOINT')
+               'NAME,SIZE,RM,TRAN,MODEL,TYPE,MOUNTPOINT,FSTYPE,PTTYPE,LABEL')
     if not got or got.returncode != 0:
         return []
     try:
@@ -157,17 +185,23 @@ def _linux_sticks():
         removable = bool(disk.get('rm')) or disk.get('tran') == 'usb'
         if not removable:
             continue
-        mounted = [p['mountpoint'] for p in disk.get('children', []) or []
-                   if p.get('mountpoint')]
-        if disk.get('mountpoint'):
-            mounted.append(disk['mountpoint'])
+        volumes = [{'name': p.get('label') or '', 'fs': p.get('fstype') or '',
+                    'called': p.get('fstype') or '',
+                    'mount': p.get('mountpoint') or ''}
+                   for p in disk.get('children', []) or []]
+        if not volumes and disk.get('fstype'):     # formatted with no table
+            volumes = [{'name': disk.get('label') or '', 'fs': disk['fstype'],
+                        'called': disk['fstype'],
+                        'mount': disk.get('mountpoint') or ''}]
         out.append({
             'device': disk['name'],
             'name': (disk.get('model') or '').strip() or 'unnamed',
             'bytes': int(disk.get('size') or 0),
             'bus': disk.get('tran') or '',
             'removable': removable,
-            'mounted': mounted,
+            'scheme': disk.get('pttype') or '',
+            'volumes': volumes,
+            'mounted': [v['mount'] for v in volumes if v['mount']],
         })
     return out
 
@@ -175,12 +209,17 @@ def _linux_sticks():
 def _windows_sticks():
     script = ("Get-Disk | Where-Object BusType -eq 'USB' | "
               "ForEach-Object { $d = $_; "
-              "$m = (Get-Partition -DiskNumber $d.Number -ErrorAction SilentlyContinue "
-              "| Where-Object DriveLetter | ForEach-Object { \"$($_.DriveLetter):\\\" }) "
-              "-join ','; "
+              "$v = @(Get-Partition -DiskNumber $d.Number -ErrorAction SilentlyContinue "
+              "| Where-Object DriveLetter | ForEach-Object { "
+              "$vol = Get-Volume -DriveLetter $_.DriveLetter "
+              "-ErrorAction SilentlyContinue; "
+              "[pscustomobject]@{ name = $vol.FileSystemLabel; "
+              "fs = $vol.FileSystem; called = $vol.FileSystem; "
+              "mount = \"$($_.DriveLetter):\\\" } }); "
               "[pscustomobject]@{ device = \"$($d.Number)\"; "
               "name = $d.FriendlyName; bytes = $d.Size; bus = 'USB'; "
-              "mounted = $m } } | ConvertTo-Json -AsArray")
+              "scheme = \"$($d.PartitionStyle)\"; "
+              "volumes = $v } } | ConvertTo-Json -Depth 4 -AsArray")
     got = _run('powershell', '-NoProfile', '-Command', script)
     if not got or got.returncode != 0:
         return []
@@ -190,15 +229,56 @@ def _windows_sticks():
         return []
     out = []
     for disk in listed:
+        volumes = [{'name': v.get('name') or '', 'fs': (v.get('fs') or '').lower(),
+                    'called': v.get('called') or '', 'mount': v.get('mount') or ''}
+                   for v in (disk.get('volumes') or [])]
         out.append({
             'device': str(disk.get('device')),
             'name': (disk.get('name') or '').strip() or 'unnamed',
             'bytes': int(disk.get('bytes') or 0),
             'bus': 'USB',
             'removable': True,
-            'mounted': [m for m in (disk.get('mounted') or '').split(',') if m],
+            'scheme': disk.get('scheme') or '',
+            'volumes': volumes,
+            'mounted': [v['mount'] for v in volumes if v['mount']],
         })
     return out
+
+
+# What FAT32 is called by the three things that report it. OpenCore's loader
+# lives on a FAT partition; nothing else on a stick can hold it.
+FAT = {'msdos', 'vfat', 'fat32', 'fat'}
+# and the scheme the guide expects. A FAT32 stick under MBR boots on most
+# firmware, so this is a remark rather than a refusal.
+GPT = {'guid_partition_scheme', 'gpt'}
+
+
+def verdict(stick):
+    """Whether this stick can be written to as it stands, and why.
+
+    The question people actually have is "do I need to format this?", and the
+    answer is not "it is a USB stick". A stick out of a camera is FAT32 under
+    MBR; one out of a Mac is APFS under GPT; a new one is exFAT. Only the first
+    can be copied to without erasing anything."""
+    fat = [v for v in stick.get('volumes', [])
+           if (v.get('fs') or '').lower() in FAT]
+    gpt = (stick.get('scheme') or '').lower() in GPT
+    named = ', '.join(sorted({(v.get('called') or v.get('fs') or 'unformatted')
+                              for v in stick.get('volumes', [])})) or 'nothing'
+
+    if not fat:
+        return False, '', (f'this holds {named}, and OpenCore boots from a FAT32 '
+                           f'partition. It has to be erased and formatted first.')
+    mounted = [v for v in fat if v.get('mount')]
+    if not mounted:
+        return False, '', ('the FAT32 partition on it is not mounted, so there is '
+                           'nowhere to copy to. Mount it, or format the stick.')
+    where = mounted[0]['mount']
+    if gpt:
+        return True, where, 'FAT32 under GPT: ready as it is, nothing to erase.'
+    return True, where, (f"FAT32, so this can be written to - though the "
+                         f"partition scheme is {stick.get('scheme') or 'unknown'} "
+                         f"rather than GPT, which is what the guide expects.")
 
 
 def sticks():
@@ -218,6 +298,7 @@ def sticks():
         if booted and stick['device'] == booted:
             continue
         stick['size'] = _sizeof(stick['bytes'])
+        stick['ready'], stick['write_to'], stick['why'] = verdict(stick)
         out.append(stick)
     return sorted(out, key=lambda s: s['device'])
 
@@ -409,10 +490,12 @@ def main(argv=None):
               f'never the one this computer booted from.{RESET}')
         return 0
     for stick in found:
+        mark = f'{GREEN}ready{RESET}' if stick['ready'] else f'{YELLOW}format{RESET}'
         print(f"  {stick['device']:10} {stick['name'][:28]:30} {stick['size']:>10}"
-              f"  {DIM}{stick['bus']}{RESET}")
-        if stick['mounted']:
-            print(f"{DIM}             mounted at {', '.join(stick['mounted'])}{RESET}")
+              f"  {mark}")
+        print(f"{DIM}             {stick['why']}{RESET}")
+        if stick['write_to']:
+            print(f"{DIM}             write to {stick['write_to']}{RESET}")
     print(f'{DIM}\n  The disk this computer booted from is not in this list, and '
           f'cannot be.{RESET}')
     return 0

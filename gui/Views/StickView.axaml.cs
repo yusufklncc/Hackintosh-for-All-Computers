@@ -13,7 +13,9 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Controls;
+using Avalonia.Media;
 using Avalonia.Platform.Storage;
+using Avalonia;
 using Shell.Engine;
 
 namespace Shell.Views;
@@ -73,8 +75,10 @@ public partial class StickView : UserControl
         _folder = list.Recovery;
         _erasable = list.Erasable;
         Which.ItemsSource = list.Sticks;
-        Which.SelectedIndex = list.Sticks.Count > 0 ? 0 : -1;
-        Copy.IsEnabled = list.Sticks.Count > 0;
+        // the one that is ready, if any: a person with two sticks in wants the
+        // one they do not have to erase
+        var ready = list.Sticks.FindIndex(s => s.Ready);
+        Which.SelectedIndex = list.Sticks.Count == 0 ? -1 : ready >= 0 ? ready : 0;
         Found.Text = list.Sticks.Count switch
         {
             0 => "No removable disk is plugged in. This only ever lists removable, "
@@ -92,18 +96,36 @@ public partial class StickView : UserControl
     {
         await Load();
         var sticks = Which.ItemsSource as IEnumerable<Stick>;
-        var count = sticks?.Count() ?? 0;
-        return $"{count} sticks, erasable={_erasable}, into {_folder}";
+        var all = sticks?.ToList() ?? new List<Stick>();
+        var ready = all.Count(s => s.Ready);
+        return $"{all.Count} sticks, {ready} ready, erasable={_erasable}, "
+             + $"into {_folder}";
     }
 
     void Describe()
     {
         if (Which.SelectedItem is not Stick stick)
         {
-            EraseBox.IsVisible = false;
+            EraseBox.IsVisible = VerdictBox.IsVisible = false;
             Open.IsVisible = false;
+            Copy.IsEnabled = false;
             return;
         }
+
+        // the question a stick raises is "do I have to format this?", so that
+        // is answered before anything else on the pane
+        VerdictBox.IsVisible = true;
+        VerdictBox.Background = Brush("OkSoft", "WarnSoft", stick.Ready);
+        VerdictWhat.Foreground = Brush("Ok", "Warn", stick.Ready);
+        VerdictWhat.Text = stick.Ready
+            ? $"Ready. Writes to {stick.WriteTo}"
+            : "This one has to be formatted first";
+        VerdictWhy.Text = stick.Why;
+
+        Copy.IsEnabled = stick.Ready;
+        // and when it does need formatting, the way to do that is open rather
+        // than folded away behind a heading nobody clicks
+        EraseBox.IsExpanded = !stick.Ready;
         EraseBox.IsVisible = true;
         Open.IsVisible = stick.Where.Length > 0;
         EraseWhat.Text = $"This erases everything on {stick.Name}, {stick.Size} "
@@ -121,6 +143,9 @@ public partial class StickView : UserControl
         Typed.Text = "";
         if (!_erasable) Erase.IsEnabled = true;
     }
+
+    IBrush Brush(string good, string bad, bool ready) =>
+        (IBrush)(Application.Current!.FindResource(ready ? good : bad) ?? Brushes.Gray);
 
     async Task Pick(bool efi)
     {

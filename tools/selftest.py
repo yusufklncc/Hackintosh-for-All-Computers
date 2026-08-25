@@ -2241,6 +2241,37 @@ def the_stick_it_writes_to():
     for stick in document['sticks']:
         check(f"{stick['device']} is offered as removable", stick['removable'],
               stick)
+        check(f"{stick['device']} says whether it can be written to as it is",
+              'ready' in stick and stick['why'], stick)
+
+    # the question a stick raises is whether it has to be formatted, and that
+    # is answered from what is on it rather than from it being a USB stick
+    for case, ready, says in (
+        ({'scheme': 'GUID_partition_scheme',
+          'volumes': [{'fs': 'msdos', 'called': 'MS-DOS FAT32',
+                       'mount': '/Volumes/USB'}]}, True, 'GPT'),
+        ({'scheme': 'FDisk_partition_scheme',
+          'volumes': [{'fs': 'msdos', 'called': 'MS-DOS FAT32',
+                       'mount': '/Volumes/USB'}]}, True, 'GPT'),
+        ({'scheme': 'GUID_partition_scheme',
+          'volumes': [{'fs': 'apfs', 'called': 'APFS',
+                       'mount': '/Volumes/Mac'}]}, False, 'APFS'),
+        ({'scheme': 'GUID_partition_scheme',
+          'volumes': [{'fs': 'exfat', 'called': 'ExFAT',
+                       'mount': '/Volumes/X'}]}, False, 'ExFAT'),
+        ({'scheme': 'GUID_partition_scheme',
+          'volumes': [{'fs': 'msdos', 'called': 'MS-DOS FAT32',
+                       'mount': ''}]}, False, 'not mounted'),
+        ({'scheme': '', 'volumes': []}, False, 'FAT32'),
+    ):
+        verdict, where, why = usb.verdict(case)
+        check(f'{case["scheme"] or "no scheme"} + '
+              f'{case["volumes"][0]["called"] if case["volumes"] else "nothing"}'
+              f' -> {"ready" if ready else "format it"}',
+              verdict is ready, why)
+        check('  and it says why in those words', says in why, why)
+        check('  ready means it names where to write',
+              bool(where) is ready, where)
 
     # naming a disk nobody was offered does not erase it. This is the check
     # that matters: the list is the gate, not the question in front of it.
