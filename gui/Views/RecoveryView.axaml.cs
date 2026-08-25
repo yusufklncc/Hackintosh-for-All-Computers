@@ -26,7 +26,7 @@ public partial class RecoveryView : UserControl
 
     string _to = AppContext.BaseDirectory;
     string _folder = "com.apple.recovery.boot";
-    bool _read;
+    Task? _read;
 
     public RecoveryView()
     {
@@ -43,10 +43,21 @@ public partial class RecoveryView : UserControl
     ///
     /// The list needs no network: it is macrecovery's own board table, which
     /// travels with the OpenCore release.</summary>
-    public async Task Load()
+    // One read, and everybody waits for the same one. A bool guard let the
+    // second caller past while the first was still awaiting: the nav's own
+    // handler starts a Swap of its own, so two arrive together, and the second
+    // returned to a pane that had not been filled yet. The screenshot pass
+    // caught it on an empty list.
+    public Task Load()
     {
-        if (_read) return;
-        _read = true;
+        // and a read that threw is not a read: keeping the faulted task would
+        // make every later look at this pane raise the same old exception
+        if (_read is { IsFaulted: true }) _read = null;
+        return _read ??= Fill();
+    }
+
+    async Task Fill()
+    {
         var engine = Builder.Find(out var missing);
         if (engine is null) { Provenance.Text = missing; Fetch.IsEnabled = false; return; }
 

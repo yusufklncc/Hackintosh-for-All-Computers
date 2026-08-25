@@ -2157,6 +2157,21 @@ def the_recovery_it_can_fetch():
               'Inventory.Recoveries' in drawn)
         check('and streams the download rather than waiting on it',
               'Builder.Stream' in drawn)
+    # every pane that reads on first sight waits on the same read. A bool
+    # guard let the second caller through while the first was still awaiting -
+    # the nav starts a Swap of its own, so two always arrive together - and the
+    # second drew an empty pane. The screenshot pass caught it; nobody else
+    # would have.
+    for view in sorted(Path('gui/Views').glob('*View.axaml.cs')):
+        drawn = view.read_text()
+        # the ones the nav calls. MachineView loads itself once, from its own
+        # constructor, and nothing else can ask it twice.
+        if 'public Task Load()' not in drawn:
+            continue
+        check(f'{view.name} waits on one read, not a flag',
+              'bool _loaded' not in drawn and 'bool _read' not in drawn
+              and '??= Fill()' in drawn, view.name)
+
     pass_ = Path('gui/App.axaml.cs').read_text()
     check('the unattended pass lists and stops',
           'ListRecoveries' in pass_ and 'TakeRecovery' not in pass_)
