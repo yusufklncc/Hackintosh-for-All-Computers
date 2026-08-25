@@ -107,9 +107,22 @@ is the joining up: which macOS, where it goes, and what to do next.
 
 The list is not kept here. `boards.json` travels with `macrecovery` and records,
 for each board id, the newest macOS Apple offers it; grouping by that gives one
-entry per macOS, and the board id is the argument the request is made with. The
-six boards mapped to `latest` are left out - what they return today is not
-something this can name in advance.
+entry per macOS, and the board id is the argument the request is made with. Six
+boards are recorded as `latest` rather than a version: those are the ones Apple
+keeps current, so they are how to ask for the newest macOS there is, and what
+that turns out to be is not named in advance because nothing here knows it.
+
+A row is named, not numbered, and the number sits beside it as what it is. The
+board list's version is that board's ceiling, not the image Apple hands back -
+measured, twice:
+
+    asked for            Apple served
+    12.7.6 board         BaseSystem 12.6      (21G115)
+    latest board         BaseSystem 26.6.2    (25G83)
+
+Recovery downloads the rest of macOS during the install, so what gets installed
+is current either way. Printing "Monterey 12.7.6" on a row that fetches a 12.6
+image would be a claim this cannot keep.
 
 It writes `com.apple.recovery.boot` at the root of the drive, beside `EFI`,
 which is where OpenCore looks. A run that fails takes back what it wrote: there

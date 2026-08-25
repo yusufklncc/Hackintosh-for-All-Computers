@@ -89,11 +89,20 @@ def choices(tool=None):
         out.append({
             'version': version,
             'name': name,
-            # what a person is offered. One place decides it, so a window and
+            # What a person is offered. One place decides it, so a window and
             # a terminal cannot word the same row differently.
-            'label': f'{name} {version}'.strip() if named
-                     else 'Whatever Apple serves now',
-            'note': '' if named else
+            #
+            # The name, not the number. The number is the newest macOS the
+            # board list records for that board, which is not the image Apple
+            # hands back: asked for the 12.7.6 board, Apple served a 12.6
+            # BaseSystem. Recovery then fetches the rest, so what gets
+            # installed is a current build - but printing "Monterey 12.7.6" on
+            # a row that downloads 12.6 is a claim nothing here can keep.
+            'label': name or version if named else 'Whatever Apple serves now',
+            'note': (f'the board list records {version} as the newest this board '
+                     f'reaches. The image Apple hands back is some build of '
+                     f'{name or version}; recovery downloads the rest during the '
+                     f'install.') if named else
                     'these boards are kept current, so this is the newest macOS '
                     'Apple is serving today - the board list does not name it in '
                     'advance, and neither does this',
@@ -284,13 +293,14 @@ def main(argv=None):
     if a.list or not a.macos:
         print(f'{BOLD}Recovery installers Apple will serve{RESET}')
         for choice in choices(tool):
-            print(f"  {choice['version']:9} {choice['label']:28} "
-                  f"{choice['board']}  {DIM}({choice['boards']} boards){RESET}")
-            if choice['note']:
-                print(f"{DIM}            {choice['note']}{RESET}")
-        print(f"{DIM}\n  read from macrecovery's own boards.json, which records the "
-              f"newest macOS\n  each board is offered. Ask for one by version, by "
-              f"name, or 'latest'.{RESET}")
+            print(f"  {choice['label']:28} {choice['board']}  "
+                  f"{DIM}{choice['version']:9} {choice['boards']} boards{RESET}")
+        print(f"{DIM}\n  The number is what the board list records as that board's "
+              f"newest, not\n  the image Apple hands back: asked for the 12.7.6 "
+              f"board it served a 12.6\n  BaseSystem. Recovery downloads the rest "
+              f"during the install.{RESET}")
+        print(f"{DIM}  Read from macrecovery's own boards.json. Ask for one by "
+              f"version, by name,\n  or 'latest'.{RESET}")
         return 0
 
     choice = find(a.macos, tool)
