@@ -77,8 +77,8 @@ and identity falls back to a placeholder, each with a warning.
     python3 tools/fetch_oc.py 1.0.5           # cache another OpenCore release (network)
     python3 tools/recovery.py --list          # what Apple will serve
     python3 tools/recovery.py --macos 12.7.6 --out /Volumes/USB   # fetch it (network)
-    python3 tools/usb.py --list               # removable disks, never the boot one
-    python3 tools/usb.py --place /Volumes/USB --efi build/EFI --recovery .
+    python3 tools/stick.py --list               # removable disks, never the boot one
+    python3 tools/stick.py --place /Volumes/USB --efi build/EFI --recovery .
 
 Both `extract` and `verify` take an optional Sample.plist path and otherwise use
 the vendored one. `fetch_oc.py` is how you move to a different OpenCore version:
@@ -137,12 +137,12 @@ than claiming the program never reaches the network.
 
 ## The stick
 
-`usb.py` is the only part of this repository that can destroy something, so it
+`stick.py` is the only part of this repository that can destroy something, so it
 is the one written to make that hard:
 
-    python3 tools/usb.py --list
-    python3 tools/usb.py --place /Volumes/USB --efi build/EFI --recovery .
-    python3 tools/usb.py --prepare disk4        # erases it
+    python3 tools/stick.py --list
+    python3 tools/stick.py --place /Volumes/USB --efi build/EFI --recovery .
+    python3 tools/stick.py --prepare disk4        # erases it
 
 Four rules, in the order they matter:
 

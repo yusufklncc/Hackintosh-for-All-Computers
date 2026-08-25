@@ -34,8 +34,8 @@ import netkexts
 import ocgen
 import inventory
 import recovery
+import stick
 import summary
-import usb
 import ui
 import usbmap
 
@@ -570,7 +570,7 @@ def main():
 
     if a.usb_list:
         import json as _json
-        sys.stdout.write(_json.dumps(usb.document(), ensure_ascii=False) + '\n')
+        sys.stdout.write(_json.dumps(stick.document(), ensure_ascii=False) + '\n')
         return 0
 
     if a.usb_place:
@@ -579,14 +579,14 @@ def main():
         argv = ['--place', a.usb_place, '--efi', a.out]
         if a.recovery_from:
             argv += ['--recovery', a.recovery_from]
-        return usb.main(argv)
+        return stick.main(argv)
 
     if a.usb_prepare:
         # --yes because the window has already asked, in front of the disk's
         # name and size. What stops the wrong disk is not the question: it is
         # that usb.prepare refuses anything --usb-list did not offer, checked
         # again at the moment it runs.
-        return usb.main(['--prepare', a.usb_prepare, '--yes'])
+        return stick.main(['--prepare', a.usb_prepare, '--yes'])
 
     if a.recovery:
         # the EFI folder's parent is the drive, which is where OpenCore looks

@@ -16,9 +16,13 @@ is written to make that hard rather than convenient:
 Copying needs none of that and is the part most people want, so it is separate:
 a stick that is already FAT32 needs no erasing at all.
 
-    python3 tools/usb.py --list
-    python3 tools/usb.py --place /Volumes/USB --efi build/EFI --recovery .
-    python3 tools/usb.py --prepare disk4        # erases it, and says so twice
+    python3 tools/stick.py --list
+    python3 tools/stick.py --place /Volumes/USB --efi build/EFI --recovery .
+    python3 tools/stick.py --prepare disk4      # erases it, and says so twice
+
+Not called usb.py. PyInstaller ships a hook for the PyPI package of that name,
+and it fires on any module called `usb` - the frozen build died on it in CI,
+in a traceback about pyusb that has nothing to do with anything here.
 """
 import argparse
 import json
