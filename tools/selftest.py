@@ -2126,6 +2126,7 @@ def the_recovery_it_can_fetch():
         check(f"{choice['version']} is named as people know it",
               choice['name'] and choice['name'] in choice['label'], choice)
 
+
     # the boards Apple keeps current are how somebody asks for the macOS that
     # is newest today. Dropping them meant the newest release could not be
     # fetched at all, which is what it looked like from the window.
@@ -2138,8 +2139,15 @@ def the_recovery_it_can_fetch():
               not any(ch.isdigit() for ch in current[0]['label']),
               current[0]['label'])
         check('and it says why it has no version', current[0]['note'])
-        check('the numbered ones do not need saying',
-              not any(c['note'] for c in numbered))
+    # the number is the board's ceiling, not the image: asked for the 12.7.6
+    # board Apple served a 12.6 BaseSystem. Printing the number as the name
+    # would be a promise nothing here can keep, so the row is named and the
+    # number is explained beside it.
+    for choice in numbered:
+        check(f"{choice['version']} is offered by name, not by number",
+              choice['label'] == choice['name'], choice['label'])
+        check(f"{choice['version']} says what the number is",
+              choice['version'] in choice['note'], choice['note'])
         check('and it can be asked for by that word',
               recovery.find('latest') == current[0])
     check('every row can be asked for by its own version',

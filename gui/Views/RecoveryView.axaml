@@ -22,9 +22,14 @@
                       x:DataType="e:RecoveryChoice">
               <ComboBox.ItemTemplate>
                 <DataTemplate x:DataType="e:RecoveryChoice">
-                  <Grid ColumnDefinitions="210,*" ColumnSpacing="10">
+                  <Grid ColumnDefinitions="210,*,Auto" ColumnSpacing="10">
                     <TextBlock Grid.Column="0" Text="{Binding Titled}" />
                     <TextBlock Grid.Column="1" Text="{Binding Board}"
+                               Classes="mono" Foreground="{DynamicResource Faint}"
+                               VerticalAlignment="Center" />
+                    <!-- the board's ceiling, not the image that arrives. The
+                         note under the box says which is which. -->
+                    <TextBlock Grid.Column="2" Text="{Binding Version}"
                                Classes="mono" Foreground="{DynamicResource Faint}"
                                VerticalAlignment="Center" />
                   </Grid>

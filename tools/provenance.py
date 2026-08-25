@@ -291,10 +291,10 @@ def catalogue():
              count=f'{_recoveries()} rows, one board id each',
              covers='which macOS Apple will serve, and the board the request '
                     'is made with',
-             gap='What Apple actually returns is not known until it is asked. '
-                 'The version is the newest that board is recorded to reach, '
-                 'not a promise about the download - and one row has no '
-                 'version at all, because the board list gives it none.'),
+             gap='The version is the newest that board is recorded to reach, '
+                 'not the image Apple hands back: the 12.7.6 board served a '
+                 '12.6 BaseSystem. One row has no version at all, because the '
+                 'board list gives it none.'),
         dict(area='AMD graphics kexts', kind=NONE, file='-',
              source='out of scope by request', tool='-',
              count='-', covers='-',
