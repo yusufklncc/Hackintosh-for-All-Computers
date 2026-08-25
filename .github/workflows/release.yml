@@ -35,10 +35,13 @@ jobs:
           chmod +x vendor/opencore/*/Utilities/*/*.linux
           python3 tools/release.py --out dist
 
+      # into a folder of its own: upload-artifact stores the contents of a
+      # directory at the artifact root, so downloading to dist/ would scatter
+      # the engine's _internal beside the zips
       - uses: actions/download-artifact@v4
         with:
           name: windows-exe
-          path: dist
+          path: dist/EFIBuilderEngine
 
       # the console program, named for what it is next to a window with the
       # product name on it
