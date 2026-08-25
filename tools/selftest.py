@@ -2109,9 +2109,10 @@ def the_recovery_it_can_fetch():
     boards = _json.loads((tool.parent / 'boards.json').read_text(encoding='utf-8'))
     offered = recovery.choices()
     check('there is something to fetch', len(offered) >= 5, len(offered))
+    numbered = [c for c in offered if c['version'][0].isdigit()]
     check('newest first',
-          offered == sorted(offered, reverse=True,
-                            key=lambda c: [int(n) for n in c['version'].split('.')]))
+          numbered == sorted(numbered, reverse=True,
+                             key=lambda c: [int(n) for n in c['version'].split('.')]))
     check('one entry per macOS',
           len({c['version'] for c in offered}) == len(offered))
     for choice in offered:
@@ -2119,10 +2120,30 @@ def the_recovery_it_can_fetch():
         # to that version, or the request asks Apple for something else
         check(f"{choice['version']} names a board that yields it",
               boards.get(choice['board']) == choice['version'], choice)
-        check(f"{choice['version']} has the name people know it by",
-              choice['name'], choice)
-    check('the boards Apple keeps moving are left out',
-          all(c['version'][0].isdigit() for c in offered))
+        check(f"{choice['version']} is offered under a name",
+              choice['label'], choice)
+    for choice in numbered:
+        check(f"{choice['version']} is named as people know it",
+              choice['name'] and choice['name'] in choice['label'], choice)
+
+    # the boards Apple keeps current are how somebody asks for the macOS that
+    # is newest today. Dropping them meant the newest release could not be
+    # fetched at all, which is what it looked like from the window.
+    current = [c for c in offered if not c['version'][0].isdigit()]
+    check('the macOS Apple is serving now can be asked for', len(current) == 1,
+          [c['version'] for c in current])
+    if current:
+        check('and it comes first', offered[0] is current[0])
+        check('named for what it is, since nothing here knows the number',
+              not any(ch.isdigit() for ch in current[0]['label']),
+              current[0]['label'])
+        check('and it says why it has no version', current[0]['note'])
+        check('the numbered ones do not need saying',
+              not any(c['note'] for c in numbered))
+        check('and it can be asked for by that word',
+              recovery.find('latest') == current[0])
+    check('every row can be asked for by its own version',
+          all(recovery.find(c['version']) == c for c in offered))
     check('and it lands where OpenCore looks',
           recovery.FOLDER == 'com.apple.recovery.boot')
 
@@ -2157,6 +2178,9 @@ def the_recovery_it_can_fetch():
               'Inventory.Recoveries' in drawn)
         check('and streams the download rather than waiting on it',
               'Builder.Stream' in drawn)
+    model = Path('gui/Engine/Inventory.cs').read_text()
+    check('the window shows the name the engine chose, not one of its own',
+          '"label"' in model and 'Label is { Length: > 0 }' in model)
     # every pane that reads on first sight waits on the same read. A bool
     # guard let the second caller through while the first was still awaiting -
     # the nav starts a Swap of its own, so two always arrive together - and the

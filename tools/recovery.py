@@ -69,8 +69,9 @@ def choices(tool=None):
     the argument the download actually takes, so this is the list and the
     answer at once.
 
-    The "latest" boards are left out. They are the ones Apple keeps moving, so
-    what they return today is not something this can name in advance."""
+    Six boards are recorded as `latest` rather than a version. Those are the
+    ones Apple keeps current, so they are how you ask for whatever macOS is
+    newest today; what that is cannot be named here, and is not."""
     tool = tool or vendored()
     if tool is None:
         return []
@@ -81,26 +82,41 @@ def choices(tool=None):
     names = _names()
     out = []
     for version, ids in grouped.items():
-        if not version[0].isdigit():
-            continue
-        short = version.rsplit('.', 1)[0] if version.startswith('10.') else version.split('.')[0]
+        named = version[0].isdigit()
+        short = (version.rsplit('.', 1)[0] if version.startswith('10.')
+                 else version.split('.')[0]) if named else ''
+        name = names.get(short, '')
         out.append({
             'version': version,
-            'name': names.get(short, ''),
+            'name': name,
+            # what a person is offered. One place decides it, so a window and
+            # a terminal cannot word the same row differently.
+            'label': f'{name} {version}'.strip() if named
+                     else 'Whatever Apple serves now',
+            'note': '' if named else
+                    'these boards are kept current, so this is the newest macOS '
+                    'Apple is serving today - the board list does not name it in '
+                    'advance, and neither does this',
             # deterministic: the same board every time, so two people asking
-            # for the same macOS ask Apple the same question
+            # for the same macOS ask Apple the same question. For the current
+            # one that lands on macrecovery's own default, which is the board
+            # the tool uses when nobody names one.
             'board': sorted(ids)[0],
             'boards': len(ids),
         })
-    out.sort(key=lambda c: [int(n) for n in c['version'].split('.')], reverse=True)
+    # newest first, and the one with no number is newer than all of them
+    out.sort(reverse=True, key=lambda c: [int(n) for n in c['version'].split('.')]
+             if c['version'][0].isdigit() else [10 ** 6])
     return out
 
 
 def find(wanted, tool=None):
-    """One choice, by version or by name. None if nothing matches."""
+    """One choice, by version, by name, or by 'latest'. None if nothing matches."""
     asked = (wanted or '').strip().lower()
     for choice in choices(tool):
-        if asked in (choice['version'].lower(), choice['name'].lower()):
+        if asked and asked in (choice['version'].lower(),
+                               choice['name'].lower(),
+                               choice['label'].lower()):
             return choice
     return None
 
@@ -246,9 +262,8 @@ def _size(count):
 
 def describe(choice, files):
     """What was fetched, in the terms the person asked in."""
-    named = f"{choice['name']} {choice['version']}".strip()
     total = sum(size for _, size in files) / (1024 * 1024)
-    return f'{named}, {len(files)} files, {total:.0f} MB'
+    return f"{choice['label']}, {len(files)} files, {total:.0f} MB"
 
 
 def main(argv=None):
@@ -269,10 +284,13 @@ def main(argv=None):
     if a.list or not a.macos:
         print(f'{BOLD}Recovery installers Apple will serve{RESET}')
         for choice in choices(tool):
-            print(f"  {choice['version']:9} {choice['name']:12} "
+            print(f"  {choice['version']:9} {choice['label']:28} "
                   f"{choice['board']}  {DIM}({choice['boards']} boards){RESET}")
-        print(f"{DIM}\n  read from macrecovery's own boards.json; the version is "
-              f"the newest\n  each board is offered.{RESET}")
+            if choice['note']:
+                print(f"{DIM}            {choice['note']}{RESET}")
+        print(f"{DIM}\n  read from macrecovery's own boards.json, which records the "
+              f"newest macOS\n  each board is offered. Ask for one by version, by "
+              f"name, or 'latest'.{RESET}")
         return 0
 
     choice = find(a.macos, tool)
@@ -289,8 +307,7 @@ def main(argv=None):
               f'somebody may be part way through{RESET}')
         return 1
 
-    print(f"{BOLD}Fetching {choice['name']} {choice['version']} "
-          f"from Apple{RESET}")
+    print(f"{BOLD}Fetching {choice['label']} from Apple{RESET}")
     print(f"{DIM}  board {choice['board']}, serial {NO_SERIAL}, into "
           f"{Path(a.out) / FOLDER}{RESET}")
     files, complaint = fetch(choice, a.out, tool)

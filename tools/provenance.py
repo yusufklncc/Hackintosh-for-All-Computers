@@ -288,12 +288,13 @@ def catalogue():
         dict(area='Recovery installers', kind=DERIVED,
              file='vendor/opencore/', source="macrecovery's own boards.json",
              tool='tools/recovery.py',
-             count=f'{_recoveries()} macOS versions, one board id each',
+             count=f'{_recoveries()} rows, one board id each',
              covers='which macOS Apple will serve, and the board the request '
                     'is made with',
              gap='What Apple actually returns is not known until it is asked. '
-                 'The version here is the newest that board is recorded to '
-                 'reach, not a promise about the download.'),
+                 'The version is the newest that board is recorded to reach, '
+                 'not a promise about the download - and one row has no '
+                 'version at all, because the board list gives it none.'),
         dict(area='AMD graphics kexts', kind=NONE, file='-',
              source='out of scope by request', tool='-',
              count='-', covers='-',
