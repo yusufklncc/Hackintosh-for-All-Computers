@@ -96,10 +96,17 @@ public sealed class RecoveryChoice
 {
     [JsonPropertyName("version")] public string Version { get; set; } = "";
     [JsonPropertyName("name")] public string Name { get; set; } = "";
+    // what to call the row. The engine decides it, because one of these has no
+    // version to print and a window inventing its own wording for that is how
+    // two surfaces come to say different things about the same thing.
+    [JsonPropertyName("label")] public string Label { get; set; } = "";
+    [JsonPropertyName("note")] public string Note { get; set; } = "";
     [JsonPropertyName("board")] public string Board { get; set; } = "";
     [JsonPropertyName("boards")] public int Boards { get; set; }
 
-    public string Titled => $"{Name} {Version}".Trim();
+    public string Titled => Label is { Length: > 0 } said ? said
+                                                          : $"{Name} {Version}".Trim();
+    public bool Explained => Note.Length > 0;
 }
 
 public sealed class RecoveryList

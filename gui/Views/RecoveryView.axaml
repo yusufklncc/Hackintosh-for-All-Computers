@@ -22,7 +22,7 @@
                       x:DataType="e:RecoveryChoice">
               <ComboBox.ItemTemplate>
                 <DataTemplate x:DataType="e:RecoveryChoice">
-                  <Grid ColumnDefinitions="150,*" ColumnSpacing="10">
+                  <Grid ColumnDefinitions="210,*" ColumnSpacing="10">
                     <TextBlock Grid.Column="0" Text="{Binding Titled}" />
                     <TextBlock Grid.Column="1" Text="{Binding Board}"
                                Classes="mono" Foreground="{DynamicResource Faint}"
@@ -31,6 +31,8 @@
                 </DataTemplate>
               </ComboBox.ItemTemplate>
             </ComboBox>
+            <TextBlock Name="Chosen" FontSize="12.5" TextWrapping="Wrap"
+                       Foreground="{DynamicResource Muted}" IsVisible="False" />
             <TextBlock Name="Provenance" FontSize="12" TextWrapping="Wrap"
                        Foreground="{DynamicResource Faint}" />
           </StackPanel>

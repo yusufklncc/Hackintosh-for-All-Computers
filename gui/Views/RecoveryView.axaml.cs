@@ -34,6 +34,13 @@ public partial class RecoveryView : UserControl
         Where.Text = _to;
         Target.Text = "The drive, not the EFI folder: OpenCore looks for "
                     + $"{_folder} next to EFI, at the root of the partition.";
+        // the row with no version has something to say about itself
+        Which.SelectionChanged += (_, _) =>
+        {
+            var note = (Which.SelectedItem as RecoveryChoice)?.Note ?? "";
+            Chosen.Text = note;
+            Chosen.IsVisible = note.Length > 0;
+        };
         Choose.Click += async (_, _) => await Pick();
         Fetch.Click += async (_, _) => await Get();
         Open.Click += (_, _) => Reveal.Show(Path.Combine(_to, _folder));
@@ -73,8 +80,8 @@ public partial class RecoveryView : UserControl
         Which.ItemsSource = list.Choices;
         Which.SelectedIndex = 0;
         Provenance.Text = $"{list.Choices.Count} of them, read from macrecovery's own "
-                        + "boards.json. The version is the newest Apple offers that "
-                        + "board, and the board is what the request is made with.";
+                        + "boards.json, which records the newest macOS Apple offers "
+                        + "each board. The board is what the request is made with.";
     }
 
     /// <summary>What the pane says, for the screenshot pass.
