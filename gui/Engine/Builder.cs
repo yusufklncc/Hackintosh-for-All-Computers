@@ -12,6 +12,7 @@ using System.IO;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Avalonia.Threading;
 
 namespace Shell.Engine;
 
@@ -197,6 +198,59 @@ public static class Builder
                       + "three minutes, so it was stopped.", 1);
         }
         return (await stdout, await stderr, process.ExitCode);
+    }
+
+    /// <summary>Run something long, and hand back each line as it arrives.
+    ///
+    /// Run() waits three minutes and returns everything at once, which is right
+    /// for reading a machine and wrong for fetching 700 MB over somebody's
+    /// home connection: the window would sit blank for minutes and then stop
+    /// the download at the deadline. The bound is still there, and still says
+    /// so when it is reached.</summary>
+    public static async Task<(string complaint, int code)> Stream(
+        Located engine, Action<string> line, TimeSpan bound, params string[] arguments)
+    {
+        var info = new ProcessStartInfo
+        {
+            FileName = engine.Program,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            RedirectStandardInput = true,
+            UseShellExecute = false,
+            CreateNoWindow = true,
+            StandardOutputEncoding = Encoding.UTF8,
+            StandardErrorEncoding = Encoding.UTF8,
+        };
+        foreach (var a in engine.Prefix) info.ArgumentList.Add(a);
+        foreach (var a in arguments) info.ArgumentList.Add(a);
+        var root = engine.Prefix.Count > 0
+            ? Directory.GetParent(Path.GetDirectoryName(engine.Prefix[0])!)!.FullName
+            : Path.GetDirectoryName(engine.Program)!;
+        info.WorkingDirectory = root;
+
+        using var process = new Process { StartInfo = info };
+        var said = new StringBuilder();
+        process.OutputDataReceived += (_, e) =>
+        {
+            if (e.Data is { } text) Dispatcher.UIThread.Post(() => line(text));
+        };
+        process.ErrorDataReceived += (_, e) =>
+        {
+            if (e.Data is { } text) said.AppendLine(text);
+        };
+        process.Start();
+        process.StandardInput.Close();
+        process.BeginOutputReadLine();
+        process.BeginErrorReadLine();
+
+        var exited = process.WaitForExitAsync();
+        if (await Task.WhenAny(exited, Task.Delay(bound)) != exited)
+        {
+            try { process.Kill(entireProcessTree: true); } catch (Exception) { }
+            return ($"{Path.GetFileName(engine.Program)} was still going after "
+                  + $"{bound.TotalMinutes:0} minutes, so it was stopped.", 1);
+        }
+        return (said.ToString().Trim(), process.ExitCode);
     }
 
     /// <summary>The machine, as the engine describes it.</summary>

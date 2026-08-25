@@ -84,7 +84,7 @@ public partial class DevicesView : UserControl
 {
     const string Everything = "All";
     List<DeviceItem> _all = new();
-    bool _loaded;
+    Task? _loaded;
     // which column orders the list, and which way. One at a time: two keys
     // would need a second arrow and nobody would read it.
     string _sortBy = "category";
@@ -109,10 +109,21 @@ public partial class DevicesView : UserControl
         Draw();
     }
 
-    public async Task Load()
+    // One read, and everybody waits for the same one. A bool guard let the
+    // second caller past while the first was still awaiting: the nav's own
+    // handler starts a Swap of its own, so two arrive together, and the second
+    // returned to a pane that had not been filled yet. The screenshot pass
+    // caught it on an empty list.
+    public Task Load()
     {
-        if (_loaded) return;
-        _loaded = true;
+        // and a read that threw is not a read: keeping the faulted task would
+        // make every later look at this pane raise the same old exception
+        if (_loaded is { IsFaulted: true }) _loaded = null;
+        return _loaded ??= Fill();
+    }
+
+    async Task Fill()
+    {
         var engine = Builder.Find(out var missing);
         if (engine is null) { Blurb.Text = missing; return; }
 

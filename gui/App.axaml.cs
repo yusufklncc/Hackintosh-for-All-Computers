@@ -60,13 +60,19 @@ public partial class App : Application
                 try
                 {
                     Console.WriteLine("drive: " + await window.DriveBuilder());
-                    foreach (var pane in new[] { "report", "devices", "kexts", "about" })
+                    foreach (var pane in new[] { "report", "recovery", "devices",
+                                                 "kexts", "about" })
                     {
                         await window.Show(pane);
                         // the report pane's whole job is behind a button, so
                         // the pass presses it rather than photographing it idle
                         if (pane == "report")
                             Console.WriteLine("report: " + await window.TakeReport());
+                        // listed, not pressed. Its button downloads 700 MB
+                        // from Apple, and what that would prove is that Apple
+                        // was up - the pane's own job is to offer the list.
+                        if (pane == "recovery")
+                            Console.WriteLine("recovery: " + await window.ListRecoveries());
                         // one turn of the loop, so what was just loaded is laid
                         // out before its picture is taken
                         await Task.Delay(1200);

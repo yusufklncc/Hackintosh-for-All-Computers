@@ -17,6 +17,11 @@ There are four ways to get that EFI, from least to most effort:
 | **`python3 tools/setup.py`** | Same thing from a clone, on Windows, Linux or macOS. Needs Python 3.11. |
 | **`EFI-base.zip` + `configs.zip`** | No script at all: unzip the EFI, copy in the `config.plist` matching your machine. |
 
+For the macOS installer itself there are two routes: a whole image from
+[Download macOS Image](#download-macos-image), or Apple's recovery, which the
+app fetches onto the stick for you - see [The app](#the-app). Recovery is the
+one that fits on FAT32.
+
 All four produce the same thing, and none of them need an internet connection
 for the common path - everything they use is in the repository.
 
@@ -75,6 +80,13 @@ open it.
 **Report** reads this machine into a single JSON file, and dumps its ACPI tables
 beside it. That is the file to carry to the computer you build on when the USB
 is being prepared somewhere else.
+
+**Recovery** puts Apple's own installer on the stick beside the EFI - about
+700 MB that boots, connects, and downloads the rest of macOS itself. It is the
+answer when a whole image will not fit: the FAT32 partition an EFI lives on
+cannot hold a file over 4 GB. Everything else in the program works offline;
+this is the one thing that does not, and it only runs when you press the
+button.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/App/report.png">

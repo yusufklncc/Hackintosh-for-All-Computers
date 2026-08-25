@@ -58,14 +58,25 @@ public sealed class SourceItem
 
 public partial class AboutView : UserControl
 {
-    bool _loaded;
+    Task? _loaded;
 
     public AboutView() => InitializeComponent();
 
-    public async Task Load()
+    // One read, and everybody waits for the same one. A bool guard let the
+    // second caller past while the first was still awaiting: the nav's own
+    // handler starts a Swap of its own, so two arrive together, and the second
+    // returned to a pane that had not been filled yet. The screenshot pass
+    // caught it on an empty list.
+    public Task Load()
     {
-        if (_loaded) return;
-        _loaded = true;
+        // and a read that threw is not a read: keeping the faulted task would
+        // make every later look at this pane raise the same old exception
+        if (_loaded is { IsFaulted: true }) _loaded = null;
+        return _loaded ??= Fill();
+    }
+
+    async Task Fill()
+    {
         var engine = Builder.Find(out var missing);
         if (engine is null) { Tally.Text = missing; return; }
 
@@ -78,7 +89,7 @@ public partial class AboutView : UserControl
             new("CONFIGS", about.Configs.ToString()),
             new("KEXTS", about.Kexts.ToString()),
             new("SOURCES", about.Sources.Count.ToString()),
-            new("NETWORK", about.Offline ? "never" : "sometimes"),
+            new("NETWORK", about.Network is null ? "never" : "when asked"),
         };
 
         // counted, not asserted. It used to say "both ACPI tools" while nine
@@ -88,7 +99,10 @@ public partial class AboutView : UserControl
                      + $"replaced, and it is often not online - so {about.Kexts} kexts, "
                      + $"{about.Configs} configs and {about.Tools.Count} whole programs "
                      + "travel inside it. The tables below were fetched once, by the "
-                     + "tool named beside each, and committed.";
+                     + "tool named beside each, and committed."
+                     + (about.Network is { } once
+                        ? $" The one thing that does open a connection is {once}."
+                        : "");
         Licence.Text = (about.Licence is { } licence ? licence + ". " : "")
                      + (about.Repo ?? "");
         Tools.ItemsSource = about.Tools.Select(t => new ToolItem(t)).ToList();

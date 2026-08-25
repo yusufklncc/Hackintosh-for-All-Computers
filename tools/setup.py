@@ -33,6 +33,7 @@ import inputdev
 import netkexts
 import ocgen
 import inventory
+import recovery
 import summary
 import ui
 import usbmap
@@ -237,6 +238,23 @@ def check_tools():
             report('SSDTTime loads, with everything it imports', False, repr(exc))
     else:
         report('SSDTTime is usable here', False, f'not on {sys.platform}')
+
+    # macrecovery is loaded the same way and has the same trap: it imports
+    # hashlib, linecache and random, none of which PyInstaller can see from
+    # here. Loading it proves the bundle carries them; it asks Apple nothing.
+    tool = recovery.vendored()
+    if tool is None:
+        report('macrecovery is here', False, 'it is not')
+    else:
+        try:
+            module = recovery._load(tool)
+            report('macrecovery loads, with everything it imports',
+                   callable(getattr(module, 'main', None)))
+            offered = recovery.choices(tool)
+            report('and its board list came with it',
+                   len(offered) >= 5, f'{len(offered)} macOS versions')
+        except Exception as exc:                   # noqa: BLE001 - the whole point
+            report('macrecovery loads, with everything it imports', False, repr(exc))
 
     print()
     if failed:
@@ -490,10 +508,18 @@ def main():
     ap.add_argument('--answers', help='answer the menus non-interactively, comma separated; '
                                       'for scripting and for CI')
     ap.add_argument('--inventory', metavar='WHAT',
-                    choices=('kexts', 'about', 'devices'),
+                    choices=inventory.WHAT,
                     help='write what this repository carries as JSON and stop: '
-                         'the vendored kexts, the standing facts, or every '
-                         'device the tables know')
+                         'the vendored kexts, the standing facts, every device '
+                         'the tables know, or the recovery installers Apple '
+                         'will serve')
+    ap.add_argument('--recovery', metavar='MACOS',
+                    help="fetch Apple's recovery installer for this macOS onto "
+                         'the drive and stop; the one thing here that opens a '
+                         'connection, and only when asked for')
+    ap.add_argument('--recovery-to', metavar='DIR',
+                    help='the drive the recovery folder goes on, at its root '
+                         '(default: the folder --out sits in)')
     ap.add_argument('--describe', action='store_true',
                     help='write this machine as one JSON document and stop, for '
                          'a front end to draw')
@@ -522,17 +548,24 @@ def main():
         # every path a caller passes is theirs, not the bundle's. Leaving
         # acpi_tables out of this meant the frozen build looked for the dumped
         # tables inside its own unpacked copy, where they never are.
-        for opt in ('machine', 'report', 'usb_map', 'acpi_tables'):
+        for opt in ('machine', 'report', 'usb_map', 'acpi_tables',
+                    'recovery_to'):
             if getattr(a, opt):
                 setattr(a, opt, str((started_in / getattr(a, opt)).resolve()))
 
     if a.check_tools:
         return check_tools()
 
+    if a.recovery:
+        # the EFI folder's parent is the drive, which is where OpenCore looks
+        # for com.apple.recovery.boot. recovery.py does the whole thing, so
+        # what a person gets here and from that tool cannot differ.
+        where = a.recovery_to or str(Path(a.out).resolve().parent)
+        return recovery.main(['--macos', a.recovery, '--out', where])
+
     if a.inventory:
         import json as _json
-        document = {'kexts': inventory.kexts, 'about': inventory.about,
-                    'devices': inventory.devices}[a.inventory]()
+        document = inventory.DOCUMENTS[a.inventory]()
         sys.stdout.write(_json.dumps(document, ensure_ascii=False) + '\n')
         return 0
 

@@ -49,6 +49,7 @@ the one being installed, and often on one that is not online.
 
     vendor/opencore/<version>/Sample.plist    pinned config template
     vendor/opencore/<version>/Utilities/      ocvalidate + macserial, all 3 hosts
+                                              and macrecovery, with its board list
     vendor/kexts.lock                         sha256 + upstream for every kext
     EFI/                                      kexts, ACPI, drivers, resources
 
@@ -74,6 +75,8 @@ and identity falls back to a placeholder, each with a warning.
     python3 tools/kexts.py   check            # tree matches vendor/kexts.lock
     python3 tools/kexts.py   outdated         # ask GitHub what is newer (network)
     python3 tools/fetch_oc.py 1.0.5           # cache another OpenCore release (network)
+    python3 tools/recovery.py --list          # what Apple will serve
+    python3 tools/recovery.py --macos 12.7.6 --out /Volumes/USB   # fetch it (network)
 
 Both `extract` and `verify` take an optional Sample.plist path and otherwise use
 the vendored one. `fetch_oc.py` is how you move to a different OpenCore version:
@@ -85,6 +88,37 @@ changes stop being a manual migration.
 release tag as strings. Some projects number the bundle and the tag differently
 - SMCAMDProcessor ships bundle 1.0.1 in release 0.7.2f1 - so treat it as a
 prompt to look, not as a verdict.
+
+## The recovery installer
+
+A whole macOS image is over 4 GB and a FAT32 partition cannot hold one, so an
+EFI stick and an installer usually have to be two different things. Apple's
+recovery is the way round it: about 700 MB of BaseSystem that boots, connects,
+and downloads the rest itself.
+
+OpenCore ships `macrecovery`, which speaks Apple's protocol and verifies what
+lands against the chunklist Apple sends with it. It is vendored with the rest
+of the release and driven, exactly like SSDTTime and USBToolBox. `recovery.py`
+is the joining up: which macOS, where it goes, and what to do next.
+
+    python3 tools/recovery.py --list
+    python3 tools/recovery.py --macos 12.7.6 --out /Volumes/USB
+    python3 tools/setup.py --recovery 12.7.6 --recovery-to /Volumes/USB
+
+The list is not kept here. `boards.json` travels with `macrecovery` and records,
+for each board id, the newest macOS Apple offers it; grouping by that gives one
+entry per macOS, and the board id is the argument the request is made with. The
+six boards mapped to `latest` are left out - what they return today is not
+something this can name in advance.
+
+It writes `com.apple.recovery.boot` at the root of the drive, beside `EFI`,
+which is where OpenCore looks. A run that fails takes back what it wrote: there
+is no resuming a partial BaseSystem, and leaving one there stops the next
+attempt before it starts.
+
+This is the only thing in the repository that opens a connection on a person's
+behalf, and it does it when asked and not before. The About page says so rather
+than claiming the program never reaches the network.
 
 ## The guided path
 

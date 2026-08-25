@@ -21,13 +21,15 @@ a = Analysis(
     datas=datas,
     hiddenimports=['acpi', 'advise', 'audio', 'build', 'detect', 'gpu', 'igpu',
                    'coverage', 'deviceids', 'inputdev', 'inventory', 'itlwm', 'mactable', 'netkexts', 'ocgen', 'oclptable', 'provenance',
-                   'summary', 'thirdparty', 'ui', 'usbmap']
-                  # SSDTTime is loaded at runtime with importlib, from a copy of
-                  # the vendored tree. PyInstaller never sees those imports, so
-                  # the standard library it uses has to be named here or the
-                  # frozen build dies the moment somebody says yes to SSDTs -
-                  # which is exactly how this was found.
-                  + ['binascii', 'ctypes', 'datetime', 'errno', 'getpass', 'glob',
+                   'recovery', 'summary', 'thirdparty', 'ui', 'usbmap']
+                  # SSDTTime and macrecovery are loaded at runtime with
+                  # importlib, out of the vendored tree. PyInstaller never sees
+                  # those imports, so the standard library they use has to be
+                  # named here or the frozen build dies the moment somebody
+                  # says yes to SSDTs - which is exactly how this was found.
+                  # --check-tools loads both, so the next one is found in CI.
+                  + ['argparse', 'hashlib', 'linecache', 'random',
+                     'binascii', 'ctypes', 'datetime', 'errno', 'getpass', 'glob',
                      'msvcrt', 'os', 'sys',
                      'gzip', 'io', 'itertools', 'json', 'multiprocessing',
                      'plistlib', 'queue', 're', 'select', 'shlex', 'shutil',
