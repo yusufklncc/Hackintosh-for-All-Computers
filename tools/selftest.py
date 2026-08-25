@@ -1245,7 +1245,8 @@ def provenance():
           str(real) in hardware['count'], hardware['count'])
     check('the areas with no source are named as such',
           {r['area'] for r in table if r['kind'] == prov.NONE} ==
-          {'Camera', 'AMD graphics kexts'},
+          {'Camera', 'AMD graphics kexts',
+           'Drivers OpenCore does not build'},
           [r['area'] for r in table if r['kind'] == prov.NONE])
     import contextlib
     import io
