@@ -1,0 +1,72 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:v="clr-namespace:Shell.Views"
+             x:Class="Shell.Views.BuilderView"
+             x:DataType="v:BuilderView">
+  <Grid RowDefinitions="Auto,*,Auto" Margin="28,24,28,24">
+
+    <StackPanel Grid.Row="0" Spacing="10" Margin="0,0,0,18">
+      <TextBlock Classes="eyebrow" Text="BUILD AN EFI" />
+      <TextBlock Name="Blurb" FontSize="13.5" TextWrapping="Wrap" MaxWidth="640"
+                 HorizontalAlignment="Left" Foreground="{DynamicResource Muted}"
+                 Text="The same questions the console asks, in the same order. Nothing is answered for you: where this machine can tell us something it is shown as detected, and you still choose." />
+      <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+        <TextBlock Grid.Column="0" Classes="eyebrow" Text="WRITE TO"
+                   VerticalAlignment="Center" />
+        <TextBlock Grid.Column="1" Name="OutFolder" Classes="mono"
+                   VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+        <Button Grid.Column="2" Name="Choose" Content="Change…" />
+      </Grid>
+    </StackPanel>
+
+    <!-- What the engine has said so far, in the colours it said it in -->
+    <Border Grid.Row="1" BorderBrush="{DynamicResource Line}" BorderThickness="1"
+            CornerRadius="8" Background="{DynamicResource Surface2}" ClipToBounds="True">
+      <!-- The console lines up its columns with spaces, so wrapping them would
+           take the alignment apart. It scrolls sideways instead. -->
+      <ScrollViewer Name="Scroll" Padding="16,12"
+                    HorizontalScrollBarVisibility="Auto">
+        <StackPanel Name="Transcript" Spacing="1" />
+      </ScrollViewer>
+    </Border>
+
+    <!-- The question that is open, if one is -->
+    <Border Grid.Row="2" Name="Prompt" Classes="panel" Margin="0,16,0,0" IsVisible="False">
+      <StackPanel Spacing="12">
+        <StackPanel Spacing="3">
+          <TextBlock Name="Step" Classes="eyebrow" IsVisible="False" />
+          <TextBlock Name="QuestionText" FontSize="16" FontWeight="SemiBold"
+                     Foreground="{DynamicResource Ink}" TextWrapping="Wrap" />
+          <TextBlock Name="Hint" FontSize="12.5" Foreground="{DynamicResource Muted}"
+                     TextWrapping="Wrap" IsVisible="False" />
+        </StackPanel>
+        <StackPanel Name="Options" Spacing="2" />
+        <TextBox Name="FreeText" Watermark="a path, or leave empty to decline"
+                 IsVisible="False" FontFamily="{DynamicResource Mono}" />
+        <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+          <Button Name="Stop" Content="Stop" />
+          <Button Name="Continue" Content="Continue" IsDefault="True"
+                  Classes="accent" />
+        </StackPanel>
+      </StackPanel>
+    </Border>
+
+    <!-- Before it starts, and after it ends -->
+    <Border Grid.Row="2" Name="Standby" Classes="panel" Margin="0,16,0,0">
+      <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
+        <StackPanel Grid.Column="0" Spacing="3" VerticalAlignment="Center">
+          <TextBlock Name="StandbyTitle" FontSize="15" FontWeight="SemiBold"
+                     Foreground="{DynamicResource Ink}" Text="Ready" />
+          <TextBlock Name="StandbyText" FontSize="12.5" TextWrapping="Wrap"
+                     Foreground="{DynamicResource Muted}"
+                     Text="This builds for the machine it runs on." />
+        </StackPanel>
+        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8"
+                    VerticalAlignment="Center">
+          <Button Name="Open" Content="Show the EFI folder" IsVisible="False" />
+          <Button Name="Begin" Content="Start" Classes="accent" />
+        </StackPanel>
+      </Grid>
+    </Border>
+  </Grid>
+</UserControl>

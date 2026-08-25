@@ -20,6 +20,7 @@ from pathlib import Path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import detect
 import ocgen
+import ui
 
 TABLE = Path('data/hardware.toml')
 ROLE_LABEL = {'ethernet': 'Ethernet', 'wifi': 'Wi-Fi', 'bluetooth': 'Bluetooth'}
@@ -29,9 +30,7 @@ GUIDES = {
     'bluetooth': 'https://dortania.github.io/Wireless-Buyers-Guide/',
 }
 
-BOLD, DIM, GREEN, YELLOW, RESET = '\033[1m', '\033[2m', '\033[32m', '\033[33m', '\033[0m'
-if os.environ.get('NO_COLOR') or not sys.stdout.isatty():
-    BOLD = DIM = GREEN = YELLOW = RESET = ''
+BOLD, DIM, GREEN, YELLOW, RESET = ui.colours('bold', 'dim', 'green', 'yellow', 'reset')
 
 
 def load_table():

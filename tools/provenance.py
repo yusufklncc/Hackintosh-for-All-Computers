@@ -31,10 +31,9 @@ from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import ocgen
+import ui
 
-BOLD, DIM, GREEN, YELLOW, RESET = '\033[1m', '\033[2m', '\033[32m', '\033[33m', '\033[0m'
-if os.environ.get('NO_COLOR') or not sys.stdout.isatty():
-    BOLD = DIM = GREEN = YELLOW = RESET = ''
+BOLD, DIM, GREEN, YELLOW, RESET = ui.colours('bold', 'dim', 'green', 'yellow', 'reset')
 
 DERIVED, QUOTED, MEASURED, REPORTED, NONE = (
     'derived', 'quoted', 'measured', 'reported', 'none')
@@ -72,18 +71,82 @@ def catalogue():
              covers='Sandy Bridge to Raptor Lake on Intel, Bulldozer and Ryzen on AMD',
              gap='Laptop profiles are Intel only. Nehalem and older, Core Ultra, '
                  'and Xeon decode to nothing rather than to a guess.'),
+        dict(area='A Mac\'s own devices', kind=MEASURED, file='tools/detect.py',
+             source="the machine's IORegistry, read while it is running macOS",
+             tool='tools/detect.py --report',
+             count='6 name fragments, plus whichever driver is attached',
+             covers='what each device is and which macOS driver has it, on a '
+                    'Mac where no kext claims anything and the running system '
+                    'is the only thing that can say',
+             gap='Only names that have been seen on a real machine are listed. '
+                 'A Mac that calls its Wi-Fi something else gets no role, '
+                 'which reads as "nothing recognised" rather than as a guess.'),
+        dict(area='Device names', kind=QUOTED, file='data/deviceids.toml',
+             source='the PCI ID Project, hwdata for the USB list, and each '
+                    "kext's own Info.plist for what neither carries",
+             tool='tools/deviceids.py --refresh',
+             count=f'{rows_in("data/deviceids.toml", "device")} named, '
+                   f'{len(ocgen.read_toml(Path("data/deviceids.toml")).get("unnamed", [])) if Path("data/deviceids.toml").exists() else 0} not',
+             covers='what to call each id this repository already drives, and '
+                    'which vendor made it, so a catalogue can be read and filtered',
+             gap='Names only. What is left unnamed is a device no public list '
+                 'and no kext names - the kext still matches it. USB names '
+                 'come from hwdata rather than linux-usb.org, whose file '
+                 'states no licence at all.'),
+        dict(area='What OCLP restores', kind=DERIVED, file='data/oclp.toml',
+             source="OpenCore Legacy Patcher's own PATCHEXPLAIN page, which "
+                    'lists each patch set with the macOS it applies from',
+             tool='tools/oclptable.py --refresh',
+             count=f'{rows_in("data/oclp.toml", "patch")} patch sets',
+             covers='where the graphics go past their native ceiling: Kepler '
+                    'from macOS 12, Haswell, Broadwell, Skylake, Polaris and '
+                    'Vega from 13',
+             gap='OCLP patches an installed macOS, not an EFI, so nothing a '
+                 'build produces changes. It is written for real Macs and says '
+                 'nothing about a PC running macOS - and neither does this. '
+                 'Three of its patch sets name no family this repository has a '
+                 'row for and are recorded unjoined.'),
+        dict(area='Mac support', kind=DERIVED, file='data/mac.toml',
+             source="Apple's own device metadata at gdmf.apple.com/v2/pmv",
+             tool='tools/mactable.py --refresh',
+             count=f'{rows_in("data/mac.toml", "mac")} machines across '
+                   f'{len(ocgen.read_toml(Path("data/mac.toml"))["lines"]) if Path("data/mac.toml").exists() else 0} '
+                   f'macOS lines',
+             covers='which macOS a real Mac still runs, by the board name it '
+                    'reports of itself, Intel and Apple silicon alike',
+             gap='Only the lines Apple still serves. A Mac that stopped at '
+                 'Monterey reads as "12 and newer" because 11 is as far back '
+                 'as the endpoint goes - the floor is the oldest served '
+                 'release, not the one the machine shipped with.'),
         dict(area='AMD graphics', kind=DERIVED, file='data/gpu.toml',
              source='dortania.github.io/GPU-Buyers-Guide, parsed from its tables',
              tool='tools/gputable.py',
              count=f'{rows_in("data/gpu.toml", "card")} cards',
              covers='Polaris, Vega, Navi 10/21/23, per card, with boot arguments',
              gap='Cards the guide does not list are unknown, not unsupported.'),
+        dict(area='NVIDIA families', kind=DERIVED, file='data/gpu.toml',
+             source="the guide's NVIDIA page, which states each family's "
+                    'oldest and newest macOS on its own lines',
+             tool='tools/gputable.py',
+             count=f'{rows_in("data/gpu.toml", "nvidia")} families, '
+                   f'{sum(len(f["cards"]) for f in ocgen.read_toml(Path("data/gpu.toml")).get("nvidia", []))} '
+                   f'cards named under them',
+             covers='every NVIDIA card, by the chip codename the PCI ID '
+                    'Project puts in its name: GK is Kepler and ends at Big '
+                    'Sur, GP is Pascal and ends at High Sierra, TU and newer '
+                    'never had a driver',
+             gap='A card the id list has no name for gets no family and falls '
+                 'back to the whole-vendor rule. The rebranded-Fermi section '
+                 'speaks for three named chips only, so a real Fermi is '
+                 'unclaimed rather than mislabelled.'),
         dict(area='NVIDIA and Arc', kind=QUOTED, file='data/gpu.toml',
              source='the same guide, which states these by family in prose',
              tool='tools/gputable.py',
              count=f'{rows_in("data/gpu.toml", "family")} family rules',
-             covers='every card of those vendors, by PCI vendor id',
-             gap='No per-card nuance: Kepler is in the note, not in a verdict.'),
+             covers='the fallback when no family claims a card, and every '
+                    'Intel Arc',
+             gap='A whole-vendor sentence. It is now the last resort rather '
+                 'than the only answer - see NVIDIA families above.'),
         dict(area='Intel iGPU', kind=DERIVED, file='data/gpu.toml',
              source='the same guide, per generation, with its framebuffer ids',
              tool='tools/gputable.py',

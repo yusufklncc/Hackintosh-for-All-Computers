@@ -1,0 +1,172 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="Shell.App"
+             RequestedThemeVariant="Default">
+  <Application.Styles>
+    <FluentTheme />
+
+    <Style Selector=":is(Window), :is(UserControl)">
+      <Setter Property="FontFamily" Value="{DynamicResource Sans}" />
+    </Style>
+
+    <!-- Colour means one thing here: a verdict. The accent is for navigation
+         and links only, so nothing on a hardware row can be mistaken for a
+         judgement about that hardware. -->
+    <Style Selector="Border.pill">
+      <Setter Property="CornerRadius" Value="10" />
+      <!-- room for the longest verdict, "driven by macOS", which was reaching
+           the edge of its own badge -->
+      <Setter Property="Padding" Value="10,3,11,4" />
+      <Setter Property="Background" Value="{DynamicResource NoneSoft}" />
+      <Setter Property="HorizontalAlignment" Value="Left" />
+    </Style>
+    <Style Selector="Border.pill > TextBlock">
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="TextWrapping" Value="NoWrap" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="Foreground" Value="{DynamicResource None}" />
+    </Style>
+    <Style Selector="Border.pill.ok"><Setter Property="Background" Value="{DynamicResource OkSoft}" /></Style>
+    <Style Selector="Border.pill.ok > TextBlock"><Setter Property="Foreground" Value="{DynamicResource Ok}" /></Style>
+    <Style Selector="Border.pill.bad"><Setter Property="Background" Value="{DynamicResource BadSoft}" /></Style>
+    <Style Selector="Border.pill.bad > TextBlock"><Setter Property="Foreground" Value="{DynamicResource Bad}" /></Style>
+    <Style Selector="Border.pill.warn"><Setter Property="Background" Value="{DynamicResource WarnSoft}" /></Style>
+    <Style Selector="Border.pill.warn > TextBlock"><Setter Property="Foreground" Value="{DynamicResource Warn}" /></Style>
+
+    <Style Selector="TextBlock.eyebrow">
+      <Setter Property="FontSize" Value="11" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="Foreground" Value="{DynamicResource Faint}" />
+      <Setter Property="LetterSpacing" Value="1.1" />
+    </Style>
+    <Style Selector="TextBlock.mono">
+      <Setter Property="FontFamily" Value="{DynamicResource Mono}" />
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="Foreground" Value="{DynamicResource Muted}" />
+    </Style>
+    <!-- A header cell that sorts. It has to look like the others until the
+         pointer is over it, or the table grows a row of buttons. -->
+    <Style Selector="Button.sorter">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="HorizontalContentAlignment" Value="Left" />
+      <Setter Property="Cursor" Value="Hand" />
+    </Style>
+    <Style Selector="Button.sorter:pointerover /template/ ContentPresenter">
+      <Setter Property="Background" Value="Transparent" />
+    </Style>
+    <Style Selector="Button.sorter:pointerover TextBlock">
+      <Setter Property="Foreground" Value="{DynamicResource Ink}" />
+    </Style>
+
+    <!-- A table row, not a list item with room to breathe: the default padding
+         made a seven-hundred-row table twice as tall as it needed to be. -->
+    <Style Selector="ListBox.rows > ListBoxItem">
+      <Setter Property="Padding" Value="14,5" />
+      <Setter Property="MinHeight" Value="0" />
+      <Setter Property="BorderBrush" Value="{DynamicResource Line}" />
+      <Setter Property="BorderThickness" Value="0,0,0,1" />
+      <Setter Property="CornerRadius" Value="0" />
+    </Style>
+    <Style Selector="ListBox.rows > ListBoxItem:selected /template/ ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource Surface2}" />
+    </Style>
+
+    <Style Selector="TextBlock.kext">
+      <Setter Property="Foreground" Value="{DynamicResource Accent}" />
+    </Style>
+    <Style Selector="Border.panel">
+      <Setter Property="BorderBrush" Value="{DynamicResource Line}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="8" />
+      <Setter Property="Padding" Value="16,14" />
+      <Setter Property="Background" Value="{DynamicResource Surface}" />
+    </Style>
+
+    <!-- Navigation: the current pane is the only accented thing on screen. -->
+    <Style Selector="RadioButton.nav">
+      <Setter Property="Template">
+        <ControlTemplate>
+          <Border Name="skin" Background="Transparent" CornerRadius="6" Padding="10,8">
+            <ContentPresenter Content="{TemplateBinding Content}" />
+          </Border>
+        </ControlTemplate>
+      </Setter>
+      <Setter Property="Foreground" Value="{DynamicResource Muted}" />
+      <Setter Property="FontSize" Value="14" />
+      <Setter Property="FontWeight" Value="Medium" />
+    </Style>
+    <Style Selector="RadioButton.nav:pointerover /template/ Border#skin">
+      <Setter Property="Background" Value="{DynamicResource Chrome}" />
+    </Style>
+    <Style Selector="RadioButton.nav:checked /template/ Border#skin">
+      <Setter Property="Background" Value="{DynamicResource AccentSoft}" />
+    </Style>
+    <Style Selector="RadioButton.nav:checked">
+      <Setter Property="Foreground" Value="{DynamicResource Accent}" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+  </Application.Styles>
+
+  <Application.Resources>
+    <ResourceDictionary>
+      <!-- Both faces travel inside the executable. Each names a fallback
+           after it: a weight that cannot be found should leave the window
+           looking wrong, not stop it from opening at all.
+
+           The authority in an avares URI is the assembly name, which is not
+           the namespace. Spelled wrong it resolves to nothing, the fallback
+           takes over, and the window looks fine in a screenshot while being
+           set in entirely the wrong face - which is what happened. -->
+      <!-- Both faces travel inside the executable. Every machine-produced
+           value is set in the monospace one, so a device id and the sentence
+           about it can never be mistaken for each other. See
+           Assets/Fonts/README.md for where they came from. -->
+      <FontFamily x:Key="Sans">avares://HackintoshEFIBuilderShell/Assets/Fonts#Instrument Sans, $Default</FontFamily>
+      <FontFamily x:Key="Mono">avares://HackintoshEFIBuilderShell/Assets/Fonts#IBM Plex Mono, monospace</FontFamily>
+      <ResourceDictionary.ThemeDictionaries>
+        <ResourceDictionary x:Key="Light">
+          <SolidColorBrush x:Key="Ground" Color="#EEF1F5" />
+          <SolidColorBrush x:Key="Surface" Color="#FFFFFF" />
+          <SolidColorBrush x:Key="Surface2" Color="#F6F8FA" />
+          <SolidColorBrush x:Key="Chrome" Color="#E4E8EE" />
+          <SolidColorBrush x:Key="Ink" Color="#11151C" />
+          <SolidColorBrush x:Key="Muted" Color="#5B6472" />
+          <SolidColorBrush x:Key="Faint" Color="#8A93A1" />
+          <SolidColorBrush x:Key="Line" Color="#DDE2E9" />
+          <SolidColorBrush x:Key="Accent" Color="#3E3BA8" />
+          <SolidColorBrush x:Key="AccentSoft" Color="#ECECFA" />
+          <SolidColorBrush x:Key="Ok" Color="#1B7A46" />
+          <SolidColorBrush x:Key="OkSoft" Color="#E4F3EA" />
+          <SolidColorBrush x:Key="Bad" Color="#AE2A20" />
+          <SolidColorBrush x:Key="BadSoft" Color="#FBE9E7" />
+          <SolidColorBrush x:Key="Warn" Color="#8A5D10" />
+          <SolidColorBrush x:Key="WarnSoft" Color="#FBF0DC" />
+          <SolidColorBrush x:Key="None" Color="#6E7784" />
+          <SolidColorBrush x:Key="NoneSoft" Color="#EDEFF3" />
+        </ResourceDictionary>
+        <ResourceDictionary x:Key="Dark">
+          <SolidColorBrush x:Key="Ground" Color="#0B0E13" />
+          <SolidColorBrush x:Key="Surface" Color="#141922" />
+          <SolidColorBrush x:Key="Surface2" Color="#1A202A" />
+          <SolidColorBrush x:Key="Chrome" Color="#1E242F" />
+          <SolidColorBrush x:Key="Ink" Color="#E7EBF1" />
+          <SolidColorBrush x:Key="Muted" Color="#98A2B0" />
+          <SolidColorBrush x:Key="Faint" Color="#6E7887" />
+          <SolidColorBrush x:Key="Line" Color="#252C38" />
+          <SolidColorBrush x:Key="Accent" Color="#A6A2FF" />
+          <SolidColorBrush x:Key="AccentSoft" Color="#20213B" />
+          <SolidColorBrush x:Key="Ok" Color="#4FC489" />
+          <SolidColorBrush x:Key="OkSoft" Color="#12281E" />
+          <SolidColorBrush x:Key="Bad" Color="#F3736A" />
+          <SolidColorBrush x:Key="BadSoft" Color="#2B1614" />
+          <SolidColorBrush x:Key="Warn" Color="#DCA84C" />
+          <SolidColorBrush x:Key="WarnSoft" Color="#2A2113" />
+          <SolidColorBrush x:Key="None" Color="#8892A0" />
+          <SolidColorBrush x:Key="NoneSoft" Color="#1C222C" />
+        </ResourceDictionary>
+      </ResourceDictionary.ThemeDictionaries>
+    </ResourceDictionary>
+  </Application.Resources>
+</Application>

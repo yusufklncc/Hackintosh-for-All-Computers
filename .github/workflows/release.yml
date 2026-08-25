@@ -13,8 +13,12 @@ jobs:
   windows-exe:
     uses: ./.github/workflows/windows-exe.yml
 
+  # the window and its engine, one folder per system
+  packages:
+    uses: ./.github/workflows/gui.yml
+
   build:
-    needs: windows-exe
+    needs: [windows-exe, packages]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -36,6 +40,23 @@ jobs:
           name: windows-exe
           path: dist
 
+      # Each package is a folder of two programs. A release carries files, so
+      # each becomes one zip named for the system it runs on.
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: '*-package'
+          path: packages
+
+      - name: One zip per system
+        run: |
+          cd packages
+          for made in *-package; do
+            system="${made%-package}"
+            chmod +x "$made"/HackintoshEFIBuilder* 2>/dev/null || true
+            (cd "$made" && zip -qr "../../dist/HackintoshEFIBuilder-$system.zip" .)
+            echo "  $system  $(du -sh "$made" | cut -f1)"
+          done
+
       - name: Publish
         uses: softprops/action-gh-release@v3
         with:
@@ -44,12 +65,17 @@ jobs:
             dist/*.zip
             dist/HackintoshEFIBuilder.exe
           body: |
-            **`HackintoshEFIBuilder.exe`** is the easy path on Windows. Download
-            it, run it, answer a few questions and it writes the EFI folder for
-            your machine - reading your CPU, board and network cards to suggest
-            the answers. Nothing else to install.
+            **`HackintoshEFIBuilder-win-x64.zip`** is the easy path: unzip it and
+            run `HackintoshEFIBuilderShell.exe`. A window that reads your machine,
+            says what macOS will and will not drive in it, and writes the EFI
+            folder. Nothing to install. The same package is there for
+            `linux-x64` and `osx-arm64`.
 
-            The two zips are the manual path. `EFI-base.zip` is the EFI folder;
+            **`HackintoshEFIBuilder.exe`** on its own is the console version of
+            the same thing, for anyone who prefers a terminal or is working over
+            one.
+
+            The remaining two zips are the manual path. `EFI-base.zip` is the EFI folder;
             `configs.zip` holds one `config.plist` per supported machine.
 
             1. Extract `EFI-base.zip` - you get an `EFI` folder.

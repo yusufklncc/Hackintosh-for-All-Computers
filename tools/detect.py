@@ -20,6 +20,7 @@ import datetime
 import os
 import json
 import platform
+import plistlib
 import re
 import subprocess
 import sys
@@ -125,6 +126,42 @@ OEM_ALIASES = {
 }
 
 
+
+# Names a machine reports of itself that name nothing. A field a vendor left at
+# its default is worse than an empty one: it looks like an answer.
+PLACEHOLDER_MODELS = {
+    'system product name', 'to be filled by o.e.m.', 'default string',
+    'not specified', 'not applicable', 'none', 'invalid', 'system name',
+    'to be filled by oem', 'oem', 'product name', 'system version',
+    'undefined', 'x.x', '123456789', 'na', 'n/a', '.',
+}
+
+
+def model_name(raw):
+    """What this machine calls itself, or None.
+
+    A laptop names itself in SMBIOS type 1 and that is the name people use for
+    it. A desktop is whatever board went into it, so the board is the more
+    useful of the two - and where the vendor never filled either in, this says
+    nothing rather than repeating their placeholder back."""
+    def usable(value):
+        text = (value or '').strip()
+        if not text or text.lower() in PLACEHOLDER_MODELS:
+            return None
+        # "1.0", "A1", "Rev 1.02" - a version, which is what most vendors put
+        # in the field Lenovo uses for the name
+        if re.fullmatch(r'(?i)(rev\.?\s*)?[vA-Z]?[\d.]+[a-z]?', text):
+            return None
+        return text
+
+    model, board = usable(raw.get('model')), usable(raw.get('board'))
+    version = usable(raw.get('version'))
+    if raw.get('laptop'):
+        return version or model or board
+    # a desktop's type 1 is often the board's name with less of it
+    return board or model
+
+
 def normalise_oem(vendor):
     if not vendor:
         return None
@@ -144,6 +181,17 @@ def _windows():
     cores = _ps('(Get-CimInstance Win32_Processor | Select-Object -First 1).NumberOfCores')
     out['cores'] = int(cores.strip()) if cores.strip().isdigit() else None
     out['vendor'] = _ps('(Get-CimInstance Win32_ComputerSystem).Manufacturer').strip()
+    # SMBIOS type 1 (the system) and type 2 (the board). A laptop puts its name
+    # in the first - "ThinkPad E570" - and a desktop usually has nothing there
+    # worth reading, because the machine is whatever board somebody chose.
+    out['model'] = _ps('(Get-CimInstance Win32_ComputerSystem).Model').strip()
+    # Lenovo puts the machine type in Model - "20H5006TTX" - and the name
+    # people know it by in the type 1 Version field. Most other vendors leave
+    # Version at something like "1.0", which is filtered out below rather than
+    # special-cased per vendor.
+    out['version'] = _ps('(Get-CimInstance Win32_ComputerSystemProduct).Version').strip()
+    out['board'] = _ps('$b = Get-CimInstance Win32_BaseBoard; '
+                       '"$($b.Manufacturer) $($b.Product)"').strip()
     chassis = _ps('(Get-CimInstance Win32_SystemEnclosure).ChassisTypes -join ","')
     types = {int(x) for x in re.findall(r'\d+', chassis)}
     if types:
@@ -171,6 +219,14 @@ def _windows():
         '{ $_.PNPClass -in @("Camera","Image","SDHost","MTD","Mouse","Keyboard") } '
         '| ForEach-Object '
         '{ "$($_.PNPClass)|$($_.PNPDeviceID)|$($_.Name)|$($_.Service)" }')
+    # Windows classes every device it enumerates, and for a network card that
+    # class is the machine saying what the card is. A card no kext here claims
+    # would otherwise be read as "nothing recognised" when the machine knew
+    # perfectly well it was the Wi-Fi.
+    out['netclass'] = _ps(
+        'Get-CimInstance Win32_PnPEntity | Where-Object '
+        '{ $_.PNPClass -in @("Net","Bluetooth") } | ForEach-Object '
+        '{ "$($_.PNPClass)|$($_.PNPDeviceID)|$($_.Name)" }')
     # ACPI-enumerated devices, for the I2C controllers that have no PCI id at
     # all: on Haswell and Broadwell they are INT33C2 and friends, and AMD's are
     # only ever named this way.
@@ -199,10 +255,19 @@ def _linux():
     ids = set(re.findall(r'^core id\s*:\s*(\d+)$', cpuinfo, re.M))
     out['cores'] = len(ids) or None
     out['vendor'] = _read('/sys/class/dmi/id/sys_vendor')
+    # the same two SMBIOS records, as the kernel exposes them
+    out['model'] = _read('/sys/class/dmi/id/product_name')
+    out['version'] = _read('/sys/class/dmi/id/product_version')
+    out['board'] = ' '.join(x for x in (_read('/sys/class/dmi/id/board_vendor'),
+                                        _read('/sys/class/dmi/id/board_name')) if x)
     chassis = _read('/sys/class/dmi/id/chassis_type')
     if chassis.isdigit():
         out['laptop'] = int(chassis) in {8, 9, 10, 11, 12, 14, 18, 21, 30, 31, 32}
     out['pci'] = _run(['lspci', '-nn'])
+    # lspci names the class before the model: "Network controller: Intel ..."
+    out['netclass'] = '\n'.join(
+        f'Net|{l}' for l in out['pci'].splitlines()
+        if re.search(r':\s*(Ethernet|Network) controller', l))
     out['gpu'] = [f"PCI|{l.split(': ', 1)[-1]}" for l in out['pci'].splitlines()
                   if 'VGA compatible controller' in l or '3D controller' in l]
     out['usb'] = _run(['lsusb'])
@@ -223,20 +288,273 @@ def _linux():
     return out
 
 
+
+def _ioreg(cls):
+    """Every node of one IOKit class, flattened, as plain dictionaries.
+
+    -a asks for a plist, which is a tree of the same dictionaries ioreg would
+    otherwise pretty-print. Parsing that beats parsing the drawing of it."""
+    raw = _run(['ioreg', '-a', '-r', '-c', cls, '-l'])
+    if not raw.strip():
+        return []
+    try:
+        tree = plistlib.loads(raw.encode('utf-8', 'replace'))
+    except Exception:
+        return []
+    out = []
+
+    def walk(nodes):
+        for node in nodes or []:
+            if isinstance(node, dict):
+                out.append(node)
+                walk(node.get('IORegistryEntryChildren'))
+    walk(tree if isinstance(tree, list) else [tree])
+    return out
+
+
+def _le(value):
+    """A little-endian id as IOKit stores it: <e4140000> is 14e4."""
+    if not isinstance(value, bytes) or len(value) < 2:
+        return None
+    return f'{value[1]:02x}{value[0]:02x}'
+
+
+def _text(value):
+    if isinstance(value, bytes):
+        return value.split(b'\x00', 1)[0].decode('utf-8', 'replace').strip()
+    return str(value).strip() if value else ''
+
+
+def _pci_name(node):
+    """What the registry calls a device, in the plainest form it offers.
+
+    `model` where there is one. Otherwise the entry's own name - "wlan",
+    "pcie-sdreader" - and the chip out of `compatible`, which is where the
+    part number lives: "wlan-pcie,bcm4387".  Neither is a marketing name and
+    neither is invented."""
+    model = _text(node.get('model'))
+    if model:
+        return model
+    name = _text(node.get('IORegistryEntryName') or node.get('name'))
+    chip = _text(node.get('compatible')).split(',')[-1]
+    # no brackets: the name reader strips those, because on an lspci line they
+    # hold "(rev 04)" and nothing worth keeping
+    worth_saying = (chip and chip.lower() not in name.lower()
+                    # a part number has letters in it. "9755" is the device id
+                    # again, and "pcie-bridge" is what the name already said
+                    and any(c.isalpha() for c in chip)
+                    and any(c.isdigit() for c in chip)
+                    and 'bridge' not in chip.lower())
+    return f'{name}, {chip}' if worth_saying else name
+
+
+# What the IORegistry calls a device is the machine naming its own hardware,
+# and on a Mac it is the only thing that does: no kext here claims an Apple
+# chip, so nothing else can say which of them is the Wi-Fi. Only names that
+# have actually been seen are listed; a name nobody has observed would be a
+# guess with a table around it.
+REGISTRY_ROLES = (
+    ('wlan', 'wifi'), ('airport', 'wifi'),
+    ('bluetooth', 'bluetooth'),
+    ('ethernet', 'ethernet'),
+    ('sdreader', 'card reader'), ('sdxc', 'card reader'),
+)
+
+
+WIRELESS_WORDS = ('wireless', 'wifi', 'wi-fi', 'wlan', '802.11')
+
+
+def named_roles(text, patterns):
+    """{id: role} for the devices a system classed as network hardware.
+
+    Windows gives every device a PNPClass and Linux puts the class in the lspci
+    line, so "this is a network card" is the machine's own word and not a
+    reading of the marketing name. Wi-Fi against Ethernet is not in the class,
+    though, and the model name is the only thing that separates them: a card
+    calling itself "Wireless LAN WiFi 6" is not an Ethernet port."""
+    out = {}
+    for line in (text or '').splitlines():
+        parts = line.split('|', 2)
+        if len(parts) < 2:
+            continue
+        kind, rest = parts[0].strip().lower(), '|'.join(parts[1:])
+        found = _pairs(rest, patterns)
+        if not found:
+            continue
+        name = rest.lower()
+        if kind == 'bluetooth' or 'bluetooth' in name:
+            role = 'bluetooth'
+        elif any(word in name for word in WIRELESS_WORDS):
+            role = 'wifi'
+        else:
+            role = 'ethernet'
+        for device_id in found:
+            out.setdefault(device_id, role)
+    return out
+
+
+def _pci_role(node):
+    """What this device is, in the machine's own words, or None.
+
+    Substrings rather than exact names: the same part is "wlan" on one Mac and
+    "wlan-pcie" on another, and both are the machine saying Wi-Fi."""
+    # The entry name first and on its own. A combo chip gives both of its
+    # functions the same `compatible` - the Bluetooth half of a BCM4387 reads
+    # "wlan-pcie,bcm4387" too - so matching that first calls the Bluetooth
+    # Wi-Fi. The names are "wlan" and "bluetooth-pcie", and those are right.
+    for text in (_text(node.get('IORegistryEntryName') or node.get('name')),
+                 _text(node.get('compatible'))):
+        for fragment, role in REGISTRY_ROLES:
+            if fragment in text.lower():
+                return role
+    return None
+
+
+def _pci_driver(node):
+    """The macOS driver attached to this device, or None.
+
+    A PCI node's first child is whatever claimed it. That is not a guess about
+    whether the device works - it is the running system saying which driver it
+    handed the device to, on a machine that is running macOS while being asked."""
+    for child in node.get('IORegistryEntryChildren') or []:
+        found = _text(child.get('IOClass') or child.get('IORegistryEntryName'))
+        if found:
+            # a DriverKit driver is a userspace one and the registry names the
+            # wrapper rather than the driver; saying so beats saying IOUserService
+            return 'a DriverKit driver' if found == 'IOUserService' else found
+    return None
+
+
+def macos_devices():
+    """This Mac's PCI, USB and audio devices, in the shapes the parsers expect.
+
+    system_profiler is the wrong place to ask. SPPCIDataType reports nothing at
+    all on Apple silicon - measured on an M1 Pro, zero lines - while the same
+    machine's IORegistry has the Wi-Fi, the Bluetooth and the card reader with
+    their vendor and device ids. This matters most on a PC already running
+    macOS, which is a machine somebody may well be rebuilding an EFI for.
+
+    The lines come out looking like lspci and lsusb because those are already
+    parsed here; a third format would be a third thing to keep working."""
+    pci, roles, drivers = [], {}, {}
+    for node in _ioreg('IOPCIDevice'):
+        vendor, device = _le(node.get('vendor-id')), _le(node.get('device-id'))
+        if not (vendor and device):
+            continue
+        pci.append(f'[{vendor}:{device}]' + (f'|{_pci_name(node)}'
+                                             if _pci_name(node) else ''))
+        role = _pci_role(node)
+        if role:
+            roles[f'{vendor}:{device}'] = role
+        driver = _pci_driver(node)
+        if driver:
+            drivers[f'{vendor}:{device}'] = driver
+
+    usb = []
+    for node in _ioreg('IOUSBHostDevice'):
+        vendor, product = node.get('idVendor'), node.get('idProduct')
+        if not (isinstance(vendor, int) and isinstance(product, int)):
+            continue
+        name = _text(node.get('USB Product Name') or node.get('kUSBProductString'))
+        usb.append(f'ID {vendor:04x}:{product:04x}' + (f'|{name}' if name else ''))
+
+    hda = []
+    for node in _ioreg('IOHDACodecDevice'):
+        codec = node.get('IOHDACodecVendorID')
+        if isinstance(codec, int):
+            hda.append(f'Vendor Id: 0x{codec:08x}')
+
+    return '\n'.join(pci), '\n'.join(usb), '\n'.join(hda), roles, drivers
+
+
+CAMERA_DRIVER = re.compile(r'\+-o (\w*Cam\w*)\s+<class \1,[^>]*\bmatched\b')
+
+
+def macos_camera_driver():
+    """The class macOS matched to this Mac's camera, or None.
+
+    Read from the tree drawing rather than a plist, because the class name is
+    what has to be searched for and it changes with the chip - AppleH13CamIn
+    here, AppleH10CamIn on an older one. "matched" in the same line is the
+    registry saying a driver took the device, not merely that it exists."""
+    found = CAMERA_DRIVER.search(_run(['ioreg', '-l']))
+    return found.group(1) if found else None
+
+
+def macos_board():
+    """The name a Mac calls its own logic board.
+
+    Apple silicon puts it first in the platform node's `compatible` - the whole
+    property reads J314sAP, MacBookPro18,3, AppleARM - and Intel has a
+    `board-id` of the Mac-XXXXXXXX form. Apple's own support metadata is keyed
+    on exactly these, which is what makes it possible to say which macOS a
+    given Mac still runs.
+
+    The serial number is right beside both of these and is never read."""
+    nodes = _ioreg('IOPlatformExpertDevice')
+    if not nodes:
+        return None
+    node = nodes[0]
+    board = _text(node.get('board-id'))
+    if board:
+        return board
+    first = _text(node.get('compatible')).split(chr(0))[0].strip()
+    return first or None
+
+
+def _macos_peripherals():
+    """The camera and the card reader, as their own sections report them.
+
+    Written in the same "class|id|name" shape the Windows query produces, so
+    the one parser reads both. PCI rather than USB on Apple silicon, which is
+    the distinction the camera row turns on."""
+    lines = []
+    camera = _run(['system_profiler', 'SPCameraDataType'])
+    for name in re.findall(r'^\s{4}(\S.*?):$', camera, re.M):
+        # a built-in Mac camera is on neither bus this knows; PCI is the honest
+        # half of the answer, since what matters downstream is "not USB"
+        lines.append(f'Camera|PCI\\{name.strip()}|{name.strip()}')
+    reader = _run(['system_profiler', 'SPCardReaderDataType'])
+    names = re.findall(r'^\s{4}(\S.*?):$', reader, re.M)
+    ids = re.findall(r'Vendor ID:\s*0x([0-9a-fA-F]{4}).*?Device ID:\s*0x([0-9a-fA-F]{4})',
+                     reader, re.S)
+    for i, name in enumerate(names):
+        ident = (f'PCI\\VEN_{ids[i][0].upper()}&DEV_{ids[i][1].upper()}'
+                 if i < len(ids) else f'PCI\\{name.strip()}')
+        lines.append(f'SDHost|{ident}|{name.strip()}')
+    return '\n'.join(lines)
+
+
 def _macos():
     out = {}
     out['cpu'] = _run(['sysctl', '-n', 'machdep.cpu.brand_string']).strip()
     cores = _run(['sysctl', '-n', 'hw.physicalcpu']).strip()
     out['cores'] = int(cores) if cores.isdigit() else None
     model = _run(['sysctl', '-n', 'hw.model']).strip()
+    out['model'] = model
     if model:
         out['laptop'] = model.startswith(('MacBook',))
     out['vendor'] = ''
-    out['pci'] = _run(['system_profiler', 'SPPCIDataType'])
-    out['usb'] = _run(['system_profiler', 'SPUSBDataType'])
+    # both sources: the registry is the one that answers on Apple silicon, and
+    # system_profiler is left in because an Intel Mac fills it in and no machine
+    # here can prove what it looks like there
+    pci, usb, hda, roles, drivers = macos_devices()
+    out['pci'] = pci + '\n' + _run(['system_profiler', 'SPPCIDataType'])
+    out['usb'] = usb + '\n' + _run(['system_profiler', 'SPUSBDataType'])
+    out['hda'] = hda
+    nvme = _run(['system_profiler', 'SPNVMeDataType'])
     out['storage'] = '\n'.join(
-        f'17|{m}' for m in re.findall(r'^\s{6}(\S.*?):$',
-                                      _run(['system_profiler', 'SPNVMeDataType']), re.M))
+        f'17|{m.strip()}' for m in re.findall(r'^\s+Model:\s*(.+)$', nvme, re.M))
+    out['peripherals'] = _macos_peripherals()
+    out['board'] = macos_board()
+    out['machine_roles'] = roles
+    out['machine_drivers'] = drivers
+    # a MacBook's trackpad is not on PS/2 or I2C; it is its own device class
+    out['multitouch'] = bool(_ioreg('AppleMultitouchDevice'))
+    out['camera_driver'] = macos_camera_driver()
+    # the codec query finds nothing on Apple silicon, but the devices are named
+    out['audio_devices'] = [m.strip() for m in re.findall(
+        r'^\s{8}(\S.*?):$', _run(['system_profiler', 'SPAudioDataType']), re.M)]
     out['gpu'] = [f'PCI|{m.strip()}' for m in re.findall(
         r'^\s*Chipset Model:\s*(.+)$',
         _run(['system_profiler', 'SPDisplaysDataType']), re.M)]
@@ -456,6 +774,21 @@ def probe():
         'laptop': laptop,
         'oem': normalise_oem(raw.get('vendor')),
         'oem_raw': (raw.get('vendor') or '').strip() or None,
+        'model': model_name(raw),
+        # Only a Mac has one of these, and it is what Apple's support metadata
+        # is keyed on. Linux and Windows fill `board` with the baseboard name -
+        # "Microsoft Corporation Virtual Machine" - and letting that through
+        # made every PC a Mac that Apple had never heard of.
+        'board_id': raw.get('board') if system == 'Darwin' else None,
+        # {id: role}, where the machine itself said what a device is. Only
+        # macOS answers this; everywhere else the kext tables do.
+        'machine_roles': (raw.get('machine_roles')
+                          or named_roles(raw.get('netclass'), PCI_PATTERNS + USB_PATTERNS)),
+        # {id: driver}, from the system that is running while it is asked
+        'machine_drivers': raw.get('machine_drivers') or {},
+        'multitouch': raw.get('multitouch'),
+        'camera_driver': raw.get('camera_driver'),
+        'audio_devices': raw.get('audio_devices') or [],
         'gpu': [g['name'] for g in split_graphics(raw.get('gpu'))[0]],
         'gpu_devices': split_graphics(raw.get('gpu'))[0],
         'gpu_virtual': [g['name'] for g in split_graphics(raw.get('gpu'))[1]],
@@ -489,7 +822,8 @@ REPORT_VERSION = 1
 
 def describe(hw):
     """One line naming the machine a probe came from, for confirming it."""
-    parts = [hw.get('cpu') or 'unknown CPU']
+    parts = [hw['model']] if hw.get('model') else []
+    parts.append(hw.get('cpu') or 'unknown CPU')
     if hw.get('cores'):
         parts.append(f'{hw["cores"]} cores')
     if hw.get('oem_raw'):

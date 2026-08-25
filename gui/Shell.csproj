@@ -1,0 +1,34 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- The window. Everything it shows comes from the Python engine beside it:
+       this project holds no rules about hardware, no kext names and no macOS
+       versions, so there is nowhere for a second answer to the same question
+       to come from. -->
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <AssemblyName>HackintoshEFIBuilderShell</AssemblyName>
+    <RootNamespace>Shell</RootNamespace>
+    <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+    <!-- Reflection-based JSON does not survive trimming, so the payload is read
+         through a generated context instead. Without this the published build
+         reads every field as null and the window comes up empty. -->
+    <JsonSerializerIsReflectionEnabledByDefault>false</JsonSerializerIsReflectionEnabledByDefault>
+    <!-- Skia is a native library, and a single-file publish leaves native
+         libraries beside the executable unless told otherwise. The file then
+         looks complete, is the size you would expect, and dies on the first
+         line that needs to draw anything. -->
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+  </PropertyGroup>
+  <ItemGroup>
+    <AvaloniaResource Include="Assets/Fonts/*.ttf" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Avalonia" Version="11.*" />
+    <PackageReference Include="Avalonia.Desktop" Version="11.*" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.*" />
+  </ItemGroup>
+</Project>

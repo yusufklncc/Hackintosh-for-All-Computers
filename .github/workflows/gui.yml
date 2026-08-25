@@ -1,0 +1,213 @@
+name: gui
+
+# Builds the window and takes its picture.
+#
+# A window is the deliverable here, and nobody can review a window from a build
+# log. Every run renders both themes against a fixture - a real laptop, not
+# whatever the runner happens to be - and uploads them, so a change to the
+# layout can be looked at the way a change to the code is read.
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ['beta/**']
+    paths: ['gui/**', '.github/workflows/gui.yml']
+  pull_request:
+    paths: ['gui/**']
+
+jobs:
+  shell:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            rid: win-x64
+            exe: HackintoshEFIBuilderShell.exe
+          - os: ubuntu-latest
+            rid: linux-x64
+            exe: HackintoshEFIBuilderShell
+          # macOS is where an EFI often gets finished rather than started: the
+          # target machine's report travels to the Mac and the build happens
+          # there. The window has to open on it, so it is built and drawn here
+          # like the other two.
+          - os: macos-latest
+            rid: osx-arm64
+            exe: HackintoshEFIBuilderShell
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      # the shell runs the engine rather than reimplementing it, so the engine
+      # has to be runnable here: from a clone that means Python
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: X server for the Linux run
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y xvfb
+
+      - name: It builds
+        run: dotnet build gui/Shell.csproj -c Release --nologo
+
+      # Published before it is drawn, because the published file is what people
+      # get. Rendering with `dotnet run` tested a layout that was never shipped:
+      # the single file was missing its native Skia library and died on startup,
+      # and nothing here noticed for four green runs.
+      - name: And it publishes as one file
+        run: >
+          dotnet publish gui/Shell.csproj -c Release -o out
+          -r ${{ matrix.rid }} --self-contained true
+          -p:PublishTrimmed=true -p:PublishSingleFile=true
+          -p:EnableCompressionInSingleFile=true
+
+      # Against a fixture, not against the runner. A Hyper-V VM has almost no
+      # hardware to describe, and a screenshot of an empty table reviews nothing.
+      # Two widths on purpose: the Linux runner gets a screen big enough for the
+      # window it asks for, and the Windows runner's 1024x768 shows what the
+      # same layout does when it cannot have it.
+      - name: It draws a machine
+        shell: bash
+        run: |
+          ${{ runner.os == 'Linux' && 'xvfb-run -a -s "-screen 0 1440x1000x24" ' || '' }}"out/${{ matrix.exe }}" \
+            --machine tools/fixtures/thinkpad-e570.json --render "$PWD/shell.png" \
+            | tee render.log
+          test -s shell.png || { echo 'no light screenshot'; exit 1; }
+          test -s shell-dark.png || { echo 'no dark screenshot'; exit 1; }
+          test -s shell-builder.png || { echo 'no builder screenshot'; exit 1; }
+          # the pane is only worth a picture if an engine answered into it
+          grep -qE 'builder: [1-9][0-9]* lines, asking ".+" with [1-9]' render.log \
+            || { echo 'the builder pane never got a question'; cat render.log; exit 1; }
+          # and it has to be able to finish one, not only start it
+          grep -q 'drive: rc=0 Written:' render.log \
+            || { echo 'the builder pane never finished a build'; cat render.log; exit 1; }
+          for pane in report devices kexts about; do
+            test -s "shell-$pane.png" || { echo "no $pane screenshot"; exit 1; }
+          done
+          grep -q 'report: Written ->' render.log \
+            || { echo 'the report pane wrote nothing'; cat render.log; exit 1; }
+
+      # A font that failed to load falls back to the system's, and the window
+      # still looks reasonable. That is the whole problem: it has to be checked,
+      # not eyeballed.
+      - name: In the faces it was set in
+        shell: bash
+        run: |
+          cat render.log
+          grep -q 'typeface Sans/400 -> Instrument Sans 400' render.log
+          grep -q 'typeface Sans/600 -> Instrument Sans 600' render.log
+          grep -q 'typeface Mono/400 -> IBM Plex Mono 400' render.log
+
+      - name: What it costs
+        shell: bash
+        run: |
+          size=$(stat -c %s "out/${{ matrix.exe }}" 2>/dev/null || stat -f %z "out/${{ matrix.exe }}")
+          echo "### ${{ matrix.os }}" >> $GITHUB_STEP_SUMMARY
+          echo "single file: $size bytes" >> $GITHUB_STEP_SUMMARY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: shell-${{ matrix.rid }}
+          path: |
+            shell.png
+            shell-dark.png
+            shell-builder.png
+            shell-report.png
+            shell-devices.png
+            shell-kexts.png
+            shell-about.png
+            out/${{ matrix.exe }}
+
+  # What a person actually downloads: the window and the engine in one folder.
+  # The window runs the engine rather than reimplementing it, so shipping one
+  # without the other ships nothing that works.
+  package:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            rid: win-x64
+            shell_exe: HackintoshEFIBuilderShell.exe
+            engine_exe: HackintoshEFIBuilder.exe
+          - os: ubuntu-latest
+            rid: linux-x64
+            shell_exe: HackintoshEFIBuilderShell
+            engine_exe: HackintoshEFIBuilder
+          - os: macos-latest
+            rid: osx-arm64
+            shell_exe: HackintoshEFIBuilderShell
+            engine_exe: HackintoshEFIBuilder
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install pyinstaller
+
+      - name: X server for the Linux run
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y xvfb
+
+      - name: The vendored tools are executable
+        if: runner.os != 'Windows'
+        run: chmod +x vendor/opencore/*/Utilities/*/* || true
+
+      - name: The engine
+        run: pyinstaller --clean --noconfirm --distpath package tools/pyinstaller.spec
+
+      - name: The window, beside it
+        run: >
+          dotnet publish gui/Shell.csproj -c Release -o package
+          -r ${{ matrix.rid }} --self-contained true
+          -p:PublishTrimmed=true -p:PublishSingleFile=true
+          -p:EnableCompressionInSingleFile=true
+
+      # The window looks for the engine beside itself first and falls back to a
+      # clone. On this runner a clone is right there, so the check is not that
+      # it worked - it is that it used the packaged engine and not the source.
+      - name: It uses the engine it shipped with
+        shell: bash
+        run: |
+          cd package
+          ${{ runner.os == 'Linux' && 'xvfb-run -a -s "-screen 0 1400x1000x24" ' || '' }}./${{ matrix.shell_exe }} \
+            --machine ../tools/fixtures/thinkpad-e570.json --render "$PWD/shot.png" \
+            | tee render.log
+          grep -q 'engine: beside this window' render.log \
+            || { echo 'it did not use the packaged engine'; cat render.log; exit 1; }
+          test -s shot.png || { echo 'it drew nothing'; exit 1; }
+          rm -f render.log shot*.png machine.json described.json
+          rm -rf EFI ACPI
+
+      - name: How long reading a machine takes here
+        shell: bash
+        run: |
+          cd package
+          start=$(date +%s)
+          ./${{ matrix.engine_exe }} --describe > described.json
+          echo "### ${{ matrix.os }}" >> $GITHUB_STEP_SUMMARY
+          echo "describe took $(( $(date +%s) - start ))s" >> $GITHUB_STEP_SUMMARY
+          python -c "import json; d=json.load(open('described.json')); \
+            print('rows', len(d['rows']), 'read', d['read'])" \
+            >> $GITHUB_STEP_SUMMARY
+          rm -f described.json
+
+      - name: What it weighs
+        shell: bash
+        run: |
+          du -sh package >> $GITHUB_STEP_SUMMARY
+          ls -la package | head -20 >> $GITHUB_STEP_SUMMARY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.rid }}-package
+          path: package/

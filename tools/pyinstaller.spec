@@ -20,8 +20,8 @@ a = Analysis(
     pathex=[TOOLS],
     datas=datas,
     hiddenimports=['acpi', 'advise', 'audio', 'build', 'detect', 'gpu', 'igpu',
-                   'inputdev', 'itlwm', 'netkexts', 'ocgen', 'provenance',
-                   'summary', 'thirdparty', 'usbmap']
+                   'coverage', 'deviceids', 'inputdev', 'inventory', 'itlwm', 'mactable', 'netkexts', 'ocgen', 'oclptable', 'provenance',
+                   'summary', 'thirdparty', 'ui', 'usbmap']
                   # SSDTTime is loaded at runtime with importlib, from a copy of
                   # the vendored tree. PyInstaller never sees those imports, so
                   # the standard library it uses has to be named here or the

@@ -584,3 +584,86 @@ status = "unsupported"
 quote = "So Intel finally made a discrete GPU. Lmao. All of them are unsupported."
 source = "https://dortania.github.io/GPU-Buyers-Guide/modern-gpus/intel-gpu.html"
 note = "The page names the Alchemist cards; Battlemage is not listed individually but falls under the same statement."
+
+[[nvidia]]
+chips = ["GK"]
+name = "Kepler Series (GTX 6xx, 7xx)"
+source = "https://dortania.github.io/GPU-Buyers-Guide/modern-gpus/nvidia-gpu.html"
+status = "works"
+cards = ["GTX Titan (GK110 Maxwell core)", "GTX Titan Black (GK110 Maxwell core)", "GTX Titan Z (One of the few dual GPU cards supported in macOS, but only one core will be in use)", "GTX 780 Ti", "GTX 780", "GTX 770", "GTX 760 Ti", "GTX 760", "GT 740 (GK107 variant)", "GT 730 (GK208 variant)", "GT 720", "GT 710 (GK208 variant)", "GTX 690 (Another dual GPU card compatible with macOS, but only one core will be in use)", "GTX 680", "GTX 670", "GTX 660 Ti", "GTX 660 (Must be running a GK104 core, not GK106)", "GTX 650 (GK107 core)", "GT 640 (GK107/GK208 core)", "GT 635", "GT 630 (GK107/GK208 core)", "Quadro K6000", "Quadro K5200", "Quadro K5000", "Quadro K4200", "Quadro K2000D", "Quadro K2000", "Quadro K600", "Quadro K420", "Quadro 410", "NVS 510"]
+lowest_name = "Mountain Lion"
+lowest_version = "10.8"
+highest_name = "Big Sur"
+highest_version = "11"
+
+[[nvidia]]
+chips = ["AD"]
+name = "Lovelace Series (RTX 40xx)"
+source = "https://dortania.github.io/GPU-Buyers-Guide/modern-gpus/nvidia-gpu.html"
+status = "unsupported"
+cards = ["RTX 4090", "RTX 4080", "RTX 4070 Ti", "RTX 4070", "RTX 6000 Ada Generation"]
+
+[[nvidia]]
+chips = ["GH"]
+name = "Hopper Series (H)"
+source = "https://dortania.github.io/GPU-Buyers-Guide/modern-gpus/nvidia-gpu.html"
+status = "unsupported"
+cards = ["H100"]
+
+[[nvidia]]
+chips = ["GA"]
+name = "Ampere Series (RTX 30xx)"
+source = "https://dortania.github.io/GPU-Buyers-Guide/modern-gpus/nvidia-gpu.html"
+status = "unsupported"
+cards = ["RTX 3090", "RTX 3080 Ti", "RTX 3080", "RTX 3070 Ti", "RTX 3070", "RTX 3060 Ti", "RTX 3060", "RTX 3050"]
+
+[[nvidia]]
+chips = ["TU"]
+name = "Turing Series (RTX 20xx, GTX 16xx)"
+source = "https://dortania.github.io/GPU-Buyers-Guide/modern-gpus/nvidia-gpu.html"
+status = "unsupported"
+cards = ["Titan RTX", "RTX 2080 Ti", "RTX 2080 SUPER", "RTX 2080", "RTX 2070 SUPER", "RTX 2070", "RTX 2060 SUPER", "RTX 2060", "GTX 1660 Ti", "GTX 1660 SUPER", "GTX 1660", "GTX 1650 SUPER", "GTX 1650", "Quadro RTX 8000", "Quadro RTX 6000", "Quadro RTX 5000", "Quadro RTX 4000"]
+
+[[nvidia]]
+chips = ["GV"]
+name = "Volta Series (V)"
+source = "https://dortania.github.io/GPU-Buyers-Guide/modern-gpus/nvidia-gpu.html"
+status = "works"
+cards = ["Titan V", "Titan V CEO Edition", "Quadro GV100"]
+lowest_name = "High Sierra 17G3025"
+lowest_version = "10.13.6"
+highest_name = "High Sierra 17G3025"
+highest_version = "10.13.6"
+
+[[nvidia]]
+chips = ["GF108", "GF117", "GF119"]
+name = "Fermi rebranded(GF108, GF117 and GF119)"
+source = "https://dortania.github.io/GPU-Buyers-Guide/modern-gpus/nvidia-gpu.html"
+status = "works"
+cards = ["GT 730 (GF108 variant)", "GT 720A", "GT 710 (GF119 variant)", "GT 705", "GT 640 (GF108 and GF116)", "GT 630 (GF108 variant)", "GT 620", "GT 610"]
+lowest_name = "Lion"
+lowest_version = "10.7"
+highest_name = "High Sierra"
+highest_version = "10.13.6"
+
+[[nvidia]]
+chips = ["GP"]
+name = "Pascal Series (GTX 10xx)"
+source = "https://dortania.github.io/GPU-Buyers-Guide/modern-gpus/nvidia-gpu.html"
+status = "works"
+cards = ["GTX Titan X (GP 102-400 Pascal core)", "GTX Titan Xp (GP 102-450 Pascal core)", "GTX 1080 Ti", "GTX 1080", "GTX 1070 Ti", "GTX 1070", "GTX 1060", "GTX 1050 Ti", "GTX 1050", "GT 1030", "GT 1010 (should theoretically work, but unverified)", "Quadro GP100", "Quadro P6000", "Quadro P5000", "Quadro P4000", "Quadro P2000", "Quadro P1000", "Quadro P620", "Quadro P600", "Quadro P400"]
+lowest_name = "Sierra"
+lowest_version = "10.12.4"
+highest_name = "High Sierra"
+highest_version = "10.13.6"
+
+[[nvidia]]
+chips = ["GM"]
+name = "Maxwell Series (GTX 9xx, 745, 750/Ti)"
+source = "https://dortania.github.io/GPU-Buyers-Guide/modern-gpus/nvidia-gpu.html"
+status = "works"
+cards = ["GTX Titan X (GM200 Maxwell core)", "GTX 980 Ti", "GTX 980", "GTX 970", "GTX 960", "GTX 950", "GTX 750 Ti", "GTX 750", "GTX 745", "Quadro M6000", "Quadro M5000", "Quadro M4000", "Quadro M2000", "Quadro K2200", "Quadro K1200", "Quadro K620"]
+lowest_name = "Yosemite"
+lowest_version = "10.10.0"
+highest_name = "High Sierra"
+highest_version = "10.13.6"

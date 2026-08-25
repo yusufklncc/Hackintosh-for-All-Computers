@@ -1,0 +1,197 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:v="clr-namespace:Shell.Views"
+             x:Class="Shell.Views.MachineView"
+             x:DataType="v:MachineView">
+  <StackPanel Margin="28,24,28,32" Spacing="22">
+
+    <!-- Said before the table, because it is about the whole of it -->
+    <Border Name="Trouble" Classes="panel" IsVisible="False">
+      <StackPanel Spacing="6">
+        <TextBlock Name="TroubleTitle" Classes="eyebrow" Text="NO MACHINE TO SHOW" />
+        <TextBlock Name="TroubleText" FontSize="13" TextWrapping="Wrap"
+                   Foreground="{DynamicResource Muted}" />
+      </StackPanel>
+    </Border>
+
+   <StackPanel Name="Content" Spacing="22">
+
+    <!-- The machine, before any question about it -->
+    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="22">
+      <Canvas Grid.Column="0" Width="188" Height="120" Name="Silhouette">
+        <Rectangle Canvas.Left="30" Canvas.Top="10" Width="128" Height="80" RadiusX="6" RadiusY="6"
+                   Fill="{DynamicResource Surface2}" Stroke="{DynamicResource Line}" StrokeThickness="2" />
+        <Rectangle Canvas.Left="38" Canvas.Top="18" Width="112" Height="64" RadiusX="3" RadiusY="3"
+                   Fill="{DynamicResource AccentSoft}" Stroke="{DynamicResource Line}" StrokeThickness="1.5" />
+        <Path Stroke="{DynamicResource Accent}" StrokeThickness="2.5" Opacity="0.45"
+              StrokeLineCap="Round" Data="M52,68 H136 M52,60 H110 M52,52 H124" />
+        <Ellipse Canvas.Left="85" Canvas.Top="25" Width="18" Height="18"
+                 Stroke="{DynamicResource Accent}" StrokeThickness="2.5" Opacity="0.55" />
+        <Path Fill="{DynamicResource Chrome}" Stroke="{DynamicResource Line}" StrokeThickness="2"
+              Data="M30,90 H158 L168,100 H20 Z" />
+        <Path Fill="{DynamicResource Surface2}" Stroke="{DynamicResource Line}" StrokeThickness="2"
+              Data="M14,100 H174 A6,6 0 0 1 168,108 H20 A6,6 0 0 1 14,100 Z" />
+      </Canvas>
+
+      <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+        <TextBlock Name="Source" Classes="eyebrow" Text="READ FROM THIS MACHINE" />
+        <TextBlock Name="MachineName" FontSize="23" FontWeight="SemiBold"
+                   Foreground="{DynamicResource Ink}" TextWrapping="Wrap" Margin="0,2,0,4" />
+        <ItemsControl Name="Spec">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="v:SpecView">
+              <StackPanel Orientation="Horizontal" Spacing="5" Margin="0,0,16,2">
+                <TextBlock Classes="mono" Text="{Binding Name}" />
+                <TextBlock Classes="mono" Text="{Binding Value}"
+                           Foreground="{DynamicResource Ink}" />
+              </StackPanel>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+        <ItemsControl Name="Tally" Margin="0,10,0,0">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="v:TallyView">
+              <Border Classes="pill" Classes.ok="{Binding IsOk}" Classes.bad="{Binding IsBad}"
+                      Classes.warn="{Binding IsUnknown}" Margin="0,0,8,0">
+                <TextBlock Text="{Binding Text}" />
+              </Border>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </StackPanel>
+    </Grid>
+
+    <!-- What macOS this machine can run, and what decided it -->
+    <Grid ColumnDefinitions="*,*" ColumnSpacing="16">
+      <Border Grid.Column="0" Classes="panel">
+        <StackPanel Spacing="8">
+          <TextBlock Classes="eyebrow" Text="MACOS THIS MACHINE CAN RUN" />
+          <TextBlock Name="Window" FontSize="17" FontWeight="SemiBold"
+                     Foreground="{DynamicResource Ink}" TextWrapping="Wrap" />
+          <TextBlock Name="WindowWhy" FontSize="12.5" Foreground="{DynamicResource Muted}"
+                     TextWrapping="Wrap" />
+          <!-- Graphics do not narrow the range; they decide whether there is a
+               display at all. Beside it, not folded into it. -->
+          <TextBlock Name="GraphicsWarning" FontSize="12.5" TextWrapping="Wrap"
+                     IsVisible="False" Margin="0,4,0,0"
+                     Foreground="{DynamicResource Warn}" />
+          <!-- Somebody else's patches, on an installed macOS. Nothing a build
+               here produces changes because of it, so it sits apart. -->
+          <TextBlock Name="Patched" FontSize="12.5" TextWrapping="Wrap"
+                     IsVisible="False" Margin="0,6,0,0"
+                     Foreground="{DynamicResource Muted}" />
+        </StackPanel>
+      </Border>
+      <Border Grid.Column="1" Classes="panel">
+        <StackPanel Spacing="10">
+          <TextBlock Classes="eyebrow" Text="WHAT SETS THE LIMITS" />
+          <ItemsControl Name="Bounds">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="v:BoundView">
+                <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,6">
+                  <TextBlock Grid.Column="0" Text="{Binding What}" FontSize="13"
+                             Foreground="{DynamicResource Ink}" />
+                  <TextBlock Grid.Column="1" Classes="mono" Text="{Binding Span}" />
+                </Grid>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+      </Border>
+    </Grid>
+
+    <!-- The hardware itself -->
+    <StackPanel Spacing="10">
+      <TextBlock Classes="eyebrow" Text="HARDWARE" />
+      <Border BorderBrush="{DynamicResource Line}" BorderThickness="1" CornerRadius="8"
+              ClipToBounds="True">
+        <StackPanel>
+          <Border Background="{DynamicResource Surface2}" BorderBrush="{DynamicResource Line}"
+                  BorderThickness="0,0,0,1" Padding="14,10">
+            <Grid ColumnDefinitions="118,*,156,186,104">
+              <TextBlock Grid.Column="0" Classes="eyebrow" Text="PART" />
+              <TextBlock Grid.Column="1" Classes="eyebrow" Text="DEVICE" />
+              <TextBlock Grid.Column="2" Classes="eyebrow" Text="SUPPORT" />
+              <TextBlock Grid.Column="3" Classes="eyebrow" Text="DRIVER" />
+              <TextBlock Grid.Column="4" Classes="eyebrow" Text="DEVICE ID" />
+            </Grid>
+          </Border>
+          <ItemsControl Name="Rows">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="v:RowView">
+                <Border BorderBrush="{DynamicResource Line}" BorderThickness="0,0,0,1" Padding="14,11">
+                  <Grid ColumnDefinitions="118,*,156,186,104">
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="9">
+                      <Path Width="16" Height="16" Stretch="Uniform" Data="{Binding Icon}"
+                            Stroke="{DynamicResource Faint}" StrokeThickness="1.2"
+                            Fill="Transparent" VerticalAlignment="Top" Margin="0,2,0,0" />
+                      <TextBlock Text="{Binding Part}" FontWeight="SemiBold" FontSize="13.5"
+                                 Foreground="{DynamicResource Ink}" />
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="1" Margin="0,0,16,0" Spacing="2">
+                      <TextBlock Text="{Binding What}" FontSize="13.5" FontWeight="SemiBold"
+                                 Foreground="{DynamicResource Ink}" TextWrapping="Wrap" />
+                      <TextBlock Text="{Binding Note}" IsVisible="{Binding HasNote}"
+                                 FontSize="12.5"
+                                 Foreground="{DynamicResource Muted}" TextWrapping="Wrap" />
+                    </StackPanel>
+
+                    <Border Grid.Column="2" Classes="pill" VerticalAlignment="Top"
+                            Margin="0,0,16,0"
+                            Classes.ok="{Binding IsOk}" Classes.bad="{Binding IsBad}"
+                            Classes.warn="{Binding IsUnknown}">
+                      <TextBlock Text="{Binding Label}" />
+                    </Border>
+
+                    <StackPanel Grid.Column="3" Margin="0,0,16,0">
+                      <ItemsControl ItemsSource="{Binding Kexts}">
+                        <ItemsControl.ItemTemplate>
+                          <DataTemplate x:DataType="v:KextView">
+                            <StackPanel Margin="0,0,0,6">
+                              <TextBlock Classes="mono kext" Text="{Binding Bundle}" />
+                              <TextBlock Classes="mono" FontSize="10.5"
+                                         Foreground="{DynamicResource Faint}"
+                                         Text="{Binding Aside}" />
+                            </StackPanel>
+                          </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                      </ItemsControl>
+                      <TextBlock Classes="mono" Text="{Binding SystemDriver}"
+                                 IsVisible="{Binding HasSystemDriver}"
+                                 TextWrapping="Wrap"
+                                 Foreground="{DynamicResource Ink}" />
+                      <TextBlock Classes="mono" Text="—" IsVisible="{Binding HasNoDriver}"
+                                 Foreground="{DynamicResource Faint}" />
+                    </StackPanel>
+
+                    <TextBlock Grid.Column="4" Classes="mono" Text="{Binding Ids}"
+                               TextWrapping="Wrap" />
+                  </Grid>
+                </Border>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+      </Border>
+    </StackPanel>
+
+    <!-- What the words on this screen mean -->
+    <Border BorderBrush="{DynamicResource Line}" BorderThickness="0,1,0,0" Padding="0,14,0,0">
+      <StackPanel Spacing="4">
+        <TextBlock FontSize="12" Foreground="{DynamicResource Faint}" TextWrapping="Wrap"
+                   Text="Verdicts come from the same tables the console prints." />
+        <TextBlock FontSize="12" Foreground="{DynamicResource Faint}" TextWrapping="Wrap"
+                   Text="&quot;unknown&quot; means nothing here claims the device - not that it fails." />
+      </StackPanel>
+    </Border>
+
+   </StackPanel>
+  </StackPanel>
+</UserControl>

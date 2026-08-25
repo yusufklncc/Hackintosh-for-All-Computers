@@ -166,11 +166,17 @@ def load(work):
     return module
 
 
-def run(work, tables=None, unattended=False, outcomes=None):
+def run(work, tables=None, unattended=False, outcomes=None, ask=None):
     """Drive the tool. Returns the Results folder it wrote into, or None.
 
     unattended runs the self-deciding patches and returns, instead of handing
-    the menus to a person."""
+    the menus to a person.
+
+    `ask` is where the tool's own questions go when there is no terminal to put
+    them on. The tool has exactly one input function and this module already
+    replaces it, so a front end can answer the menus the same way it answers
+    everything else - the questions are the tool's, only the surface changes.
+    Without it a window had to send people to the console for this one step."""
     tool = available()
     if not tool:
         return None, f'{VENDOR} is not usable on {sys.platform}'
@@ -203,6 +209,8 @@ def run(work, tables=None, unattended=False, outcomes=None):
                 return None, 'no ACPI tables were loaded, so there is nothing to read'
             outcomes.extend(automatic(ssdt, work / 'Results'))
             raise SystemExit(0)
+        if ask:
+            ssdt.u.grab = ask
         while True:
             ssdt.main()
     except SystemExit:
@@ -233,7 +241,14 @@ def dump(work, into):
     work = prepare(work)
     module = load(work)
     ssdt = module.SSDT()
-    out = ssdt.d.dump_tables(str(Path(into).resolve()))
+    # the dumper asks too - "press [enter]" on a table it could not read - and
+    # a window has no stdin to answer with. run() covers its own prompts and
+    # this one was left reading a closed pipe.
+    ssdt.u.grab = _auto_grab
+    try:
+        out = ssdt.d.dump_tables(str(Path(into).resolve()))
+    except _Unattended as exc:
+        return None, f'the tables could not be dumped without asking: {exc}' 
     return (Path(out) if out else None), ('' if out else 'nothing was dumped')
 
 

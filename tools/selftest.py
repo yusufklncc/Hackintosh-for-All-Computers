@@ -448,15 +448,24 @@ def detection_gaps():
                  'detail': 'x' * 40 + ' ' + 'y' * 40}
     out = summary.render({'cpu': None, 'pci_ids': []})
     check('the summary still renders with nothing to say', len(out) > 2)
+    # An NVIDIA id no name list carries, so no chip family can claim it and the
+    # whole-vendor rule is what answers. That rule used to need the word
+    # "nvidia" in the reported name, so a card the machine called anything else
+    # came out unknown.
     nvidia = {'generation': 'raptor-lake', 'laptop': False, 'pci_ids': [],
-              'gpu_devices': [{'id': '10de:1187', 'name': 'GTX 760'}]}
-    # the family rule used to need the word "nvidia" in the reported name, so a
-    # card the machine called anything else came out unknown
+              'gpu_devices': [{'id': '10de:ffff', 'name': 'Some Card'}]}
     graphics = [r for r in summary.rows(nvidia) if r['part'] == 'Graphics']
     check('a card is judged on its vendor id, not on what it happens to be called',
           graphics and graphics[0]['verdict'] == summary.UNSUPPORTED, graphics)
     check('a long verdict wraps instead of losing its caveat',
           any('Turing' in l for l in summary.render(nvidia)))
+
+    # and a card the chip family does claim is answered by the family, which is
+    # the whole point: a GTX 760 is Kepler and ran until Big Sur
+    kepler = dict(nvidia, gpu_devices=[{'id': '10de:1187', 'name': 'GTX 760'}])
+    row = [r for r in summary.rows(kepler) if r['part'] == 'Graphics'][0]
+    check('a card the family claims is not swept up by the vendor rule',
+          row['verdict'] == summary.SUPPORTED, row)
 
 
 def broadcom_wifi():
@@ -683,7 +692,10 @@ def window_stays_open():
     import setup as guided
     src = Path('tools/setup.py').read_text()
     check('the pause is only for the frozen build',
-          "if not getattr(sys, 'frozen', False) or SCRIPTING:" in src)
+          "if not getattr(sys, 'frozen', False) or SCRIPTING or UI.protocol:" in src)
+    # a front end has no key to press and no window to keep open; waiting for
+    # one would hang the build behind a prompt nobody can see
+    check('and never when a front end is driving', 'or UI.protocol:' in src)
     check('and a refusal is printed before it, not swallowed',
           'if isinstance(exc.code, str):' in src)
 
@@ -774,7 +786,20 @@ def ssdt_flow():
     check('the tables are dumped when none were handed in',
           'acpi.dump(' in flow and 'if not tables:' in flow)
     check('and the menu run uses the same ones',
-          "acpi.run(Path(a.out).parent / 'acpi', tables)" in flow)
+          "acpi.run(Path(a.out).parent / 'acpi', tables," in flow)
+    # the menus used to be refused under a front end, because the tool reads
+    # its own input and there was no terminal to read from. It has one input
+    # function and this passes a replacement into it.
+    check('a front end is offered the menus rather than sent to a console',
+          'ask=tool_answer if UI.protocol' in flow
+          and 'Run the console builder' not in src)
+    check('and the answer goes back through the same path as every other',
+          "_answer(t='prompt'" in src[src.index('def tool_answer('):
+                                      src.index('def run_ssdts(')])
+    import acpi as _acpi
+    import inspect
+    check('the tool takes the replacement where its own input goes',
+          'ask' in inspect.signature(_acpi.run).parameters)
 
     if not acpi.available():
         return
@@ -1247,6 +1272,893 @@ def tables_match_sources():
                    if i.startswith('ffff') or i.endswith(':ffff')])
 
 
+def front_end_protocol():
+    """The same flow, driven as a front end would drive it.
+
+    Two surfaces is two things to get wrong, so what is checked here is that
+    there are not two: the same questions in the same order, and a config that
+    differs from the console's only where it is meant to - the SMBIOS serials,
+    which are generated fresh every run."""
+    import json
+    import ui
+
+    check('a line keeps the tone the console would have shown it in',
+          ui.spans('\033[32mdone\033[0m') == [{'tone': 'green', 'text': 'done'}],
+          ui.spans('\033[32mdone\033[0m'))
+    check('and a line with no codes is one plain span',
+          ui.spans('plain') == [{'tone': 'plain', 'text': 'plain'}])
+
+    with tempfile.TemporaryDirectory() as tmp:
+        console = Path(tmp) / 'console' / 'EFI'
+        front = Path(tmp) / 'front' / 'EFI'
+        typed = run([sys.executable, 'tools/setup.py', '--no-detect',
+                     '--answers', '2,10,3', '--out', str(console)])
+        check('the console still builds', typed.returncode == 0)
+
+        # answered by name rather than by number, which is the point of the
+        # event: a front end draws the rows and never has to count them
+        want = {'What kind of machine is this?': 'laptop',
+                'Which CPU generation?': 'kaby-lake',
+                'Board or laptop brand?': 'hp'}
+        proc = subprocess.Popen(
+            [sys.executable, 'tools/setup.py', '--no-detect', '--protocol',
+             '--out', str(front)],
+            stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True,
+            encoding='utf-8', bufsize=1)
+        asked, events, built, rc = [], [], None, None
+        for line in proc.stdout:
+            try:
+                event = json.loads(line)
+            except ValueError:
+                check('every line is one JSON object', False, line[:70])
+                break
+            events.append(event['t'])
+            if event['t'] == 'ask':
+                asked.append(event['question'])
+                pick = want.get(event['question'])
+                n = next((o['n'] for o in event['options'] if o['value'] == pick), 1)
+                proc.stdin.write(json.dumps({'id': event['id'], 'value': str(n)}) + '\n')
+                proc.stdin.flush()
+            elif event['t'] == 'prompt':
+                proc.stdin.write(json.dumps({'id': event['id'], 'value': ''}) + '\n')
+                proc.stdin.flush()
+            elif event['t'] == 'built':
+                built = event['out']
+            elif event['t'] == 'done':
+                rc = event['rc']
+        proc.wait()
+
+        check('it says what it is before anything else', events[:1] == ['hello'], events[:1])
+        check('and how it ended, last', events[-1] == 'done', events[-1])
+        check('the front end was asked the same three questions', len(asked) == 3, asked)
+        check('it built', rc == 0 and proc.returncode == 0, rc)
+        check('and said where', built and Path(built).exists(), built)
+
+        if typed.returncode == 0 and rc == 0:
+            import plistlib
+
+            def without_serials(path):
+                """The config, minus what is generated fresh on every run.
+
+                Counting differing lines instead was wrong in a way that only
+                showed in CI: two runs can draw the same serial, and then two
+                lines match by luck and the count is short."""
+                with open(path, 'rb') as fh:
+                    plist = plistlib.load(fh)
+                generic = plist.get('PlatformInfo', {}).get('Generic', {})
+                for key in ('SystemUUID', 'SystemSerialNumber', 'MLB'):
+                    generic.pop(key, None)
+                return plist
+
+            a = without_serials(console / 'OC' / 'config.plist')
+            b = without_serials(front / 'OC' / 'config.plist')
+            check('the two configs are the same everywhere else', a == b,
+                  [k for k in set(a) | set(b) if a.get(k) != b.get(k)])
+
+    # every module that prints in colour asks the same question about it
+    for name in ('advise', 'kextorder', 'provenance', 'summary', 'thirdparty', 'setup'):
+        source = Path('tools') / f'{name}.py'
+        check(f'{name} takes its colours from one place',
+              'ui.colours(' in source.read_text()
+              and "os.environ.get('NO_COLOR')" not in source.read_text())
+
+
+def machine_document():
+    """What a front end opens on: the same summary, as values.
+
+    The risk here is two answers to one question - a screen that says something
+    the printed table does not. So the document is built from the same rows,
+    and what is checked is that they cannot drift apart."""
+    import json
+    import summary
+
+    hw = json.loads(Path('tools/fixtures/thinkpad-e570.json').read_text())
+    hw = hw.get('hardware', hw)
+    doc = summary.document(hw, 'a fixture')
+
+    printed = summary.rows(hw)
+    check('a row for every row the table has', len(doc['rows']) == len(printed))
+    check('and the same verdicts',
+          [r['verdict'] for r in doc['rows']] == [r['verdict'] for r in printed])
+
+    # the sentence and the field have to agree: pulling the kext out of the
+    # prose is what this replaced, and a row where they disagree would be a
+    # screen contradicting the text underneath it
+    for r in doc['rows']:
+        for k in r['kexts']:
+            check(f"{r['part']}: {k['bundle']} is the one the sentence names",
+                  k['bundle'].replace('.kext', '') in r['detail']
+                  or k['bundle'] in r['detail'], r['detail'])
+
+    # the note is what the columns cannot say. A screen that draws the kext in
+    # its own column and repeats it underneath has said one thing twice.
+    for r in doc['rows']:
+        for k in r['kexts']:
+            check(f"{r['part']}: the note does not repeat {k['bundle']}",
+                  k['bundle'].replace('.kext', '') not in r['note'], r['note'])
+        for i in r['ids']:
+            check(f"{r['part']}: the note does not repeat {i}", i not in r['note'])
+    check('and the console sentence is untouched',
+          'AirportBrcmFixup.kext' in next(
+              r for r in doc['rows'] if r['part'] == 'Wi-Fi')['detail'])
+
+    wifi = next(r for r in doc['rows'] if r['part'] == 'Wi-Fi')
+    facts = wifi['kexts'][0]
+    check('a vendored kext carries its upstream', facts['upstream'], facts)
+    check('and a link built from it',
+          facts['url'] == f"https://github.com/{facts['upstream']}", facts['url'])
+    check('and the licence this repository read from that project',
+          facts['licence'] and facts['licence'] != 'none stated', facts['licence'])
+    check('and whether it is actually here', facts['shipped'] is True)
+    check('the version is the vendored one, not a remembered one',
+          facts['version'] == ocgen.read_toml(
+              Path('vendor/kexts.lock'))['kext'][facts['bundle']]['version'])
+
+    check('the macOS floor names what set it',
+          doc['macos']['from']['version'] == '10.12'
+          and doc['macos']['from_because'] == 'Intel graphics', doc['macos'])
+
+    # a Mac reports none of its own hardware, and eight unknown rows is noise
+    blank = json.loads(Path('tools/fixtures/no-hardware.json').read_text())
+    blank = blank.get('hardware', blank)
+    check('a machine nothing is known about says so instead',
+          summary.document(blank)['worth_showing'] is False)
+
+    with tempfile.TemporaryDirectory() as tmp:
+        r = run([sys.executable, 'tools/setup.py', '--describe',
+                 '--machine', 'tools/fixtures/thinkpad-e570.json',
+                 '--out', str(Path(tmp) / 'EFI')])
+        check('--describe writes one JSON object and stops', r.returncode == 0
+              and len(r.stdout.strip().splitlines()) == 1, r.returncode)
+        if r.returncode == 0:
+            written = json.loads(r.stdout)
+            check('naming the report it was given as the source',
+                  written['source'].startswith('report'), written['source'])
+            check('and it is the same document', written['rows'] == doc['rows'])
+
+
+def machine_name():
+    """What a machine calls itself, and when that is worth repeating.
+
+    A vendor who left the field at its default has said nothing, and printing
+    "To Be Filled By O.E.M." as a machine's name is worse than printing the
+    processor: it looks like an answer."""
+    import detect
+
+    check('a laptop is named by the field Lenovo puts the name in',
+          detect.model_name({'laptop': True, 'version': 'ThinkPad E570',
+                             'model': '20H5006TTX'}) == 'ThinkPad E570')
+    check('and by the product name where that field is a version',
+          detect.model_name({'laptop': True, 'version': '1.0',
+                             'model': 'Inspiron 5570'}) == 'Inspiron 5570')
+    check('a desktop is named by its board, which is what it is',
+          detect.model_name({'laptop': False, 'model': 'System Product Name',
+                             'board': 'ASUSTeK PRIME Z390-A'}) == 'ASUSTeK PRIME Z390-A')
+    for empty in ('To Be Filled By O.E.M.', 'Default string', 'System Product Name',
+                  '', '   ', 'Rev 1.02', 'x.x'):
+        check(f'{empty!r} names nothing',
+              detect.model_name({'laptop': True, 'version': empty}) is None)
+    check('and nothing at all is nothing', detect.model_name({}) is None)
+
+    # this machine, whatever it is: the point is that it does not throw
+    named = detect.probe().get('model')
+    check('probing this machine returns a name or None',
+          named is None or isinstance(named, str), named)
+
+
+def embedded_fonts():
+    """Two faces travel inside the window, so two licences travel with them."""
+    fonts = Path('gui/Assets/Fonts')
+    if not fonts.exists():
+        check('the fonts directory is there', False)
+        return
+    have = {p.name for p in fonts.glob('*.ttf')}
+    check('the faces the window asks for are present',
+          have == {'InstrumentSans-Regular.ttf', 'InstrumentSans-SemiBold.ttf',
+                   'IBMPlexMono-Regular.ttf'}, sorted(have))
+    # "Plex" is a Reserved Font Name, so that file has to be the published one
+    check('nothing asks for a Plex weight that is not published',
+          'IBMPlexMono-Medium' not in Path('gui/App.axaml').read_text())
+    for licence in ('OFL-InstrumentSans.txt', 'OFL-IBMPlexMono.txt'):
+        text = (fonts / licence).read_text(encoding='utf-8', errors='replace')
+        check(f'{licence} is the licence it claims to be',
+              'SIL OPEN FONT LICENSE' in text.upper())
+    # a modified font under the OFL may not keep the original's reserved name,
+    # and these two were cut from a variable font
+    readme = (fonts / 'README.md').read_text(encoding='utf-8')
+    check('the modified files say they are modified',
+          'instancer' in readme and 'renamed' in readme)
+    check('and the build embeds them rather than asking the system',
+          'AvaloniaResource Include="Assets/Fonts/*.ttf"'
+          in Path('gui/Shell.csproj').read_text())
+
+
+def macos_registry():
+    """A Mac's own devices, read from the registry rather than the report of it.
+
+    system_profiler answers with nothing at all on Apple silicon - measured on
+    an M1 Pro, SPPCIDataType printed zero lines - while the IORegistry on the
+    same machine had the Wi-Fi, the Bluetooth and the card reader. This matters
+    on a PC already running macOS, where the machine being described is the
+    machine being converted."""
+    import detect
+
+    check('an id is little-endian in the registry and big-endian everywhere else',
+          detect._le(b'\xe4\x14\x00\x00') == '14e4', detect._le(b'\xe4\x14'))
+    check('and nothing is not an id', detect._le(None) is None and detect._le(b'\x01') is None)
+    check('a name stops at the first NUL', detect._text(b'BCM4387\x00junk') == 'BCM4387')
+
+    plist = b"""<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><array><dict>
+  <key>vendor-id</key><data>axAAAA==</data>
+  <key>device-id</key><data>DBAAAA==</data>
+  <key>IOName</key><string>pci-bridge</string>
+  <key>IORegistryEntryChildren</key><array><dict>
+    <key>vendor-id</key><data>5BQAAA==</data>
+    <key>device-id</key><data>M0QAAA==</data>
+    <key>model</key><data>QkNNNDM4NwA=</data>
+  </dict></array>
+</dict></array></plist>"""
+
+    was = detect._run
+    try:
+        detect._run = lambda cmd, shell=False: (
+            plist.decode() if 'IOPCIDevice' in cmd else '')
+        pci, usb, hda, roles, drivers = detect.macos_devices()
+    finally:
+        detect._run = was
+
+    check('a nested device is found, not only the bridge above it',
+          '[14e4:4433]|BCM4387' in pci, pci)
+    check('and the bridge as well, since it is a device with an id',
+          '[106b:100c]' in pci, pci)
+    check('an id with no name has no trailing bar',
+          '[106b:100c]|' not in pci, pci)
+    check('the lines parse with the reader that already exists',
+          detect._pairs(pci, detect.PCI_PATTERNS) == {'14e4:4433', '106b:100c'},
+          detect._pairs(pci, detect.PCI_PATTERNS))
+    check('and the name comes back with the id it was beside',
+          detect._names(pci, detect.PCI_PATTERNS).get('14e4:4433') == 'BCM4387',
+          detect._names(pci, detect.PCI_PATTERNS))
+    check('nothing is invented for the classes that answered nothing',
+          usb == '' and hda == '')
+
+    # a combo chip gives both halves the same `compatible`, so the entry name
+    # has to win or the Bluetooth is reported as a second Wi-Fi
+    wifi = {'IORegistryEntryName': 'wlan', 'compatible': b'wlan-pcie,bcm4387\x00'}
+    bt = {'IORegistryEntryName': 'bluetooth-pcie', 'compatible': b'wlan-pcie,bcm4387\x00'}
+    check('the machine naming a device wlan means Wi-Fi',
+          detect._pci_role(wifi) == 'wifi')
+    check('and naming one bluetooth means Bluetooth, whatever it is compatible with',
+          detect._pci_role(bt) == 'bluetooth', detect._pci_role(bt))
+    check('a device it does not name is not given a role',
+          detect._pci_role({'IORegistryEntryName': 'pci-bridge0'}) is None)
+
+    # and the row that comes of it
+    import summary
+    rows = summary.network_rows({
+        'pci_ids': ['14e4:4433'],
+        'machine_roles': {'14e4:4433': 'wifi'},
+        'device_names': {'14e4:4433': 'wlan, bcm4387'},
+    })
+    said = next(r for r in rows if r['part'] == 'Wi-Fi')
+    check('a device only the machine named still gets a row',
+          said['what'] == 'wlan, bcm4387' and said['verdict'] == summary.UNKNOWN, said)
+    check('and it is not claimed to be supported', not said['kexts'])
+
+    # the same device, on a machine that has handed it to a driver
+    driven = summary.network_rows({
+        'system': 'Darwin', 'pci_ids': ['14e4:4433'],
+        'machine_roles': {'14e4:4433': 'wifi'},
+        'machine_drivers': {'14e4:4433': 'AppleBCMWLANCore'},
+        'device_names': {'14e4:4433': 'wlan, bcm4387'},
+    })
+    wifi_row = next(r for r in driven if r['part'] == 'Wi-Fi')
+    check('a device macOS is driving says which driver has it',
+          wifi_row['verdict'] == summary.DRIVEN
+          and 'AppleBCMWLANCore' in wifi_row['detail'], wifi_row)
+    check('and it is still not a kext this repository ships',
+          not wifi_row['kexts'])
+    check('"driven by macOS" is never said about a machine that is not one',
+          summary.DRIVEN not in [r['verdict'] for r in summary.rows(
+              {'pci_ids': ['8086:1559'], 'system': 'Windows'})])
+
+    # and on the machine this is running on, whatever that is
+    hw = detect.probe()
+    if hw.get('system') == 'Darwin':
+        check('this Mac reports at least its own PCI devices',
+              len(hw['pci_ids']) > 0, hw['pci_ids'])
+        check('and says which system it was read on', hw['system'] == 'Darwin')
+
+
+def genuine_macs():
+    """Which macOS a real Mac runs, from the list Apple publishes.
+
+    Every other verdict here comes from what a kext claims. A Mac's hardware is
+    claimed by nothing, so the only honest answer about it is Apple's own - and
+    it is keyed on the board name the machine reports of itself, which is the
+    same string on both sides."""
+    import detect
+    import mactable
+    import summary
+
+    table = mactable.table()
+    check('the table exists and names its source',
+          table.get('source', '').startswith('https://gdmf.apple.com'), table.get('source'))
+    check('with more than a handful of machines', len(table.get('mac', [])) > 50,
+          len(table.get('mac', [])))
+    check('and the lines are in order, oldest first',
+          [int(v.split('.')[0]) for v in table['lines']]
+          == sorted(int(v.split('.')[0]) for v in table['lines']), table['lines'])
+
+    # an Apple silicon board and an Intel board, both from the same file
+    silicon = [r for r in table['mac'] if r['board'].startswith('J')]
+    intel = [r for r in table['mac'] if r['board'].startswith('Mac-')]
+    check('both kinds of board are in it', silicon and intel,
+          (len(silicon), len(intel)))
+    check('a board with no ceiling is one the newest line still lists',
+          all(r['lines'][-1] == table['lines'][-1]
+              for r in table['mac'] if not r['ceiling']))
+    check('and a board with a ceiling is not in the newest line',
+          all(r['lines'][-1] != table['lines'][-1]
+              for r in table['mac'] if r['ceiling']))
+
+    check('an unknown board is not guessed at', mactable.window('nope') is None)
+    check('and no board at all is not either', mactable.window('') is None)
+
+    # the floor and ceiling turn into releases people know by name
+    made = summary.genuine_mac({'system': 'Darwin', 'board_id': silicon[0]['board']})
+    check('a listed board comes back with a named release',
+          made['listed'] and made['from']['name'], made)
+    check('a machine with no board is not a Mac',
+          summary.genuine_mac({}) is None)
+    check('and neither is a PC that happens to name its baseboard',
+          summary.genuine_mac({'system': 'Linux',
+                               'board_id': 'Microsoft Corporation Virtual Machine'})
+          is None)
+    check('a board nothing lists says so rather than nothing',
+          summary.genuine_mac({'system': 'Darwin', 'board_id': 'nope'}) == {
+              'board': 'nope', 'from': None, 'to': None, 'listed': False})
+
+    # this machine, if it happens to be a Mac. A PC has a baseboard name and
+    # no board id, and asking Apple about one is the bug this used to have.
+    here = detect.probe()
+    board = here.get('board_id')
+    check('only a Mac has a board id',
+          board is None or here.get('system') == 'Darwin', (board, here.get('system')))
+    if board:
+        check('this Mac names its own board', board and ' ' not in board, board)
+        check('and the table has something to say about it',
+              mactable.window(board) is not None, board)
+
+
+def the_processor_bounds_it_too():
+    """An AMD machine runs on kernel patches, and those patches have bounds.
+
+    They were not counted, so a Ryzen desktop with no recognised network card
+    said "not bounded here" while its own profile said 10.13 to 26. Above the
+    patches the machine does not boot at all, which is a harder limit than any
+    kext imposes."""
+    import coverage
+    import summary
+
+    ryzen = {'cpu': 'AMD Ryzen 5 5600', 'generation': 'ryzen-threadripper',
+             'cores': 6, 'laptop': False}
+    window = summary.profile_window(ryzen)
+    check('a Ryzen profile is bounded by its patches', window is not None)
+    check('from High Sierra', window[0] == 17, window)
+    check('to whatever the newest patch covers', window[1] and window[1] >= 24, window)
+
+    named = summary.macos_range(ryzen)
+    check('and the machine range now says so rather than nothing', named is not None)
+    check('with the patches named as what set it',
+          'kernel patches' in named[0][0], named)
+
+    intel = {'cpu': 'i5', 'generation': 'comet-lake', 'laptop': False}
+    check('an Intel profile carries no kernel patches, so it bounds nothing',
+          summary.profile_window(intel) is None)
+
+    check('a machine whose generation is unknown is not guessed at',
+          summary.profile_window({'cpu': 'something'}) is None)
+
+    # the envelope, not the intersection: grouping by capability read a renamed
+    # successor patch as the capability having stopped, and bounded Ryzen at 11
+    row = dict(path='', platform='desktop', vendor='amd', cpu='ryzen-threadripper',
+               cores=6, chipset=None, oem=None, variant=None)
+    check('the ceiling is the furthest any patch reaches',
+          coverage.window_for(row)[1] >= 24, coverage.window_for(row))
+
+
+def graphics_and_the_range():
+    """What the graphics mean for the macOS range: not a bound, a warning.
+
+    An unsupported card does not narrow which macOS runs - it decides whether
+    the machine has a display at all. Folding it into the range would read as a
+    version limit, which is a different and wrong thing to tell somebody."""
+    import summary
+
+    arc = {'id': '8086:56a0', 'name': 'Intel(R) Arc(TM) A770'}
+    igpu = {'id': '8086:9bc4', 'name': 'Intel(R) UHD Graphics'}
+    radeon = {'id': '1002:67df', 'name': 'Radeon RX 580'}
+
+    nothing = summary.graphics_advice({'generation': 'comet-lake',
+                                       'gpu_devices': [radeon]})
+    check('a supported card is not warned about', nothing is None, nothing)
+    check('and neither is a machine with no graphics at all',
+          summary.graphics_advice({'gpu_devices': []}) is None)
+
+    fallback = summary.graphics_advice({'generation': 'comet-lake',
+                                        'gpu_devices': [arc, igpu]})
+    check('an unsupported card with a working iGPU says to use the iGPU',
+          fallback['tone'] == summary.UNSUPPORTED
+          and 'UHD Graphics' in fallback['text']
+          and 'range above still holds' in fallback['text'], fallback)
+
+    alone = summary.graphics_advice({'generation': 'comet-lake',
+                                     'gpu_devices': [arc]})
+    check('an unsupported card with no iGPU says there is no fallback',
+          'no integrated graphics to fall back on' in alone['text'], alone)
+    check('and that it has to be replaced', 'replaced' in alone['text'])
+
+    # the field report about this processor says its iGPU does not accelerate,
+    # so the iGPU cannot be offered as the way out
+    dead = summary.graphics_advice({'cpu': 'i5-10200H', 'generation': 'comet-lake',
+                                    'gpu_devices': [arc, igpu]})
+    check('an unsupported card and a dead iGPU says neither is supported',
+          'neither is' in dead['text'] and 'cannot cover for it' in dead['text'], dead)
+
+    unheard = summary.graphics_advice({
+        'generation': 'comet-lake',
+        'gpu_devices': [{'id': 'abcd:1234', 'name': 'Something Nobody Ships'}]})
+    check('a card in no table is unknown and says that is not a verdict',
+          unheard['tone'] == summary.UNKNOWN
+          and 'not the same as unsupported' in unheard['text'], unheard)
+
+
+def what_the_machine_calls_its_network():
+    """A card no kext claims is still a card the machine can name.
+
+    Windows classes every device it enumerates and Linux puts the class in the
+    lspci line. Wi-Fi against Ethernet is not in the class, so the model name
+    settles that - a card calling itself "Wireless LAN WiFi 6" is not a port."""
+    import detect
+
+    lines = '\n'.join([
+        r'Net|PCI\VEN_10EC&DEV_B852&SUBSYS_1234|Realtek 8852BE Wireless LAN WiFi 6 PCI-E NIC',
+        r'Bluetooth|USB\VID_0BDA&PID_B85B|Realtek Bluetooth 5.3 Adapter',
+        r'Net|PCI\VEN_8086&DEV_15F3|Intel(R) Ethernet Controller I225-V',
+        r'Net|ROOT\VMS_MP|Hyper-V Virtual Switch Extension Adapter',
+    ])
+    found = detect.named_roles(lines, detect.PCI_PATTERNS + detect.USB_PATTERNS)
+    check('a Realtek card that says WiFi is Wi-Fi', found.get('10ec:b852') == 'wifi',
+          found)
+    check('its Bluetooth half is Bluetooth', found.get('0bda:b85b') == 'bluetooth')
+    check('a card that says Ethernet is Ethernet', found.get('8086:15f3') == 'ethernet')
+    check('and a virtual adapter with no hardware id is not a device',
+          len(found) == 3, found)
+
+    # and the row it produces
+    import summary
+    rows = summary.network_rows({
+        'pci_ids': ['10ec:b852'],
+        'machine_roles': {'10ec:b852': 'wifi'},
+        'device_names': {'10ec:b852': 'Realtek 8852BE Wireless LAN WiFi 6 PCI-E NIC'},
+    })
+    wifi = next(r for r in rows if r['part'] == 'Wi-Fi')
+    check('the card is named rather than called unrecognised',
+          '8852BE' in wifi['what'], wifi['what'])
+    check('and nothing is claimed to drive it',
+          wifi['verdict'] == summary.UNKNOWN and not wifi['kexts'], wifi)
+
+
+def the_device_catalogue():
+    """Every device the tables know, in one list, once each.
+
+    The risk is a catalogue that disagrees with the build: it must read the
+    same tables rather than become a second copy of them, and it must not
+    invent a device or lose one."""
+    import deviceids
+    import inventory
+
+    named = deviceids.table()
+    check('the name table says where its names came from',
+          'pci-ids' in named.get('source', {}).get('pci', ''), named.get('source'))
+    check('and it took the USB list from a source that states a licence',
+          'hwdata' in named.get('source', {}).get('usb', ''), named.get('source'))
+    check('an id nobody has written a name for keeps its id',
+          isinstance(named.get('unnamed'), list))
+
+    # a module soldered into a laptop is in no public list, but the kext that
+    # claims it names it: BrcmPatchRAM carries a DisplayName per device
+    import deviceids
+    by_kext = [r for r in named.get('device', []) if r.get('bus') == 'kext']
+    check('what the public lists miss is asked of the kext that claims it',
+          len(by_kext) > 40, len(by_kext))
+    check('and the kext source is named', 'Info.plist' in
+          named.get('source', {}).get('kext', ''), named.get('source'))
+    check('a real laptop module comes back with its own name',
+          'Bluetooth' in (deviceids.describe('0a5c:6412')[1] or ''),
+          deviceids.describe('0a5c:6412'))
+    check('and fewer than fifty are left with no name at all',
+          len(named.get('unnamed', [])) < 50, len(named.get('unnamed', [])))
+
+    catalogue = inventory.devices()
+    rows = catalogue['devices']
+    check('there are devices in it', len(rows) > 400, len(rows))
+    check('every one has a category the list declares',
+          all(r['category'] in catalogue['categories'] for r in rows))
+    check('and a name, never an empty cell',
+          all(r['name'] for r in rows))
+    # one vocabulary. The tables were written at different times and said
+    # "works" and "supported" for the same thing.
+    check('every verdict is one of the words the filter offers',
+          {r['status'] for r in rows} <= set(catalogue['statuses']),
+          sorted({r['status'] for r in rows}))
+    check('and "works" is not one of them, because "supported" is',
+          'works' not in catalogue['statuses'], catalogue['statuses'])
+
+    # one row per device. Broadcom Bluetooth is three kexts in a relay and
+    # every adapter used to appear three times.
+    keyed = [(r['category'], r['id']) for r in rows if r['id'] and r['category'] != 'Graphics']
+    check('a device claimed by several kexts is listed once',
+          len(keyed) == len(set(keyed)),
+          [k for k in keyed if keyed.count(k) > 1][:3])
+
+    # graphics are keyed the other way: nine cards share 1002:67df and the
+    # model is the thing somebody is looking for
+    cards = [r for r in rows if r['category'] == 'Graphics' and r['id'] == '1002:67df']
+    check('cards sharing an id are listed by model', len(cards) > 1,
+          [c['name'] for c in cards])
+    # the verdict is a field now, not the first word of the note, so that is
+    # where the models differ from each other
+    check('and each model keeps its own verdict',
+          len({c['status'] for c in cards}) > 1, [(c['name'], c['status']) for c in cards])
+
+    # what the tables hold has to survive the trip
+    ids_in_table = {i.lower() for d in ocgen.read_toml(Path('data/hardware.toml'))['driver']
+                    for i in d['ids'] if d['role'] in inventory.ROLE_CATEGORY}
+    ids_in_catalogue = {r['id'].lower() for r in rows
+                        if r['id'] and r['category'] in inventory.ROLE_CATEGORY.values()}
+    check('no device the kexts claim is missing from the catalogue',
+          not (ids_in_table - ids_in_catalogue),
+          sorted(ids_in_table - ids_in_catalogue)[:5])
+    check('and none is invented',
+          not (ids_in_catalogue - ids_in_table),
+          sorted(ids_in_catalogue - ids_in_table)[:5])
+
+    check('the vendor filter has something to filter by',
+          len(catalogue['vendors']) > 5, catalogue['vendors'][:4])
+
+    # the builder takes --inventory and hands it to this module. The two lists
+    # of what that argument accepts were written twice and drifted: the window
+    # asked for "devices" and the builder had never heard of it.
+    source = Path('tools/setup.py').read_text()
+    for what in ('kexts', 'about', 'devices'):
+        check(f'the builder accepts --inventory {what}',
+              f"'{what}'" in source.split('--inventory')[1][:400], what)
+        r = run([sys.executable, 'tools/setup.py', '--inventory', what])
+        check(f'and answers it with JSON', r.returncode == 0
+              and r.stdout.lstrip().startswith('{'), r.stdout[:60])
+
+
+def nvidia_by_family():
+    """Which NVIDIA cards macOS drove, and until when.
+
+    The guide states this per family and names no device ids; the PCI ID
+    Project names the chip in every device name. Joining the two turns one
+    sentence about the whole vendor into a verdict per card - a GTX 680 ran
+    until Big Sur and an RTX 4090 never ran at all, and both used to read
+    the same."""
+    import gpu
+    import ocgen as _ocgen
+
+    families = _ocgen.read_toml(Path('data/gpu.toml')).get('nvidia', [])
+    check('the families were parsed from the page', len(families) >= 8, len(families))
+    named = {f['name'].split(' Series')[0].split('(')[0].strip() for f in families}
+    check('and the ones people actually own are among them',
+          {'Kepler', 'Maxwell', 'Pascal', 'Turing'} <= named, sorted(named))
+
+    def verdict(device_id):
+        return gpu.classify({'id': device_id, 'name': 'NVIDIA'})
+
+    kepler, entry = verdict('10de:1180')          # GK104, GTX 680
+    check('a Kepler card is supported', kepler == 'works', (kepler, entry))
+    check('and says where it stops', entry['macos'][1] == '11', entry.get('macos'))
+
+    pascal, entry = verdict('10de:1b06')          # GP102, GTX 1080 Ti
+    check('a Pascal card stops at High Sierra',
+          pascal == 'works' and entry['macos'][1] == '10.13.6', entry.get('macos'))
+
+    ada, entry = verdict('10de:2684')             # AD102, RTX 4090
+    check('a card whose family never had a driver says so',
+          ada == 'unsupported' and 'no driver was ever written' in entry['note'],
+          entry)
+
+    # the rebranded-Fermi section speaks for three chips it names, and a real
+    # Fermi is not one of them
+    fermi_rebrand, entry = verdict('10de:0f00')   # GF108, GT 630
+    check('a rebranded Fermi is claimed by the section that names its chip',
+          fermi_rebrand == 'works' and 'GF108' in str(entry['family']), entry)
+    real_fermi, entry = verdict('10de:0e22')      # GF104, GTX 460
+    check('and a real Fermi is left to the whole-vendor rule rather than mislabelled',
+          real_fermi == 'unsupported' and 'Fermi rebranded' not in str(entry), entry)
+
+    # the page lists its cards under each family, so the catalogue reads card
+    # by card the way the AMD one does rather than family by family
+    listed = {c for f in families for c in f['cards']}
+    check('the families name their cards', len(listed) > 100, len(listed))
+    check('including the ones people ask about',
+          {'GTX 1080 Ti', 'GTX 980', 'RTX 4090'} <= listed,
+          sorted(c for c in listed if '1080' in c or '4090' in c))
+    check('and the section that lists them without a header is not empty',
+          any(f['cards'] for f in families if 'Fermi' in f['name']),
+          [f['name'] for f in families if 'Fermi' in f['name']])
+    check('no sub-heading was read as a card',
+          not [c for c in listed if c.endswith(':')],
+          [c for c in listed if c.endswith(':')][:3])
+    # a list ends where the prose resumes and the page marks that nowhere, so
+    # every entry has to look like a card or the footnote comes in with them
+    import gputable
+    check('and no prose was',
+          all(gputable.CARD_SHAPE.match(c) for c in listed),
+          [c for c in listed if not gputable.CARD_SHAPE.match(c)][:2])
+
+    import inventory
+    rows = inventory.devices()['devices']
+    nvidia = [r for r in rows if r['vendor'] == 'NVIDIA Corporation']
+    check('the catalogue lists NVIDIA card by card', len(nvidia) > 100, len(nvidia))
+    check('each carrying its family', all(r['note'] for r in nvidia))
+    check('and its range as values rather than prose',
+          any(r['macos'] and r['macos']['to'] == '11' for r in nvidia),
+          [r['macos'] for r in nvidia[:2]])
+    check('with the patched range beside it where there is one',
+          any((r['macos'] or {}).get('oclp') for r in nvidia))
+    check('and that range has both ends',
+          all(r['macos'].get('oclp_to') for r in nvidia
+              if (r['macos'] or {}).get('oclp')))
+
+    # AMD cards and Intel iGPUs are patched too, and the catalogue used to say
+    # so only for NVIDIA
+    polaris = next(r for r in rows if r['name'] == 'RX 580')
+    check('an AMD card OCLP patches says so as well',
+          (polaris['macos'] or {}).get('oclp') == '13.0', polaris['macos'])
+
+    check('an id the name list does not carry gets no family',
+          gpu.nvidia_family({'id': '10de:ffff'}) is None)
+    check('and a card that is not NVIDIA is not looked up at all',
+          gpu.nvidia_family({'id': '1002:67df'}) is None)
+
+    # and it reaches the range the machine screen shows
+    import summary
+    machine = {'cpu': 'i5', 'generation': 'comet-lake', 'laptop': False,
+               'gpu_devices': [{'id': '10de:1180', 'name': 'GeForce GTX 680'}]}
+    window = summary.macos_range(machine)
+    check('a supported NVIDIA card bounds the machine range', window is not None)
+    check('at the release its family stops on',
+          window[1] and window[1][2] == 20, window)
+
+
+def the_vendored_opencore():
+    """One OpenCore release, whole, and runnable.
+
+    Everything a build rests on comes out of one release, so half an update is
+    worse than none. And a program has to be executable: git records the bit,
+    the release zip does not set it on the Linux builds, and a build that
+    shells out to an unrunnable ocvalidate stops with nothing to read."""
+    import subprocess as _sub
+
+    versions = sorted(p.name for p in Path('vendor/opencore').iterdir() if p.is_dir())
+    check('exactly one version is vendored', len(versions) == 1, versions)
+    here = Path('vendor/opencore') / versions[0]
+    check('with the sample every config is layered onto',
+          (here / 'Sample.plist').exists())
+
+    listed = _sub.run(['git', 'ls-files', '-s', str(here)],
+                      capture_output=True, text=True).stdout.splitlines()
+    programs = [l for l in listed
+                if any(f'/{t}' in l for t in ('ocvalidate', 'macserial'))
+                and not l.endswith(('.md', '.exe'))]
+    check('both tools are vendored for every system', len(programs) >= 4,
+          len(programs))
+    unrunnable = [l.split('\t')[-1] for l in programs if not l.startswith('100755')]
+    check('and every one of them is recorded executable', not unrunnable, unrunnable)
+
+    # the version the About page shows is this directory's name, so a stale
+    # number cannot survive an update
+    import inventory
+    check('the version reported is the one vendored',
+          inventory.about()['opencore'] == versions[0])
+
+    # the write-up of how to do this next time names the tools that do it. A
+    # document that names a tool which does not exist is worse than none.
+    doc = Path('docs/RELEASING.md')
+    check('there is a write-up of how to move to the next one', doc.exists())
+    if doc.exists():
+        text = doc.read_text()
+        for tool in ('tools/opencore.py', 'tools/verify.py', 'tools/matrix.py',
+                     'tools/fetch_oc.py', 'tools/selftest.py'):
+            check(f'{tool} is named in it and exists',
+                  tool in text and Path(tool).exists())
+        check('and it says the release is tagged, not pushed by hand',
+              'git tag' in text and 'release.yml' in text)
+
+
+def the_tools_a_window_can_drive():
+    """Both vendored tools reach a person, whichever surface is attached.
+
+    They read their own input, which a window has none of. One of them has a
+    single input function and takes a replacement; the other is somebody else's
+    executable and gets a console window of its own. Neither is refused now,
+    and being refused was the state this records the end of."""
+    import inspect
+    import usbmap
+
+    check('the mapper can be given a console of its own',
+          'own_console' in inspect.signature(usbmap.run).parameters)
+    source = Path('tools/usbmap.py').read_text()
+    check('and it asks for one the way Windows spells it',
+          'CREATE_NEW_CONSOLE' in source)
+    check('by name, not by number, so it reads as what it is',
+          '0x00000010' not in source)
+
+    builder = Path('tools/setup.py').read_text()
+    check('a front end is offered the mapper rather than skipped',
+          'own_console=UI.protocol' in builder)
+    check('and told where it will appear',
+          'window of its own' in builder)
+    # the guard that used to skip it entirely
+    check('nothing skips the step for being a front end',
+          'not UI.protocol and not a.usb_map' not in builder)
+
+    # Opening it to a front end opened it to the unattended pass as well, which
+    # answered yes and waited for somebody to plug in a device. An unattended
+    # pass declines what it is offered.
+    drive = Path('gui/Views/BuilderView.axaml.cs').read_text()
+    check('an unattended pass declines rather than taking the first row',
+          'o.Value is "no" or "none"' in drive, 'declining option preferred')
+    check('and the value it declines by is in the question it was sent',
+          "'value': v" in Path('tools/setup.py').read_text())
+
+
+def what_oclp_restores():
+    """Where the graphics go past their native ceiling, and whose doing it is.
+
+    OCLP publishes this: each patch set with the macOS it applies from. The
+    join between their prose and this repository's family names is the only
+    part written here, and it is the part worth pinning down."""
+    import oclptable
+    import summary
+
+    table = oclptable.table()
+    check('the table names its source',
+          'OpenCore-Legacy-Patcher' in table.get('source', ''), table.get('source'))
+    check('and holds the patch sets the page lists',
+          len(table.get('patch', [])) >= 8, len(table.get('patch', [])))
+
+    kepler = oclptable.for_nvidia('GK')
+    check('Kepler is restored from macOS 12',
+          kepler and kepler['from'] == '12.0', kepler)
+    check('and Pascal is not, because the page does not list it',
+          oclptable.for_nvidia('GP') is None)
+    check('Haswell graphics are restored from 13',
+          (oclptable.for_igpu('haswell') or {}).get('from') == '13.0')
+    check('and Polaris cards too',
+          (oclptable.for_card_family('Polaris 10 and 20 series') or {}).get('from')
+          == '13.0')
+    check('a family nobody patches gets nothing',
+          oclptable.for_nvidia('AD') is None
+          and oclptable.for_igpu('raptor-lake') is None)
+
+    # the patch page says where a set starts and never where it stops, so the
+    # ceiling comes from the shape of the documentation: one support page per
+    # macOS OCLP has added, and the newest of them is as far as it goes
+    top = oclptable.upper_bound()
+    check('there is a ceiling, and it is a macOS anybody would recognise',
+          top and top[0] and top[1].isdigit(), top)
+    check('and it is at least Ventura, or the pages were misread',
+          top and int(top[1]) >= 13, top)
+    check('the table says where the ceiling came from',
+          'MODELS' in oclptable.table().get('ceiling_source', ''),
+          oclptable.table().get('ceiling_source'))
+
+    # and it reaches the machine screen, beside the range rather than inside it
+    kepler_machine = {'generation': 'comet-lake', 'laptop': False,
+                      'gpu_devices': [{'id': '10de:1180', 'name': 'GTX 680'}]}
+    said = summary.patched_further(kepler_machine)
+    check('a Kepler machine is told where the patches take it',
+          said and said[0]['from'] == '12.0', said)
+    window = summary.macos_windows(kepler_machine)
+    check('and the range itself is untouched by it',
+          all('OCLP' not in w[0] for w in window), window)
+
+    modern = {'generation': 'comet-lake', 'laptop': False,
+              'gpu_devices': [{'id': '1002:73ff', 'name': 'RX 6600'}]}
+    check('a machine nothing patches is told nothing',
+          summary.patched_further(modern) == [], summary.patched_further(modern))
+
+    # one line per family, however many cards of it are in the machine
+    two_keplers = dict(kepler_machine, gpu_devices=[
+        {'id': '10de:1180', 'name': 'GTX 680'}, {'id': '10de:1187', 'name': 'GTX 760'}])
+    check('two cards of one family say it once',
+          len(summary.patched_further(two_keplers)) == 1,
+          summary.patched_further(two_keplers))
+
+
+def the_about_page():
+    """What the program says about itself has to be true of the program.
+
+    Every number on it is counted from the tree, because a number typed into a
+    sentence goes stale silently - this page carried "OpenCore 1.0.6" and "41
+    kexts" while the tree held 1.0.5 and 42."""
+    import inventory
+
+    about = inventory.about()
+    check('the OpenCore version is the vendored one',
+          about['opencore'] == sorted(x.name for x in Path('vendor/opencore').iterdir()
+                                      if x.is_dir())[-1], about['opencore'])
+    check('the kext count is what the lock holds',
+          about['kexts'] == len(ocgen.read_toml(Path('vendor/kexts.lock'))['kext']))
+    check('and what is actually on disk agrees with it',
+          about['shipped'] == about['kexts'], (about['shipped'], about['kexts']))
+    check('the config count is the catalogue length',
+          about['configs'] == len(ocgen.read_toml(
+              Path('profiles/catalogue.toml'))['config']))
+
+    # the whole point of the page
+    check('every source area says what it covers and what it does not',
+          all(s['covers'] and s['gap'] for s in about['sources']),
+          [s['area'] for s in about['sources'] if not (s['covers'] and s['gap'])])
+    check('every one names a kind the page explains',
+          {s['kind'] for s in about['sources']}
+          <= {'derived', 'measured', 'quoted', 'reported', 'none'},
+          sorted({s['kind'] for s in about['sources']}))
+    check('and the tally adds up to the areas',
+          sum(about['tally'].values()) == len(about['sources']))
+
+    # vendored programs, which the page carried and never drew
+    check('the vendored programs are listed', len(about['tools']) >= 5,
+          len(about['tools']))
+    check('each with the licence its project states',
+          all(t.get('license') for t in about['tools']),
+          [t['path'] for t in about['tools'] if not t.get('license')])
+    check('and the upstream it came from',
+          all(t.get('upstream') for t in about['tools']))
+
+    check('this repository names its own licence',
+          about['licence'] and 'License' in about['licence'], about['licence'])
+
+    # the sentence about the network used to say "both ACPI tools" while nine
+    # programs travelled in the package, so it is counted now and not written
+    source = Path('gui/Views/AboutView.axaml.cs').read_text()
+    layout = Path('gui/Views/AboutView.axaml').read_text()
+    check('the offline sentence counts what it claims',
+          'about.Tools.Count' in source, 'about.Tools.Count' in source)
+    check('and is not a fixed sentence in the layout',
+          'ACPI tools travel' not in layout)
+    check('and the weakest sources are drawn first', '["none"] = 0' in source)
+
+
 if __name__ == '__main__':
     for section in (graphics, graphics_advice, audio_advice, storage, peripherals,
                     trackpad, framebuffer, boot_args, other_machine,
@@ -1256,7 +2168,14 @@ if __name__ == '__main__':
                     smbus_trackpad, macos_window, card_readers, third_party,
                     usb_mapping, acpi_tables, unattended_ssdts, ssdt_flow, window_stays_open,
                     frozen_names, frozen_build, workflow_flags,
-                    runner_independence, tables_match_sources):
+                    runner_independence, tables_match_sources,
+                    front_end_protocol, machine_document, machine_name,
+                    embedded_fonts, macos_registry, genuine_macs,
+                    the_processor_bounds_it_too, graphics_and_the_range,
+                    what_the_machine_calls_its_network, the_device_catalogue,
+                    nvidia_by_family, the_vendored_opencore,
+                    the_tools_a_window_can_drive,
+                    what_oclp_restores, the_about_page):
         print(f'\n{section.__name__}')
         section()
     print()

@@ -26,3 +26,6 @@ build/
 # Python bytecode
 __pycache__/
 *.py[cod]
+
+# a published build dropped in for trying by hand
+gui/dist/

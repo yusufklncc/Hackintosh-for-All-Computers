@@ -1,0 +1,94 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:v="clr-namespace:Shell.Views"
+             x:Class="Shell.Views.AboutView"
+             x:DataType="v:AboutView">
+  <ScrollViewer>
+    <StackPanel Margin="28,24,28,32" Spacing="20">
+
+      <StackPanel Spacing="8" MaxWidth="740" HorizontalAlignment="Left">
+        <TextBlock Classes="eyebrow" Text="ABOUT" />
+        <TextBlock FontSize="15" TextWrapping="Wrap" Foreground="{DynamicResource Ink}"
+                   Text="An OpenCore EFI builder that answers from tables, and says where each table came from." />
+        <TextBlock Name="Offline" FontSize="13.5" TextWrapping="Wrap"
+                   Foreground="{DynamicResource Muted}" />
+        <TextBlock Name="Licence" FontSize="12.5" TextWrapping="Wrap"
+                   Foreground="{DynamicResource Faint}" />
+      </StackPanel>
+
+      <ItemsControl Name="Counts">
+        <ItemsControl.ItemsPanel>
+          <ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
+        <ItemsControl.ItemTemplate>
+          <DataTemplate x:DataType="v:CountItem">
+            <Border Classes="panel" Margin="0,0,12,12" MinWidth="150">
+              <StackPanel Spacing="4">
+                <TextBlock Classes="eyebrow" Text="{Binding Name}" />
+                <TextBlock Text="{Binding Value}" FontSize="19" FontWeight="SemiBold"
+                           Foreground="{DynamicResource Ink}" />
+              </StackPanel>
+            </Border>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+
+      <StackPanel Spacing="10">
+        <TextBlock Classes="eyebrow" Text="PROGRAMS THAT TRAVEL WITH IT" />
+        <TextBlock FontSize="12.5" TextWrapping="Wrap" MaxWidth="740"
+                   HorizontalAlignment="Left" Foreground="{DynamicResource Muted}"
+                   Text="Not kexts - whole programs, vendored and driven. Each is pinned by hash and carries the licence its project states." />
+        <ItemsControl Name="Tools">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="v:ToolItem">
+              <Grid ColumnDefinitions="*,150,170" Margin="0,0,0,6">
+                <StackPanel Grid.Column="0" Margin="0,0,12,0">
+                  <TextBlock Classes="mono" Text="{Binding Path}"
+                             Foreground="{DynamicResource Ink}" />
+                  <TextBlock Classes="mono" FontSize="10.5" Text="{Binding Note}"
+                             IsVisible="{Binding HasNote}"
+                             Foreground="{DynamicResource Faint}" TextWrapping="Wrap" />
+                </StackPanel>
+                <TextBlock Grid.Column="1" Classes="mono" Text="{Binding Upstream}"
+                           TextWrapping="Wrap" />
+                <TextBlock Grid.Column="2" Classes="mono" Text="{Binding Licence}"
+                           TextWrapping="Wrap" />
+              </Grid>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </StackPanel>
+
+      <StackPanel Spacing="10">
+        <TextBlock Classes="eyebrow" Text="WHERE THE ANSWERS COME FROM" />
+        <TextBlock Name="Tally" FontSize="13" TextWrapping="Wrap" MaxWidth="740"
+                   HorizontalAlignment="Left" Foreground="{DynamicResource Muted}" />
+        <ItemsControl Name="Sources">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="v:SourceItem">
+              <Border Classes="panel" Margin="0,0,0,8">
+                <StackPanel Spacing="6">
+                  <Grid ColumnDefinitions="*,Auto">
+                    <TextBlock Grid.Column="0" Text="{Binding Area}" FontSize="14"
+                               FontWeight="SemiBold" Foreground="{DynamicResource Ink}" />
+                    <Border Grid.Column="1" Classes="pill"
+                            Classes.ok="{Binding IsDerived}"
+                            Classes.warn="{Binding IsWeak}"
+                            Classes.bad="{Binding IsNone}">
+                      <TextBlock Text="{Binding Kind}" />
+                    </Border>
+                  </Grid>
+                  <TextBlock Classes="mono" Text="{Binding Source}" TextWrapping="Wrap" />
+                  <TextBlock Text="{Binding Covers}" FontSize="12.5" TextWrapping="Wrap"
+                             Foreground="{DynamicResource Muted}" />
+                  <TextBlock Text="{Binding Gap}" FontSize="12.5" TextWrapping="Wrap"
+                             Foreground="{DynamicResource Warn}" IsVisible="{Binding HasGap}" />
+                </StackPanel>
+              </Border>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </StackPanel>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

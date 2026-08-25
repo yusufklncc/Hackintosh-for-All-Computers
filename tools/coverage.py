@@ -71,6 +71,33 @@ def load_configs():
     return out
 
 
+def window_for(row):
+    """(floor, ceiling or None) in Darwin majors for one profile's kernel patches.
+
+    A config's patches say where it is armed. An AMD profile is a stack of
+    kernel patches with an upper bound on each, and above that bound the
+    machine does not boot at all - which is a harder limit than anything a kext
+    imposes, and it was not being counted.
+
+    The envelope of the patches, not the intersection of them. Grouping by
+    capability and taking the lowest ceiling looked more precise and was wrong:
+    a capability whose successor patch carries a different comment reads as
+    having stopped, and Ryzen came out bounded at macOS 11 by a patch that had
+    simply been renamed. Where a capability really does run out, coverage's own
+    report is the place that says so. A profile with no kernel patches - every
+    Intel one - is bounded by nothing here and returns None."""
+    sample = ocgen.load_plist(ocgen.vendored_sample())
+    config = ocgen.assemble(sample, ocgen.layer_chain(row, PROFILES),
+                            ocgen.build_params(row))
+    windows = [(parse(p.get('MinKernel'), (0, 0, 0)), parse(p.get('MaxKernel'), INF))
+               for p in config['Kernel'].get('Patch', [])
+               if p.get('Enabled', True)]
+    if not windows:
+        return None
+    highest = max(hi for _, hi in windows)
+    return min(lo for lo, _ in windows)[0], (None if highest == INF else highest[0])
+
+
 def recover_names(configs):
     """Darwin major -> macOS versions, learned from patch comments in this tree.
 
