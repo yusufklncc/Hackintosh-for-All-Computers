@@ -9,11 +9,15 @@ name: gui
 
 on:
   workflow_dispatch:
+  # release.yml builds the packages by calling this, so what ships is what was
+  # exercised here rather than a second build of it
+  workflow_call:
   push:
-    branches: ['beta/**']
-    paths: ['gui/**', '.github/workflows/gui.yml']
+    branches: [main, 'beta/**']
+    paths: ['gui/**', 'tools/**', 'data/**', 'vendor/**',
+            '.github/workflows/gui.yml']
   pull_request:
-    paths: ['gui/**']
+    paths: ['gui/**', 'tools/**', 'data/**', 'vendor/**']
 
 jobs:
   shell:
