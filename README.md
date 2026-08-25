@@ -8,21 +8,23 @@ This repository installs macOS on PC hardware. It holds ready macOS images, and
 it builds the OpenCore EFI folder your particular machine needs - reading your
 CPU, board and network cards to work out what to put in it.
 
-There are three ways to get that EFI, from least to most effort:
+There are four ways to get that EFI, from least to most effort:
 
 | | |
 |---|---|
-| **`HackintoshEFIBuilder.exe`** | Windows, nothing to install. Download from [Releases](../../releases), run it, answer a few questions. |
+| **The app** | A window, for Windows, Linux and macOS. Download from [Releases](../../releases), unzip, run it - nothing to install. |
+| **`EFIBuilderEngine.exe`** | The same builder in a terminal, for Windows. `HackintoshEFIBuilder-console-win-x64.zip` in the same release. |
 | **`python3 tools/setup.py`** | Same thing from a clone, on Windows, Linux or macOS. Needs Python 3.11. |
 | **`EFI-base.zip` + `configs.zip`** | No script at all: unzip the EFI, copy in the `config.plist` matching your machine. |
 
-All three produce the same thing, and none of them need an internet connection
+All four produce the same thing, and none of them need an internet connection
 for the common path - everything they use is in the repository.
 
 If you hit a problem, open an issue with what you have and what happened.
 
 ## Table of contents
 
+- [The app](#the-app)
 - [Get your EFI](#get-your-efi)
 - [Building for another machine](#building-for-another-machine)
 - [Check Compatibility](#check-compatibility)
@@ -35,6 +37,83 @@ If you hit a problem, open an issue with what you have and what happened.
 - [Post Installation](#post-installation)
 - [Adding a kext by hand](#adding-a-kext-by-hand)
 - [Finding your hardware yourself](#finding-your-hardware-yourself)
+
+### The app
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/App/machine.png">
+</p>
+
+Download the package for your system from [Releases](../../releases), unzip it,
+and run `HackintoshEFIBuilder`. There is nothing to install and nothing to
+configure, and it never reaches the network - the tables, the kexts and the
+OpenCore files all travel inside it.
+
+It opens on the machine it is running on: the model name, what each part is,
+whether macOS drives it, which kext does the driving, and the oldest macOS this
+hardware can boot together with the part that sets that floor. `unknown` means
+no table here claims the device - not that it fails.
+
+The window reimplements none of the builder. It runs the same program the
+terminal runs and draws the answers, so a screen cannot say something the
+console would not.
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/App/builder.png">
+</p>
+
+**Builder** asks the same questions in the same order, and answers none of them
+for you: where the machine can tell it something, the option is marked
+*detected* and you still choose. It writes the EFI folder and then offers to
+open it.
+
+<details>
+<summary><b>The other four panes</b></summary>
+
+<br>
+
+**Report** reads this machine into a single JSON file, and dumps its ACPI tables
+beside it. That is the file to carry to the computer you build on when the USB
+is being prepared somewhere else.
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/App/report.png">
+</p>
+
+**Compatible Hardware** lists 766 devices across 8 categories - everything this
+repository knows - searchable by name, id or kext, and filterable by category,
+vendor and support. It is read out of the same tables a build reads.
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/App/hardware.png">
+</p>
+
+**Kexts** lists the 42 kexts that ship inside the program, with the project each
+comes from, its version, its licence, and how many device ids it claims - read
+out of the kexts themselves rather than from a list somebody kept.
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/App/kexts.png">
+</p>
+
+**About** names where every answer comes from: which tool fetched each table,
+whether it was derived, measured, quoted or reported - and the areas with no
+source at all, said plainly instead of guessed.
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/App/about.png">
+</p>
+
+</details>
+
+<br>
+
+Each package holds two files: `HackintoshEFIBuilder`, the window, and
+`EFIBuilderEngine`, the builder it runs. Both are needed, and neither is signed
+- Windows will want *More info* then *Run anyway* on the first run, macOS an
+allow in System Settings.
+
+<br>
 
 ### Get your EFI
 
@@ -125,8 +204,9 @@ Run it from a clone with:
 python3 tools/setup.py
 ```
 
-Or download `HackintoshEFIBuilder.exe` from [Releases](../../releases) and
-double-click it - it carries everything inside, so there is nothing else to get.
+Or download it from [Releases](../../releases): the app for your system, or
+`HackintoshEFIBuilder-console-win-x64.zip` for the same thing in a terminal.
+Both carry everything inside, so there is nothing else to get.
 
 If you would rather not run anything, `EFI-base.zip` and `configs.zip` in the
 same release are the manual route, described under
@@ -145,7 +225,8 @@ The fix is to take the hardware report on the target machine and carry it over.
 On that machine, from Windows or Linux:
 
 ```
-HackintoshEFIBuilder.exe --report machine.json      # or the menu's option 4
+EFIBuilderEngine.exe --report machine.json          # or the menu's option 4
+                                                    # the app: the Report pane
 python3 tools/detect.py --report machine.json       # from a clone
 ```
 
@@ -222,7 +303,7 @@ To check if your hardware is incompatible, I leave links below.
 
 - When you plug-in USB back, you can see EFI partition in "My Computer"
 - Open EFI partition.
-- If you built one with `HackintoshEFIBuilder.exe` or `tools/setup.py`, copy that
+- If you built one with the app, `EFIBuilderEngine.exe` or `tools/setup.py`, copy that
   `EFI` folder there and you are done.
 - Otherwise go to `Releases` and take the two files:
   - `EFI-base.zip` - the EFI folder itself, the same for every machine.
@@ -495,7 +576,7 @@ same release file does share it. If you want one nobody else has, generate it:
 
 ### Adding a kext by hand
 
-The builder does this for you, and it knows 475 device ids and which kext
+The builder does this for you, and it knows 531 device ids and which kext
 drives each. This is the route if you are working from the release zips, or
 if you have hardware it does not cover.
 

@@ -2041,6 +2041,40 @@ def the_vendored_opencore():
               'git tag' in text and 'release.yml' in text)
 
 
+def what_the_readme_shows():
+    """The front page shows the window, and counts things that move.
+
+    Screenshots rot two ways: the file is renamed and the page draws a broken
+    image, or the numbers beside it drift from what the program now holds. Both
+    are silent to anyone who wrote the page and never reloads it."""
+    import inventory
+
+    readme = Path('README.md').read_text(encoding='utf-8')
+    shots = sorted(p.name for p in Path('Resources/App').glob('*.png'))
+    check('there are screenshots of the window', shots, shots)
+    for shot in shots:
+        check(f'{shot} is on the front page', f'Resources/App/{shot}' in readme)
+    drawn = set(re.findall(r'Resources/App/([\w.-]+\.png)', readme))
+    check('and every image it draws exists', not (drawn - set(shots)),
+          sorted(drawn - set(shots)))
+
+    # the numbers beside those pictures are the program's own
+    devices = inventory.devices()
+    kexts = inventory.kexts()['kexts']
+    claimed = sum(k['devices'] for k in kexts if k.get('devices'))
+    for count, what in ((len(devices['devices']), 'devices'),
+                        (len(devices['categories']), 'categories'),
+                        (len(kexts), 'kexts'),
+                        (claimed, 'device ids')):
+        check(f'the page counts {count} {what}, and so does the program',
+              re.search(rf'\b{count}\b[^.]*{what}', readme, re.S), count)
+
+    # a folder of two programs: the page has to name the one to open
+    check('it names the window', 'HackintoshEFIBuilder' in readme)
+    check('and the engine, by the name it ships under',
+          'EFIBuilderEngine' in readme)
+
+
 def the_tools_a_window_can_drive():
     """Both vendored tools reach a person, whichever surface is attached.
 
@@ -2213,7 +2247,8 @@ if __name__ == '__main__':
                     nvidia_by_family, what_the_two_programs_are_called,
                     the_vendored_opencore,
                     the_tools_a_window_can_drive,
-                    what_oclp_restores, the_about_page):
+                    what_oclp_restores, the_about_page,
+                    what_the_readme_shows):
         print(f'\n{section.__name__}')
         section()
     print()

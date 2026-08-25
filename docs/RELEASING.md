@@ -83,8 +83,8 @@ Each `HackintoshEFIBuilder-<system>.zip` holds two programs:
 
 | file | what it is |
 |---|---|
-| `HackintoshEFIBuilderShell` | the window |
-| `HackintoshEFIBuilder` | the engine, which the window runs |
+| `HackintoshEFIBuilder` | the window |
+| `EFIBuilderEngine` | the builder, which the window runs |
 
 Both are needed. The window reimplements none of the engine: it asks it for
 everything and draws the answers. CI proves the packaged pair is the one being
