@@ -45,9 +45,13 @@ public static class Builder
         {
             if (!File.Exists(packaged)) continue;
             complaint = "";
-            var where = packaged.Contains(Path.Combine("Contents", "Resources"))
+            // resolved first: the path built here is Contents/MacOS/../Resources,
+            // which does not contain "Contents/Resources" as text, so the
+            // engine was found inside the bundle and reported as beside it
+            var full = Path.GetFullPath(packaged);
+            var where = full.Contains(Path.Combine("Contents", "Resources"))
                 ? "inside this app" : "beside this window";
-            return new Located(Path.GetFullPath(packaged), Array.Empty<string>(), where);
+            return new Located(full, Array.Empty<string>(), where);
         }
 
         // a clone: walk up for the tools directory rather than assuming how
