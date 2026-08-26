@@ -2710,8 +2710,15 @@ def what_it_looks_like_when_it_arrives():
     # the last line of a menu was under the edge, and the scroller was asked
     # to go to an end it had not measured yet
     drawn = Path('gui/Views/BuilderView.axaml.cs').read_text()
-    check('the transcript scrolls after the layout, not before it',
-          'DispatcherPriority.Background' in drawn)
+    check('the transcript follows its last line once the layout settles',
+          'LayoutUpdated' in drawn and 'void StickToEnd' in drawn)
+    check('and again when the question panel changes how tall it is',
+          drawn.count('StickToEnd();') >= 4, drawn.count('StickToEnd();'))
+    check('and it reports where it is, so a build can check',
+          'scrolled {Scroll.Offset.Y' in drawn)
+    check('which the render pass does',
+          'the transcript did not follow its last line'
+          in Path('.github/workflows/gui.yml').read_text())
     shape = Path('gui/Views/BuilderView.axaml').read_text()
     check('and leaves room under the last line', 'Padding="16,12,16,24"' in shape)
 

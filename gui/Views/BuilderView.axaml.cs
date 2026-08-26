@@ -90,9 +90,34 @@ public partial class BuilderView : UserControl
         return await ended.Task;
     }
 
+    /// <summary>Follow the last line down, once the layout knows where it is.
+    ///
+    /// Posting a ScrollToEnd asks the scroller for an end it has not measured
+    /// yet, and it stops short: the bottom of a menu stayed out of sight, and
+    /// the row hidden there was the one that quits. Waiting for the layout to
+    /// settle is the only moment the extent is the real one.</summary>
+    void StickToEnd()
+    {
+        if (_following) return;
+        _following = true;
+        EventHandler? once = null;
+        once = (_, _) =>
+        {
+            Transcript.LayoutUpdated -= once;
+            _following = false;
+            Scroll.ScrollToEnd();
+        };
+        Transcript.LayoutUpdated += once;
+        Transcript.InvalidateMeasure();
+    }
+
+    bool _following;
+
     /// <summary>What is on screen, in one line a build log can assert on.</summary>
     public string State() =>
         $"builder: {Transcript.Children.Count} lines, " +
+        $"scrolled {Scroll.Offset.Y:0} + {Scroll.Viewport.Height:0} " +
+        $"of {Scroll.Extent.Height:0}, " +
         (_open is null ? "no question open"
                        : $"asking \"{_open.Text}\" with {_open.Options.Count} options");
 
@@ -167,6 +192,9 @@ public partial class BuilderView : UserControl
         _session?.Stop();
         _session = null;
         Prompt.IsVisible = false;
+        // the panel below changes how tall the transcript is, and an
+        // offset that was at the bottom is not any more
+        StickToEnd();
         Standby.IsVisible = true;
         Begin.IsEnabled = true;
         StandbyTitle.Text = "Stopped";
@@ -200,10 +228,7 @@ public partial class BuilderView : UserControl
             line.Inlines!.Add(run);
         }
         Transcript.Children.Add(line);
-        // after the layout, not before it. Called here the scroller is asked
-        // to go to an end it has not measured yet, so it stops short - and
-        // what stayed out of sight was the last row of a menu.
-        Dispatcher.UIThread.Post(Scroll.ScrollToEnd, DispatcherPriority.Background);
+        StickToEnd();
     }
 
     // ---- what it asked ---------------------------------------------------
@@ -212,6 +237,9 @@ public partial class BuilderView : UserControl
     {
         _open = question;
         Prompt.IsVisible = true;
+        // the panel below changes how tall the transcript is, and an
+        // offset that was at the bottom is not any more
+        StickToEnd();
         Standby.IsVisible = false;
         QuestionText.Text = question.Text;
         Step.Text = question.Note?.ToUpperInvariant();
@@ -291,6 +319,9 @@ public partial class BuilderView : UserControl
         var id = _open.Id;
         _open = null;
         Prompt.IsVisible = false;
+        // the panel below changes how tall the transcript is, and an
+        // offset that was at the bottom is not any more
+        StickToEnd();
         _session.Answer(id, answer);
     }
 
@@ -298,6 +329,9 @@ public partial class BuilderView : UserControl
     {
         _session = null;
         Prompt.IsVisible = false;
+        // the panel below changes how tall the transcript is, and an
+        // offset that was at the bottom is not any more
+        StickToEnd();
         Standby.IsVisible = true;
         Begin.IsEnabled = true;
         Begin.Content = "Build again";
