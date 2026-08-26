@@ -84,7 +84,11 @@ jobs:
           test -s shell-dark.png || { echo 'no dark screenshot'; exit 1; }
           test -s shell-builder.png || { echo 'no builder screenshot'; exit 1; }
           # the pane is only worth a picture if an engine answered into it
-          grep -qE 'builder: [1-9][0-9]* lines, asking ".+" with [1-9]' render.log \
+          # ".*" between the count and the question: the pane says where it is
+          # scrolled in the middle of that line now, and a pattern that assumed
+          # the two were adjacent failed the step before any of the checks
+          # below it ran
+          grep -qE 'builder: [1-9][0-9]* lines,.*asking ".+" with [1-9]' render.log \
             || { echo 'the builder pane never got a question'; cat render.log; exit 1; }
           # and it has to be able to finish one, not only start it
           # the transcript follows its last line. It stopped short twice: once

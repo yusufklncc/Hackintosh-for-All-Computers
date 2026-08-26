@@ -2721,6 +2721,17 @@ def what_it_looks_like_when_it_arrives():
     import scrollcheck
     check('which the render pass checks with a tool of its own',
           'scrollcheck.py' in Path('.github/workflows/gui.yml').read_text())
+
+    # the line the workflow greps for is the line the pane prints. Adding the
+    # scroll position to the middle of it broke a pattern that assumed the
+    # count and the question were adjacent - and that failed the step before
+    # any of the checks after it ran, which is why nothing said why.
+    said = ('builder: 20 lines, scrolled 0 + 342 of 306, '
+            'asking "Which machine is this EFI for?" with 4 options')
+    workflow = Path('.github/workflows/gui.yml').read_text()
+    for pattern in re.findall(r"grep -qE '(builder:[^']+)'", workflow):
+        check('the workflow still recognises what the pane prints',
+              re.search(pattern, said), pattern)
     check('that tool catches a transcript left short',
           scrollcheck.short('scrolled 0 + 70 of 337'), 'missed it')
     check('and passes one that is at the end',
