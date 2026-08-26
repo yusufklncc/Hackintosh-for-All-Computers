@@ -2716,9 +2716,17 @@ def what_it_looks_like_when_it_arrives():
           drawn.count('StickToEnd();') >= 4, drawn.count('StickToEnd();'))
     check('and it reports where it is, so a build can check',
           'scrolled {Scroll.Offset.Y' in drawn)
-    check('which the render pass does',
-          'the transcript did not follow its last line'
-          in Path('.github/workflows/gui.yml').read_text())
+    # a file, not a heredoc in the workflow: written inline the same check was
+    # read as shell commands, printed nothing, and passed by accident
+    import scrollcheck
+    check('which the render pass checks with a tool of its own',
+          'scrollcheck.py' in Path('.github/workflows/gui.yml').read_text())
+    check('that tool catches a transcript left short',
+          scrollcheck.short('scrolled 0 + 70 of 337'), 'missed it')
+    check('and passes one that is at the end',
+          not scrollcheck.short('scrolled 63 + 274 of 337'))
+    check('and does not mind a viewport taller than the content',
+          not scrollcheck.short('scrolled 0 + 379 of 355'))
     shape = Path('gui/Views/BuilderView.axaml').read_text()
     check('and leaves room under the last line', 'Padding="16,12,16,24"' in shape)
 

@@ -92,23 +92,7 @@ jobs:
           # once because opening a question made the transcript shorter and
           # nothing scrolled again. The row left out of sight was the one that
           # quits SSDTTime's menu.
-          python3 - <<'PY' render.log
-          import re, sys
-          short = []
-          for line in open(sys.argv[1], encoding='utf-8', errors='replace'):
-              m = re.search(r'scrolled (\d+) \+ (\d+) of (\d+)', line)
-              if not m:
-                  continue
-              at, seen, all_ = (int(x) for x in m.groups())
-              if at + seen < all_ - 1:
-                  short.append(line.strip())
-          if short:
-              print('the transcript did not follow its last line:')
-              for said in short:
-                  print('  ' + said)
-              sys.exit(1)
-          print('the transcript is at the end every time it was looked at')
-          PY
+          python3 tools/scrollcheck.py render.log
 
           grep -q 'drive: rc=0 Written:' render.log \
             || { echo 'the builder pane never finished a build'; cat render.log; exit 1; }
