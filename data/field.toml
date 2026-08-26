@@ -21,3 +21,18 @@ status = "unsupported"
 observed_by = "yusufklncc"
 observed = "macOS installs, but graphics acceleration cannot be made to work"
 note = "Comet Lake is supported as a generation, so the generation rule alone would call this one supported."
+
+# The Mac identity a config claims, where somebody has run the combination and
+# the tables can only say what Apple serves. `data/smbios.toml` joined to
+# macrecovery's board list says how far an identity is offered; whether an
+# install then completes on hardware that is not that Mac is a different
+# question, and only running it answers that.
+[[smbios]]
+model = "MacBookPro16,1"
+macos = "26"
+cpu = "i5-7200U"
+observed_by = "yusufklncc"
+observed = "Tahoe boots its recovery and installs, on Kaby Lake hardware, with this identity"
+note = """-no_compat_check gets a boot past the model check; it does not carry \
+an install through on an identity the release does not serve. Its place is \
+after the install, once the proper identity is put back."""

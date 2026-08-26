@@ -60,6 +60,12 @@ def ids_in(path, key='driver', role=None):
 
 # What each category rests on. The counts are read; everything else is the
 # provenance of the file, which has to be stated somewhere and is stated here.
+def _identities():
+    """How many Mac identities the table knows."""
+    import smbios
+    return len(smbios.table())
+
+
 def _recoveries():
     """How many macOS versions the vendored board list yields."""
     import recovery
@@ -219,8 +225,11 @@ def catalogue():
         dict(area='Field reports', kind=REPORTED, file='data/field.toml',
              source='running macOS on the machine, attributed per entry',
              tool='hand written',
-             count=f'{rows_in("data/field.toml", "igpu")} iGPU exception{"s" if rows_in("data/field.toml", "igpu") != 1 else ""}',
-             covers='processors whose iGPU behaves differently from its generation',
+             count=f'{rows_in("data/field.toml", "igpu")} iGPU, '
+                   f'{rows_in("data/field.toml", "smbios")} identity',
+             covers='processors whose iGPU behaves differently from its '
+                    'generation, and Mac identities somebody has installed a '
+                    'particular macOS under',
              gap='One person, one machine each. It outranks the generation rule '
                  'because it is more specific, not because it is stronger.'),
         dict(area='Kext load order', kind=DERIVED, file='EFI/OC/Kexts/',
@@ -285,6 +294,16 @@ def catalogue():
              covers='the map the tool writes, on Windows, run from the builder',
              gap='Windows only, because that is the build the project publishes. '
                  'Nothing here can produce a map without a person at the machine.'),
+        dict(area='Mac identities', kind=DERIVED, file='data/smbios.toml',
+             source="acidanthera's AppleModels, joined to macrecovery's boards.json",
+             tool='tools/smbios.py',
+             count=f'{_identities()} models, one board list each',
+             covers='the board behind each identity a config can claim, and the '
+                    'newest macOS that board is offered',
+             gap='Not from Apple\'s device-management metadata: that lists, per '
+                 'macOS line, the machines the line is still served to, which is '
+                 'narrower than what a machine runs. Whether an install then '
+                 'completes is not something either list says.'),
         dict(area='Recovery installers', kind=DERIVED,
              file='vendor/opencore/', source="macrecovery's own boards.json",
              tool='tools/recovery.py',

@@ -61,6 +61,17 @@ def _names():
     return {r['version']: r['name'] for r in ocgen.read_toml(RELEASES)['release']}
 
 
+def served(tool=None):
+    """board id -> the newest macOS macrecovery's list records for it.
+
+    The same file the Recovery tab's list comes from, read whole rather than
+    grouped: smbios.py asks it the other way round, board first."""
+    tool = tool or vendored()
+    if tool is None:
+        return {}
+    return json.loads((tool.parent / 'boards.json').read_text(encoding='utf-8'))
+
+
 def choices(tool=None):
     """What can be fetched, newest first, read from macrecovery's board list.
 

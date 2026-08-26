@@ -33,6 +33,15 @@
     <Style Selector="Border.pill.warn"><Setter Property="Background" Value="{DynamicResource WarnSoft}" /></Style>
     <Style Selector="Border.pill.warn > TextBlock"><Setter Property="Foreground" Value="{DynamicResource Warn}" /></Style>
 
+    <!-- The verdict on a stick. Through styles, not FindResource: these
+         brushes live in the theme dictionaries and looking one up from code
+         hands back UnsetValue, which cast to IBrush took the whole program
+         down the first time somebody selected a disk. -->
+    <Style Selector="Border.verdict.ok"><Setter Property="Background" Value="{DynamicResource OkSoft}" /></Style>
+    <Style Selector="Border.verdict.ok TextBlock.state"><Setter Property="Foreground" Value="{DynamicResource Ok}" /></Style>
+    <Style Selector="Border.verdict.warn"><Setter Property="Background" Value="{DynamicResource WarnSoft}" /></Style>
+    <Style Selector="Border.verdict.warn TextBlock.state"><Setter Property="Foreground" Value="{DynamicResource Warn}" /></Style>
+
     <Style Selector="TextBlock.eyebrow">
       <Setter Property="FontSize" Value="11" />
       <Setter Property="FontWeight" Value="SemiBold" />

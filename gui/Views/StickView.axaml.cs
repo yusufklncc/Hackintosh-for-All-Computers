@@ -13,9 +13,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Controls;
-using Avalonia.Media;
 using Avalonia.Platform.Storage;
-using Avalonia;
 using Shell.Engine;
 
 namespace Shell.Views;
@@ -45,9 +43,14 @@ public partial class StickView : UserControl
         // the button turns on only when what is typed is the disk that is
         // selected. A checkbox would be a habit; this has to be read.
         Typed.TextChanged += (_, _) =>
-            Erase.IsEnabled = _erasable
-                && Which.SelectedItem is Stick s
-                && Typed.Text?.Trim() == s.Device;
+        {
+            var want = (Which.SelectedItem as Stick)?.Device ?? "";
+            var typed = Typed.Text?.Trim() ?? "";
+            Erase.IsEnabled = _erasable && want.Length > 0 && typed == want;
+            // and say what is wrong, rather than leaving a grey button
+            TypedHint.Text = typed.Length == 0 || Erase.IsEnabled ? ""
+                           : $"that is not {want}";
+        };
         Open.Click += (_, _) =>
         {
             if (Which.SelectedItem is Stick s && s.Where.Length > 0) Reveal.Show(s.Where);
@@ -91,15 +94,54 @@ public partial class StickView : UserControl
         Describe();
     }
 
-    /// <summary>What the pane found, for the screenshot pass.</summary>
+    /// <summary>What the pane found, for the screenshot pass.
+    ///
+    /// And then what it draws for a stick that is not there. A build machine
+    /// has no USB in it, so a real run only ever exercises the empty list -
+    /// and the path that draws a disk is the one that took the whole program
+    /// down when a resource lookup handed back UnsetValue.</summary>
     public async Task<string> ListForRender()
     {
         await Load();
         var sticks = Which.ItemsSource as IEnumerable<Stick>;
         var all = sticks?.ToList() ?? new List<Stick>();
         var ready = all.Count(s => s.Ready);
+        var drawn = Rehearse();
         return $"{all.Count} sticks, {ready} ready, erasable={_erasable}, "
-             + $"into {_folder}";
+             + $"into {_folder}, drew {drawn}";
+    }
+
+    /// <summary>Select a made-up stick of each kind, and put it back.</summary>
+    string Rehearse()
+    {
+        var was = Which.ItemsSource;
+        var wasIndex = Which.SelectedIndex;
+        var pretend = new List<Stick>
+        {
+            new() { Device = "disk404", Name = "a stick that is not here",
+                    Size = "8.0 GB", Ready = true, WriteTo = "/nowhere",
+                    Why = "FAT32 under GPT: ready as it is, nothing to erase." },
+            new() { Device = "disk405", Name = "another that is not here",
+                    Size = "16.0 GB", Ready = false,
+                    Why = "this holds APFS, and OpenCore boots from a FAT32 "
+                        + "partition. It has to be erased and formatted first." },
+        };
+        var seen = 0;
+        try
+        {
+            Which.ItemsSource = pretend;
+            foreach (var _ in pretend)
+            {
+                Which.SelectedIndex = seen;          // SelectionChanged -> Describe
+                seen++;
+            }
+        }
+        finally
+        {
+            Which.ItemsSource = was;
+            Which.SelectedIndex = wasIndex;
+        }
+        return $"{seen} verdicts";
     }
 
     void Describe()
@@ -115,8 +157,8 @@ public partial class StickView : UserControl
         // the question a stick raises is "do I have to format this?", so that
         // is answered before anything else on the pane
         VerdictBox.IsVisible = true;
-        VerdictBox.Background = Brush("OkSoft", "WarnSoft", stick.Ready);
-        VerdictWhat.Foreground = Brush("Ok", "Warn", stick.Ready);
+        VerdictBox.Classes.Set("ok", stick.Ready);
+        VerdictBox.Classes.Set("warn", !stick.Ready);
         VerdictWhat.Text = stick.Ready
             ? $"Ready. Writes to {stick.WriteTo}"
             : "This one has to be formatted first";
@@ -132,20 +174,22 @@ public partial class StickView : UserControl
                        + $"({stick.Device})"
                        + (stick.Where.Length > 0 ? $", mounted at {stick.Where}." : ".")
                        + " There is no undoing it.";
+        // the word to type, spelled out. "the disk name" was read as the
+        // volume's name - USB, RUFUS_BOOT - and the button stayed grey with
+        // nothing saying why
         EraseHow.Text = _erasable
-            ? "It becomes one FAT32 partition under GPT, which is what OpenCore "
-            + "boots from. Type the disk name to turn the button on."
+            ? $"It becomes one FAT32 partition under GPT, which is what OpenCore "
+            + $"boots from. Type {stick.Device} below to turn the button on."
             : "This system cannot do it from here - it needs a root or "
             + "administrator the engine does not have. Press it anyway and the "
             + "exact commands to run yourself are printed below.";
+        Typed.Watermark = $"type {stick.Device}";
         EraseAsk.IsVisible = true;
         Erase.IsEnabled = false;
         Typed.Text = "";
+        TypedHint.Text = "";
         if (!_erasable) Erase.IsEnabled = true;
     }
-
-    IBrush Brush(string good, string bad, bool ready) =>
-        (IBrush)(Application.Current!.FindResource(ready ? good : bad) ?? Brushes.Gray);
 
     async Task Pick(bool efi)
     {

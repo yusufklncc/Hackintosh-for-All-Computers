@@ -26,7 +26,7 @@ jobs:
 
       - name: It builds an EFI from the bundle alone
         run: |
-          dist/EFIBuilderEngine/EFIBuilderEngine.exe --no-detect --answers 2,10,3 --out smoke/EFI
+          dist/EFIBuilderEngine/EFIBuilderEngine.exe --no-detect --answers 2,10,3,9 --out smoke/EFI
           if (-not (Test-Path smoke/EFI/OC/config.plist)) { exit 1 }
 
       # --check reads this runner and prints what it means, with no questions
@@ -56,7 +56,7 @@ jobs:
           # a different set of questions than a laptop does, and a fixed answer
           # string against whatever the runner happens to be is how this failed.
           dist/EFIBuilderEngine/EFIBuilderEngine.exe --machine tools/fixtures/no-hardware.json `
-            --acpi-tables ACPI --answers 2,10,3 --out acpi-smoke/EFI
+            --acpi-tables ACPI --answers 2,10,3,9 --out acpi-smoke/EFI
           if (-not (Test-Path acpi-smoke/EFI/OC/config.plist)) { exit 1 }
           # the automatic set, against this runner's own tables. It asks nothing,
           # which is why a script may have it, and this is the only place it can

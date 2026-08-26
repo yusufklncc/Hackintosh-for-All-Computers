@@ -40,11 +40,11 @@
             </ComboBox>
             <!-- the answer to "do I need to format this?", which is the
                  question a stick actually raises -->
-            <Border Name="VerdictBox" CornerRadius="6" Padding="12,10"
-                    IsVisible="False">
+            <Border Name="VerdictBox" Classes="verdict" CornerRadius="6"
+                    Padding="12,10" IsVisible="False">
               <StackPanel Spacing="4">
-                <TextBlock Name="VerdictWhat" FontSize="13.5" FontWeight="SemiBold"
-                           TextWrapping="Wrap" />
+                <TextBlock Name="VerdictWhat" Classes="state" FontSize="13.5"
+                           FontWeight="SemiBold" TextWrapping="Wrap" />
                 <TextBlock Name="VerdictWhy" FontSize="12.5" TextWrapping="Wrap"
                            Foreground="{DynamicResource Muted}" />
               </StackPanel>
@@ -86,6 +86,8 @@
           <StackPanel Name="EraseAsk" Spacing="8">
             <TextBox Name="Typed" Watermark="type the disk name to confirm"
                      HorizontalAlignment="Left" Width="260" />
+            <TextBlock Name="TypedHint" FontSize="12"
+                       Foreground="{DynamicResource Faint}" />
             <Button Name="Erase" Content="Erase it" IsEnabled="False" />
           </StackPanel>
         </StackPanel>

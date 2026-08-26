@@ -34,6 +34,7 @@ import netkexts
 import ocgen
 import inventory
 import recovery
+import smbios
 import stick
 import summary
 import ui
@@ -766,7 +767,7 @@ def main():
                    detected=('laptop' if hw.get('laptop') else
                              'desktop' if hw.get('laptop') is False else None))
 
-        total = asked + 3    # laptop: platform, generation, brand
+        total = asked + 4    # laptop: platform, generation, brand, macOS
         vendor = None
         if plat == 'desktop':
             det = ('amd' if hw.get('generation') in ('ryzen-threadripper', 'bulldozer-jaguar')
@@ -775,7 +776,7 @@ def main():
             # first question it cannot honestly claim a total yet
             vendor = ask(nxt(), 0, 'Which CPU vendor?',
                          [('intel', 'Intel'), ('amd', 'AMD')], detected=det)
-            total = asked + (5 if vendor == 'amd' else 4)
+            total = asked + (6 if vendor == 'amd' else 5)
         else:
             print(f'\n      {DIM}laptop profiles cover Intel only, so no vendor question{RESET}')
 
@@ -797,6 +798,17 @@ def main():
                   [(o, o.upper().replace('-', ' / ')) for o in available('oem')],
                   detected=hw.get('oem'), allow_skip=True)
 
+    # Which macOS, asked once and used twice. The identity a config claims has
+    # a ceiling of its own - MacBookPro14,1 is served up to Ventura, whatever
+    # the hardware can do - and an install that stops for that reason gives no
+    # sign why. Asked after the profile, because the profile is what picks the
+    # identity.
+    rels = netkexts.releases()
+    target = ask(nxt(), total, 'Which macOS are you installing?',
+                 [(r['darwin'], f"{r['name']} {r['version']}") for r in rels],
+                 detected=None)
+    wanted = next(r for r in rels if r['darwin'] == target)
+
     row = dict(path='', platform=plat, vendor=vendor, cpu=cpu,
                chipset=None, oem=oem, variant=None, cores=cores)
     if not (PROFILES / 'cpu' / pname / f'{cpu}.toml').exists():
@@ -804,6 +816,45 @@ def main():
     if oem and not (PROFILES / 'overlay' / f'oem.{oem}.toml').exists():
         print(f'\n  {DIM}no {oem} overlay for this combination; using the generic profile{RESET}')
         row['oem'] = None
+
+    # and what that profile's identity is served, against what was just asked
+    identity = smbios.profile_identity(
+        (PROFILES / 'cpu' / pname / f'{cpu}.toml').read_text(encoding='utf-8'))
+    if identity:
+        fits, said = smbios.reaches(identity, wanted['version'])
+        print(f'\n{BOLD}The Mac this pretends to be{RESET}')
+        print(f'  {identity:18} {said}')
+        if fits is False:
+            print(f'  {YELLOW}{wanted["name"]} {wanted["version"]} is past that. '
+                  f'macOS decides from the identity, not from the hardware, so '
+                  f'the install stops\n  and does not say why.{RESET}')
+            reach = [m for m in smbios.higher(wanted['version'])
+                     if m.startswith(identity.rstrip('0123456789,').strip())]
+            others = smbios.higher(wanted['version'])
+            named = ', '.join((reach or others)[:6])
+            if named:
+                print(f'  {DIM}identities that are served it: {named}'
+                      f'{" and others" if len(others) > 6 else ""}.'
+                      f'\n  Changing it is a decision with consequences for power '
+                      f'management and graphics,\n  so nothing here changes it for '
+                      f'you: set SystemProductName by hand if that is what you '
+                      f'want.{RESET}')
+        elif fits is None:
+            print(f'  {DIM}{said}{RESET}')
+        # and what somebody has actually seen, which is a weaker thing than a
+        # table and is labelled as one wherever it appears. The identities
+        # named above count too: being told MacBookPro16,1 would be served
+        # this release is worth less than being told somebody ran it.
+        looked = [identity] + (smbios.higher(wanted['version'])
+                               if fits is False else [])
+        for seen in [r for m in looked for r in smbios.reported(m, wanted['version'])]:
+            print(f"  {GREEN}reported{RESET}  {seen['model']}: {seen['observed']}")
+            print(f"      {DIM}{seen['observed_by']}"
+                  + (f", {seen['cpu']}" if seen.get('cpu') else '') + RESET)
+            if seen.get('note'):
+                for line in seen['note'].split('. '):
+                    if line.strip():
+                        print(f"      {DIM}{line.strip().rstrip('.')}.{RESET}")
 
     # network hardware: only offered when something was actually recognised,
     # so nobody is asked to decide about a device they do not have
@@ -1080,21 +1131,19 @@ def main():
                     ('one', 'Yes, for one macOS version only'),
                     ('no', 'No, leave them out')])
         if mode != 'no':
-            darwin = None
-            if mode == 'one' and matched:
-                rels = netkexts.releases()
-                darwin = ask(0, 0, 'Which macOS are you installing?',
-                             [(r['darwin'], f"{r['name']} {r['version']}") for r in rels])
+            # asked once, at the top. Asking again here was the same question
+            # with the same answer, one screen later.
+            darwin = target if mode == 'one' and matched else None
             # Intel Wi-Fi resolves to one build, so the every-version mode has
             # to ask which macOS after all - but only when such a card is there
-            wifi_darwin = darwin
-            if netkexts.wifi_entry(matched, 0)[1] and wifi_darwin is None:
-                print(f'\n      {DIM}Intel Wi-Fi is built separately for each macOS release, '
-                      f'so it needs one.{RESET}')
-                rels = netkexts.releases()
-                wifi_darwin = ask(0, 0, 'Which macOS for the Wi-Fi kext?',
-                                  [(r['darwin'], f"{r['name']} {r['version']}") for r in rels],
-                                  allow_skip=True)
+            # Intel Wi-Fi resolves to one build whatever the mode is, and the
+            # release to build it for is the one already named
+            wifi_darwin = darwin if darwin is not None else (
+                target if netkexts.wifi_entry(matched, 0)[1] else None)
+            if wifi_darwin is not None and darwin is None:
+                print(f'\n      {DIM}Intel Wi-Fi is built separately for each macOS '
+                      f'release; using {wanted["name"]} {wanted["version"]}, which '
+                      f'you named above.{RESET}')
             entries, chosen = netkexts.entries(matched, darwin) if matched else ([], [])
             entries += storage_kexts + input_kexts
             if wifi_darwin is not None:
