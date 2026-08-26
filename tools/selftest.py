@@ -2724,6 +2724,13 @@ def what_it_looks_like_when_it_arrives():
     check('and the bundle is unpacked again and checked before it ships',
           'does not survive its own zip' in made
           and 'the framework symlinks did not survive' in made)
+    # unpacking is not enough: it has to find its engine from in there, which
+    # it did not, and a bundle sitting in a clone hid that by walking up
+    check('and it is run from the bundle, not only unpacked',
+          'engine: inside this app' in made)
+    finder = Path('gui/Engine/Builder.cs').read_text()
+    check('the window looks inside its own Resources',
+          '"..", "Resources", "EFIBuilderEngine"' in finder)
 
 
 def what_to_show_the_igpu_as():

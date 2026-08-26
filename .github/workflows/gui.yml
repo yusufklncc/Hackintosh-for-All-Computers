@@ -339,6 +339,16 @@ jobs:
             || { echo 'the bundle does not survive its own zip'; exit 1; }
           test -L "Hackintosh EFI Builder.app/Contents/Resources/EFIBuilderEngine/_internal/Python.framework/Versions/Current" \
             || { echo 'the framework symlinks did not survive'; exit 1; }
+          # and it has to find its engine from in there. Run from a clone the
+          # window walks up and finds tools/setup.py, which hid the fact that
+          # it never looked in Contents/Resources: a downloaded app opened to
+          # "no engine found".
+          "Hackintosh EFI Builder.app/Contents/MacOS/HackintoshEFIBuilder" \
+            --machine ../tools/fixtures/thinkpad-e570.json \
+            --render "$PWD/inbundle.png" > bundle.log 2>&1 || true
+          grep -q 'engine: inside this app' bundle.log \
+            || { echo 'the bundle did not find the engine inside itself'; \
+                 cat bundle.log; exit 1; }
           cd .. && rm -rf proof
 
       - name: What it weighs

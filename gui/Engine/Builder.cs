@@ -30,15 +30,24 @@ public static class Builder
         // beside the window, or in the folder the engine ships as. It is a
         // folder build now: a one-file build unpacked itself into a temporary
         // directory on every run and Defender called that a trojan.
+        //
+        // And inside the bundle on macOS. The engine goes in Contents/Resources
+        // because a .app that reads files next to itself breaks when it is
+        // moved - and this did not look there, so a downloaded app opened to
+        // "no engine found". It was invisible while testing because a bundle
+        // sitting in a clone finds tools/setup.py by walking up instead.
         foreach (var packaged in new[]
                  {
                      Path.Combine(beside, ExeName),
                      Path.Combine(beside, "EFIBuilderEngine", ExeName),
+                     Path.Combine(beside, "..", "Resources", "EFIBuilderEngine", ExeName),
                  })
         {
             if (!File.Exists(packaged)) continue;
             complaint = "";
-            return new Located(packaged, Array.Empty<string>(), "beside this window");
+            var where = packaged.Contains(Path.Combine("Contents", "Resources"))
+                ? "inside this app" : "beside this window";
+            return new Located(Path.GetFullPath(packaged), Array.Empty<string>(), where);
         }
 
         // a clone: walk up for the tools directory rather than assuming how
@@ -59,7 +68,8 @@ public static class Builder
         }
 
         complaint = $"No engine found. Looked for {ExeName} beside this window, " +
-                    $"and for tools/setup.py above {beside}.";
+                    $"inside this app's Resources, and for tools/setup.py above " +
+                    $"{beside}.";
         return null;
     }
 
