@@ -931,6 +931,14 @@ def the_two_windows_only_ways_this_broke():
     check('and no call still uses the colliding name',
           "parent / 'acpi'" not in flow,
           [l for l in flow.splitlines() if "parent / 'acpi'" in l])
+    # and what CI looks for has to be where the rename put it: the Windows
+    # job checked acpi/Results and the folder is ssdt-work/Results now
+    for made in (Path('.github/workflows/windows-exe.yml'),
+                 Path('.github/workflows/validate.yml')):
+        said = made.read_text()
+        check(f'{made.name} looks for Results where the rename put it',
+              '/acpi/Results' not in said and 'acpi/Results' not in said,
+              [l for l in said.splitlines() if 'acpi/Results' in l])
 
 
 def acpi_tables():

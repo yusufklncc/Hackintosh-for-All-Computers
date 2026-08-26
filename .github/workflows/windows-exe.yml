@@ -61,10 +61,10 @@ jobs:
           # the automatic set, against this runner's own tables. It asks nothing,
           # which is why a script may have it, and this is the only place it can
           # be run against a real machine at all.
-          if (-not (Test-Path acpi-smoke/acpi/Results)) {
+          if (-not (Test-Path acpi-smoke/ssdt-work/Results)) {
             Write-Error 'the automatic SSDTs produced no Results folder'; exit 1
           }
-          Get-ChildItem acpi-smoke/acpi/Results
+          Get-ChildItem acpi-smoke/ssdt-work/Results
 
       - uses: actions/upload-artifact@v4
         with:
