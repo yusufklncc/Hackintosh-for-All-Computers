@@ -1045,20 +1045,46 @@ def main():
         native = gpu.native_ids(cpu)
         if first and native and (first.get('id') or '').lower() not in native:
             said = gpu.fakes(cpu, first.get('id'))
-            if said:
+            seen = gpu.reported_fakes(cpu, first.get('id'))
+            if said or seen:
                 print(f'\n{BOLD}The device-id this iGPU shows{RESET}')
-                print(f'  {first["id"]} is not one {cpu} supports as it stands. '
-                      f'WhateverGreen says:')
-                # not `row`: that name already holds the profile this build is
-                # for, and rebinding it here emptied it three hundred lines later
-                for sentence in said:
-                    print(f'      {DIM}{sentence["says"]}{RESET}')
-                options = [(s['id'], f'Fake it to {s["id"]}') for s in said]
+                print(f'  {first["id"]} is not one {cpu} supports as it stands.')
+                options = []
+                if said:
+                    print(f'  WhateverGreen says:')
+                    # not `row`: that name already holds the profile this build
+                    # is for, and rebinding it emptied it three hundred lines on
+                    for sentence in said:
+                        print(f'      {DIM}{sentence["says"]}{RESET}')
+                    options += [(s['id'], f'Fake it to {s["id"]}') for s in said]
+                for report in seen:
+                    print(f'  {GREEN}reported{RESET}: {report["observed"]}')
+                    print(f'      {DIM}{report["source"]}{RESET}')
+                    for line in report.get('note', '').split('. '):
+                        if line.strip():
+                            print(f"      {DIM}{line.strip().rstrip('.')}.{RESET}")
+                    options.append((f'reported:{report["fake"]}',
+                                    f'Fake it to {report["fake"]} - reported, '
+                                    f'not stated by WhateverGreen'))
                 fake = ask(0, 0, 'Fake the device-id?', options, allow_skip=True,
                            skip_label='No, leave it as the machine reports it')
                 if fake:
                     device_props.setdefault(igpu.IGPU_PATH, {})
-                    device_props[igpu.IGPU_PATH]['device-id'] = 'hex:' + fake
+                    if fake.startswith('reported:'):
+                        chosen = next(r for r in seen
+                                      if r['fake'] == fake.split(':', 1)[1])
+                        device_props[igpu.IGPU_PATH]['device-id'] = \
+                            'hex:' + chosen['fake']
+                        # the framebuffer that went with it, or this is not the
+                        # configuration anybody reported
+                        if chosen.get('platform_id'):
+                            device_props[igpu.IGPU_PATH]['AAPL,ig-platform-id'] = \
+                                'hex:' + chosen['platform_id']
+                            print(f'      {DIM}and the framebuffer that was '
+                                  f'reported with it, '
+                                  f'{chosen["platform_id"]}{RESET}')
+                    else:
+                        device_props[igpu.IGPU_PATH]['device-id'] = 'hex:' + fake
 
     input_lines, input_kexts = inputdev.entries(hw.get('pci_ids'), hw.get('ps2'),
                                                 hw.get('acpi_ids'))

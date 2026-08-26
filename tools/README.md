@@ -317,10 +317,21 @@ can read off one, so the builder shows the sentences and asks. It writes
 `device-id` beside `AAPL,ig-platform-id` on the same device, which is where
 both belong.
 
-**Where the document says nothing, neither does this.** Ice Lake's UHD G1 is
-listed as unsupported and no fake is stated for it, so no fake is offered -
-even though configs in the wild present it as an Iris Plus G4. That is somebody
-else's report, not a sentence from the project that writes the driver.
+**Where the document says nothing, the other table can still speak.** Ice
+Lake's G1 is listed as unsupported and no fake is stated for it, so nothing is
+quoted - but a published EFI for an i5-1035G1 presents it as an Iris Plus G4
+and reports working, and that is in `data/field.toml`:
+
+    [[igpu_id]]
+    profile     = "ice-lake"
+    id          = "8086:8a56"
+    fake        = "5c8a0000"
+    platform_id = "01005c8a"
+
+The builder offers it beside the quoted ones and says which is which - the row
+is labelled `reported` in the menu itself, with the config it came from. Taking
+it writes the framebuffer as well as the id, because a faked id beside the real
+part's framebuffer is not the configuration anybody ran.
 
 ## The oldest and newest macOS a machine can run
 

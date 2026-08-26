@@ -2672,10 +2672,23 @@ def what_to_show_the_igpu_as():
     check('and the id it says to fake *to* is not read as one it applies to',
           '8086:3e92' not in exact[0]['matches'], exact[0]['matches'])
 
-    # and a generation the document is silent about stays silent
-    check('Ice Lake is offered nothing, because nothing is written',
+    # and a generation the document is silent about gets nothing *quoted*
+    check('Ice Lake is quoted nothing, because nothing is written',
           gpu.fakes('ice-lake', '8086:8a56') == [],
           gpu.fakes('ice-lake', '8086:8a56'))
+
+    # what somebody has run instead, kept apart from what is written
+    seen = gpu.reported_fakes('ice-lake', '8086:8a56')
+    check('but what somebody ran is offered, from the other table', seen, seen)
+    if seen:
+        row = seen[0]
+        check('with where it came from', row['source'].startswith('http'))
+        check('and the framebuffer that went with it, which is half the change',
+              row.get('platform_id'), row)
+        check('and it says it is not the project speaking',
+              'not a sentence from the project' in row.get('note', ''))
+    check('an id nobody reported gets nothing',
+          gpu.reported_fakes('kaby-lake', '8086:5916') == [])
 
     # the sentences survived the markdown: a link full of full stops used to
     # cut them off in the middle
@@ -2688,6 +2701,10 @@ def what_to_show_the_igpu_as():
           "'Fake the device-id?'" in source)
     check('and writes it where the framebuffer goes',
           "device_props[igpu.IGPU_PATH]['device-id']" in source)
+    check('a reported one is labelled as reported in the menu itself',
+          'not stated by WhateverGreen' in source)
+    check('and brings its framebuffer with it',
+          "chosen['platform_id']" in source)
     # `row` at that point is the profile this build is for; rebinding it
     # emptied the profile three hundred lines later
     check('and does not rebind the profile while listing sentences',

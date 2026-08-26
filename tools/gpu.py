@@ -71,6 +71,24 @@ def fakes(generation, device_id=None):
     return [r for r in rows if not r.get('matches')]
 
 
+def reported_fakes(generation, device_id=None):
+    """The same thing, where nobody upstream has written a sentence.
+
+    Weaker evidence and labelled as such wherever it is shown: one person's
+    config that reports working is not the project that writes the driver
+    saying what to do. It carries the framebuffer that went with it, because a
+    faked id beside the real part's framebuffer is a different configuration
+    from the one that was reported."""
+    out = []
+    for row in ocgen.read_toml(FIELD).get('igpu_id', []):
+        if row.get('profile') != generation:
+            continue
+        if device_id and row.get('id', '').lower() != device_id.lower():
+            continue
+        out.append(row)
+    return out
+
+
 def native_ids(generation):
     """The device ids WhateverGreen says need no faked device-id.
 

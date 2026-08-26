@@ -230,10 +230,12 @@ def catalogue():
              source='running macOS on the machine, attributed per entry',
              tool='hand written',
              count=f'{rows_in("data/field.toml", "igpu")} iGPU, '
+                   f'{rows_in("data/field.toml", "igpu_id")} faked iGPU id, '
                    f'{rows_in("data/field.toml", "smbios")} identity',
              covers='processors whose iGPU behaves differently from its '
-                    'generation, and Mac identities somebody has installed a '
-                    'particular macOS under',
+                    'generation, iGPUs presented as another where the driver '
+                    'project states no fake, and Mac identities somebody has '
+                    'installed a particular macOS under',
              gap='One person, one machine each. It outranks the generation rule '
                  'because it is more specific, not because it is stronger.'),
         dict(area='Kext load order', kind=DERIVED, file='EFI/OC/Kexts/',

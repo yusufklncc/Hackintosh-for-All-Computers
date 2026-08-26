@@ -36,3 +36,18 @@ observed = "Tahoe boots its recovery and installs, on Kaby Lake hardware, with t
 note = """-no_compat_check gets a boot past the model check; it does not carry \
 an install through on an identity the release does not serve. Its place is \
 after the install, once the proper identity is put back."""
+
+# An iGPU presented as a different one, where WhateverGreen states no fake and
+# somebody has run it anyway. `fake` is the device-id property; `platform_id`
+# is the framebuffer that has to go with it, because a faked id with the
+# framebuffer of the real part is not the configuration that was reported.
+[[igpu_id]]
+profile = "ice-lake"
+id = "8086:8a56"
+fake = "5c8a0000"
+platform_id = "01005c8a"
+source = "https://github.com/Freddywhest/Opencore-HP-Pavilion-10th-gen-Intel-Core-i5-1035G1"
+observed = "a published EFI for an HP Pavilion 15 with an i5-1035G1, running Ventura, presents the G1 as an Iris Plus G4"
+note = """WhateverGreen lists the Ice Lake UHD/Iris Plus G1 as unsupported and \
+states no fake for it. This is one config that does it and reports working, \
+not a sentence from the project that writes the driver."""
