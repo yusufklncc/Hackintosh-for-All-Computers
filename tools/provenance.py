@@ -170,11 +170,15 @@ def catalogue():
              tool='tools/fbtable.py',
              count=f'{rows_in("data/framebuffer.toml", "framebuffer")} framebuffers, '
                    f'{rows_in("data/framebuffer.toml", "native")} native ids, '
-                   f'{rows_in("data/framebuffer.toml", "support")} macOS ranges',
+                   f'{rows_in("data/framebuffer.toml", "support")} macOS ranges, '
+                   f'{rows_in("data/framebuffer.toml", "fake")} faked ids',
              covers='Ivy Bridge to Ice Lake: type, connectors, memory, which '
-                    'device ids need no faked device-id, and the macOS range '
-                    'each generation states',
-             gap='Sandy Bridge has a section but no list in that form. '
+                    'device ids need no faked device-id, what to fake the rest '
+                    'to where the document says, and the macOS range each '
+                    'generation states',
+             gap='The faked ids are only where the document states one - it '
+                 'says nothing for Ice Lake, so neither does this. '
+                 'Sandy Bridge has a section but no list in that form. '
                  'Connector patches are per machine and are not written at all.'),
         dict(area='Audio codecs', kind=DERIVED, file='data/audio.toml',
              source="AppleALC's own Resources/<CODEC>/Info.plist, pinned release",

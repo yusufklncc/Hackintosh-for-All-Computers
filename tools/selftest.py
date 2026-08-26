@@ -2645,6 +2645,55 @@ def what_it_looks_like_when_it_arrives():
           '.AppImage"' in shipped and 'dist/*.AppImage' in shipped)
 
 
+def what_to_show_the_igpu_as():
+    """The other identity a build claims, and the same rule about inventing.
+
+    An iGPU whose device id is not one its generation supports can sometimes be
+    presented as one that is. WhateverGreen says which, in sentences; where it
+    says nothing - Ice Lake - nothing here fills the gap."""
+    import gpu
+    import ocgen as _oc
+
+    rows = _oc.read_toml(Path('data/framebuffer.toml')).get('fake', [])
+    check('the faked ids are read out of the document', rows, len(rows))
+    for row in rows:
+        check(f'{row["id"]} keeps the sentence it came from',
+              row['says'].strip().endswith(('.', ':')) and '`' in row['says'],
+              row['says'][:60])
+        check(f'{row["id"]} is eight hex digits, as a property takes it',
+              len(row['id']) == 8 and all(c in '0123456789abcdef' for c in row['id']),
+              row['id'])
+        check(f'{row["id"]} says which profiles it is about', row['profiles'])
+
+    # a sentence that names device ids is about those ids and no others
+    exact = gpu.fakes('coffe-lake-plus', '8086:3e91')
+    check('an id the document names gets that sentence and only that one',
+          len(exact) == 1 and exact[0]['matches'] == ['8086:3e91'], exact)
+    check('and the id it says to fake *to* is not read as one it applies to',
+          '8086:3e92' not in exact[0]['matches'], exact[0]['matches'])
+
+    # and a generation the document is silent about stays silent
+    check('Ice Lake is offered nothing, because nothing is written',
+          gpu.fakes('ice-lake', '8086:8a56') == [],
+          gpu.fakes('ice-lake', '8086:8a56'))
+
+    # the sentences survived the markdown: a link full of full stops used to
+    # cut them off in the middle
+    check('no sentence begins mid-link',
+          not any(r['says'].startswith(('org/', 'com/', 'www.')) for r in rows),
+          [r['says'][:20] for r in rows])
+
+    source = Path('tools/setup.py').read_text()
+    check('the builder offers it rather than applying it',
+          "'Fake the device-id?'" in source)
+    check('and writes it where the framebuffer goes',
+          "device_props[igpu.IGPU_PATH]['device-id']" in source)
+    # `row` at that point is the profile this build is for; rebinding it
+    # emptied the profile three hundred lines later
+    check('and does not rebind the profile while listing sentences',
+          'for sentence in said' in source)
+
+
 def the_tools_a_window_can_drive():
     """Both vendored tools reach a person, whichever surface is attached.
 
@@ -2821,6 +2870,7 @@ if __name__ == '__main__':
                     the_recovery_it_can_fetch,
                     the_mac_a_config_pretends_to_be,
                     what_it_looks_like_when_it_arrives,
+                    what_to_show_the_igpu_as,
                     the_stick_it_writes_to,
                     what_oclp_restores, the_about_page,
                     what_the_readme_shows):

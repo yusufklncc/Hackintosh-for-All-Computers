@@ -183,6 +183,56 @@ def parse_native(text):
     return out
 
 
+# "fake `device-id` `12040000`", in the document's own words. Which machines
+# a sentence applies to is in the sentence and not always in the section, so
+# the sentence travels with the id rather than being summarised away.
+# ends at a full stop or a colon: the Ivy Bridge sentence introduces a table
+FAKE = re.compile(r'[^.:\n]*?fake[^.:\n]*?`device-id`\s*`([0-9A-Fa-f]{8})`[^.:\n]*?[.:]',
+                  re.I)
+NAMED_ID = re.compile(r'0x([0-9A-Fa-f]{4})\b')
+
+
+def parse_fakes(text):
+    """The device-ids the document says to fake, per generation.
+
+    Not every part of a supported generation is supported: some need to be
+    presented as a different one. The document says which and to what, and
+    those sentences are the whole of what is known - nothing here works one
+    out. An id with no sentence gets no suggestion."""
+    out = []
+    # markdown links first: a sentence ends at a full stop, and a link to
+    # en.wikipedia.org has two of them in the middle of one
+    plain = re.sub(r'\[([^\]]+)\]\([^)]*\)', r'\1', text)
+    sections = [(m.start(), m.group(0)) for m in
+                re.finditer(r'^## Intel .*$', plain, re.M)]
+    for k, (pos, head) in enumerate(sections):
+        end = sections[k + 1][0] if k + 1 < len(sections) else len(plain)
+        seg = plain[pos:end]
+        fb = LIST.search(seg)
+        profiles = CODENAME_PROFILES.get(fb.group('name').strip(), []) if fb else []
+        if not profiles:
+            continue
+        for found in FAKE.finditer(seg):
+            said = ' '.join(found.group(0).split())
+            if 'IMEI' in said:                 # a different device entirely
+                continue
+            # a sentence that names device ids is about those ids, not about
+            # everything in the section
+            # the sentence names the id to fake *to* as well; that one is the
+            # answer, not a machine this applies to
+            target = found.group(1)[:4]
+            target = f'8086:{target[2:4]}{target[0:2]}'.lower()
+            named = [f'8086:{x.lower()}' for x in NAMED_ID.findall(said)
+                     if f'8086:{x.lower()}' != target]
+            out.append({
+                'id': found.group(1).lower(),
+                'profiles': profiles,
+                'matches': named,
+                'says': said,
+            })
+    return out
+
+
 def parse_support(text):
     """The macOS range each generation is supported on, from its own sentence."""
     table = release_darwin()
@@ -238,7 +288,9 @@ def main(argv=None):
             sys.exit(f'{codename} has framebuffers but no macOS range; '
                      f'the document layout has changed')
 
+    fakes = parse_fakes(text)
     ocgen.write_toml(Path(a.out), {'framebuffer': entries, 'native': native,
+                                   'fake': fakes,
                                    'support': support},
                      '# Intel framebuffer platform ids, from WhateverGreen.\n'
                      '#\n'

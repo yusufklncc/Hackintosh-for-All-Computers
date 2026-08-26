@@ -52,6 +52,25 @@ FIELD = Path('data/field.toml')
 FRAMEBUFFERS = Path('data/framebuffer.toml')
 
 
+def fakes(generation, device_id=None):
+    """What the document says to present this iGPU as, if it says anything.
+
+    Two kinds of sentence: one that names the device ids it is about, and one
+    that names a sub-architecture nothing here can read off a machine. The
+    first can be matched; the second is offered with its own words, because
+    working out which of them applies is the person's job and not this
+    program's guess."""
+    rows = [row for row in ocgen.read_toml(FRAMEBUFFERS).get('fake', [])
+            if generation in row.get('profiles', [])]
+    if device_id:
+        exact = [r for r in rows if device_id.lower() in
+                 [m.lower() for m in r.get('matches', [])]]
+        if exact:
+            return exact
+    # a sentence about specific ids says nothing about an id it does not name
+    return [r for r in rows if not r.get('matches')]
+
+
 def native_ids(generation):
     """The device ids WhateverGreen says need no faked device-id.
 

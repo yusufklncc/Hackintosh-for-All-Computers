@@ -1547,6 +1547,36 @@ label = "ICL"
 profiles = ["ice-lake"]
 id = "8086:8a5b"
 
+[[fake]]
+id = "12040000"
+profiles = ["haswell"]
+matches = []
+says = "For desktop HD4400 and mobile HD4200/HD4400/HD4600 need fake the `device-id` `12040000` for `IGPU`."
+
+[[fake]]
+id = "16590000"
+profiles = ["kaby-lake"]
+matches = []
+says = "For UHD620 (Kaby Lake Refresh) fake `device-id` `16590000` for `IGPU`."
+
+[[fake]]
+id = "923e0000"
+profiles = ["coffe-lake", "coffe-lake-plus", "coffee-lake-whiskey-lake", "comet-lake"]
+matches = []
+says = "If you are using a 9th generation Coffee Lake Refresh processor, it is necessary to fake `device-id` `923E0000` for `IGPU`."
+
+[[fake]]
+id = "a53e0000"
+profiles = ["coffe-lake", "coffe-lake-plus", "coffee-lake-whiskey-lake", "comet-lake"]
+matches = []
+says = "For UHD620 (Whiskey Lake)) fake `device-id` `A53E0000` for `IGPU`."
+
+[[fake]]
+id = "923e0000"
+profiles = ["coffe-lake", "coffe-lake-plus", "coffee-lake-whiskey-lake", "comet-lake"]
+matches = ["8086:3e91"]
+says = "id 0x3E91 fake the id with 0x3E92 (`device-id` `923E0000`)."
+
 [[support]]
 codename = "Capri"
 profiles = ["ivy-bridge"]

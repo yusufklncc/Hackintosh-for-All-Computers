@@ -299,6 +299,29 @@ plainly runs more than Big Sur. Reading it as a ceiling is a mistake this
 repository made and corrected: `genuine_mac()` told real Macs the wrong thing
 until it was moved onto the same board list.
 
+### The device-id an iGPU shows
+
+A generation being supported does not mean every part in it is. `data/framebuffer.toml`
+records which device ids a generation takes as they are - the `native` rows -
+and, where WhateverGreen says what to present the rest as, the sentence it says
+it in:
+
+    For UHD620 (Whiskey Lake) fake `device-id` `A53E0000` for `IGPU`.
+    If you are using a 9th generation Coffee Lake Refresh processor, it is
+    necessary to fake `device-id` `923E0000` for `IGPU`.
+    id 0x3E91 fake the id with 0x3E92 (`device-id` `923E0000`).
+
+Five of them, all quoted. Two kinds: one names the device ids it is about and
+can be matched against a machine; the rest name a sub-architecture nothing here
+can read off one, so the builder shows the sentences and asks. It writes
+`device-id` beside `AAPL,ig-platform-id` on the same device, which is where
+both belong.
+
+**Where the document says nothing, neither does this.** Ice Lake's UHD G1 is
+listed as unsupported and no fake is stated for it, so no fake is offered -
+even though configs in the wild present it as an Iris Plus G4. That is somebody
+else's report, not a sentence from the project that writes the driver.
+
 ## The oldest and newest macOS a machine can run
 
 Each part that bounds macOS contributes a window, and the machine's range is

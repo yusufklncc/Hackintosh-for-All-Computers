@@ -1036,6 +1036,30 @@ def main():
                 if picked == igpu.NO_ACCELERATION['value']:
                     print(f'      {YELLOW}{igpu.NO_ACCELERATION["note"]}{RESET}')
 
+        # and, where the id is not one the generation supports as it stands,
+        # what the document says to present it as. Offered rather than
+        # applied: two of these sentences are about a sub-architecture nothing
+        # here can read off a machine, so the choosing is somebody else's.
+        first = next((d for d in hw.get('gpu_devices', [])
+                      if (d.get('id') or '').startswith('8086:')), None)
+        native = gpu.native_ids(cpu)
+        if first and native and (first.get('id') or '').lower() not in native:
+            said = gpu.fakes(cpu, first.get('id'))
+            if said:
+                print(f'\n{BOLD}The device-id this iGPU shows{RESET}')
+                print(f'  {first["id"]} is not one {cpu} supports as it stands. '
+                      f'WhateverGreen says:')
+                # not `row`: that name already holds the profile this build is
+                # for, and rebinding it here emptied it three hundred lines later
+                for sentence in said:
+                    print(f'      {DIM}{sentence["says"]}{RESET}')
+                options = [(s['id'], f'Fake it to {s["id"]}') for s in said]
+                fake = ask(0, 0, 'Fake the device-id?', options, allow_skip=True,
+                           skip_label='No, leave it as the machine reports it')
+                if fake:
+                    device_props.setdefault(igpu.IGPU_PATH, {})
+                    device_props[igpu.IGPU_PATH]['device-id'] = 'hex:' + fake
+
     input_lines, input_kexts = inputdev.entries(hw.get('pci_ids'), hw.get('ps2'),
                                                 hw.get('acpi_ids'))
     pointing = [d for d in hw.get('peripherals', [])
