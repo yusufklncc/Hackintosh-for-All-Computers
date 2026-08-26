@@ -24,12 +24,15 @@
             CornerRadius="8" Background="{DynamicResource Surface2}" ClipToBounds="True">
       <!-- The console lines up its columns with spaces, so wrapping them would
            take the alignment apart. It scrolls sideways instead. -->
-      <!-- room under the last line: a menu whose final row sits against the
-           edge reads as a menu with no final row, and the one hidden there
-           was the one that quits -->
-      <ScrollViewer Name="Scroll" Padding="16,12,16,24"
+      <!-- Room under the last line, in the content and not on the viewer.
+           A ScrollViewer's Padding shrinks what is on screen without adding
+           anything to scroll through, so the last rows sat behind it: the
+           scroller reported itself at the end, the check agreed, and a menu
+           still ended two lines early. A margin on the panel is part of the
+           extent, so the end can actually be reached. -->
+      <ScrollViewer Name="Scroll" Padding="16,12,16,0"
                     HorizontalScrollBarVisibility="Auto">
-        <StackPanel Name="Transcript" Spacing="1" />
+        <StackPanel Name="Transcript" Spacing="1" Margin="0,0,0,28" />
       </ScrollViewer>
     </Border>
 

@@ -2739,7 +2739,14 @@ def what_it_looks_like_when_it_arrives():
     check('and does not mind a viewport taller than the content',
           not scrollcheck.short('scrolled 0 + 379 of 355'))
     shape = Path('gui/Views/BuilderView.axaml').read_text()
-    check('and leaves room under the last line', 'Padding="16,12,16,24"' in shape)
+    # in the content, not on the viewer. A ScrollViewer's Padding shrinks what
+    # is on screen without adding anything to scroll through, so the last rows
+    # sat behind it while the scroller reported itself at the end - which is
+    # why the check above passed and a menu still ended two lines early.
+    check('the room under the last line is part of what scrolls',
+          'Name="Transcript" Spacing="1" Margin="0,0,0,28"' in shape)
+    check('and the viewer itself pads nothing at the bottom',
+          'Padding="16,12,16,0"' in shape)
 
     made = Path('.github/workflows/gui.yml').read_text()
     check('macOS packages as a .app', 'appbundle.py' in made)
