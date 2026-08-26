@@ -2070,6 +2070,13 @@ def the_vendored_opencore():
                   tool in text and Path(tool).exists())
         check('and it says the release is tagged, not pushed by hand',
               'git tag' in text and 'release.yml' in text)
+        # the number means the OpenCore it builds, not a count of features
+        # here, and the document has to say so: it is the one thing about a
+        # release nobody can see from the outside
+        check('and what the version number means',
+              'follows OpenCore' in text and 'not a count of features' in text)
+        check('and how to publish when OpenCore has not moved',
+              'Republish' in text or 'republish' in text)
 
 
 def what_the_readme_shows():

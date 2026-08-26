@@ -82,16 +82,26 @@ beside it. That is the file to carry to the computer you build on when the USB
 is being prepared somewhere else.
 
 **USB stick** finds the removable disks, formats one if you want, and copies
-both folders onto it in the right places. It lists removable disks only and
-never the one the computer booted from, and it asks for the disk by name before
-erasing anything.
+both folders onto it in the right places. It says whether the stick can be
+written to as it stands - FAT32 under GPT with room, or something that has to
+be erased first - and it lists removable disks only, never the one the computer
+booted from. Erasing asks for the disk by its own name.
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/App/usb.png">
+</p>
 
 **Recovery** puts Apple's own installer on the stick beside the EFI - about
 700 MB that boots, connects, and downloads the rest of macOS itself. It is the
 answer when a whole image will not fit: the FAT32 partition an EFI lives on
 cannot hold a file over 4 GB. Everything else in the program works offline;
 this is the one thing that does not, and it only runs when you press the
-button.
+button. The list is read from the tool's own board table, and the first row
+asks for whatever macOS Apple is serving today.
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/App/recovery.png">
+</p>
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/App/report.png">

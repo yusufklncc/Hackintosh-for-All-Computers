@@ -131,6 +131,12 @@ which is where OpenCore looks. A run that fails takes back what it wrote: there
 is no resuming a partial BaseSystem, and leaving one there stops the next
 attempt before it starts.
 
+Run against Apple: Monterey came down as a 623 MB BaseSystem and the current
+row as 916 MB, both chunklist-verified, and the second mounts as macOS 26.6.2.
+That is also how the row labels were settled - the board list's version is the
+board's ceiling, not the image, and asking for the 12.7.6 board served a 12.6
+image.
+
 This is the only thing in the repository that opens a connection on a person's
 behalf, and it does it when asked and not before. The About page says so rather
 than claiming the program never reaches the network.
@@ -182,6 +188,9 @@ whatever else was copied.
 Erasing works from here on macOS. On Linux it needs root and on Windows an
 administrator, and the engine has neither: it prints the exact `sgdisk`/`mkfs`
 or `diskpart` lines to run instead of failing halfway through a disk.
+
+Both halves have been run on a real stick on macOS - erase to GPT + FAT32, then
+copy an EFI and a recovery onto it - and the result boots.
 
 ## The guided path
 

@@ -64,10 +64,38 @@ Nothing here decides that a version works; the run does.
 
 ## 2. The release
 
-Tag it. The workflow does the rest:
+### What the version number is
+
+**The tag follows OpenCore, not this repository.** `v1.0.7` means the EFI it
+builds is OpenCore 1.0.7. It is not a count of features, and it does not go up
+because something here got better: the number tells somebody which OpenCore
+they are about to boot, which is the only thing about it they cannot see from
+the outside.
+
+So there are two kinds of release:
+
+| | |
+|---|---|
+| **A new OpenCore** | Section 1, then tag `v<that version>`. Everything that has landed here since rides along. |
+| **Everything else** | Republish the tag that is already out. Same number, new assets. |
+
+Republishing is what happens when work lands and OpenCore has not moved. Delete
+the release, move the tag, and run the workflow by hand from the Actions tab
+with the tag as input:
 
 ```
-git tag v1.4.0 && git push origin v1.4.0
+gh release delete v1.0.7 --yes
+git tag -f v1.0.7 && git push -f origin v1.0.7
+gh workflow run release.yml -f tag=v1.0.7
+```
+
+Nothing is lost by it: the assets are rebuilt from the commit the tag now
+points at, and the release notes are written by the workflow.
+
+### Tag it, and the workflow does the rest
+
+```
+git tag v1.0.8 && git push origin v1.0.8
 ```
 
 `release.yml` then:
