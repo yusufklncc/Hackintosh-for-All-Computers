@@ -40,13 +40,30 @@ jobs:
           # the identity a config claims has a ceiling of its own. Asking for a
           # macOS past it has to be said out loud: the install stops with no
           # sign why, and the hardware is not what stopped it.
-          python3 tools/setup.py $NONE --answers 2,10,3,12 --out /tmp/toolate/EFI \
+          # 4 is the last option: keep the identity the profile picked
+          python3 tools/setup.py $NONE --answers 2,10,3,12,4 --out /tmp/toolate/EFI \
             | tee /tmp/toolate.log
           grep -q 'MacBookPro14,1' /tmp/toolate.log
           grep -qi 'is past that' /tmp/toolate.log \
             || { echo 'asking for Tahoe on a Ventura identity said nothing'; exit 1; }
           grep -q 'MacBookPro16,1' /tmp/toolate.log \
             || { echo 'it did not name an identity that is served it'; exit 1; }
+          python3 -c "import plistlib,sys; \
+            g=plistlib.load(open('/tmp/toolate/EFI/OC/config.plist','rb'))['PlatformInfo']['Generic']; \
+            sys.exit(0 if g['SystemProductName']=='MacBookPro14,1' else 1)" \
+            || { echo 'declining still changed the identity'; exit 1; }
+
+          # and taking the offer swaps it, with a serial minted for the new one
+          python3 tools/setup.py $NONE --answers 2,10,3,12,1 --out /tmp/swapped/EFI \
+            | tee /tmp/swapped.log
+          grep -q 'MacBookPro14,1 -> MacBookPro16,1' /tmp/swapped.log \
+            || { echo 'taking the offer did not swap the identity'; exit 1; }
+          python3 -c "import plistlib,sys; \
+            g=plistlib.load(open('/tmp/swapped/EFI/OC/config.plist','rb'))['PlatformInfo']['Generic']; \
+            sys.exit(0 if g['SystemProductName']=='MacBookPro16,1' and g['SystemSerialNumber'] else 1)" \
+            || { echo 'the swapped config has the wrong identity or no serial'; exit 1; }
+          # the profile on disk is untouched: this is one build's identity
+          grep -q 'MacBookPro14,1' profiles/cpu/laptop/kaby-lake.toml
           # and one that fits says so without a warning
           python3 tools/setup.py $NONE --answers 2,10,3,9 --out /tmp/intime/EFI \
             | tee /tmp/intime.log

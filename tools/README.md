@@ -263,9 +263,25 @@ What every published config claims, today:
 machine's problem.
 
 The builder asks which macOS at the end of the profile questions and says what
-the identity reaches. It does not change the identity: a Kaby Lake laptop
-claiming to be a 2019 machine has consequences for power management and
-graphics, and that is a decision, not a fix.
+the identity reaches. When the release asked for is past it, it offers the
+nearest identities that are served the release and swaps the one that is
+chosen:
+
+    Claim a Mac that is served Tahoe 26 instead?
+       1) MacBookPro16,1, whatever Apple is serving now
+       2) MacBookPro16,2, whatever Apple is serving now
+       3) MacBookPro16,4, whatever Apple is serving now
+       4) No, keep MacBookPro14,1 and let the install refuse
+
+Nearest, not newest: the closest still-served model in the same family, and a
+laptop is never offered a desktop. `build.py --smbios MODEL` is what does it,
+and it runs before macserial, so the serial and MLB belong to the Mac the
+config ends up claiming. The profile on disk is not touched - this is one
+build's identity, not a change to what the repository publishes.
+
+It is a question rather than something applied quietly: the identity drives
+power management, and some releases hand a machine a different graphics path
+for it.
 
 **Not from Apple's device-management metadata.** `gdmf.apple.com/v2/pmv` lists,
 per macOS line, the machines that line is still served to, which is narrower

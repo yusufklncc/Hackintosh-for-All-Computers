@@ -207,6 +207,42 @@ def reported(model, wanted):
     return out
 
 
+LAPTOPS = ('MacBook', 'MacBookAir', 'MacBookPro')
+
+
+def _number(model):
+    """(major, minor) out of "MacBookPro16,1", for ordering within a family."""
+    found = re.search(r'(\d+),(\d+)$', model)
+    return (int(found.group(1)), int(found.group(2))) if found else (0, 0)
+
+
+def _family(model):
+    return re.sub(r'\d+,\d+$', '', model)
+
+
+def suggest(identity, wanted, limit=4):
+    """Identities that are served `wanted` and are the nearest thing to this one.
+
+    Nearest, not newest: the closest model that is still served keeps the most
+    of what the profile was written around. Same family first - a laptop stays
+    a laptop - then anything of the same shape, because a family can run out
+    before the release does."""
+    served = set(higher(wanted))
+    if not served:
+        return []
+    family = _family(identity)
+    laptop = family in LAPTOPS
+    here = _number(identity)
+
+    same = sorted((m for m in served if _family(m) == family and _number(m) > here),
+                  key=_number)
+    shape = sorted((m for m in served
+                    if (_family(m) in LAPTOPS) == laptop
+                    and m not in same and m != identity),
+                   key=lambda m: (_family(m), _number(m)))
+    return (same + shape)[:limit]
+
+
 def profile_identity(text):
     """The SystemProductName a profile writes, or None."""
     found = re.search(r'^SystemProductName\s*=\s*"([^"]+)"', text, re.M)

@@ -818,6 +818,8 @@ def main():
         row['oem'] = None
 
     # and what that profile's identity is served, against what was just asked
+    claim = None                 # the identity to build with, when it is not
+                                 # the one the profile picks
     identity = smbios.profile_identity(
         (PROFILES / 'cpu' / pname / f'{cpu}.toml').read_text(encoding='utf-8'))
     if identity:
@@ -832,13 +834,10 @@ def main():
                      if m.startswith(identity.rstrip('0123456789,').strip())]
             others = smbios.higher(wanted['version'])
             named = ', '.join((reach or others)[:6])
-            if named:
-                print(f'  {DIM}identities that are served it: {named}'
-                      f'{" and others" if len(others) > 6 else ""}.'
-                      f'\n  Changing it is a decision with consequences for power '
-                      f'management and graphics,\n  so nothing here changes it for '
-                      f'you: set SystemProductName by hand if that is what you '
-                      f'want.{RESET}')
+            print(f'  {DIM}What changes with it: the identity drives power '
+                  f'management, and some\n  releases hand a machine a different '
+                  f'graphics path for it. It is a decision,\n  which is why it is '
+                  f'a question and not a fix.{RESET}')
         elif fits is None:
             print(f'  {DIM}{said}{RESET}')
         # and what somebody has actually seen, which is a weaker thing than a
@@ -855,6 +854,19 @@ def main():
                 for line in seen['note'].split('. '):
                     if line.strip():
                         print(f"      {DIM}{line.strip().rstrip('.')}.{RESET}")
+
+        # and then offer it, rather than telling somebody to edit a plist. The
+        # profile on disk is not touched: this is one build's identity.
+        if fits is False:
+            nearer = [(m, f'{m}, {smbios.reach(m)[1]}')
+                      for m in smbios.suggest(identity, wanted['version'])]
+            if nearer:
+                claim = ask(0, 0,
+                            f'Claim a Mac that is served {wanted["name"]} '
+                            f'{wanted["version"]} instead?', nearer,
+                            allow_skip=True,
+                            skip_label=f'No, keep {identity} and let the install '
+                                       f'refuse')
 
     # network hardware: only offered when something was actually recognised,
     # so nobody is asked to decide about a device they do not have
@@ -1201,6 +1213,8 @@ def main():
         cmd += ['--acpi', acpi_results]
     if smbus_disable:
         cmd += ['--disable-kexts', ','.join(smbus_disable)]
+    if claim:
+        cmd += ['--smbios', claim]
 
     print(f'\n{BOLD}Building{RESET}')
     print(f'  {DIM}build {" ".join(cmd)}{RESET}\n')

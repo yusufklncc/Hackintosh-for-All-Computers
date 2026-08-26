@@ -137,6 +137,9 @@ def main(argv=None):
     ap.add_argument('--oc', help='OpenCore version to build against (default: newest vendored)')
     ap.add_argument('--out', default='build/EFI')
     ap.add_argument('--identity', choices=('generate', 'placeholder'), default='generate')
+    ap.add_argument('--smbios', metavar='MODEL',
+                    help='claim this Mac instead of the one the profile picks; '
+                         'the serial and MLB are then generated for it')
     ap.add_argument('--no-validate', action='store_true')
     ap.add_argument('--add-kexts', help='JSON file of extra Kernel.Add entries to append')
     ap.add_argument('--boot-args', help='extra boot arguments to append to the config')
@@ -326,6 +329,15 @@ def main(argv=None):
     for bundle, needed, why in kextorder.check(config['Kernel']['Add']):
         warn(f'load order: {bundle} needs {needed}, which {why}')
 
+    # Before the serial is generated, because macserial mints one for whatever
+    # model the config names: swapping the name afterwards would leave a serial
+    # belonging to a different Mac.
+    if a.smbios:
+        gen = config.setdefault('PlatformInfo', {}).setdefault('Generic', {})
+        was = gen.get('SystemProductName')
+        gen['SystemProductName'] = a.smbios
+        if was and was != a.smbios:
+            print(f'  identity     {was} -> {a.smbios}, asked for')
     serial = apply_identity(config, a.identity, warn)
 
     out = Path(a.out)

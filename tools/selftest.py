@@ -2442,6 +2442,37 @@ def the_mac_a_config_pretends_to_be():
     check('and uses that answer for the kexts rather than asking again',
           'darwin = target if mode' in source)
     check('and says what the identity reaches', 'smbios.reaches(' in source)
+    check('and offers one that is served, rather than saying to edit a plist',
+          'smbios.suggest(' in source and "'--smbios', claim" in source)
+    check('the builder can be told which Mac to claim',
+          "'--smbios'" in Path('tools/build.py').read_text())
+
+    # nearest, not newest: the closest still-served model keeps the most of
+    # what the profile was written around, and a laptop stays a laptop
+    check('a laptop is offered laptops',
+          all(m.startswith('MacBook')
+              for m in smbios.suggest('MacBookPro14,1', '26')),
+          smbios.suggest('MacBookPro14,1', '26'))
+    check('and the nearest one first',
+          smbios.suggest('MacBookPro14,1', '26')[0] == 'MacBookPro16,1',
+          smbios.suggest('MacBookPro14,1', '26'))
+    check('a desktop is offered desktops',
+          not any(m.startswith('MacBook')
+                  for m in smbios.suggest('MacPro6,1', '26')),
+          smbios.suggest('MacPro6,1', '26'))
+    check('a family that has run out falls back to the same shape',
+          smbios.suggest('MacBookAir9,1', '26'),
+          smbios.suggest('MacBookAir9,1', '26'))
+    check('and no list offers the identity somebody already has',
+          all(m not in smbios.suggest(m, '26')
+              for m in ('MacPro7,1', 'MacBookPro16,1', 'iMac20,1')))
+
+    # the serial has to belong to the Mac the config claims, so the swap
+    # happens before macserial is asked for one
+    built = Path('tools/build.py').read_text()
+    check('the identity is swapped before the serial is minted',
+          built.index("gen['SystemProductName'] = a.smbios")
+          < built.index('serial = apply_identity('))
 
     # a real Mac is judged by the same list, not by Apple\'s per-line one
     facts = summary.genuine_mac({'system': 'Darwin',
