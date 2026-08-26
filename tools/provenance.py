@@ -118,18 +118,17 @@ def catalogue():
                  'nothing about a PC running macOS - and neither does this. '
                  'Three of its patch sets name no family this repository has a '
                  'row for and are recorded unjoined.'),
-        dict(area='Mac support', kind=DERIVED, file='data/mac.toml',
-             source="Apple's own device metadata at gdmf.apple.com/v2/pmv",
+        dict(area='Mac updates', kind=MEASURED, file='data/mac.toml',
+             source="Apple's device-management metadata, read from the endpoint",
              tool='tools/mactable.py --refresh',
-             count=f'{rows_in("data/mac.toml", "mac")} machines across '
-                   f'{len(ocgen.read_toml(Path("data/mac.toml"))["lines"]) if Path("data/mac.toml").exists() else 0} '
-                   f'macOS lines',
-             covers='which macOS a real Mac still runs, by the board name it '
-                    'reports of itself, Intel and Apple silicon alike',
-             gap='Only the lines Apple still serves. A Mac that stopped at '
-                 'Monterey reads as "12 and newer" because 11 is as far back '
-                 'as the endpoint goes - the floor is the oldest served '
-                 'release, not the one the machine shipped with.'),
+             count=f'{rows_in("data/mac.toml", "mac")} boards, '
+                   f'{len(ocgen.read_toml("data/mac.toml").get("lines", []))} lines',
+             covers='which macOS lines Apple still serves each board it names, '
+                    'Intel and Apple silicon alike',
+             gap='Not what a Mac can run. Read as a range it says '
+                 'MacBookPro16,1 stops at Big Sur, and it plainly does not - '
+                 'the endpoint is about updates. How far a Mac goes comes from '
+                 "macrecovery's board list instead."),
         dict(area='AMD graphics', kind=DERIVED, file='data/gpu.toml',
              source='dortania.github.io/GPU-Buyers-Guide, parsed from its tables',
              tool='tools/gputable.py',

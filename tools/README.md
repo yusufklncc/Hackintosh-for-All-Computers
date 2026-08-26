@@ -333,6 +333,23 @@ is labelled `reported` in the menu itself, with the config it came from. Taking
 it writes the framebuffer as well as the id, because a faked id beside the real
 part's framebuffer is not the configuration anybody ran.
 
+### What Apple's own metadata does and does not say
+
+`data/mac.toml` comes from `gdmf.apple.com/v2/pmv` and lists, per macOS line,
+the boards that line is still served to. That is a statement about **updates**.
+
+It was read here as a support range, and the mistake showed: MacBookPro16,1
+appears under Big Sur and nothing later, so a 2019 machine was told it stopped
+at Big Sur. How far a Mac goes now comes from macrecovery's board list, the
+same one the Recovery tab and `tools/smbios.py` use. The two facts sit side by
+side on the machine page and say which is which:
+
+    Apple, for Mac-B4831CEBD52A0C4C        any → Ventura 13
+    Apple still updates it on              13.7.8, 12.7.6, 11.7.11
+
+There is no floor any more. Nothing this repository reads knows the oldest
+macOS a given Mac can run, and it no longer implies one.
+
 ## The oldest and newest macOS a machine can run
 
 Each part that bounds macOS contributes a window, and the machine's range is

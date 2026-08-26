@@ -1,4 +1,11 @@
-"""Which macOS a real Mac can run, from Apple's own metadata.
+"""Which macOS lines Apple still serves a real Mac, from its own metadata.
+
+Not what the Mac can run. That reading was wrong and showed on a screen:
+MacBookPro16,1 appears in this endpoint under Big Sur and nothing later, and it
+plainly runs more than Big Sur. What the endpoint lists, per macOS line, is the
+machines that line is still *served* to - a statement about updates, not about
+support. How far a Mac goes is `tools/smbios.py`, which asks macrecovery's
+board list instead.
 
 Every other table here is about a machine somebody is converting. This one is
 about the machine they may be sitting at: a Mac reports none of the hardware
@@ -10,18 +17,17 @@ The source is the endpoint Apple publishes for device management:
     https://gdmf.apple.com/v2/pmv
 
 It lists every macOS line Apple still serves, and for each one the machines it
-runs on - by the board name a Mac reports of itself, "J314sAP" on Apple silicon
-and "Mac-1E7E29AD0135F9BC" on Intel. So the floor is the oldest line that names
-a board and the ceiling is the newest, and both are read rather than remembered.
+is served to - by the board name a Mac reports of itself, "J314sAP" on Apple
+silicon and "Mac-1E7E29AD0135F9BC" on Intel. Those lines are what this records,
+under that name.
 
     python3 tools/mactable.py --refresh     # network
     python3 tools/mactable.py               # what the table says now
 
-What it cannot say: Apple only publishes the lines it still serves. A Mac that
-shipped with Sierra and stopped at Monterey reads as "12 and newer" here,
-because 11 is as far back as the endpoint goes. The floor is therefore the
-oldest *still-served* release, and the table says so rather than implying it is
-the release the machine shipped with.
+What it cannot say: anything about the range a Mac supports. Only which of the
+lines Apple currently publishes reach it - which is worth knowing on its own
+(it is whether the machine is still getting updates) and is not the same
+question.
 """
 import argparse
 import json
@@ -119,8 +125,20 @@ def table():
     return ocgen.read_toml(TABLE) if TABLE.exists() else {}
 
 
+def serves(board):
+    """The macOS lines Apple still serves this board, newest first, or []."""
+    if not board:
+        return []
+    for row in table().get('mac', []):
+        if row['board'].lower() == board.lower():
+            return list(reversed(row.get('lines', [])))
+    return []
+
+
 def window(board):
-    """(floor, ceiling or None) for one board, or None if it is not listed."""
+    """(oldest, newest) of the lines still served, or None if unlisted.
+
+    Kept for what it is: the span of *served lines*, not a support range."""
     if not board:
         return None
     for row in table().get('mac', []):

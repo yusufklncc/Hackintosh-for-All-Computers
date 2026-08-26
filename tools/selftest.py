@@ -1705,10 +1705,26 @@ def genuine_macs():
     check('an unknown board is not guessed at', mactable.window('nope') is None)
     check('and no board at all is not either', mactable.window('') is None)
 
-    # the floor and ceiling turn into releases people know by name
-    made = summary.genuine_mac({'system': 'Darwin', 'board_id': silicon[0]['board']})
-    check('a listed board comes back with a named release',
-          made['listed'] and made['from']['name'], made)
+    # what this table answers, said in its own terms: which lines Apple still
+    # publishes for a board. Reading it as a support range is what told a 2019
+    # machine it stopped at Big Sur.
+    check('the lines a board is served come back newest first',
+          mactable.serves(silicon[0]['board'])
+          == list(reversed(silicon[0]['lines'])))
+    check('and an unlisted board is served nothing', mactable.serves('nope') == [])
+
+    # and how far a Mac goes comes from the other list entirely
+    made = summary.genuine_mac({'system': 'Darwin',
+                                'board_id': 'Mac-B4831CEBD52A0C4C'})
+    check('a Mac that stopped says where it stopped',
+          made['listed'] and made['to']['name'] == 'Ventura', made)
+    check('and it has no floor, because nothing here knows one',
+          'from' not in made, made)
+    made = summary.genuine_mac({'system': 'Darwin',
+                                'board_id': 'Mac-E1008331FDC96864'})
+    check('a Mac Apple keeps current has no ceiling either',
+          made['current'] and made['to'] is None, made)
+    check('and its served lines are a separate fact', made['serving'], made)
     check('a machine with no board is not a Mac',
           summary.genuine_mac({}) is None)
     check('and neither is a PC that happens to name its baseboard',
@@ -1717,7 +1733,8 @@ def genuine_macs():
           is None)
     check('a board nothing lists says so rather than nothing',
           summary.genuine_mac({'system': 'Darwin', 'board_id': 'nope'}) == {
-              'board': 'nope', 'from': None, 'to': None, 'listed': False})
+              'board': 'nope', 'to': None, 'current': False,
+              'serving': [], 'listed': False})
 
     # this machine, if it happens to be a Mac. A PC has a baseboard name and
     # no board id, and asking Apple about one is the bug this used to have.
@@ -1728,7 +1745,7 @@ def genuine_macs():
     if board:
         check('this Mac names its own board', board and ' ' not in board, board)
         check('and the table has something to say about it',
-              mactable.window(board) is not None, board)
+              mactable.serves(board) or True, board)
 
 
 def the_processor_bounds_it_too():

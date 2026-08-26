@@ -70,8 +70,13 @@ public sealed class MacosWindow
 public sealed class MacSupport
 {
     [JsonPropertyName("board")] public string Board { get; set; } = "";
-    [JsonPropertyName("from")] public Release? From { get; set; }
+    // how far it goes, from macrecovery's board list. There is no floor: the
+    // list this used to read answers a different question, and reading it as a
+    // range told a 2019 machine it stopped at Big Sur.
     [JsonPropertyName("to")] public Release? To { get; set; }
+    [JsonPropertyName("current")] public bool Current { get; set; }
+    // which macOS lines Apple still publishes for it, which is about updates
+    [JsonPropertyName("serving")] public List<string> Serving { get; set; } = new();
     [JsonPropertyName("listed")] public bool Listed { get; set; }
 }
 

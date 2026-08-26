@@ -97,6 +97,16 @@ public sealed class BoundView
         Span = $"{bound.From?.ToString() ?? "any"} → {bound.To?.ToString() ?? "current"}";
     }
 
+    /// <summary>A row whose right-hand side is not a range.
+    ///
+    /// Which macOS lines Apple still publishes for a board is a list, not a
+    /// span, and drawing it as one is how it came to be read as a span.</summary>
+    public BoundView(string what, string said)
+    {
+        What = what;
+        Span = said;
+    }
+
     public string What { get; }
     public string Span { get; }
 }

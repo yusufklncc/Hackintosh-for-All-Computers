@@ -151,19 +151,26 @@ public partial class MachineView : UserControl
 
         // A real Mac's answer comes from Apple, not from the kext tables: they
         // claim none of its hardware, so they have nothing to say about it.
-        if (m.Mac is { Listed: true, From: { } shipped })
+        if (m.Mac is { Listed: true })
         {
             var last = m.Mac.To;
-            Window.Text = last is null ? $"{shipped} and newer" : $"{shipped} to {last}";
-            WindowWhy.Text = last is null
-                ? $"Apple still lists {m.Mac.Board} in the newest macOS it serves, "
-                + "so this Mac is supported."
-                : $"Apple no longer lists {m.Mac.Board} past {last}.";
-            Bounds.ItemsSource = new List<BoundView>
+            Window.Text = m.Mac.Current ? "Whatever Apple is serving now"
+                                        : $"Up to {last}";
+            WindowWhy.Text = m.Mac.Current
+                ? $"{m.Mac.Board} is one of the boards Apple keeps current, so "
+                + "this Mac is offered the newest macOS there is."
+                : $"{m.Mac.Board} is offered up to {last}. There is no floor "
+                + "here: nothing this reads knows the oldest macOS a Mac runs.";
+            var bounds = new List<BoundView>
             {
-                new(new Bound { What = "Apple, for " + m.Mac.Board,
-                                From = m.Mac.From, To = m.Mac.To }),
+                new(new Bound { What = "Apple, for " + m.Mac.Board, To = m.Mac.To }),
             };
+            // a different fact, and it used to be read as the one above:
+            // which lines Apple still publishes for it is about updates
+            if (m.Mac.Serving.Count > 0)
+                bounds.Add(new BoundView("Apple still updates it on",
+                                         string.Join(", ", m.Mac.Serving)));
+            Bounds.ItemsSource = bounds;
         }
         else if (m.Mac is { Listed: false })
         {

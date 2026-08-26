@@ -681,38 +681,40 @@ def _by_version(major):
 
 
 def genuine_mac(hw):
-    """What Apple says about this Mac, or None if it is not one.
+    """What is known about this Mac, and which question each part answers.
 
-    A different question from the rest of this file. Everywhere else the answer
-    comes from what a kext claims; here it comes from Apple's own list of which
-    machines each macOS line still runs on, because on a real Mac that is the
-    only question worth asking."""
+    Two different facts, from two different places, and they were one for a
+    while:
+
+      * how far the machine goes - the newest macOS its board is offered, out
+        of macrecovery's board list,
+      * which macOS lines Apple still serves it - out of Apple's own
+        device-management metadata, which is a statement about updates and not
+        about support. Read as a range it says MacBookPro16,1 stops at Big Sur,
+        which is how this came to tell a 2019 machine the wrong thing.
+
+    There is no floor here any more. Nothing this reads knows the oldest macOS
+    a Mac can run."""
     # both, not either: a probe from a report carries whatever the machine it
-    # came from had, and only a Mac's board means anything to Apple's list
+    # came from had, and only a Mac's board means anything to either list
     if hw.get('system') != 'Darwin':
         return None
     board = hw.get('board_id')
     if not board:
         return None
-    # The ceiling comes from macrecovery's board list, not from Apple's
-    # per-line device lists. Those say which machines a line is still served
-    # to, which is narrower than what a machine can run: MacBookPro16,1
-    # appears only under Big Sur there and plainly runs more than Big Sur.
+
     import recovery
-    serves = recovery.served().get(board)
-    found = mactable.window(board)
-    if not found and not serves:
-        # a Mac too new or too old for anything either list knows
-        return {'board': board, 'from': None, 'to': None, 'listed': False}
-    floor, ceiling = found if found else (None, None)
-    if serves == 'latest':
-        ceiling = None                      # still current: no ceiling to name
-    elif serves:
-        ceiling = serves.rsplit('.', 1)[0] if serves.startswith('10.') \
-            else serves.split('.')[0]
-    return {'board': board, 'from': _by_version(floor) if floor else None,
-            'to': _by_version(ceiling), 'listed': True,
-            'current': serves == 'latest'}
+    offered = recovery.served().get(board)
+    lines = mactable.serves(board)
+    if not offered and not lines:
+        return {'board': board, 'to': None, 'current': False,
+                'serving': [], 'listed': False}
+    ceiling = None
+    if offered and offered != 'latest':
+        ceiling = (offered.rsplit('.', 1)[0] if offered.startswith('10.')
+                   else offered.split('.')[0])
+    return {'board': board, 'to': _by_version(ceiling), 'listed': True,
+            'current': offered == 'latest', 'serving': lines}
 
 
 def document(hw, source='this machine'):
