@@ -2710,7 +2710,20 @@ def what_it_looks_like_when_it_arrives():
     # shipped Linux twice and took that download from 86 MB to 168
     shipped = Path('.github/workflows/release.yml').read_text()
     check('the AppImage is published on its own, not inside the folder zip',
-          '.AppImage"' in shipped and 'dist/*.AppImage' in shipped)
+          '.AppImage' in shipped and 'dist/*.AppImage' in shipped)
+
+    # and the zip is made by the build that made the thing. An artifact is a
+    # file tree: carrying a .app as one lost the symlinks inside
+    # Python.framework and the signature with them, and macOS called the app
+    # damaged.
+    check('each package zips itself', 'Into the zip it ships as' in made)
+    check('with ditto on macOS, which is what keeps a bundle',
+          'ditto -c -k' in made)
+    check('and the release moves those zips rather than making its own',
+          're-zipping' in shipped.lower() or 'as their builds zipped them' in shipped)
+    check('and the bundle is unpacked again and checked before it ships',
+          'does not survive its own zip' in made
+          and 'the framework symlinks did not survive' in made)
 
 
 def what_to_show_the_igpu_as():

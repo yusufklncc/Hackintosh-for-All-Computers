@@ -57,29 +57,15 @@ jobs:
           pattern: '*-package'
           path: packages
 
-      - name: One zip per system
+      # The packages arrive as the zips their own build made. Re-zipping them
+      # here is what broke the .app: an artifact is a file tree, and a bundle
+      # does not survive being carried as one.
+      - name: The packages, as their builds zipped them
         run: |
-          cd packages
-          for made in *-package; do
-            system="${made%-package}"
-            # upload-artifact does not carry the executable bit, and a .app
-            # whose binary cannot run is a folder with an icon
-            chmod +x "$made"/EFIBuilderEngine/EFIBuilderEngine \
-                     "$made"/HackintoshEFIBuilder \
-                     "$made"/*.app/Contents/MacOS/HackintoshEFIBuilder \
-                     "$made"/*.app/Contents/Resources/EFIBuilderEngine/EFIBuilderEngine \
-                     2>/dev/null || true
-            # the AppImage is the same program again, so it goes out as its
-            # own asset rather than doubling the size of the folder zip
-            for one in "$made"/*.AppImage; do
-              [ -e "$one" ] || continue
-              mv "$one" "../dist/HackintoshEFIBuilder-$system.AppImage"
-              chmod +x "../dist/HackintoshEFIBuilder-$system.AppImage"
-              echo "  $system  AppImage $(du -h "../dist/HackintoshEFIBuilder-$system.AppImage" | cut -f1)"
-            done
-            (cd "$made" && zip -qr "../../dist/HackintoshEFIBuilder-$system.zip" .)
-            echo "  $system  $(du -sh "$made" | cut -f1)"
-          done
+          mv packages/*/*.zip packages/*/*.AppImage dist/ 2>/dev/null || true
+          mv packages/*.zip packages/*.AppImage dist/ 2>/dev/null || true
+          chmod +x dist/*.AppImage 2>/dev/null || true
+          ls -la dist
 
       - name: Publish
         uses: softprops/action-gh-release@v3

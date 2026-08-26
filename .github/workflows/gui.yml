@@ -298,13 +298,49 @@ jobs:
             || { echo 'the AppImage did not find its engine'; cat /tmp/appimage.log; exit 1; }
           test -s /tmp/appimage.png || { echo 'the AppImage drew nothing'; exit 1; }
 
+      # Zipped here, not later. An artifact is a file tree, and uploading one
+      # loses what a .app is made of: the symlinks inside Python.framework came
+      # back as missing files and the signature with them, so macOS called the
+      # app damaged. A zip made on the machine that built it keeps the links,
+      # the modes and the seal.
+      - name: Into the zip it ships as
+        shell: bash
+        run: |
+          mkdir -p out
+          # the AppImage is the whole program again; it goes out on its own
+          for one in package/*.AppImage; do
+            [ -e "$one" ] || continue
+            mv "$one" "out/HackintoshEFIBuilder-${{ matrix.rid }}.AppImage"
+          done
+          if [ "$RUNNER_OS" = "macOS" ]; then
+            # ditto, because zip on macOS is not what preserves a bundle
+            (cd package && ditto -c -k --sequesterRsrc --keepParent . \
+              "../out/HackintoshEFIBuilder-${{ matrix.rid }}.zip")
+          else
+            (cd package && zip -qry \
+              "../out/HackintoshEFIBuilder-${{ matrix.rid }}.zip" .)
+          fi
+          ls -la out
+
+      - name: And it comes out of that zip whole
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          mkdir -p proof && cd proof
+          ditto -x -k "../out/HackintoshEFIBuilder-${{ matrix.rid }}.zip" .
+          codesign --verify --deep --strict "Hackintosh EFI Builder.app" \
+            || { echo 'the bundle does not survive its own zip'; exit 1; }
+          test -L "Hackintosh EFI Builder.app/Contents/Resources/EFIBuilderEngine/_internal/Python.framework/Versions/Current" \
+            || { echo 'the framework symlinks did not survive'; exit 1; }
+          cd .. && rm -rf proof
+
       - name: What it weighs
         shell: bash
         run: |
-          du -sh package >> $GITHUB_STEP_SUMMARY
-          ls -la package | head -20 >> $GITHUB_STEP_SUMMARY
+          du -sh package out >> $GITHUB_STEP_SUMMARY
+          ls -la out >> $GITHUB_STEP_SUMMARY
 
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.rid }}-package
-          path: package/
+          path: out/
