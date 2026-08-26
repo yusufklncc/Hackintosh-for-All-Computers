@@ -878,11 +878,13 @@ def frozen_names():
           'except BaseException' in src)
 
 
-def the_two_windows_only_ways_this_broke():
-    """Both were invisible on the machine this is written on.
+def the_windows_only_ways_this_broke():
+    """Every one of these was invisible on the machine this is written on.
 
-    A window on Windows showed raw JSON in the middle of the ACPI step and then
-    skipped it: two separate faults, neither reachable from macOS or Linux."""
+    A window on Windows showed raw JSON in the middle of the ACPI step, then
+    skipped it, then - once that was fixed - dumped a second set of tables on
+    top of the first and refused them all. Three faults, none reachable from
+    macOS or Linux, each found by somebody running it."""
     import acpi as acpimod
     import shutil
 
@@ -921,6 +923,24 @@ def the_two_windows_only_ways_this_broke():
         else:
             check('this filesystem tells the two names apart, so nothing to '
                   'collide', True, 'case-sensitive here')
+
+    # 3. the dumper does not replace what is already in the folder: run it
+    # twice and both DSDT.AML and dsdt.dat survive, and SSDTTime then refuses
+    # the lot - "multiple files with DSDT signature passed"
+    with tempfile.TemporaryDirectory() as where:
+        into = Path(where) / 'ACPI'
+        into.mkdir()
+        (into / 'DSDT.AML').write_bytes(b'x')
+        (into / 'dsdt.dat').write_bytes(b'x')
+        ok, said = acpimod.clear_dump(into)
+        check('a dump empties the folder it writes into',
+              ok and not list(into.iterdir()), said)
+        (into / 'notes.md').write_text('somebody put this here')
+        ok, said = acpimod.clear_dump(into)
+        check('but not a folder holding anything else', not ok, said)
+        check('and it says what stopped it', 'notes.md' in said, said)
+        check('missing is fine, there is nothing to clear',
+              acpimod.clear_dump(Path(where) / 'nope')[0])
 
     # and the builder does not name them so they can collide in the first place
     flow = Path('tools/setup.py').read_text()
@@ -2961,7 +2981,7 @@ if __name__ == '__main__':
                     device_names, broadcom_wifi, detection_gaps, provenance,
                     framebuffers, native_device_ids, field_reports, load_order,
                     smbus_trackpad, macos_window, card_readers, third_party,
-                    usb_mapping, acpi_tables, the_two_windows_only_ways_this_broke,
+                    usb_mapping, acpi_tables, the_windows_only_ways_this_broke,
                     unattended_ssdts, ssdt_flow, window_stays_open,
                     frozen_names, frozen_build, workflow_flags,
                     runner_independence, tables_match_sources,

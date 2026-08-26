@@ -257,6 +257,34 @@ def run(work, tables=None, unattended=False, outcomes=None, ask=None):
     return results, ''
 
 
+# what a dump leaves behind, and nothing else
+DUMPED = ('.aml', '.dat', '.dsl', '.txt')
+
+
+def clear_dump(into):
+    """Empty the folder a dump is about to be written into.
+
+    The dumper writes `.dat` and renames them to `.aml`, and it does not
+    replace what is already there: run it twice into the same folder and both
+    spellings of every table survive. SSDTTime then refuses the lot - "multiple
+    files with DSDT signature passed" - and the step ends with nothing loaded.
+
+    Only files a dump makes are removed, and only from a folder that holds
+    nothing else: this is somebody's directory, not ours."""
+    into = Path(into)
+    if not into.exists():
+        return True, ''
+    stray = [f.name for f in into.iterdir()
+             if f.is_file() and f.suffix.lower() not in DUMPED]
+    if stray or any(f.is_dir() for f in into.iterdir()):
+        return False, (f'{into} holds things a dump did not write '
+                       f'({", ".join(stray[:3]) or "a folder"}); '
+                       f'empty it yourself or point somewhere else')
+    for f in into.iterdir():
+        f.unlink()
+    return True, ''
+
+
 def dump(work, into):
     """Dump this machine's ACPI tables, using the tool's own dumper."""
     tool = available()
@@ -266,6 +294,9 @@ def dump(work, into):
         # a Mac's own tables are not the target machine's, and there is no
         # acpidump for macOS in the first place
         return None, 'ACPI tables cannot be dumped from macOS'
+    ok, complaint = clear_dump(into)
+    if not ok:
+        return None, complaint
     work = prepare(work)
     module = load(work)
     ssdt = quiet_screen(module.SSDT())
