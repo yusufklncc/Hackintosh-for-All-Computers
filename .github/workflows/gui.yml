@@ -314,7 +314,9 @@ jobs:
           done
           if [ "$RUNNER_OS" = "macOS" ]; then
             # ditto, because zip on macOS is not what preserves a bundle
-            (cd package && ditto -c -k --sequesterRsrc --keepParent . \
+            # no --keepParent: with "." as the source it stores the folder
+            # the files are in, and the .app came back one level down
+            (cd package && ditto -c -k --sequesterRsrc . \
               "../out/HackintoshEFIBuilder-${{ matrix.rid }}.zip")
           else
             (cd package && zip -qry \

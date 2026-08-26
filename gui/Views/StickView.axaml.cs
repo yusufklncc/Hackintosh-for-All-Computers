@@ -68,7 +68,13 @@ public partial class StickView : UserControl
         var engine = Builder.Find(out var missing);
         if (engine is null) { Found.Text = missing; Copy.IsEnabled = false; return; }
 
+        // Windows takes its time over this: a PowerShell start, Get-Disk, and
+        // a Get-Volume for every partition. An empty box with nothing under it
+        // for ten seconds reads as "no stick", which is how it was read.
+        Found.Text = "Looking…";
+        Again.IsEnabled = false;
         var (list, complaint) = await Inventory.Sticks(engine);
+        Again.IsEnabled = true;
         if (list is null)
         {
             Found.Text = complaint;
