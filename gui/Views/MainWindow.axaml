@@ -4,6 +4,7 @@
         x:Class="Shell.Views.MainWindow"
         x:DataType="v:MainWindow"
         Title="Hackintosh EFI Builder"
+        Icon="avares://HackintoshEFIBuilder/Assets/Icon/png/icon-256.png"
         Width="1180" Height="780" MinWidth="880" MinHeight="600"
         Background="{DynamicResource Ground}"
         Foreground="{DynamicResource Ink}">

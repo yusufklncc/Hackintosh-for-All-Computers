@@ -10,6 +10,11 @@
     <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
     <InvariantGlobalization>true</InvariantGlobalization>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <!-- Explorer and the taskbar read this out of the executable itself -->
+    <ApplicationIcon>Assets/Icon/HackintoshEFIBuilder.ico</ApplicationIcon>
+    <Product>Hackintosh EFI Builder</Product>
+    <Company>yusufklncc</Company>
+    <AssemblyTitle>Hackintosh EFI Builder</AssemblyTitle>
     <AssemblyName>HackintoshEFIBuilder</AssemblyName>
     <RootNamespace>Shell</RootNamespace>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
@@ -25,6 +30,7 @@
   </PropertyGroup>
   <ItemGroup>
     <AvaloniaResource Include="Assets/Fonts/*.ttf" />
+    <AvaloniaResource Include="Assets/Icon/png/*.png" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Avalonia" Version="11.*" />

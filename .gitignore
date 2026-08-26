@@ -35,3 +35,4 @@ gui/dist/
 # 916 MB BaseSystem.dmg into a commit.
 gui/bin/
 gui/obj/
+gui/dist-app/

@@ -2498,6 +2498,79 @@ def the_mac_a_config_pretends_to_be():
           facts['to'] and facts['to']['version'] == '13', facts)
 
 
+def what_it_looks_like_when_it_arrives():
+    """The icon, and the shapes each system expects a program to arrive in.
+
+    A folder of files is not how a program arrives on any of the three. macOS
+    wants a .app - without an Info.plist a double-click opens Terminal, the
+    Dock draws a generic page, and the menu bar says the process name, which is
+    how "Avalonia Application" ended up above a window called something else."""
+    import icons
+
+    trouble = icons.check()
+    check('every icon file is here and the right shape', not trouble, trouble)
+
+    # the master is not the drawing as it arrived: macOS applies no mask, and
+    # a drawing that fills three quarters of its frame sits a size smaller than
+    # everything beside it in a Dock
+    w, h, left, right, top, bottom = icons.shape_of(icons.MASTER)
+    check('the drawing fills the frame the way Apple\'s own icons do',
+          right - left + 1 == icons.SHAPE and w == icons.FRAME,
+          f'{right - left + 1} in {w}')
+    check('and the source it was cut from is kept',
+          (icons.ICONS / 'icon-source-2048.png').exists())
+
+    # the .ico really holds four sizes, since nothing else here would notice
+    blob = icons.ICO.read_bytes()
+    import struct
+    kind, count = struct.unpack('<HH', blob[2:6])
+    check('the .ico is an icon file with every size in it',
+          kind == 1 and count == len(icons.WINDOWS), (kind, count))
+
+    csproj = Path('gui/Shell.csproj').read_text()
+    check('the executable carries the icon', 'ApplicationIcon' in csproj)
+    check('and a name Explorer can show', '<Product>' in csproj)
+    layout = Path('gui/App.axaml').read_text()
+    check('the application names itself, which is what the menu bar reads',
+          'Name="Hackintosh EFI Builder"' in layout)
+    window = Path('gui/Views/MainWindow.axaml').read_text()
+    check('and the window has the icon on it', 'Assets/Icon/png' in window)
+
+    # the bundler
+    bundler = Path('tools/appbundle.py').read_text()
+    check('the bundle names itself for the menu bar',
+          "'CFBundleName'" in bundler)
+    # run rather than grepped: it made a bundle with no engine in it once,
+    # and the window opened to "no engine found" and nothing else
+    import appbundle
+    with tempfile.TemporaryDirectory() as where:
+        empty = Path(where) / 'published'
+        empty.mkdir()
+        (empty / 'HackintoshEFIBuilder').write_bytes(b'not really')
+        try:
+            appbundle.build(empty, Path(where) / 'x.app', '1.0.7')
+            check('and refuses to ship without the engine inside it', False,
+                  'it made one anyway')
+        except SystemExit as refused:
+            check('and refuses to ship without the engine inside it',
+                  'EFIBuilderEngine' in str(refused), str(refused)[:60])
+    check('and signs last, because moving a file after invalidates it',
+          bundler.index('codesign') > bundler.index("PkgInfo"))
+    # a keep-list. A delete-list is a list somebody forgets to add to, and the
+    # first bundle this made carried NEXT-STEPS.txt and a .DS_Store
+    check('it copies what belongs rather than deleting what does not',
+          "item.suffix == '.dylib'" in bundler and 'left.append' in bundler)
+
+    made = Path('.github/workflows/gui.yml').read_text()
+    check('macOS packages as a .app', 'appbundle.py' in made)
+    check('and it is checked for a name, an icon, an engine and a signature',
+          all(x in made for x in ('CFBundleName', '.icns',
+                                  'Resources/EFIBuilderEngine',
+                                  'codesign --verify')))
+    check('Linux gets something a desktop can show',
+          '.desktop' in made and 'Icon=HackintoshEFIBuilder' in made)
+
+
 def the_tools_a_window_can_drive():
     """Both vendored tools reach a person, whichever surface is attached.
 
@@ -2672,6 +2745,7 @@ if __name__ == '__main__':
                     the_tools_a_window_can_drive,
                     the_recovery_it_can_fetch,
                     the_mac_a_config_pretends_to_be,
+                    what_it_looks_like_when_it_arrives,
                     the_stick_it_writes_to,
                     what_oclp_restores, the_about_page,
                     what_the_readme_shows):

@@ -62,8 +62,13 @@ jobs:
           cd packages
           for made in *-package; do
             system="${made%-package}"
+            # upload-artifact does not carry the executable bit, and a .app
+            # whose binary cannot run is a folder with an icon
             chmod +x "$made"/EFIBuilderEngine/EFIBuilderEngine \
-                     "$made"/HackintoshEFIBuilder 2>/dev/null || true
+                     "$made"/HackintoshEFIBuilder \
+                     "$made"/*.app/Contents/MacOS/HackintoshEFIBuilder \
+                     "$made"/*.app/Contents/Resources/EFIBuilderEngine/EFIBuilderEngine \
+                     2>/dev/null || true
             (cd "$made" && zip -qr "../../dist/HackintoshEFIBuilder-$system.zip" .)
             echo "  $system  $(du -sh "$made" | cut -f1)"
           done

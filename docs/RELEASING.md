@@ -114,10 +114,17 @@ is the way to re-publish without moving a tag.
 
 Each `HackintoshEFIBuilder-<system>.zip` holds two programs:
 
-| file | what it is |
+| system | what is in the zip |
 |---|---|
-| `HackintoshEFIBuilder` | the window |
-| `EFIBuilderEngine` | the builder, which the window runs |
+| macOS | `Hackintosh EFI Builder.app`, with the engine inside it |
+| Windows | `HackintoshEFIBuilder.exe` and `EFIBuilderEngine\` beside it |
+| Linux | the same two, plus a `.desktop` entry and an icon |
+
+On macOS the engine lives at `Contents/Resources/EFIBuilderEngine`: a .app that
+reads files next to itself stops working the moment somebody drags it to
+Applications. The bundle is ad-hoc signed, because an unsigned binary does not
+start at all on Apple silicon - it is still not *notarised*, so the first open
+needs the usual right-click.
 
 Both are needed. The window reimplements none of the engine: it asks it for
 everything and draws the answers. CI proves the packaged pair is the one being

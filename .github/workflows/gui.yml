@@ -246,6 +246,47 @@ jobs:
           diff /tmp/wanted /tmp/shipped \
             || { echo 'the package is not the two programs'; exit 1; }
 
+      # macOS: a folder of files is not how a program arrives here. A bare
+      # Mach-O opens Terminal when double-clicked, shows a generic icon, and
+      # puts the process name in the menu bar - all of it for want of an
+      # Info.plist, which is what this writes.
+      - name: A .app, on macOS
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          python3 tools/appbundle.py --from package \
+            --out "package-app/Hackintosh EFI Builder.app" \
+            --version "$(basename $(ls -d vendor/opencore/*/ | head -1))"
+          app="package-app/Hackintosh EFI Builder.app"
+          test -x "$app/Contents/MacOS/HackintoshEFIBuilder"
+          test -d "$app/Contents/Resources/EFIBuilderEngine"
+          test -f "$app/Contents/Resources/HackintoshEFIBuilder.icns"
+          # the name in the menu bar comes from here, and the icon from the Dock
+          /usr/libexec/PlistBuddy -c 'Print :CFBundleName' "$app/Contents/Info.plist" \
+            | grep -q 'Hackintosh EFI Builder'
+          # and it has to be signed, or Apple silicon will not start it at all
+          codesign --verify --deep --strict "$app" \
+            || { echo 'the bundle is not signed'; exit 1; }
+          rm -rf package && mv package-app package
+
+      # Linux: the folder stays, with what a desktop needs to show it in a menu
+      - name: A .desktop entry, on Linux
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          cp gui/Assets/Icon/png/icon-256.png package/HackintoshEFIBuilder.png
+          cat > package/HackintoshEFIBuilder.desktop <<'ENTRY'
+          [Desktop Entry]
+          Type=Application
+          Name=Hackintosh EFI Builder
+          Comment=Build the OpenCore EFI folder this machine needs
+          Exec=HackintoshEFIBuilder
+          Icon=HackintoshEFIBuilder
+          Terminal=false
+          Categories=Utility;System;
+          ENTRY
+          test -s package/HackintoshEFIBuilder.desktop
+
       - name: What it weighs
         shell: bash
         run: |
