@@ -69,6 +69,14 @@ jobs:
                      "$made"/*.app/Contents/MacOS/HackintoshEFIBuilder \
                      "$made"/*.app/Contents/Resources/EFIBuilderEngine/EFIBuilderEngine \
                      2>/dev/null || true
+            # the AppImage is the same program again, so it goes out as its
+            # own asset rather than doubling the size of the folder zip
+            for one in "$made"/*.AppImage; do
+              [ -e "$one" ] || continue
+              mv "$one" "dist/HackintoshEFIBuilder-$system.AppImage"
+              chmod +x "dist/HackintoshEFIBuilder-$system.AppImage"
+              echo "  $system  AppImage $(du -h "dist/HackintoshEFIBuilder-$system.AppImage" | cut -f1)"
+            done
             (cd "$made" && zip -qr "../../dist/HackintoshEFIBuilder-$system.zip" .)
             echo "  $system  $(du -sh "$made" | cut -f1)"
           done
@@ -79,6 +87,7 @@ jobs:
           tag_name: ${{ github.event.inputs.tag || github.ref_name }}
           files: |
             dist/*.zip
+            dist/*.AppImage
             dist/HackintoshEFIBuilder-console-win-x64.zip
           body: |
             **`HackintoshEFIBuilder-win-x64.zip`** is the easy path: unzip it and
@@ -86,6 +95,10 @@ jobs:
             says what macOS will and will not drive in it, and writes the EFI
             folder. Nothing to install. The same package is there for
             `linux-x64` and `osx-arm64`.
+
+            On macOS the zip holds **Hackintosh EFI Builder.app**; on Linux
+            there is a single **`.AppImage`** as well as the folder, and it
+            runs on whatever distribution you have without installing anything.
 
             **`HackintoshEFIBuilder-console-win-x64.zip`** is the same builder
             without a window, for anyone who prefers a terminal or is working

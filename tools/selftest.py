@@ -2588,6 +2588,12 @@ def what_it_looks_like_when_it_arrives():
     check('so the keep-list is a check, not a cleaner',
           '::warning::' in made)
 
+    # the AppImage is the whole program again; leaving it in the folder zip
+    # shipped Linux twice and took that download from 86 MB to 168
+    shipped = Path('.github/workflows/release.yml').read_text()
+    check('the AppImage is published on its own, not inside the folder zip',
+          '.AppImage"' in shipped and 'dist/*.AppImage' in shipped)
+
 
 def the_tools_a_window_can_drive():
     """Both vendored tools reach a person, whichever surface is attached.
