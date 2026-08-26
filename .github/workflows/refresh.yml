@@ -18,6 +18,32 @@ permissions:
   pull-requests: write
 
 jobs:
+  # The Recovery tab depends on somebody else's server still behaving. Apple
+  # can stop serving a board or change the protocol, and the first anybody
+  # would know is a person pressing Download and getting an error. So ask once
+  # a week, the same way the tab asks, and keep none of it: what is checked is
+  # that the request works, not what it returns.
+  recovery:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: The list is readable without asking anyone
+        run: python3 tools/recoverycheck.py --catalogue
+      - name: And Apple still answers
+        run: python3 tools/recoverycheck.py | tee /tmp/recovery.log
+      - name: Say so
+        if: always()
+        run: |
+          echo '### Recovery' >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          cat /tmp/recovery.log >> $GITHUB_STEP_SUMMARY 2>/dev/null || true
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+
   refresh:
     runs-on: ubuntu-latest
     steps:

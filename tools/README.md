@@ -141,6 +141,28 @@ This is the only thing in the repository that opens a connection on a person's
 behalf, and it does it when asked and not before. The About page says so rather
 than claiming the program never reaches the network.
 
+### Checking that Apple still answers
+
+`recoverycheck.py` runs weekly beside the table refresh. It asks for a recovery
+through the same vendored tool the tab uses, checks a chunklist came with it and
+that the image is the size of a BaseSystem, and then deletes it: the download
+goes into a temporary directory that does not outlive the run.
+
+    python3 tools/recoverycheck.py --catalogue   # the list, asking Apple nothing
+    python3 tools/recoverycheck.py               # the newest row, end to end
+    python3 tools/recoverycheck.py --all         # every row, about 8 GB
+
+What it is for: Apple can stop serving a board or change the protocol, and
+without this the first anybody would know is a person pressing Download and
+getting an error.
+
+**What it is not for.** Nothing it fetches is published, kept or copied
+anywhere. Apple's software is Apple's to distribute; the program fetches it
+onto the machine of the person who asked for it, and this deletes what it
+fetched. Putting a BaseSystem in a release would be redistributing macOS, which
+is the same reason `vendor/ocbinarydata.lock` records that nobody has licensed
+those drivers rather than assuming it is fine.
+
 ## The stick
 
 `stick.py` is the only part of this repository that can destroy something, so it

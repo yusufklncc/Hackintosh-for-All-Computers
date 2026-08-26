@@ -2434,6 +2434,24 @@ def the_stick_it_writes_to():
         _, complaint = stick.place(root / 'stick', recovery=root / 'empty')
         check('an installer that is not there is refused', complaint)
 
+    # the weekly check: it asks Apple the same way the tab does and keeps
+    # nothing, because Apple's software is Apple's to distribute
+    watcher = Path('tools/recoverycheck.py')
+    check('there is a check that Apple still answers', watcher.exists())
+    if watcher.exists():
+        said = watcher.read_text()
+        check('it goes through the same tool the tab does',
+              'recovery.fetch(' in said)
+        check('and into a directory that does not outlive it',
+              'TemporaryDirectory' in said)
+        check('and says plainly that it keeps nothing',
+              'Nothing is published, kept, or copied anywhere' in said)
+        check('and a listing-only mode that asks Apple for nothing',
+              "'--catalogue'" in said)
+    weekly = Path('.github/workflows/refresh.yml').read_text()
+    check('it runs weekly beside the tables',
+          'recoverycheck.py' in weekly and 'schedule:' in weekly)
+
     # the builder offers all three, and does none of it itself
     source = Path('tools/setup.py').read_text()
     for flag in ('--usb-list', '--usb-place', '--usb-prepare'):
