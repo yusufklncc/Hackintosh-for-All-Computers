@@ -88,7 +88,22 @@ jobs:
           # an id in a supported generation that is not natively supported:
           # still supported, flagged as needing a faked device-id
           WSK='--machine tools/fixtures/whiskey-lake.json'
-          python3 tools/setup.py $WSK --answers 1,9,1,1 --out /tmp/whiskey/EFI
+          # 3 declines the faked device-id: this step is about the profile,
+          # not about what to present the iGPU as
+          python3 tools/setup.py $WSK --answers 1,9,1,3,1 --out /tmp/whiskey/EFI
+          python3 -c "import plistlib,sys; \
+            p=plistlib.load(open('/tmp/whiskey/EFI/OC/config.plist','rb'))\
+              ['DeviceProperties']['Add']['PciRoot(0x0)/Pci(0x2,0x0)']; \
+            sys.exit(0 if 'device-id' not in p else 1)" \
+            || { echo 'declining still faked the device-id'; exit 1; }
+
+          # and taking it writes what the document says, on the same device
+          python3 tools/setup.py $WSK --answers 1,9,1,2,1 --out /tmp/whiskey-fake/EFI
+          python3 -c "import plistlib,sys; \
+            p=plistlib.load(open('/tmp/whiskey-fake/EFI/OC/config.plist','rb'))\
+              ['DeviceProperties']['Add']['PciRoot(0x0)/Pci(0x2,0x0)']; \
+            sys.exit(0 if p.get('device-id')==bytes.fromhex('a53e0000') else 1)" \
+            || { echo 'the faked device-id did not land'; exit 1; }
           python3 tools/summary.py $WSK | grep -q 'not natively'
           CML='--machine tools/fixtures/comet-lake-h.json'
           python3 tools/setup.py $CML --answers 1,9,3 --out /tmp/field/EFI
