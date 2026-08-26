@@ -94,7 +94,7 @@ jobs:
         run: |
           IDS='--machine tools/fixtures/no-hardware.json --ids 8086:15b8 --usb-ids 8087:0029'
           python3 tools/setup.py $IDS --answers 2,10,3,9,1    --out /tmp/net-all/EFI
-          python3 tools/setup.py $IDS --answers 2,10,3,9,2,10 --out /tmp/net-sonoma/EFI
+          python3 tools/setup.py $IDS --answers 2,10,3,10,2 --out /tmp/net-sonoma/EFI
           python3 tools/setup.py $IDS --answers 2,10,3,9,3    --out /tmp/net-none/EFI
           test -d /tmp/net-all/EFI/OC/Kexts/IntelMausi.kext
           test ! -d /tmp/net-none/EFI/OC/Kexts/IntelMausi.kext
@@ -102,9 +102,9 @@ jobs:
       - name: Wi-Fi resolves to one build, or to none
         run: |
           NONE='--machine tools/fixtures/no-hardware.json'
-          python3 tools/setup.py $NONE --ids 8086:2723 --answers 2,10,3,9,2,10 --out /tmp/wifi-sonoma/EFI
+          python3 tools/setup.py $NONE --ids 8086:2723 --answers 2,10,3,10,2 --out /tmp/wifi-sonoma/EFI
           test -d /tmp/wifi-sonoma/EFI/OC/Kexts/AirportItlwm.kext
-          python3 tools/setup.py $NONE --ids 8086:2723 --answers 2,10,3,9,2,11 --out /tmp/wifi-sequoia/EFI
+          python3 tools/setup.py $NONE --ids 8086:2723 --answers 2,10,3,11,2 --out /tmp/wifi-sequoia/EFI
           test ! -d /tmp/wifi-sequoia/EFI/OC/Kexts/AirportItlwm.kext
           python3 tools/setup.py $NONE --ids 14e4:43a3 --answers 2,10,3,9,1 --out /tmp/wifi-brcm/EFI
           test -d /tmp/wifi-brcm/EFI/OC/Kexts/AirportBrcmFixup.kext
@@ -121,7 +121,7 @@ jobs:
           python3 tools/setup.py $NONE --ids 8086:5912 --answers 2,10,3,9 --out /tmp/fb/EFI
           cp -r EFI/OC/Kexts/UTBDefault.kext /tmp/UTBMap.kext
           python3 tools/setup.py $NONE --ids 8086:2723 --usb-map /tmp/UTBMap.kext \
-            --answers 2,10,3,9,2,10 --out /tmp/usbmap/EFI
+            --answers 2,10,3,10,2 --out /tmp/usbmap/EFI
           test -d /tmp/usbmap/EFI/OC/Kexts/UTBMap.kext
           test ! -d /tmp/usbmap/EFI/OC/Kexts/UTBDefault.kext
 
