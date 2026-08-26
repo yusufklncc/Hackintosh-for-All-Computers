@@ -220,7 +220,7 @@ def _family(model):
     return re.sub(r'\d+,\d+$', '', model)
 
 
-def suggest(identity, wanted, limit=4):
+def suggest(identity, wanted, limit=3):
     """Identities that are served `wanted` and are the nearest thing to this one.
 
     Nearest, not newest: the closest model that is still served keeps the most

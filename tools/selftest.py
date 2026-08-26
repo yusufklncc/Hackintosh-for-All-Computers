@@ -2463,6 +2463,12 @@ def the_mac_a_config_pretends_to_be():
     check('a family that has run out falls back to the same shape',
           smbios.suggest('MacBookAir9,1', '26'),
           smbios.suggest('MacBookAir9,1', '26'))
+    # always three, so the position of the decline option cannot move when
+    # the model database gains a machine - a scripted answer is a number
+    check('the list is a fixed length',
+          all(len(smbios.suggest('MacBookPro14,1', v)) == 3
+              for v in ('14', '15', '26')),
+          [len(smbios.suggest('MacBookPro14,1', v)) for v in ('14', '15', '26')])
     check('and no list offers the identity somebody already has',
           all(m not in smbios.suggest(m, '26')
               for m in ('MacPro7,1', 'MacBookPro16,1', 'iMac20,1')))
