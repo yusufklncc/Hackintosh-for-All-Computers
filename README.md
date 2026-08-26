@@ -4,116 +4,136 @@
   <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/All%20macOS.png">
 </p>
 
-This repository installs macOS on PC hardware. It holds ready macOS images, and
-it builds the OpenCore EFI folder your particular machine needs - reading your
-CPU, board and network cards to work out what to put in it.
+This repository installs macOS on PC hardware, and it does it through a program
+you download and run. The program reads the machine in front of it, works out
+which OpenCore EFI folder that machine needs, writes it, fetches Apple's
+installer, formats the USB stick and copies both onto it. There is nothing to
+install alongside it and nothing to configure - the hardware tables, the kexts
+and the OpenCore files all travel inside it, and it opens no connection except
+the one that downloads macOS, when you press that button.
 
-There are four ways to get that EFI, from least to most effort:
+<p align="center">
+  <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/App/machine.png">
+</p>
 
-| | |
-|---|---|
-| **The app** | A window, for Windows, Linux and macOS. Download from [Releases](../../releases), unzip, run it - nothing to install. |
-| **`EFIBuilderEngine.exe`** | The same builder in a terminal, for Windows. `HackintoshEFIBuilder-console-win-x64.zip` in the same release. |
-| **`python3 tools/setup.py`** | Same thing from a clone, on Windows, Linux or macOS. Needs Python 3.11. |
-| **`EFI-base.zip` + `configs.zip`** | No script at all: unzip the EFI, copy in the `config.plist` matching your machine. |
-
-For the macOS installer itself there are two routes: a whole image from
-[Download macOS Image](#download-macos-image), or Apple's recovery, which the
-app fetches onto the stick for you - see [The app](#the-app). Recovery is the
-one that fits on FAT32.
-
-All four produce the same thing, and none of them need an internet connection
-for the common path - everything they use is in the repository.
+Get it from [Releases](../../releases), unzip it, run `HackintoshEFIBuilder`,
+and read on from [The app](#the-app). Everything the program does can also be
+done from a terminal, or by hand out of two zip files; that is all folded into
+[Without the window](#without-the-window) at the bottom, and produces exactly
+the same EFI folder.
 
 If you hit a problem, open an issue with what you have and what happened.
 
 ## Table of contents
 
 - [The app](#the-app)
+- [When your system blocks it](#when-your-system-blocks-it)
 - [Get your EFI](#get-your-efi)
 - [Building for another machine](#building-for-another-machine)
 - [Check Compatibility](#check-compatibility)
+- [Make the USB stick](#make-the-usb-stick)
 - [Download macOS Image](#download-macos-image)
-- [Write macOS Image](#write-macos-image)
-- [Put the EFI on the USB drive](#put-the-efi-on-the-usb-drive)
 - [Adjust BIOS settings](#adjust-bios-settings)
 - [First boot](#first-boot)
 - [macOS Installation Steps](#macos-installation-steps)
 - [Post Installation](#post-installation)
-- [Adding a kext by hand](#adding-a-kext-by-hand)
-- [Finding your hardware yourself](#finding-your-hardware-yourself)
+- [Without the window](#without-the-window)
+- [Working on this repository](#working-on-this-repository)
+- The images
+  - [Sonoma](#macos-sonoma) · [Ventura](#macos-ventura) · [Monterey](#macos-monterey) · [Big Sur](#macos-big-sur) · [Catalina](#macos-catalina)
+  - [Mojave](#macos-mojave) · [High Sierra](#macos-high-sierra) · [Sierra](#macos-sierra) · [El Capitan](#macos-el-capitan) · [Yosemite](#macos-yosemite)
+
+<br>
 
 ### The app
 
-<p align="center">
-  <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/App/machine.png">
-</p>
+| | |
+|---|---|
+| **Windows** | `HackintoshEFIBuilder-win-x64.zip` - unzip anywhere and run `HackintoshEFIBuilder.exe`. |
+| **macOS** | `HackintoshEFIBuilder-osx-arm64.zip` for Apple silicon, `-osx-x64.zip` for Intel. Unzip and open `HackintoshEFIBuilder.app`. |
+| **Linux** | `HackintoshEFIBuilder-linux-x64.AppImage` - `chmod +x` it and run it. Or the `-linux-x64.zip`, unzipped. |
 
-Download the package for your system from [Releases](../../releases), unzip it,
-and run `HackintoshEFIBuilder`. There is nothing to install and nothing to
-configure, and it never reaches the network - the tables, the kexts and the
-OpenCore files all travel inside it.
+Nothing else is needed: no .NET, no Python, no runtime of any kind. Each
+package carries two programs - `HackintoshEFIBuilder`, the window, and
+`EFIBuilderEngine`, the builder it runs. Keep them together. The window
+reimplements none of the builder; it runs the same program a terminal runs and
+draws its answers, so a screen here cannot say something the console would not.
 
-It opens on the machine it is running on: the model name, what each part is,
-whether macOS drives it, which kext does the driving, and the oldest macOS this
-hardware can boot together with the part that sets that floor. `unknown` means
-no table here claims the device - not that it fails.
+Neither program is signed by a company that pays Microsoft or Apple, so both
+systems will stop you the first time. That is one dialog on each, and
+[When your system blocks it](#when-your-system-blocks-it) has the steps.
 
-The window reimplements none of the builder. It runs the same program the
-terminal runs and draws the answers, so a screen cannot say something the
-console would not.
+Down the left are eight panes.
+
+<br>
+
+**Machine** is where it opens: the model name, what each part is, whether macOS
+drives it, which kext does the driving, and the oldest macOS this hardware can
+boot together with the part that sets that floor. `unknown` means no table here
+claims the device - not that it fails. It is the picture at the top of this
+page.
+
+<br>
+
+**Builder** asks the questions and writes the EFI folder. It answers none of
+them for you: where the machine can tell it something the option is marked
+*detected*, and you still choose. See [Get your EFI](#get-your-efi).
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/App/builder.png">
 </p>
 
-**Builder** asks the same questions in the same order, and answers none of them
-for you: where the machine can tell it something, the option is marked
-*detected* and you still choose. It writes the EFI folder and then offers to
-open it.
-
-<details>
-<summary><b>The other four panes</b></summary>
-
 <br>
 
-**Report** reads this machine into a single JSON file, and dumps its ACPI tables
-beside it. That is the file to carry to the computer you build on when the USB
-is being prepared somewhere else.
-
-**USB stick** finds the removable disks, formats one if you want, and copies
-both folders onto it in the right places. It says whether the stick can be
-written to as it stands - FAT32 under GPT with room, or something that has to
-be erased first - and it lists removable disks only, never the one the computer
-booted from. Erasing asks for the disk by its own name.
-
-<p align="center">
-  <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/App/usb.png">
-</p>
-
-**Recovery** puts Apple's own installer on the stick beside the EFI - about
-700 MB that boots, connects, and downloads the rest of macOS itself. It is the
-answer when a whole image will not fit: the FAT32 partition an EFI lives on
-cannot hold a file over 4 GB. Everything else in the program works offline;
-this is the one thing that does not, and it only runs when you press the
-button. The list is read from the tool's own board table, and the first row
-asks for whatever macOS Apple is serving today.
-
-<p align="center">
-  <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/App/recovery.png">
-</p>
+**Report** reads this machine into a single JSON file and dumps its ACPI tables
+beside it. That is the file to carry to the computer you build on, when the
+stick is being prepared somewhere else - see
+[Building for another machine](#building-for-another-machine). It holds no
+serial numbers and no raw device dump, so it is safe to send to someone who is
+helping you.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/App/report.png">
 </p>
 
+<br>
+
+**Recovery** puts Apple's own installer on the stick beside the EFI - about
+700 MB that boots, connects, and downloads the rest of macOS itself. It is the
+answer when a whole image will not fit: the FAT32 partition an EFI lives on
+cannot hold a file over 4 GB. This is the one thing in the program that reaches
+the network, and it only runs when you press the button. The list is read from
+OpenCore's own board table, and the first row asks for whatever macOS Apple is
+serving today.
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/App/recovery.png">
+</p>
+
+<br>
+
+**USB stick** finds the removable disks, formats one if you want, and copies
+both folders onto it in the right places. It says whether the stick can be
+written to as it stands - FAT32 under GPT with room - or whether it has to be
+erased first, and it lists removable disks only, never the one the computer
+booted from. Erasing asks you for the disk by its own name before it starts.
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/App/usb.png">
+</p>
+
+<br>
+
 **Compatible Hardware** lists 766 devices across 8 categories - everything this
 repository knows - searchable by name, id or kext, and filterable by category,
-vendor and support. It is read out of the same tables a build reads.
+vendor and support. It is read out of the same tables a build reads, so it
+cannot drift from what the builder would do.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/App/hardware.png">
 </p>
+
+<br>
 
 **Kexts** lists the 42 kexts that ship inside the program, with the project each
 comes from, its version, its licence, and how many device ids it claims - read
@@ -123,6 +143,8 @@ out of the kexts themselves rather than from a list somebody kept.
   <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/App/kexts.png">
 </p>
 
+<br>
+
 **About** names where every answer comes from: which tool fetched each table,
 whether it was derived, measured, quoted or reported - and the areas with no
 source at all, said plainly instead of guessed.
@@ -131,23 +153,73 @@ source at all, said plainly instead of guessed.
   <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/App/about.png">
 </p>
 
-</details>
+<br>
+
+### When your system blocks it
+
+Signing an application means paying Microsoft or Apple every year for a
+certificate. This project does not, so the first run is refused on both. Nothing
+below weakens anything permanently, and none of it is specific to this program -
+it is what every unsigned open-source download needs.
 
 <br>
 
-Each package holds two files: `HackintoshEFIBuilder`, the window, and
-`EFIBuilderEngine`, the builder it runs. Both are needed, and neither is signed
-- Windows will want *More info* then *Run anyway* on the first run, macOS an
-allow in System Settings.
+**Windows.** If Smart App Control is on, the program will not start and Windows
+will say very little about why. Microsoft's own page is plain about the rule:
+*"If the app is unsigned, or the signature is invalid, Smart App Control will
+consider it untrusted and block it for your protection."* There is no *run
+anyway* on that dialog; the switch is the only way past it.
+
+  - Open **Windows Security** → **App & browser control** → **Smart App
+    Control** → set it to **Off**.
+  - Run the program.
+
+Microsoft's page also answers the question everybody asks before touching that
+switch: *"Recent Windows updates allow Smart App Control to be re-enabled
+without requiring a clean installation."* Turning it back on afterwards was
+tested here on Windows 11 and worked from the same switch.
+
+A different dialog, a blue one headed **Windows protected your PC**, is
+SmartScreen rather than Smart App Control. That one you can pass without
+changing any setting: click **More info**, then **Run anyway**.
+
+<br>
+
+**macOS.** The app is signed ad-hoc - enough that macOS will run it at all on
+Apple silicon - but it is not notarised, so Gatekeeper refuses the first open.
+The way through is to try once and then allow it, in that order:
+
+  - Double-click `HackintoshEFIBuilder.app`. It will be refused. That refusal is
+    what creates the entry in the next step.
+  - Open **System Settings** → **Privacy & Security**, scroll to **Security**,
+    and click **Open Anyway** next to the app's name. Apple notes this
+    *"button is available for about an hour after you try to open the app"* - if
+    it is not there, try to open the app again and go back.
+  - Enter your password. macOS remembers the exception, and it opens normally
+    from then on.
+
+Unzip it and then **drag the app into your Applications folder** before
+opening it. An app that is still sitting where the zip left it is run from a
+read-only copy somewhere else on the disk, which is why it can be allowed and
+still behave as if it were not; moving it in Finder ends that.
+
+<br>
+
+**Linux.** Nothing blocks it; the AppImage only needs the executable bit.
+
+```
+chmod +x HackintoshEFIBuilder-linux-x64.AppImage
+./HackintoshEFIBuilder-linux-x64.AppImage
+```
 
 <br>
 
 ### Get your EFI
 
-The builder asks a handful of questions and writes the folder. Where it can read
-the answer off your machine it says so next to the question, but it never picks
-for you - detection can be wrong, and a wrong answer that arrives already ticked
-is one nobody rechecks.
+Open the **Builder** pane and press start. It asks a handful of questions and
+writes the folder. Where it can read the answer off your machine it says so
+next to the question, but it never picks for you - detection can be wrong, and a
+wrong answer that arrives already ticked is one nobody rechecks.
 
 First it says what your hardware means for macOS:
 
@@ -170,8 +242,8 @@ Hardware for macOS  from this machine
 
 `unknown` means no table here has anything to say about that part, not that it
 will fail. Nothing on this screen stops the build - if a card is unsupported it
-says so and suggests replacing it, and the choice stays yours. `python3
-tools/setup.py --check` prints just this and exits.
+says so and suggests replacing it, and the choice stays yours. The **Machine**
+pane shows the same reading at any time, without starting a build.
 
 Then it asks:
 
@@ -184,36 +256,60 @@ Then it asks:
        4) Neither - just write this machine's report, to build for it elsewhere
       > 1
 
-[2/4] What kind of machine is this?
+[2/5] What kind of machine is this?
       detected: Laptop
        1) Desktop
        2) Laptop <- detected
       > 2
 
-[3/4] Which CPU generation?
+[3/5] Which CPU generation?
       detected: Kaby Lake
       ...
       10) Kaby Lake <- detected
       > 10
 
-[4/4] Board or laptop brand?
+[4/5] Board or laptop brand?
       detected: hp
        3) HP <- detected
       > 3
-```
 
-One of the questions is which macOS you are installing, and it is not only
-about kexts: a config claims a Mac identity, and macOS decides what it will
-install from that rather than from your hardware. Ask for Tahoe on a config
-that claims `MacBookPro14,1` and the install stops without saying why, because
-Apple serves that model up to Ventura. The builder says so before you get
-there, and names the identities that are served the release you asked for.
+[5/5] Which macOS are you installing?
+      ...
+```
 
 The first question matters because the USB stick is usually made on a computer
 that already works, not on the one being built for. See
 [Building for another machine](#building-for-another-machine).
 
-It then looks at your network hardware and offers to add the kexts it needs:
+The last one is not only about kexts. A config claims a Mac identity, and macOS
+decides what it will install from that identity rather than from your hardware.
+Ask for Tahoe on a config that claims `MacBookPro14,1` and the install stops
+without saying why, because Apple serves that model up to Ventura. The builder
+checks this before you get there: if the identity in your profile is not served
+the release you asked for, it names the ones that are and offers to set one -
+same family first, and never the identity already in use. Decline and it builds
+what you asked for and tells you what will happen.
+
+<br>
+
+**What it offers along the way.** None of these are asked unless your answers
+make them relevant, and every one of them can be declined:
+
+  - **SSDTs.** It opens SSDTTime inside the window for the patches your platform
+    needs, and you work through that tool's own menu right there.
+  - **USB ports.** Mapping them now, on this machine, produces the port map
+    macOS needs instead of the generic one.
+  - **Framebuffer and device-id.** On Intel graphics it offers the framebuffer
+    id for your chip, and where WhateverGreen's documentation says a fake
+    device-id is required - Ice Lake G1 parts among them - it offers that too,
+    quoting the sentence it came from.
+  - **Trackpad.** An I²C or SMBus trackpad gets asked about separately, because
+    PS/2 and SMBus want different kexts.
+
+<br>
+
+**Network cards** are last, because without one the machine cannot finish the
+install:
 
 ```
   Ethernet
@@ -232,19 +328,8 @@ lets OpenCore load the right one, so one EFI boots any of them. Choosing *one
 version* puts in only what that release needs. Intel Wi-Fi is the exception: it
 is built separately for each macOS, so it always asks which.
 
-Run it from a clone with:
-
-```
-python3 tools/setup.py
-```
-
-Or download it from [Releases](../../releases): the app for your system, or
-`HackintoshEFIBuilder-console-win-x64.zip` for the same thing in a terminal.
-Both carry everything inside, so there is nothing else to get.
-
-If you would rather not run anything, `EFI-base.zip` and `configs.zip` in the
-same release are the manual route, described under
-[Put the EFI on the USB drive](#put-the-efi-on-the-usb-drive).
+Then it writes the `EFI` folder and offers to open it. From here, go to
+[Make the USB stick](#make-the-usb-stick).
 
 <br>
 
@@ -256,24 +341,17 @@ network cards, NVMe, trackpad - belongs to the wrong machine, and you do not
 want any of it in the config.
 
 The fix is to take the hardware report on the target machine and carry it over.
-On that machine, from Windows or Linux:
 
-```
-EFIBuilderEngine.exe --report machine.json          # or the menu's option 4
-                                                    # the app: the Report pane
-python3 tools/detect.py --report machine.json       # from a clone
-```
+  - On the machine you are building **for**, run the program and open the
+    **Report** pane. It writes one small JSON file: CPU, board, graphics, PCI,
+    USB and audio ids, NVMe models. The Builder's fourth answer, *just write
+    this machine's report*, does the same thing.
+  - Copy that file to the computer you are building **on**, by USB stick, mail
+    or anything else. It holds no serial numbers and no raw device dump.
+  - There, start the Builder and answer *Another machine, and I have its
+    hardware report*. It asks for the file.
 
-That writes one small JSON file: CPU, board, graphics, PCI, USB and audio ids,
-NVMe models. Copy it to the computer you build on and pass it back:
-
-```
-python3 tools/setup.py --machine machine.json
-```
-
-Every question and every piece of advice then applies to that machine. The
-report holds no serial numbers and no raw device dump, so it is safe to send to
-someone who is helping you.
+Every question and every piece of advice then applies to that machine.
 
 Without a report, answer *Another machine, and I do not have one*. Nothing is
 detected and nothing is guessed at; instead you are asked which Ethernet, Wi-Fi
@@ -302,71 +380,33 @@ To check if your hardware is incompatible, I leave links below.
 
 <br>
 
-### Download macOS Image
+### Make the USB stick
 
-- Go
-  - [Sonoma](#macos-sonoma)
-  - [Ventura](#macos-ventura)
-  - [Monterey](#macos-monterey)
-  - [Big Sur](#macos-big-sur)
-  - [Catalina](#macos-catalina)
-  - [Mojave](#macos-mojave)
-  - [High Sierra](#macos-high-sierra)
-  - [Sierra](#macos-sierra)
-  - [El Capitan](#macos-el-capitan)
-  - [Yosemite](#macos-yosemite)
+The stick needs two things: the `EFI` folder you just built, and macOS itself.
+There are two ways to get the second, and they lead to different sticks.
 
-<br>
+| | | |
+|---|---|---|
+| **Recovery** | The program downloads it | About 700 MB. Boots, connects, and downloads the rest of macOS on the machine being converted. Needs a network card macOS already drives. Any 2 GB stick. |
+| **A ready image** | You download it from this page | 12 GB or so of `.raw`, written with balenaEtcher. Installs with no network at all. 16 GB stick or larger. |
 
-### Write macOS Image
-
-- Extract RAW file from ZIP to the desktop.
-- Download [balenaEtcher](https://www.balena.io/etcher/).
-- Open program and click to "Flash from file"
-- Select the OSX image `(.raw file)` from the popup window.
-- Click to "Select target" and select USB drive.
-- Click to "Flash!" and select allow in popup window.
-<p align="center">
-  <img src="https://user-images.githubusercontent.com/78423442/154849816-0a04602a-9064-4780-9d4e-ed86254b4fea.png"></p>
-
-- When you have finished writing, 'unplug' the USB stick and plug it back in again.
+Recovery is the shorter road and the one the program can do end to end; an
+image is the answer when the machine has no network macOS can use during the
+install, or when the connection is too slow to trust.
 
 <br>
 
-### Put the EFI on the USB drive
+#### With recovery - the program does all of it
 
-- When you plug-in USB back, you can see EFI partition in "My Computer"
-- Open EFI partition.
-- If you built one with the app, `EFIBuilderEngine.exe` or `tools/setup.py`, copy that
-  `EFI` folder there and you are done.
-- Otherwise go to `Releases` and take the two files:
-  - `EFI-base.zip` - the EFI folder itself, the same for every machine.
-  - `configs.zip` - one `config.plist` per supported machine.
-- Extract `EFI-base.zip`. You get an `EFI` folder.
-- Open `configs.zip` and find the entry matching your hardware. Example:
-  - my CPU is `i5-7200U`. It is `Kaby Lake Mobile (Laptop)` cpu, and the laptop is an HP.
-  - so I take `Laptop/HP/009 - Laptop - Kaby Lake.plist`.
-  - if there is no entry for your brand, take the plain one - `Laptop/009 - Laptop - Kaby Lake.plist`.
-- Copy that file into `EFI/OC/` and rename it to `config.plist`.
-- Copy the `EFI` folder to the EFI partition.
-- Now you can boot from USB.
-
-<br>
-
-#### With the recovery installer instead of an image
-
-If you took the recovery from the app's Recovery tab, there is no macOS image
-to write and the stick is a plain one. Format it as **GUID Partition Map** with
-a single **MS-DOS (FAT)** partition - on macOS that is Disk Utility with
-*View → Show All Devices*, selecting the drive itself rather than the volume
-under it, or:
-
-```
-diskutil list                                        # find the disk number
-diskutil eraseDisk MS-DOS USB GPT /dev/diskN         # N is that number
-```
-
-Then put both folders at the root of it, side by side:
+  - Open the **Recovery** pane, pick the macOS you want, and press download. The
+    top row asks for whatever Apple is serving today; the rows under it are
+    named releases. It saves `BaseSystem.dmg` and `BaseSystem.chunklist` into a
+    `com.apple.recovery.boot` folder.
+  - Open the **USB stick** pane. It lists the removable disks it can see and
+    says, for each, whether it is ready as it stands - FAT32 under GPT with room
+    - or has to be erased first. If it has to be, press format and type the
+    disk's name when it asks.
+  - Press copy. It puts both folders at the root of the stick, side by side:
 
 ```
 /Volumes/USB/
@@ -379,32 +419,54 @@ and the recovery folder is not inside it either - OpenCore looks for that name
 beside itself. Boot from the USB and the OpenCore picker lists **macOS Base
 System**; pick it, and the installer downloads the rest of macOS itself.
 
-A 2 GB stick is enough: the recovery is under a gigabyte and the EFI is about
-7 MB. The machine needs Ethernet or a Wi-Fi card macOS already drives while it
-installs, because that download happens on the machine being converted.
+The machine needs Ethernet, or a Wi-Fi card macOS already drives, while it
+installs - that download happens on the machine being converted, not on the one
+that made the stick.
 
 <br>
 
-One base folder serves every machine because OpenCore loads only what the
-config names. That is also why the download is about 7 MB instead of a gigabyte.
+#### With an image
+
+  - Take a `.raw` from [Download macOS Image](#download-macos-image) and extract
+    it from the zip.
+  - Download [balenaEtcher](https://www.balena.io/etcher/), click **Flash from
+    file** and choose the `.raw`, click **Select target** and choose the USB
+    drive, then **Flash!**.
+    <p align="center"><img src="https://user-images.githubusercontent.com/78423442/154849816-0a04602a-9064-4780-9d4e-ed86254b4fea.png"></p>
+  - When it finishes, unplug the stick and plug it back in. An `EFI` partition
+    appears in *My Computer*.
+  - Copy your `EFI` folder into that partition, replacing what is there. The
+    **USB stick** pane will do it if the partition shows up in its list;
+    otherwise drag it across yourself.
+
+Now you can boot from USB.
+
+<br>
 
 > [!IMPORTANT]
 > Each `config.plist` ships with a serial number, MLB and UUID of its own, but everyone who downloads the same file shares them, and `ROM` is a placeholder (`11:22:33:44:55:66`) because it has to be your own machine's MAC address. Generate your own with the [Post Installation](#post-installation) steps before signing in to iCloud, iMessage or FaceTime.
 
 <br>
 
-If you would rather build it yourself - to pick a different OpenCore version, or
-because your combination is not in the list - the repository generates these
-folders from a small set of profiles:
+### Download macOS Image
 
-```
-python3 tools/build.py --catalogue                 # list every published config
-python3 tools/build.py --name "Laptop/HP/009 - Laptop - Kaby Lake"
-python3 tools/build.py --platform laptop --cpu kaby-lake --oem hp
-```
+Whole installers, already written and ready for balenaEtcher, one per release.
+Each is a `.raw` inside a zip, and each has its own notes further down this
+page. Take one of these only if you are going the image route in
+[Make the USB stick](#make-the-usb-stick) - with recovery there is nothing to
+download here.
 
-It needs nothing but Python 3.11 and a clone - no downloads, no dependencies.
-See [tools/README.md](tools/README.md).
+- Go
+  - [Sonoma](#macos-sonoma)
+  - [Ventura](#macos-ventura)
+  - [Monterey](#macos-monterey)
+  - [Big Sur](#macos-big-sur)
+  - [Catalina](#macos-catalina)
+  - [Mojave](#macos-mojave)
+  - [High Sierra](#macos-high-sierra)
+  - [Sierra](#macos-sierra)
+  - [El Capitan](#macos-el-capitan)
+  - [Yosemite](#macos-yosemite)
 
 <br>
 
@@ -640,11 +702,121 @@ same release file does share it. If you want one nobody else has, generate it:
     `Board Serial` and `SmUUID` it produced, then reset NVRAM as above.
   - Now you can login iCloud, iMessage or other apple services and you can use macOS.
 
-### Adding a kext by hand
+### Without the window
+
+Everything above can be done without the window, and one of these is the answer
+if the app will not run on your system, if you are working over SSH, or if you
+would rather see the commands. They all produce the same EFI folder - the window
+runs the middle one of them and draws its output.
+
+<details>
+<summary><b>The terminal, the clone, and doing it by hand</b></summary>
+
+<br>
+
+#### The same builder in a terminal
+
+`HackintoshEFIBuilder-console-win-x64.zip` in [Releases](../../releases) is
+`EFIBuilderEngine.exe` on its own, for Windows. It carries everything inside it,
+same as the app, and asks the same questions in the same order:
+
+```
+EFIBuilderEngine.exe                        the builder
+EFIBuilderEngine.exe --check                just the hardware reading, then exit
+EFIBuilderEngine.exe --report machine.json  write this machine's report
+EFIBuilderEngine.exe --machine machine.json build for the machine in that file
+```
+
+Smart App Control blocks this one for exactly the same reason it blocks the app;
+see [When your system blocks it](#when-your-system-blocks-it).
+
+<br>
+
+#### From a clone
+
+Needs Python 3.11 and nothing else - no packages to install, no network. Works
+on Windows, Linux and macOS.
+
+```
+python3 tools/setup.py                        the builder
+python3 tools/setup.py --check                just the hardware reading
+python3 tools/setup.py --machine machine.json build for another machine
+python3 tools/detect.py --report machine.json write this machine's report
+```
+
+The USB stick and the recovery download are their own tools, and the panes in
+the app are these:
+
+```
+python3 tools/recovery.py --list
+python3 tools/recovery.py --macos 12.7.6 --out /Volumes/USB
+
+python3 tools/stick.py --list
+python3 tools/stick.py --prepare disk4        erases it, and says so twice
+python3 tools/stick.py --place /Volumes/USB --efi build/EFI --recovery .
+```
+
+`--prepare` only ever lists removable, external disks, never the one the
+computer booted from, and asks for the disk by its own name before it starts.
+
+<br>
+
+#### Formatting the stick yourself
+
+A stick for the recovery route is a plain one: **GUID Partition Map** with a
+single **MS-DOS (FAT)** partition. On macOS that is Disk Utility with
+*View → Show All Devices*, selecting the drive itself rather than the volume
+under it, or:
+
+```
+diskutil list                                        # find the disk number
+diskutil eraseDisk MS-DOS USB GPT /dev/diskN         # N is that number
+```
+
+Then put `EFI/` and `com.apple.recovery.boot/` at the root of it, side by side,
+as in [Make the USB stick](#make-the-usb-stick).
+
+<br>
+
+#### No script at all
+
+`EFI-base.zip` and `configs.zip` in the same release are the manual route.
+
+- Extract `EFI-base.zip`. You get an `EFI` folder - the same one for every
+  machine, because OpenCore loads only what the config names. That is also why
+  it is about 7 MB rather than a gigabyte.
+- Open `configs.zip` and find the entry matching your hardware. Example:
+  - my CPU is `i5-7200U`. It is a `Kaby Lake Mobile (Laptop)` cpu, and the laptop is an HP.
+  - so I take `Laptop/HP/009 - Laptop - Kaby Lake.plist`.
+  - if there is no entry for your brand, take the plain one - `Laptop/009 - Laptop - Kaby Lake.plist`.
+- Copy that file into `EFI/OC/` and rename it to `config.plist`.
+- Copy the `EFI` folder to the EFI partition of the stick.
+
+Nothing detects anything on this route, so nothing is added for your network
+card - see *Adding a kext by hand* below.
+
+<br>
+
+#### Generating a config yourself
+
+To pick a different OpenCore version, or because your combination is not in the
+list, the repository generates these folders from a small set of profiles:
+
+```
+python3 tools/build.py --catalogue                 # list every published config
+python3 tools/build.py --name "Laptop/HP/009 - Laptop - Kaby Lake"
+python3 tools/build.py --platform laptop --cpu kaby-lake --oem hp
+```
+
+It needs nothing but Python 3.11 and a clone. See [tools/README.md](tools/README.md).
+
+<br>
+
+#### Adding a kext by hand
 
 The builder does this for you, and it knows 531 device ids and which kext
-drives each. This is the route if you are working from the release zips, or
-if you have hardware it does not cover.
+drives each. This is the route if you are working from the release zips, or if
+you have hardware it does not cover.
 
 Shut down, boot back into Windows, and:
   - Kexts for possible Network card models:
@@ -665,13 +837,10 @@ Shut down, boot back into Windows, and:
 
 <br>
 
+#### Finding your hardware yourself
 
-<br>
-
-### Finding your hardware yourself
-
-The builder reads all of this for you, so this section is only needed if you
-want to check a machine before starting - or before buying one.
+The builder reads all of this for you, so this is only needed if you want to
+check a machine before starting - or before buying one.
 
 - Download and install [AIDA64 Extreme](https://www.aida64.com/downloads).
 - Open `AIDA64 Extreme` and double click `Summary`
@@ -699,10 +868,10 @@ I took the screenshots from my current computer. According to this guide, here a
   - Network Devices: Dell Wireless 1820A Wi-Fi & BT , Realtek RTL8111/8168/8411 Ethernet
   - Touchpad: SynPS/2 Synaptics TouchPad
 
+</details>
+
 <br>
 
-
-<br>
 ### Working on this repository
 
 The configs are generated from a small set of profiles rather than stored, and
