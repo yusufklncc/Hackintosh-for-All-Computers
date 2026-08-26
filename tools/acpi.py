@@ -277,9 +277,15 @@ def clear_dump(into):
     stray = [f.name for f in into.iterdir()
              if f.is_file() and f.suffix.lower() not in DUMPED]
     if stray or any(f.is_dir() for f in into.iterdir()):
+        # SSDTTime's own tree, uppercased, is what a run before the ACPI/acpi
+        # collision was fixed left in here. Naming it saves somebody working
+        # out why LICENSE is in a folder of tables.
+        theirs = {'LICENSE', 'README.MD', 'SSDTTIME.PY'} & set(stray)
         return False, (f'{into} holds things a dump did not write '
-                       f'({", ".join(stray[:3]) or "a folder"}); '
-                       f'empty it yourself or point somewhere else')
+                       f'({", ".join(sorted(stray)[:3]) or "a folder"}); '
+                       + ('this looks like what an older build left here, so '
+                          'deleting the folder is safe. ' if theirs else '')
+                       + 'Empty it yourself or point somewhere else')
     for f in into.iterdir():
         f.unlink()
     return True, ''

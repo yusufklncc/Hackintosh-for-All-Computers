@@ -939,6 +939,14 @@ def the_windows_only_ways_this_broke():
         ok, said = acpimod.clear_dump(into)
         check('but not a folder holding anything else', not ok, said)
         check('and it says what stopped it', 'notes.md' in said, said)
+        # the folder somebody actually hit had SSDTTime's own tree in it,
+        # uppercased, left by a build from before the ACPI/acpi collision was
+        # fixed. Saying so beats leaving them to work out why LICENSE is there.
+        for name in ('LICENSE', 'README.MD', 'SSDTTIME.PY'):
+            (into / name).write_text('from an older build')
+        ok, said = acpimod.clear_dump(into)
+        check('and names an older build when that is what it looks like',
+              not ok and 'an older build left here' in said, said)
         check('missing is fine, there is nothing to clear',
               acpimod.clear_dump(Path(where) / 'nope')[0])
 
@@ -2698,6 +2706,14 @@ def what_it_looks_like_when_it_arrives():
     # first bundle this made carried NEXT-STEPS.txt and a .DS_Store
     check('it copies what belongs rather than deleting what does not',
           "item.suffix == '.dylib'" in bundler and 'left.append' in bundler)
+
+    # the last line of a menu was under the edge, and the scroller was asked
+    # to go to an end it had not measured yet
+    drawn = Path('gui/Views/BuilderView.axaml.cs').read_text()
+    check('the transcript scrolls after the layout, not before it',
+          'DispatcherPriority.Background' in drawn)
+    shape = Path('gui/Views/BuilderView.axaml').read_text()
+    check('and leaves room under the last line', 'Padding="16,12,16,24"' in shape)
 
     made = Path('.github/workflows/gui.yml').read_text()
     check('macOS packages as a .app', 'appbundle.py' in made)

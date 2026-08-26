@@ -200,7 +200,10 @@ public partial class BuilderView : UserControl
             line.Inlines!.Add(run);
         }
         Transcript.Children.Add(line);
-        Scroll.ScrollToEnd();
+        // after the layout, not before it. Called here the scroller is asked
+        // to go to an end it has not measured yet, so it stops short - and
+        // what stayed out of sight was the last row of a menu.
+        Dispatcher.UIThread.Post(Scroll.ScrollToEnd, DispatcherPriority.Background);
     }
 
     // ---- what it asked ---------------------------------------------------
