@@ -318,6 +318,11 @@ jobs:
             # the files are in, and the .app came back one level down
             (cd package && ditto -c -k --sequesterRsrc . \
               "../out/HackintoshEFIBuilder-${{ matrix.rid }}.zip")
+          elif [ "$RUNNER_OS" = "Windows" ]; then
+            # no zip on a Windows runner, and nothing in this package needs a
+            # symlink kept, so PowerShell's own archiver will do
+            powershell -NoProfile -Command \
+              "Compress-Archive -Path package\* -DestinationPath out/HackintoshEFIBuilder-${{ matrix.rid }}.zip -Force"
           else
             (cd package && zip -qry \
               "../out/HackintoshEFIBuilder-${{ matrix.rid }}.zip" .)
