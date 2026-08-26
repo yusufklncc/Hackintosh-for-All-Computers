@@ -2681,6 +2681,11 @@ def what_it_looks_like_when_it_arrives():
           'Name="Hackintosh EFI Builder"' in layout)
     window = Path('gui/Views/MainWindow.axaml').read_text()
     check('and the window has the icon on it', 'Assets/Icon/png' in window)
+    # the sidebar drew the same chip a second time, by hand, in Path data. Two
+    # drawings of one mark are one edit away from disagreeing, and the one
+    # nobody re-exports is the one that goes stale.
+    check('and the sidebar draws that file rather than redrawing the mark',
+          window.count('Assets/Icon/png') >= 2 and '<Path ' not in window)
 
     # the bundler
     bundler = Path('tools/appbundle.py').read_text()

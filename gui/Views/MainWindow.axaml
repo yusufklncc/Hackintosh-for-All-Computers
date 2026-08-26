@@ -17,10 +17,14 @@
       <DockPanel Margin="12,16">
         <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="10"
                     Margin="10,6,10,18">
-          <Path Width="26" Height="26" Stretch="Uniform"
-                Stroke="{DynamicResource Accent}" StrokeThickness="1.4"
-                Fill="Transparent"
-                Data="M4.5,4.5 H21.5 V21.5 H4.5 Z M9,1.8 V4.5 M13,1.8 V4.5 M17,1.8 V4.5 M9,21.5 V24.2 M13,21.5 V24.2 M17,21.5 V24.2 M1.8,9 H4.5 M1.8,13 H4.5 M1.8,17 H4.5 M21.5,9 H24.2 M21.5,13 H24.2 M21.5,17 H24.2" />
+          <!-- The application's own icon, not a second drawing of it. The
+               glyph that stood here was the same chip redrawn by hand, and
+               two drawings of one mark drift apart the moment either is
+               touched. Scaled down from 256, so it stays sharp on a display
+               that renders this at twice the size. -->
+          <Image Width="26" Height="26"
+                 RenderOptions.BitmapInterpolationMode="HighQuality"
+                 Source="avares://HackintoshEFIBuilder/Assets/Icon/png/icon-256.png" />
           <StackPanel>
             <TextBlock Text="EFI Builder" FontSize="14" FontWeight="SemiBold"
                        Foreground="{DynamicResource Ink}" />
