@@ -73,9 +73,9 @@ jobs:
             # own asset rather than doubling the size of the folder zip
             for one in "$made"/*.AppImage; do
               [ -e "$one" ] || continue
-              mv "$one" "dist/HackintoshEFIBuilder-$system.AppImage"
-              chmod +x "dist/HackintoshEFIBuilder-$system.AppImage"
-              echo "  $system  AppImage $(du -h "dist/HackintoshEFIBuilder-$system.AppImage" | cut -f1)"
+              mv "$one" "../dist/HackintoshEFIBuilder-$system.AppImage"
+              chmod +x "../dist/HackintoshEFIBuilder-$system.AppImage"
+              echo "  $system  AppImage $(du -h "../dist/HackintoshEFIBuilder-$system.AppImage" | cut -f1)"
             done
             (cd "$made" && zip -qr "../../dist/HackintoshEFIBuilder-$system.zip" .)
             echo "  $system  $(du -sh "$made" | cut -f1)"
