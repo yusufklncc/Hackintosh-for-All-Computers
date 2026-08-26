@@ -786,7 +786,7 @@ def ssdt_flow():
     check('the tables are dumped when none were handed in',
           'acpi.dump(' in flow and 'if not tables:' in flow)
     check('and the menu run uses the same ones',
-          "acpi.run(Path(a.out).parent / 'acpi', tables," in flow)
+          "acpi.run(Path(a.out).parent / 'ssdt-menus', tables," in flow)
     # the menus used to be refused under a front end, because the tool reads
     # its own input and there was no terminal to read from. It has one input
     # function and this passes a replacement into it.
@@ -926,6 +926,11 @@ def the_two_windows_only_ways_this_broke():
     flow = Path('tools/setup.py').read_text()
     check('the dump and the working copy have names that cannot collide',
           "'ssdt-work'" in flow and "/ 'ACPI'" in flow)
+    # every call, not only the first: the one behind "open the menus" was
+    # missed, so answering yes got the refusal and carried on as though no
+    check('and no call still uses the colliding name',
+          "parent / 'acpi'" not in flow,
+          [l for l in flow.splitlines() if "parent / 'acpi'" in l])
 
 
 def acpi_tables():
@@ -2332,6 +2337,26 @@ def the_stick_it_writes_to():
     check('and names what it booted from, or says it could not',
           'booted' in document)
     check('and whether it can erase here at all', 'erasable' in document)
+    # an empty list used to mean two things: no stick, or a command that failed.
+    # On Windows it meant the second - a PowerShell flag from a version Windows
+    # does not ship - and the pane said nothing at all.
+    check('it says whether it could ask, not only what it found',
+          document['asked'] is True and document['trouble'] == '',
+          (document['asked'], document['trouble']))
+    pane = Path('gui/Views/StickView.axaml.cs').read_text()
+    check('and the window tells the two apart',
+          'That is not' in pane and 'list.Asked' in pane)
+
+    # the Windows listing has to work on the PowerShell Windows ships
+    source = Path('tools/stick.py').read_text()
+    check('nothing asks PowerShell 7 for something 5.1 cannot do',
+          'ConvertTo-Json -InputObject' in source
+          and '-AsArray")' not in source)
+    check('and one disk is read as a list of one',
+          'isinstance(listed, dict)' in source)
+    # and lsblk has to work on an older util-linux than this one
+    check('the Linux listing falls back when a column is too new',
+          'LSBLK_PLAIN' in source and 'LSBLK_FULL' in source)
     check('the recovery folder is the one OpenCore looks for',
           document['recovery'] == 'com.apple.recovery.boot')
 

@@ -176,10 +176,20 @@ def _macos_mounts(device):
     return [v['mount'] for v in _macos_layout(device)[1] if v['mount']]
 
 
+# FSVER, FSSIZE and FSAVAIL are newer than lsblk itself: asking for them on an
+# older util-linux fails the whole command, and a stick list that came back
+# empty because of a column name is indistinguishable from no stick at all.
+LSBLK_FULL = ('NAME,SIZE,RM,TRAN,MODEL,TYPE,MOUNTPOINT,FSTYPE,FSVER,FSSIZE,'
+              'FSAVAIL,PTTYPE,LABEL')
+LSBLK_PLAIN = 'NAME,SIZE,RM,TRAN,MODEL,TYPE,MOUNTPOINT,FSTYPE,PTTYPE,LABEL'
+
+
 def _linux_sticks():
-    got = _run('lsblk', '-J', '-b', '-o',
-               'NAME,SIZE,RM,TRAN,MODEL,TYPE,MOUNTPOINT,FSTYPE,FSVER,FSSIZE,'
-               'FSAVAIL,PTTYPE,LABEL')
+    got = _run('lsblk', '-J', '-b', '-o', LSBLK_FULL)
+    if not got or got.returncode != 0:
+        # without the size columns the verdict has less to go on, which is
+        # better than no list
+        got = _run('lsblk', '-J', '-b', '-o', LSBLK_PLAIN)
     if not got or got.returncode != 0:
         return []
     try:
@@ -220,7 +230,7 @@ def _linux_sticks():
 
 
 def _windows_sticks():
-    script = ("Get-Disk | Where-Object BusType -eq 'USB' | "
+    script = ("$disks = @(Get-Disk | Where-Object BusType -eq 'USB' | "
               "ForEach-Object { $d = $_; "
               "$v = @(Get-Partition -DiskNumber $d.Number -ErrorAction SilentlyContinue "
               "| Where-Object DriveLetter | ForEach-Object { "
@@ -233,7 +243,12 @@ def _windows_sticks():
               "[pscustomobject]@{ device = \"$($d.Number)\"; "
               "name = $d.FriendlyName; bytes = $d.Size; bus = 'USB'; "
               "scheme = \"$($d.PartitionStyle)\"; "
-              "volumes = $v } } | ConvertTo-Json -Depth 4 -AsArray")
+              "volumes = $v } }); "
+              # @() because one disk serialises as an object and two as a list,
+              # and -AsArray is PowerShell 7 while Windows ships 5.1 - asking
+              # for it there fails the whole command and the list comes back
+              # empty with nothing said
+              "ConvertTo-Json -InputObject @($disks) -Depth 4")
     got = _run('powershell', '-NoProfile', '-Command', script)
     if not got or got.returncode != 0:
         return []
@@ -241,6 +256,8 @@ def _windows_sticks():
         listed = json.loads(got.stdout or '[]')
     except json.JSONDecodeError:
         return []
+    if isinstance(listed, dict):        # one disk, not a list of one
+        listed = [listed]
     out = []
     for disk in listed:
         volumes = [{'name': v.get('name') or '', 'fs': (v.get('fs') or '').lower(),
@@ -453,15 +470,43 @@ def _said(done):
     return f'it exited {done.returncode}'
 
 
+def asked():
+    """Whether the thing that lists disks here answered at all.
+
+    An empty list means no removable disk. It used to also mean the command
+    failed - a PowerShell flag that only exists in a version Windows does not
+    ship - and those are not the same thing to tell somebody."""
+    if sys.platform == 'darwin':
+        got = _run('diskutil', 'list', '-plist')
+        return (got is not None and got.returncode == 0,
+                'diskutil did not answer')
+    if sys.platform.startswith('linux'):
+        got = _run('lsblk', '-J', '-b', '-o', LSBLK_FULL)
+        if not got or got.returncode != 0:
+            got = _run('lsblk', '-J', '-b', '-o', LSBLK_PLAIN)
+        return (got is not None and got.returncode == 0,
+                'lsblk did not answer')
+    if sys.platform.startswith('win'):
+        got = _run('powershell', '-NoProfile', '-Command',
+                   'ConvertTo-Json -InputObject @(Get-Disk | Select-Object Number)')
+        return (got is not None and got.returncode == 0,
+                'Get-Disk did not answer; it needs the Storage module')
+    return False, f'nothing here lists disks on {sys.platform}'
+
+
 def document():
     """The list as a front end reads it, with what it is allowed to do.
 
     `erasable` is not a guess about permissions: it is what prepare() would do
     on this system, so a window can grey a button out instead of offering one
     that always fails."""
+    answered, why = asked()
     return {
         't': 'sticks',
         'platform': sys.platform,
+        # so that "none plugged in" and "could not ask" read differently
+        'asked': answered,
+        'trouble': '' if answered else why,
         'booted': _booted_from(),
         'erasable': sys.platform == 'darwin',
         'recovery': RECOVERY,

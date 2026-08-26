@@ -82,14 +82,16 @@ public partial class StickView : UserControl
         // one they do not have to erase
         var ready = list.Sticks.FindIndex(s => s.Ready);
         Which.SelectedIndex = list.Sticks.Count == 0 ? -1 : ready >= 0 ? ready : 0;
-        Found.Text = list.Sticks.Count switch
+        Found.Text = (list.Asked, list.Sticks.Count) switch
         {
-            0 => "No removable disk is plugged in. This only ever lists removable, "
-               + "external, physical disks, and never the one this computer booted "
-               + $"from{(list.Booted is { } b ? $" ({b})" : "")}.",
-            1 => "One, and it is not the disk this computer booted from.",
-            var n => $"{n} of them. The disk this computer booted from is not among "
-                   + "them and cannot be.",
+            (false, _) => $"Nothing here could ask: {list.Trouble}. That is not "
+                        + "the same as no stick being plugged in.",
+            (_, 0) => "No removable disk is plugged in. This only ever lists "
+               + "removable, external, physical disks, and never the one this "
+               + $"computer booted from{(list.Booted is { } b ? $" ({b})" : "")}.",
+            (_, 1) => "One, and it is not the disk this computer booted from.",
+            (_, var n) => $"{n} of them. The disk this computer booted from is not "
+                   + "among them and cannot be.",
         };
         Describe();
     }

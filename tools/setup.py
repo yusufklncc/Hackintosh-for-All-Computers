@@ -338,7 +338,12 @@ def run_ssdts(a, where):
         # already coming through as text, so a front end only needs to answer -
         # and it answers the same way it answers everything else. This used to
         # send people to the console for this one step.
-        more, complaint = acpi.run(Path(a.out).parent / 'acpi', tables,
+        # a name of its own, for the reason the first one has one: 'acpi' and
+        # the 'ACPI' the tables were dumped to are one directory on Windows,
+        # and the working copy is emptied before it is filled. This one was
+        # missed when the first was renamed, so answering "yes, open the menus"
+        # got the refusal and carried on as though the answer had been no.
+        more, complaint = acpi.run(Path(a.out).parent / 'ssdt-menus', tables,
                                    ask=tool_answer if UI.protocol else None)
         if more:
             got = more
@@ -904,7 +909,7 @@ def main():
     # machine's tables anywhere, which is the only place it means anything.
     if SCRIPTING and a.acpi_tables and acpi.available():
         print(f'\n{BOLD}ACPI{RESET}')
-        got, complaint = acpi.run(Path(a.out).parent / 'acpi', a.acpi_tables,
+        got, complaint = acpi.run(Path(a.out).parent / 'ssdt-work', a.acpi_tables,
                                   unattended=True)
         if got:
             aml, add, patches = acpi.collect(got)

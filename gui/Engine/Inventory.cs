@@ -141,6 +141,9 @@ public sealed class StickList
     [JsonPropertyName("platform")] public string Platform { get; set; } = "";
     [JsonPropertyName("booted")] public string? Booted { get; set; }
     [JsonPropertyName("erasable")] public bool Erasable { get; set; }
+    // an empty list is "none plugged in"; this is "could not ask"
+    [JsonPropertyName("asked")] public bool Asked { get; set; }
+    [JsonPropertyName("trouble")] public string Trouble { get; set; } = "";
     [JsonPropertyName("recovery")] public string Recovery { get; set; } = "";
     [JsonPropertyName("sticks")] public List<Stick> Sticks { get; set; } = new();
 }
