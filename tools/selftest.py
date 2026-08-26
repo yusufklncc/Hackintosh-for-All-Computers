@@ -100,7 +100,7 @@ def boot_args():
         r = run([sys.executable, 'tools/setup.py',
                  '--machine', 'tools/fixtures/no-hardware.json',
                  '--hda-ids', '10ec:0255',
-                 '--answers', '2,10,3', '--out', str(out)])
+                 '--answers', '2,10,3,9', '--out', str(out)])
         check('the guided build succeeds', r.returncode == 0)
         if r.returncode != 0:
             return
@@ -225,7 +225,7 @@ def other_machine():
 
         # named by hand, because nothing about that machine can be detected
         out = Path(tmp) / 'EFI'
-        r = run([sys.executable, 'tools/setup.py', '--answers', '3,2,10,3,1,3,1,1',
+        r = run([sys.executable, 'tools/setup.py', '--answers', '3,2,10,3,9,1,3,1,1',
                  '--out', str(out)])
         check('naming the hardware of another machine builds', r.returncode == 0)
         if r.returncode == 0:
@@ -273,9 +273,9 @@ def scripted_answers():
         without = Path(tmp) / 'without' / 'EFI'
         a = run([sys.executable, 'tools/setup.py', '--machine', fixture,
                  '--nvme', 'Samsung SSD 970 EVO',
-                 '--answers', '2,10,3,3', '--out', str(with_drive)])
+                 '--answers', '2,10,3,9,3', '--out', str(with_drive)])
         b = run([sys.executable, 'tools/setup.py', '--machine', fixture,
-                 '--answers', '2,10,3,3', '--out', str(without)])
+                 '--answers', '2,10,3,9,3', '--out', str(without)])
         check('the same answers build with the extra question', a.returncode == 0)
         check('and without it, the spare answer being harmless', b.returncode == 0)
         if a.returncode == 0:
@@ -283,7 +283,7 @@ def scripted_answers():
                   not (with_drive / 'OC' / 'Kexts' / 'NVMeFix.kext').exists())
         short = run([sys.executable, 'tools/setup.py', '--machine', fixture,
                      '--nvme', 'Samsung SSD 970 EVO',
-                     '--answers', '2,10,3', '--out', str(Path(tmp) / 'short' / 'EFI')],
+                     '--answers', '2,10,3,9', '--out', str(Path(tmp) / 'short' / 'EFI')],
                     may_fail=True)
         check('running out of answers says so instead of reading a closed stdin',
               short.returncode != 0 and 'ran out' in (short.stdout + short.stderr),
@@ -1101,8 +1101,9 @@ def load_order():
         out = Path(tmp) / 'EFI'
         r = run([sys.executable, 'tools/setup.py',
                  '--machine', 'tools/fixtures/thinkpad-e570.json',
-                 '--answers', '1,1,1', '--out', str(out)])
-        check('a build with kexts added succeeds', r.returncode == 0)
+                 '--answers', '1,9,1,1', '--out', str(out)])
+        check('a build with kexts added succeeds', r.returncode == 0,
+              (r.stdout or r.stderr)[-200:])
         if r.returncode == 0:
             cfg = ocgen.load_plist(out / 'OC' / 'config.plist')
             problems = kextorder.check(cfg['Kernel']['Add'], deps)
@@ -1316,14 +1317,15 @@ def front_end_protocol():
         console = Path(tmp) / 'console' / 'EFI'
         front = Path(tmp) / 'front' / 'EFI'
         typed = run([sys.executable, 'tools/setup.py', '--no-detect',
-                     '--answers', '2,10,3', '--out', str(console)])
+                     '--answers', '2,10,3,9', '--out', str(console)])
         check('the console still builds', typed.returncode == 0)
 
         # answered by name rather than by number, which is the point of the
         # event: a front end draws the rows and never has to count them
         want = {'What kind of machine is this?': 'laptop',
                 'Which CPU generation?': 'kaby-lake',
-                'Board or laptop brand?': 'hp'}
+                'Board or laptop brand?': 'hp',
+                'Which macOS are you installing?': 22}
         proc = subprocess.Popen(
             [sys.executable, 'tools/setup.py', '--no-detect', '--protocol',
              '--out', str(front)],
@@ -1354,7 +1356,9 @@ def front_end_protocol():
 
         check('it says what it is before anything else', events[:1] == ['hello'], events[:1])
         check('and how it ended, last', events[-1] == 'done', events[-1])
-        check('the front end was asked the same three questions', len(asked) == 3, asked)
+        check('the front end was asked the same four questions', len(asked) == 4, asked)
+        check('and one of them was which macOS',
+              'Which macOS are you installing?' in asked, asked)
         check('it built', rc == 0 and proc.returncode == 0, rc)
         check('and said where', built and Path(built).exists(), built)
 
@@ -2272,29 +2276,44 @@ def the_stick_it_writes_to():
     for case, ready, says in (
         ({'scheme': 'GUID_partition_scheme',
           'volumes': [{'fs': 'msdos', 'called': 'MS-DOS FAT32',
-                       'mount': '/Volumes/USB'}]}, True, 'GPT'),
+                       'free': 4 << 30, 'mount': '/Volumes/USB'}]}, True, 'GPT'),
         ({'scheme': 'FDisk_partition_scheme',
           'volumes': [{'fs': 'msdos', 'called': 'MS-DOS FAT32',
-                       'mount': '/Volumes/USB'}]}, True, 'GPT'),
+                       'free': 4 << 30, 'mount': '/Volumes/USB'}]}, True, 'GPT'),
         ({'scheme': 'GUID_partition_scheme',
-          'volumes': [{'fs': 'apfs', 'called': 'APFS',
+          'volumes': [{'fs': 'apfs', 'called': 'APFS', 'free': 4 << 30,
                        'mount': '/Volumes/Mac'}]}, False, 'APFS'),
         ({'scheme': 'GUID_partition_scheme',
-          'volumes': [{'fs': 'exfat', 'called': 'ExFAT',
+          'volumes': [{'fs': 'exfat', 'called': 'ExFAT', 'free': 4 << 30,
                        'mount': '/Volumes/X'}]}, False, 'ExFAT'),
         ({'scheme': 'GUID_partition_scheme',
           'volumes': [{'fs': 'msdos', 'called': 'MS-DOS FAT32',
-                       'mount': ''}]}, False, 'not mounted'),
+                       'free': 4 << 30, 'mount': ''}]}, False, 'not mounted'),
         ({'scheme': '', 'volumes': []}, False, 'FAT32'),
+        # a stick Rufus has been near: a 1 MB FAT12 helper beside an exFAT
+        # partition. Calling that ready sent an installer at 26 KB of room.
+        ({'scheme': 'GUID_partition_scheme',
+          'volumes': [{'fs': 'exfat', 'called': 'ExFAT', 'free': 58 << 30,
+                       'mount': '/Volumes/ssad'},
+                      {'fs': 'msdos', 'called': 'MS-DOS FAT12', 'free': 26624,
+                       'mount': '/Volumes/RUFUS_BOOT'}]}, False, 'FAT12'),
+        # and FAT32 with no room on it
+        ({'scheme': 'GUID_partition_scheme',
+          'volumes': [{'fs': 'msdos', 'called': 'MS-DOS FAT32', 'name': 'FULL',
+                       'free': 40 << 20, 'mount': '/Volumes/FULL'}]},
+         False, '700 MB'),
     ):
         verdict, where, why = stick.verdict(case)
         check(f'{case["scheme"] or "no scheme"} + '
-              f'{case["volumes"][0]["called"] if case["volumes"] else "nothing"}'
+              f'{", ".join(v["called"] for v in case["volumes"]) or "nothing"}'
               f' -> {"ready" if ready else "format it"}',
               verdict is ready, why)
         check('  and it says why in those words', says in why, why)
         check('  ready means it names where to write',
               bool(where) is ready, where)
+    check('a pane that asks for a word says which word',
+          'Type {stick.Device} below' in
+          Path('gui/Views/StickView.axaml.cs').read_text())
 
     # naming a disk nobody was offered does not erase it. This is the check
     # that matters: the list is the gate, not the question in front of it.
@@ -2355,10 +2374,84 @@ def the_stick_it_writes_to():
         drawn = pane.read_text()
         check('which reads the list from the engine', 'Inventory.Sticks' in drawn)
         check('and asks for the disk by name before erasing',
-              'Typed.Text?.Trim() == s.Device' in drawn)
+              'typed == want' in drawn and 'Device ?? ""' in drawn)
     pass_ = Path('gui/App.axaml.cs').read_text()
     check('the unattended pass lists and erases nothing',
           'ListSticks' in pass_ and 'usb-prepare' not in pass_)
+
+
+def the_mac_a_config_pretends_to_be():
+    """The identity's own ceiling, which the hardware knows nothing about.
+
+    A Kaby Lake laptop can run every macOS its graphics support, and the
+    install will still refuse if the config claims MacBookPro14,1 and the
+    release stopped serving that model. The machine page used to say this was
+    not recorded; it is now."""
+    import smbios
+    import summary
+
+    rows = smbios.table()
+    check('the identity table is here', len(rows) > 100, len(rows))
+    check('every row names a model and at least one board',
+          all(r['name'] and r['boards'] for r in rows))
+
+    # the list form is not the rare case, and a parser that reads only the
+    # scalar one drops those models without saying anything
+    many = [r for r in rows if len(r['boards']) > 1]
+    check('models with more than one board survived the parse', many,
+          [r['name'] for r in many][:4])
+    scalar = smbios.boards_in('SystemProductName: "X"\nBoardProduct: "Mac-1"\n')
+    listed = smbios.boards_in('BoardProduct:\n  - "Mac-1"\n  - "Mac-2"\n')
+    check('both spellings read', scalar == ['Mac-1'] and listed == ['Mac-1', 'Mac-2'],
+          (scalar, listed))
+
+    # every identity a profile can write has to be answerable, or the builder
+    # asks a question it cannot act on
+    unknown = []
+    for profile in sorted(Path('profiles/cpu').rglob('*.toml')):
+        identity = smbios.profile_identity(profile.read_text(encoding='utf-8'))
+        if identity and smbios.reach(identity)[0] is None:
+            unknown.append((profile.stem, identity))
+    check('every identity a profile claims is in the table', not unknown, unknown)
+
+    # the join itself, on the case that started this
+    version, said = smbios.reach('MacBookPro14,1')
+    check('MacBookPro14,1 is served up to Ventura', version == '13.7.8', said)
+    fits, _ = smbios.reaches('MacBookPro14,1', '26')
+    check('so Tahoe is past it', fits is False)
+    fits, _ = smbios.reaches('MacBookPro14,1', '13')
+    check('and Ventura is not', fits is True)
+    version, _ = smbios.reach('MacBookPro16,1')
+    check('an identity Apple keeps current says so rather than a number',
+          version == 'latest', version)
+    check('and it reaches whatever was asked for',
+          smbios.reaches('MacBookPro16,1', '26')[0] is True)
+    check('an identity nothing knows is not guessed at',
+          smbios.reach('MacBookPro99,9')[0] is None)
+
+    named = smbios.higher('26')
+    check('identities that do reach it can be named', named, len(named))
+    check('and MacBookPro14,1 is not among them',
+          'MacBookPro14,1' not in named)
+
+    # the builder asks, and asks once
+    source = Path('tools/setup.py').read_text()
+    check('the builder asks which macOS',
+          source.count("'Which macOS are you installing?'") == 1, 
+          source.count("'Which macOS are you installing?'"))
+    check('and uses that answer for the kexts rather than asking again',
+          'darwin = target if mode' in source)
+    check('and says what the identity reaches', 'smbios.reaches(' in source)
+
+    # a real Mac is judged by the same list, not by Apple\'s per-line one
+    facts = summary.genuine_mac({'system': 'Darwin',
+                                 'board_id': 'Mac-E1008331FDC96864'})
+    check('a Mac Apple keeps current has no ceiling to name',
+          facts['to'] is None and facts['current'], facts)
+    facts = summary.genuine_mac({'system': 'Darwin',
+                                 'board_id': 'Mac-B4831CEBD52A0C4C'})
+    check('and one that stopped says where',
+          facts['to'] and facts['to']['version'] == '13', facts)
 
 
 def the_tools_a_window_can_drive():
@@ -2534,6 +2627,7 @@ if __name__ == '__main__':
                     the_vendored_opencore,
                     the_tools_a_window_can_drive,
                     the_recovery_it_can_fetch,
+                    the_mac_a_config_pretends_to_be,
                     the_stick_it_writes_to,
                     what_oclp_restores, the_about_page,
                     what_the_readme_shows):

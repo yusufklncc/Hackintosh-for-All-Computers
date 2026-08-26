@@ -192,6 +192,13 @@ Then it asks:
       > 3
 ```
 
+One of the questions is which macOS you are installing, and it is not only
+about kexts: a config claims a Mac identity, and macOS decides what it will
+install from that rather than from your hardware. Ask for Tahoe on a config
+that claims `MacBookPro14,1` and the install stops without saying why, because
+Apple serves that model up to Ventura. The builder says so before you get
+there, and names the identities that are served the release you asked for.
+
 The first question matters because the USB stick is usually made on a computer
 that already works, not on the one being built for. See
 [Building for another machine](#building-for-another-machine).

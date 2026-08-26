@@ -694,13 +694,25 @@ def genuine_mac(hw):
     board = hw.get('board_id')
     if not board:
         return None
+    # The ceiling comes from macrecovery's board list, not from Apple's
+    # per-line device lists. Those say which machines a line is still served
+    # to, which is narrower than what a machine can run: MacBookPro16,1
+    # appears only under Big Sur there and plainly runs more than Big Sur.
+    import recovery
+    serves = recovery.served().get(board)
     found = mactable.window(board)
-    if not found:
-        # a Mac too new or too old for the lines Apple still serves
+    if not found and not serves:
+        # a Mac too new or too old for anything either list knows
         return {'board': board, 'from': None, 'to': None, 'listed': False}
-    floor, ceiling = found
-    return {'board': board, 'from': _by_version(floor), 'to': _by_version(ceiling),
-            'listed': True}
+    floor, ceiling = found if found else (None, None)
+    if serves == 'latest':
+        ceiling = None                      # still current: no ceiling to name
+    elif serves:
+        ceiling = serves.rsplit('.', 1)[0] if serves.startswith('10.') \
+            else serves.split('.')[0]
+    return {'board': board, 'from': _by_version(floor) if floor else None,
+            'to': _by_version(ceiling), 'listed': True,
+            'current': serves == 'latest'}
 
 
 def document(hw, source='this machine'):

@@ -34,31 +34,47 @@ jobs:
           # are the same on every runner. Detecting the runner instead makes the
           # answer string depend on whether it happens to have an NVMe drive.
           NONE='--machine tools/fixtures/no-hardware.json'
-          python3 tools/setup.py $NONE --answers 2,10,3 --out /tmp/laptop/EFI
-          python3 tools/setup.py $NONE --answers 1,2,2,3,6 --out /tmp/amd/EFI
+          python3 tools/setup.py $NONE --answers 2,10,3,9 --out /tmp/laptop/EFI
+          python3 tools/setup.py $NONE --answers 1,2,2,3,6,8 --out /tmp/amd/EFI
+
+          # the identity a config claims has a ceiling of its own. Asking for a
+          # macOS past it has to be said out loud: the install stops with no
+          # sign why, and the hardware is not what stopped it.
+          python3 tools/setup.py $NONE --answers 2,10,3,12 --out /tmp/toolate/EFI \
+            | tee /tmp/toolate.log
+          grep -q 'MacBookPro14,1' /tmp/toolate.log
+          grep -qi 'is past that' /tmp/toolate.log \
+            || { echo 'asking for Tahoe on a Ventura identity said nothing'; exit 1; }
+          grep -q 'MacBookPro16,1' /tmp/toolate.log \
+            || { echo 'it did not name an identity that is served it'; exit 1; }
+          # and one that fits says so without a warning
+          python3 tools/setup.py $NONE --answers 2,10,3,9 --out /tmp/intime/EFI \
+            | tee /tmp/intime.log
+          grep -q 'served up to Ventura' /tmp/intime.log
+          ! grep -qi 'is past that' /tmp/intime.log
           python3 tools/build.py --name 'Desktop/Intel/016 - Desktop - Raptor Lake' --out /tmp/named/EFI
           # a whole real machine, which is the only fixture the fast path and
           # the framebuffer menu can both be exercised from
           E570='--machine tools/fixtures/thinkpad-e570.json'
           # 1 takes the detected profile, 1 the recommended framebuffer, 1 the kexts
-          python3 tools/setup.py $E570 --answers 1,1,1 --out /tmp/fast/EFI
+          python3 tools/setup.py $E570 --answers 1,9,1,1 --out /tmp/fast/EFI
           test -d /tmp/fast/EFI/OC/Kexts/AirportBrcmFixup.kext
           test -d /tmp/fast/EFI/OC/Kexts/NVMeFix.kext
           # 2 answers the profile questions by hand instead
-          python3 tools/setup.py $E570 --answers 2,2,10,6,1,1 --out /tmp/byhand/EFI
+          python3 tools/setup.py $E570 --answers 2,2,10,6,9,1,1 --out /tmp/byhand/EFI
           # the last framebuffer option leaves the key out; the one before it is
           # the id that boots without acceleration
-          python3 tools/setup.py $E570 --answers 1,16,1 --out /tmp/fb-none/EFI
-          python3 tools/setup.py $E570 --answers 1,15,1 --out /tmp/fb-noaccel/EFI
+          python3 tools/setup.py $E570 --answers 1,9,16,1 --out /tmp/fb-none/EFI
+          python3 tools/setup.py $E570 --answers 1,9,15,1 --out /tmp/fb-noaccel/EFI
           # a processor whose iGPU a field report says does not accelerate: no
           # framebuffer section, no menu, and the profile's placeholder removed
           # an id in a supported generation that is not natively supported:
           # still supported, flagged as needing a faked device-id
           WSK='--machine tools/fixtures/whiskey-lake.json'
-          python3 tools/setup.py $WSK --answers 1,1,1 --out /tmp/whiskey/EFI
+          python3 tools/setup.py $WSK --answers 1,9,1,1 --out /tmp/whiskey/EFI
           python3 tools/summary.py $WSK | grep -q 'not natively'
           CML='--machine tools/fixtures/comet-lake-h.json'
-          python3 tools/setup.py $CML --answers 1,3 --out /tmp/field/EFI
+          python3 tools/setup.py $CML --answers 1,9,3 --out /tmp/field/EFI
           python3 - <<'CHECK'
           import plistlib
           d = plistlib.load(open('/tmp/field/EFI/OC/config.plist', 'rb'))
@@ -69,43 +85,43 @@ jobs:
       - name: Storage advice
         run: |
           NONE='--machine tools/fixtures/no-hardware.json'
-          python3 tools/setup.py $NONE --nvme 'Samsung SSD 970 EVO' --answers 2,10,3,1 --out /tmp/nvme/EFI
+          python3 tools/setup.py $NONE --nvme 'Samsung SSD 970 EVO' --answers 2,10,3,9,1 --out /tmp/nvme/EFI
           test -d /tmp/nvme/EFI/OC/Kexts/NVMeFix.kext
-          python3 tools/setup.py $NONE --nvme 'APPLE SSD AP0512'    --answers 2,10,3   --out /tmp/apple-nvme/EFI
+          python3 tools/setup.py $NONE --nvme 'APPLE SSD AP0512'    --answers 2,10,3,9 --out /tmp/apple-nvme/EFI
           test ! -d /tmp/apple-nvme/EFI/OC/Kexts/NVMeFix.kext
 
       - name: Network kexts, both modes and declining
         run: |
           IDS='--machine tools/fixtures/no-hardware.json --ids 8086:15b8 --usb-ids 8087:0029'
-          python3 tools/setup.py $IDS --answers 2,10,3,1    --out /tmp/net-all/EFI
-          python3 tools/setup.py $IDS --answers 2,10,3,2,10 --out /tmp/net-sonoma/EFI
-          python3 tools/setup.py $IDS --answers 2,10,3,3    --out /tmp/net-none/EFI
+          python3 tools/setup.py $IDS --answers 2,10,3,9,1    --out /tmp/net-all/EFI
+          python3 tools/setup.py $IDS --answers 2,10,3,9,2,10 --out /tmp/net-sonoma/EFI
+          python3 tools/setup.py $IDS --answers 2,10,3,9,3    --out /tmp/net-none/EFI
           test -d /tmp/net-all/EFI/OC/Kexts/IntelMausi.kext
           test ! -d /tmp/net-none/EFI/OC/Kexts/IntelMausi.kext
 
       - name: Wi-Fi resolves to one build, or to none
         run: |
           NONE='--machine tools/fixtures/no-hardware.json'
-          python3 tools/setup.py $NONE --ids 8086:2723 --answers 2,10,3,2,10 --out /tmp/wifi-sonoma/EFI
+          python3 tools/setup.py $NONE --ids 8086:2723 --answers 2,10,3,9,2,10 --out /tmp/wifi-sonoma/EFI
           test -d /tmp/wifi-sonoma/EFI/OC/Kexts/AirportItlwm.kext
-          python3 tools/setup.py $NONE --ids 8086:2723 --answers 2,10,3,2,11 --out /tmp/wifi-sequoia/EFI
+          python3 tools/setup.py $NONE --ids 8086:2723 --answers 2,10,3,9,2,11 --out /tmp/wifi-sequoia/EFI
           test ! -d /tmp/wifi-sequoia/EFI/OC/Kexts/AirportItlwm.kext
-          python3 tools/setup.py $NONE --ids 14e4:43a3 --answers 2,10,3,1 --out /tmp/wifi-brcm/EFI
+          python3 tools/setup.py $NONE --ids 14e4:43a3 --answers 2,10,3,9,1 --out /tmp/wifi-brcm/EFI
           test -d /tmp/wifi-brcm/EFI/OC/Kexts/AirportBrcmFixup.kext
           python3 tools/itlwm.py
 
       - name: Trackpad, framebuffer and a user-made USB map
         run: |
           NONE='--machine tools/fixtures/no-hardware.json'
-          python3 tools/setup.py $NONE --ids 8086:9d60 --answers 2,10,3,1 --out /tmp/i2c/EFI
+          python3 tools/setup.py $NONE --ids 8086:9d60 --answers 2,10,3,9,1 --out /tmp/i2c/EFI
           test -d /tmp/i2c/EFI/OC/Kexts/VoodooI2C.kext
           # Haswell and Broadwell put the controller on ACPI, with no PCI id
-          python3 tools/setup.py $NONE --acpi-ids INT33C2 --answers 2,7,3,1 --out /tmp/i2c-acpi/EFI
+          python3 tools/setup.py $NONE --acpi-ids INT33C2 --answers 2,7,3,9,1 --out /tmp/i2c-acpi/EFI
           test -d /tmp/i2c-acpi/EFI/OC/Kexts/VoodooI2C.kext
-          python3 tools/setup.py $NONE --ids 8086:5912 --answers 2,10,3   --out /tmp/fb/EFI
+          python3 tools/setup.py $NONE --ids 8086:5912 --answers 2,10,3,9 --out /tmp/fb/EFI
           cp -r EFI/OC/Kexts/UTBDefault.kext /tmp/UTBMap.kext
           python3 tools/setup.py $NONE --ids 8086:2723 --usb-map /tmp/UTBMap.kext \
-            --answers 2,10,3,2,10 --out /tmp/usbmap/EFI
+            --answers 2,10,3,9,2,10 --out /tmp/usbmap/EFI
           test -d /tmp/usbmap/EFI/OC/Kexts/UTBMap.kext
           test ! -d /tmp/usbmap/EFI/OC/Kexts/UTBDefault.kext
 
@@ -114,13 +130,13 @@ jobs:
           # a real round trip: this runner's own hardware, written out and read
           # back. The trailing 3 declines whatever it has, since that varies.
           python3 tools/detect.py --report /tmp/machine.json
-          python3 tools/setup.py --machine /tmp/machine.json --answers 2,10,3,3 \
+          python3 tools/setup.py --machine /tmp/machine.json --answers 2,10,3,9,3 \
             --out /tmp/from-report/EFI
           # menu route: 2 picks the report, then its path, then the usual answers
-          python3 tools/setup.py --answers 2,/tmp/machine.json,2,10,3,3 --out /tmp/menu-report/EFI
+          python3 tools/setup.py --answers 2,/tmp/machine.json,2,10,3,9,3 --out /tmp/menu-report/EFI
           # 3 is the other machine with no report: network hardware is named,
           # here Intel Ethernet, no Wi-Fi, Intel Bluetooth, for every macOS
-          python3 tools/setup.py --answers 3,2,10,3,1,3,1,1 --out /tmp/by-name/EFI
+          python3 tools/setup.py --answers 3,2,10,3,9,1,3,1,1 --out /tmp/by-name/EFI
           test -d /tmp/by-name/EFI/OC/Kexts/IntelMausi.kext
           test -d /tmp/by-name/EFI/OC/Kexts/IntelBluetoothFirmware.kext
           test ! -d /tmp/by-name/EFI/OC/Kexts/AirportItlwm.kext
@@ -197,7 +213,7 @@ jobs:
         run: |
           NONE='--machine tools/fixtures/no-hardware.json'
           python3 tools/setup.py $NONE --acpi-tables tools/fixtures/acpi \
-            --answers 2,10,3 --out /tmp/autossdt/EFI
+            --answers 2,10,3,9 --out /tmp/autossdt/EFI
           ls /tmp/autossdt/EFI/OC/ACPI/
           test -f /tmp/autossdt/EFI/OC/ACPI/SSDT-EC.aml
           test -f /tmp/autossdt/EFI/OC/ACPI/SSDT-PLUG.aml
@@ -215,7 +231,7 @@ jobs:
           d['device_names']['8086:9d23'] = 'Synaptics SMBus Driver'
           json.dump(d, open('/tmp/smbus.json', 'w'))
           MAKE
-          python3 tools/setup.py --machine /tmp/smbus.json --answers 1,1,1,1 \
+          python3 tools/setup.py --machine /tmp/smbus.json --answers 1,9,1,1,1 \
             --out /tmp/smbus/EFI
           python3 - <<'CHECK'
           import plistlib

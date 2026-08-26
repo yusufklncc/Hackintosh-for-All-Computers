@@ -153,17 +153,20 @@ def _macos_layout(device):
         for part in disk.get('Partitions', []) or []:
             about = _run('diskutil', 'info', '-plist',
                          f"/dev/{part['DeviceIdentifier']}")
-            kind, named = '', ''
+            kind, named, size, free = '', '', 0, 0
             if about and about.returncode == 0:
                 try:
                     read = plistlib.loads(about.stdout.encode())
                     kind = read.get('FilesystemType') or ''
                     named = read.get('FilesystemName') or ''
+                    size = read.get('VolumeSize') or read.get('Size') or 0
+                    free = read.get('FreeSpace') or 0
                 except Exception:                  # noqa: BLE001
                     pass
             volumes.append({
                 'name': part.get('VolumeName') or '',
                 'fs': kind, 'called': named,
+                'bytes': int(size or 0), 'free': int(free or 0),
                 'mount': part.get('MountPoint') or '',
             })
     return scheme, volumes
@@ -175,7 +178,8 @@ def _macos_mounts(device):
 
 def _linux_sticks():
     got = _run('lsblk', '-J', '-b', '-o',
-               'NAME,SIZE,RM,TRAN,MODEL,TYPE,MOUNTPOINT,FSTYPE,PTTYPE,LABEL')
+               'NAME,SIZE,RM,TRAN,MODEL,TYPE,MOUNTPOINT,FSTYPE,FSVER,FSSIZE,'
+               'FSAVAIL,PTTYPE,LABEL')
     if not got or got.returncode != 0:
         return []
     try:
@@ -189,14 +193,19 @@ def _linux_sticks():
         removable = bool(disk.get('rm')) or disk.get('tran') == 'usb'
         if not removable:
             continue
-        volumes = [{'name': p.get('label') or '', 'fs': p.get('fstype') or '',
-                    'called': p.get('fstype') or '',
+        def _vol(p):
+            # FSVER is FAT12/FAT16/FAT32 where FSTYPE is only ever "vfat", and
+            # the difference is the whole answer: a 1 MB FAT12 helper is not a
+            # partition an installer fits on
+            return {'name': p.get('label') or '', 'fs': p.get('fstype') or '',
+                    'called': p.get('fsver') or p.get('fstype') or '',
+                    'bytes': int(p.get('fssize') or 0),
+                    'free': int(p.get('fsavail') or 0),
                     'mount': p.get('mountpoint') or ''}
-                   for p in disk.get('children', []) or []]
+
+        volumes = [_vol(p) for p in disk.get('children', []) or []]
         if not volumes and disk.get('fstype'):     # formatted with no table
-            volumes = [{'name': disk.get('label') or '', 'fs': disk['fstype'],
-                        'called': disk['fstype'],
-                        'mount': disk.get('mountpoint') or ''}]
+            volumes = [_vol(disk)]
         out.append({
             'device': disk['name'],
             'name': (disk.get('model') or '').strip() or 'unnamed',
@@ -219,6 +228,7 @@ def _windows_sticks():
               "-ErrorAction SilentlyContinue; "
               "[pscustomobject]@{ name = $vol.FileSystemLabel; "
               "fs = $vol.FileSystem; called = $vol.FileSystem; "
+              "bytes = $vol.Size; free = $vol.SizeRemaining; "
               "mount = \"$($_.DriveLetter):\\\" } }); "
               "[pscustomobject]@{ device = \"$($d.Number)\"; "
               "name = $d.FriendlyName; bytes = $d.Size; bus = 'USB'; "
@@ -234,7 +244,10 @@ def _windows_sticks():
     out = []
     for disk in listed:
         volumes = [{'name': v.get('name') or '', 'fs': (v.get('fs') or '').lower(),
-                    'called': v.get('called') or '', 'mount': v.get('mount') or ''}
+                    'called': v.get('called') or '',
+                    'bytes': int(v.get('bytes') or 0),
+                    'free': int(v.get('free') or 0),
+                    'mount': v.get('mount') or ''}
                    for v in (disk.get('volumes') or [])]
         out.append({
             'device': str(disk.get('device')),
@@ -255,6 +268,10 @@ FAT = {'msdos', 'vfat', 'fat32', 'fat'}
 # and the scheme the guide expects. A FAT32 stick under MBR boots on most
 # firmware, so this is a remark rather than a refusal.
 GPT = {'guid_partition_scheme', 'gpt'}
+# What has to fit: a recovery is about 700 MB and an EFI about 10. Below this
+# there is no point offering to copy, and saying so beats a copy that stops
+# halfway through a 900 MB image.
+ROOM = 1024 * 1024 * 1024
 
 
 def verdict(stick):
@@ -262,27 +279,51 @@ def verdict(stick):
 
     The question people actually have is "do I need to format this?", and the
     answer is not "it is a USB stick". A stick out of a camera is FAT32 under
-    MBR; one out of a Mac is APFS under GPT; a new one is exFAT. Only the first
-    can be copied to without erasing anything."""
-    fat = [v for v in stick.get('volumes', [])
-           if (v.get('fs') or '').lower() in FAT]
+    MBR; one out of a Mac is APFS under GPT; one Rufus has been near has a 1 MB
+    FAT12 helper partition beside an exFAT one, and calling that ready sends an
+    installer at a partition with 26 KB free."""
     gpt = (stick.get('scheme') or '').lower() in GPT
+    volumes = stick.get('volumes', [])
     named = ', '.join(sorted({(v.get('called') or v.get('fs') or 'unformatted')
-                              for v in stick.get('volumes', [])})) or 'nothing'
+                              for v in volumes})) or 'nothing'
 
+    fat = [v for v in volumes if (v.get('fs') or '').lower() in FAT]
+    # FAT12 and FAT16 are FAT, and neither is what OpenCore wants or big
+    # enough to matter. Where the filesystem's own name says which, believe it.
+    wide = [v for v in fat if 'FAT12' not in (v.get('called') or '').upper()
+            and 'FAT16' not in (v.get('called') or '').upper()]
     if not fat:
         return False, '', (f'this holds {named}, and OpenCore boots from a FAT32 '
                            f'partition. It has to be erased and formatted first.')
-    mounted = [v for v in fat if v.get('mount')]
+    if not wide:
+        small = ', '.join(sorted({v.get('called') or 'FAT' for v in fat}))
+        return False, '', (f'the only FAT partition on it is {small} - a helper '
+                           f'partition, not one an EFI and an installer fit on. '
+                           f'It has to be erased and formatted first.')
+
+    mounted = [v for v in wide if v.get('mount')]
     if not mounted:
         return False, '', ('the FAT32 partition on it is not mounted, so there is '
                            'nowhere to copy to. Mount it, or format the stick.')
-    where = mounted[0]['mount']
+    # the roomiest, because a stick can carry more than one and the small one
+    # is never the one meant
+    best = max(mounted, key=lambda v: v.get('free') or 0)
+    where = best['mount']
+    room = best.get('free') or 0
+    beside = (f" It is one of {len(volumes)} partitions on the stick."
+              if len(volumes) > 1 else '')
+
+    if room < ROOM:
+        return False, '', (f'{best["name"] or where} is FAT32 but has '
+                           f'{_sizeof(room)} free, and a recovery installer is '
+                           f'about 700 MB.{beside} Erase the stick, or clear it.')
     if gpt:
-        return True, where, 'FAT32 under GPT: ready as it is, nothing to erase.'
-    return True, where, (f"FAT32, so this can be written to - though the "
-                         f"partition scheme is {stick.get('scheme') or 'unknown'} "
-                         f"rather than GPT, which is what the guide expects.")
+        return True, where, (f'FAT32 under GPT with {_sizeof(room)} free: ready as '
+                             f'it is, nothing to erase.{beside}')
+    return True, where, (f"FAT32 with {_sizeof(room)} free, so this can be written "
+                         f"to - though the partition scheme is "
+                         f"{stick.get('scheme') or 'unknown'} rather than GPT, "
+                         f"which is what the guide expects.{beside}")
 
 
 def sticks():

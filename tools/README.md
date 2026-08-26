@@ -231,6 +231,49 @@ upstream document states it. The other leaves the key out entirely, which means
 that behind and call it a choice. `null` in a `--device-props` file is how that
 is expressed.
 
+## The Mac a config pretends to be
+
+A config claims an identity - `SystemProductName`, `MacBookPro14,1` - and macOS
+decides what it will install from that, not from the hardware. A Kaby Lake
+laptop whose graphics, audio and network are all supported will still be
+refused Sequoia if the identity stopped being served at Ventura, and the
+install gives no sign why.
+
+    python3 tools/smbios.py --refresh     # network; rewrites data/smbios.toml
+    python3 tools/smbios.py               # every profile's identity and its reach
+    python3 tools/smbios.py --macos 26    # the identities that are served it
+
+Two tables joined. `data/smbios.toml` holds the board id behind each identity,
+from acidanthera's AppleModels database - the same data OpenCore uses to fill
+the SMBIOS in. `boards.json`, already vendored with macrecovery, says the
+newest macOS each board is offered. A model can carry more than one board;
+iMac17,1 has three.
+
+What every published config claims, today:
+
+    High Sierra   MacBookPro6,1  MacBookPro8,2  iMac12,2
+    Catalina      MacBookPro10,2 iMac13,1
+    Big Sur       MacBookPro11,1 iMac14,4
+    Monterey      MacBookPro12,1 MacBookPro13,1 iMac16,2 iMac17,1 MacPro6,1
+    Ventura       MacBookPro14,1 iMac18,1
+    Sequoia       MacBookAir9,1  MacBookPro15,1 iMacPro1,1
+    current       MacBookPro16,1 MacPro7,1      iMac20,1
+
+`MacPro6,1` is seven of the profiles and stops at Monterey, so this is not one
+machine's problem.
+
+The builder asks which macOS at the end of the profile questions and says what
+the identity reaches. It does not change the identity: a Kaby Lake laptop
+claiming to be a 2019 machine has consequences for power management and
+graphics, and that is a decision, not a fix.
+
+**Not from Apple's device-management metadata.** `gdmf.apple.com/v2/pmv` lists,
+per macOS line, the machines that line is still served to, which is narrower
+than what a machine runs - MacBookPro16,1 appears only under Big Sur there and
+plainly runs more than Big Sur. Reading it as a ceiling is a mistake this
+repository made and corrected: `genuine_mac()` told real Macs the wrong thing
+until it was moved onto the same board list.
+
 ## The oldest and newest macOS a machine can run
 
 Each part that bounds macOS contributes a window, and the machine's range is
@@ -1015,7 +1058,7 @@ workflow rather than repeating it, so what gets published is the build that was
 tested. Either way it has to produce an EFI from its own bundle before the run
 is allowed to pass.
 
-`--answers 2,10,3` replays a menu run non-interactively, alongside
+`--answers 2,10,3,9` replays a menu run non-interactively, alongside
 `--machine tools/fixtures/no-hardware.json`. That is what CI uses,
 on both platforms, instead of piping keystrokes.
 

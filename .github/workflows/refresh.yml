@@ -29,6 +29,9 @@ jobs:
           python3 tools/audiotable.py --out data/audio.toml
           python3 tools/fbtable.py --out data/framebuffer.toml
           python3 tools/cardtable.py --out data/cardreader.toml
+          # new Macs appear in this one, and every identity a config claims is
+          # measured against it
+          python3 tools/smbios.py --refresh
           python3 tools/thirdparty.py --refresh
           python3 tools/thirdparty.py --fetch
 
@@ -65,7 +68,7 @@ jobs:
           chmod +x vendor/opencore/*/Utilities/*/*.linux
           python3 tools/selftest.py
           python3 tools/setup.py --machine tools/fixtures/no-hardware.json \
-            --hda-ids 10ec:0255 --answers 2,10,3 --out /tmp/refresh/EFI
+            --hda-ids 10ec:0255 --answers 2,10,3,9 --out /tmp/refresh/EFI
 
       - name: Open a pull request
         if: steps.diff.outputs.changed == 'yes'
