@@ -195,6 +195,7 @@ jobs:
           -r ${{ matrix.rid }} --self-contained true
           -p:PublishTrimmed=true -p:PublishSingleFile=true
           -p:EnableCompressionInSingleFile=true
+          -p:DebugType=none -p:DebugSymbols=false
 
       # The window looks for the engine beside itself first and falls back to a
       # clone. On this runner a clone is right there, so the check is not that
@@ -203,41 +204,45 @@ jobs:
         if: ${{ !matrix.cross }}
         shell: bash
         run: |
-          cd package
-          ${{ runner.os == 'Linux' && 'xvfb-run -a -s "-screen 0 1400x1000x24" ' || '' }}./${{ matrix.shell_exe }} \
+          # from a scratch directory, not from inside the package: a build
+          # writes its EFI, its ACPI tables and its NEXT-STEPS into the working
+          # directory, and all of that used to land among the two programs
+          mkdir -p scratch && cd scratch
+          ${{ runner.os == 'Linux' && 'xvfb-run -a -s "-screen 0 1400x1000x24" ' || '' }}../package/${{ matrix.shell_exe }} \
             --machine ../tools/fixtures/thinkpad-e570.json --render "$PWD/shot.png" \
             | tee render.log
           grep -q 'engine: beside this window' render.log \
             || { echo 'it did not use the packaged engine'; cat render.log; exit 1; }
           test -s shot.png || { echo 'it drew nothing'; exit 1; }
-          rm -f render.log shot*.png machine.json described.json
 
       - name: How long reading a machine takes here
         if: ${{ !matrix.cross }}
         shell: bash
         run: |
-          cd package
+          mkdir -p scratch && cd scratch
           start=$(date +%s)
-          ./EFIBuilderEngine/${{ matrix.engine_exe }} --describe > described.json
+          ../package/EFIBuilderEngine/${{ matrix.engine_exe }} --describe > described.json
           echo "### ${{ matrix.os }}" >> $GITHUB_STEP_SUMMARY
           echo "describe took $(( $(date +%s) - start ))s" >> $GITHUB_STEP_SUMMARY
           python -c "import json; d=json.load(open('described.json')); \
             print('rows', len(d['rows']), 'read', d['read'])" \
             >> $GITHUB_STEP_SUMMARY
-          rm -f described.json
 
-      # A package holds two programs and nothing else. Exercising it here wrote
-      # an EFI, a report and a NEXT-STEPS beside them, and all of that shipped:
-      # somebody unzipped the release and found notes about a machine that was
-      # not theirs. Keep what belongs, delete the rest, and say what went.
-      - name: Nothing a test run left behind
+      # A package holds two programs and nothing else. Exercising it here used
+      # to write an EFI, a report and a NEXT-STEPS beside them, and all of that
+      # shipped: somebody unzipped the release and found notes about a machine
+      # that was not theirs. The runs happen in a scratch directory now, so
+      # this is a check rather than a cleaner - anything it has to remove is a
+      # step writing where it should not, and it says so.
+      - name: Nothing but the two programs
         shell: bash
         run: |
           cd package
           for leftover in *; do
             case "$leftover" in
               ${{ matrix.shell_exe }}|EFIBuilderEngine) ;;
-              *) echo "  removing $leftover"; rm -rf "$leftover" ;;
+              *) echo "::warning::$leftover was left in the package by a build step"
+                 rm -rf "$leftover" ;;
             esac
           done
           ls -A | sort > /tmp/shipped
@@ -269,23 +274,29 @@ jobs:
             || { echo 'the bundle is not signed'; exit 1; }
           rm -rf package && mv package-app package
 
-      # Linux: the folder stays, with what a desktop needs to show it in a menu
-      - name: A .desktop entry, on Linux
+      # Linux: one file that runs wherever, which is the same promise the rest
+      # of this makes. The folder goes in the zip too, for anyone who would
+      # rather have it.
+      - name: An AppImage, on Linux
         if: runner.os == 'Linux'
         shell: bash
         run: |
-          cp gui/Assets/Icon/png/icon-256.png package/HackintoshEFIBuilder.png
-          cat > package/HackintoshEFIBuilder.desktop <<'ENTRY'
-          [Desktop Entry]
-          Type=Application
-          Name=Hackintosh EFI Builder
-          Comment=Build the OpenCore EFI folder this machine needs
-          Exec=HackintoshEFIBuilder
-          Icon=HackintoshEFIBuilder
-          Terminal=false
-          Categories=Utility;System;
-          ENTRY
-          test -s package/HackintoshEFIBuilder.desktop
+          sudo apt-get install -y desktop-file-utils zsync
+          curl -sSL -o /tmp/appimagetool \
+            https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage
+          chmod +x /tmp/appimagetool
+          sudo mv /tmp/appimagetool /usr/local/bin/appimagetool
+          python3 tools/appimage.py --from package --appdir /tmp/AppDir \
+            --out "package/Hackintosh EFI Builder.AppImage"
+          test -x "package/Hackintosh EFI Builder.AppImage"
+          # it has to start, and the only thing that proves that is starting it
+          xvfb-run -a -s "-screen 0 1400x1000x24" \
+            "package/Hackintosh EFI Builder.AppImage" --appimage-extract-and-run \
+            --machine tools/fixtures/thinkpad-e570.json --render /tmp/appimage.png \
+            > /tmp/appimage.log 2>&1 || true
+          grep -q 'engine: beside this window' /tmp/appimage.log \
+            || { echo 'the AppImage did not find its engine'; cat /tmp/appimage.log; exit 1; }
+          test -s /tmp/appimage.png || { echo 'the AppImage drew nothing'; exit 1; }
 
       - name: What it weighs
         shell: bash

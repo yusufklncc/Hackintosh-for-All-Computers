@@ -118,7 +118,7 @@ Each `HackintoshEFIBuilder-<system>.zip` holds two programs:
 |---|---|
 | macOS | `Hackintosh EFI Builder.app`, with the engine inside it |
 | Windows | `HackintoshEFIBuilder.exe` and `EFIBuilderEngine\` beside it |
-| Linux | the same two, plus a `.desktop` entry and an icon |
+| Linux | `Hackintosh EFI Builder.AppImage`, one file that runs anywhere, beside the two programs |
 
 On macOS the engine lives at `Contents/Resources/EFIBuilderEngine`: a .app that
 reads files next to itself stops working the moment somebody drags it to

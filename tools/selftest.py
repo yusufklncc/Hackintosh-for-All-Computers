@@ -2567,8 +2567,26 @@ def what_it_looks_like_when_it_arrives():
           all(x in made for x in ('CFBundleName', '.icns',
                                   'Resources/EFIBuilderEngine',
                                   'codesign --verify')))
-    check('Linux gets something a desktop can show',
-          '.desktop' in made and 'Icon=HackintoshEFIBuilder' in made)
+    check('Linux gets one file that runs wherever',
+          'appimage.py' in made and '.AppImage' in made)
+    check('and the AppImage is started rather than only built',
+          'the AppImage did not find its engine' in made)
+
+    packer = Path('tools/appimage.py').read_text()
+    check('the AppImage carries the engine beside the window',
+          f"binaries / ENGINE" in packer)
+    check('and writes what a menu needs',
+          'Desktop Entry' in packer and 'AppRun' in packer)
+    check('and keeps what belongs rather than deleting what does not',
+          "item.suffix == '.so'" in packer and 'left.append' in packer)
+
+    # the exercised build used to write its EFI and its notes among the two
+    # programs, because it ran with the package as its working directory
+    check('the runs happen somewhere else', 'mkdir -p scratch' in made)
+    check('and nothing publishes debug symbols beside the program',
+          'DebugType=none' in made)
+    check('so the keep-list is a check, not a cleaner',
+          '::warning::' in made)
 
 
 def the_tools_a_window_can_drive():
