@@ -878,6 +878,56 @@ def frozen_names():
           'except BaseException' in src)
 
 
+def the_two_windows_only_ways_this_broke():
+    """Both were invisible on the machine this is written on.
+
+    A window on Windows showed raw JSON in the middle of the ACPI step and then
+    skipped it: two separate faults, neither reachable from macOS or Linux."""
+    import acpi as acpimod
+    import shutil
+
+    # 1. the tool clears the screen by asking the shell to, and that process
+    # inherits stdout - which under a front end is the JSON protocol
+    source = Path('tools/acpi.py').read_text()
+    check('the screen-clearing is turned off before the tool runs',
+          'def quiet_screen' in source)
+    check('and both ways in go through it',
+          source.count('quiet_screen(module.SSDT())') == 2,
+          source.count('quiet_screen(module.SSDT())'))
+
+    class Pretend:
+        class u:
+            @staticmethod
+            def cls():
+                raise AssertionError('it cleared the screen')
+    acpimod.quiet_screen(Pretend)
+    Pretend.u.cls()          # no longer the one that raises
+
+    # 2. the working copy is emptied before it is filled, and "acpi" and
+    # "ACPI" are one directory on Windows and macOS. A dump of 22 tables
+    # became "no valid .aml files were found".
+    with tempfile.TemporaryDirectory() as where:
+        base = Path(where)
+        tables = base / 'ACPI'
+        tables.mkdir()
+        shutil.copy2('tools/fixtures/acpi/DSDT.aml', tables / 'DSDT.aml')
+        got, complaint = acpimod.run(base / 'acpi', str(tables),
+                                     unattended=True, outcomes=[])
+        if (base / 'acpi').exists() and os.path.samefile(base / 'acpi', tables):
+            check('a working copy that is the tables folder is refused',
+                  got is None and 'same folder' in complaint, complaint[:80])
+            check('and the tables are still there afterwards',
+                  (tables / 'DSDT.aml').exists())
+        else:
+            check('this filesystem tells the two names apart, so nothing to '
+                  'collide', True, 'case-sensitive here')
+
+    # and the builder does not name them so they can collide in the first place
+    flow = Path('tools/setup.py').read_text()
+    check('the dump and the working copy have names that cannot collide',
+          "'ssdt-work'" in flow and "/ 'ACPI'" in flow)
+
+
 def acpi_tables():
     """SSDTTime is driven, not reimplemented, so the wiring is what is checked."""
     import acpi
@@ -2757,7 +2807,8 @@ if __name__ == '__main__':
                     device_names, broadcom_wifi, detection_gaps, provenance,
                     framebuffers, native_device_ids, field_reports, load_order,
                     smbus_trackpad, macos_window, card_readers, third_party,
-                    usb_mapping, acpi_tables, unattended_ssdts, ssdt_flow, window_stays_open,
+                    usb_mapping, acpi_tables, the_two_windows_only_ways_this_broke,
+                    unattended_ssdts, ssdt_flow, window_stays_open,
                     frozen_names, frozen_build, workflow_flags,
                     runner_independence, tables_match_sources,
                     front_end_protocol, machine_document, machine_name,

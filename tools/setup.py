@@ -291,7 +291,7 @@ def run_ssdts(a, where):
     if not tables:
         into = Path(a.out).parent / 'ACPI'
         print(f'      {DIM}reading this machine\'s ACPI tables{RESET}')
-        dumped, complaint = acpi.dump(Path(a.out).parent / 'acpi-dump', into)
+        dumped, complaint = acpi.dump(Path(a.out).parent / 'ssdt-dumper', into)
         if not dumped:
             print(f'      {YELLOW}{complaint}{RESET}')
             return None
@@ -300,7 +300,9 @@ def run_ssdts(a, where):
               f'{dumped}{RESET}')
 
     outcomes = []
-    got, complaint = acpi.run(Path(a.out).parent / 'acpi', tables,
+    # not 'acpi': the tables are dumped to 'ACPI' beside it, and on a
+    # case-insensitive filesystem those are one directory
+    got, complaint = acpi.run(Path(a.out).parent / 'ssdt-work', tables,
                               unattended=True, outcomes=outcomes)
     if not got and not outcomes:
         print(f'      {YELLOW}{complaint}{RESET}')

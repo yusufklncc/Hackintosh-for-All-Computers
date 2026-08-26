@@ -106,6 +106,22 @@ def hash_note():
 
 
 
+def quiet_screen(ssdt):
+    """Stop the tool clearing the screen, which it does through the shell.
+
+    `cls()` runs `os.system("cls")` on Windows, and that spawns a process which
+    inherits this one's stdout. Under a front end stdout is the JSON protocol,
+    so the clear lands in the middle of it and the line it interrupts arrives
+    as text nobody can parse - which is what a window showed: raw JSON in the
+    transcript, in the middle of the ACPI step. There is nothing to clear when
+    the output is a pipe.
+
+    On Unix the tool already guards this with $TERM, which is why it only ever
+    happened on Windows."""
+    ssdt.u.cls = lambda *_args, **_kw: None
+    return ssdt
+
+
 def prepare(work):
     """Copy the tree and the compiler somewhere of ours, and return the copy."""
     work = Path(work)
@@ -184,11 +200,23 @@ def run(work, tables=None, unattended=False, outcomes=None, ask=None):
     if not ok:
         return None, detail
 
+    # prepare() empties the working copy before filling it. If that is the
+    # same directory the tables are in, the tables go with it - and on Windows
+    # and macOS "ACPI" and "acpi" are the same directory, which is how a dump
+    # of 22 tables became "no valid .aml files were found".
+    # samefile, not a string comparison: on a case-insensitive filesystem
+    # "acpi" and "ACPI" are one directory and two different strings, and
+    # comparing the strings is what let this through the first time
+    if (tables and Path(work).exists() and Path(tables).exists()
+            and os.path.samefile(work, tables)):
+        return None, (f'the working copy and the tables are the same folder '
+                      f'({work}); the working copy is emptied first, so this '
+                      f'would delete them')
     work = prepare(work)
     here = Path.cwd()
     outcomes = outcomes if outcomes is not None else []
     module = load(work)
-    ssdt = module.SSDT()
+    ssdt = quiet_screen(module.SSDT())
     if tables:
         # handing it the tables up front saves the person finding them again.
         # Loading them prompts too - "press enter" on a table it could not read,
@@ -240,7 +268,7 @@ def dump(work, into):
         return None, 'ACPI tables cannot be dumped from macOS'
     work = prepare(work)
     module = load(work)
-    ssdt = module.SSDT()
+    ssdt = quiet_screen(module.SSDT())
     # the dumper asks too - "press [enter]" on a table it could not read - and
     # a window has no stdin to answer with. run() covers its own prompts and
     # this one was left reading a closed pipe.
