@@ -79,10 +79,40 @@ public partial class RecoveryView : UserControl
         _folder = list.Folder;
         Which.ItemsSource = list.Choices;
         Which.SelectedIndex = 0;
+        SayNetwork(list);
         Provenance.Text = $"{list.Choices.Count} of them, read from macrecovery's own "
                         + "boards.json, which records the newest macOS Apple offers "
                         + "each board. The board is what the request is made with.";
     }
+
+    /// <summary>Whether the machine being installed can finish this at all.
+    ///
+    /// The engine reads it off the hardware report; this only draws it. A
+    /// verdict of "cable" is the one worth the space - Wi-Fi with no driver
+    /// and Ethernet with one is a common laptop, recovery works on it, and the
+    /// only thing missing is knowing to plug the cable in first.</summary>
+    void SayNetwork(RecoveryList list)
+    {
+        if (list.Network is not { Length: > 0 } verdict) return;
+        var (word, style) = verdict switch
+        {
+            "ready"   => ("This machine can download during the install", "ok"),
+            "cable"   => ("Use an Ethernet cable for the install", "warn"),
+            "no"      => ("Recovery cannot finish on this machine", "bad"),
+            _         => ("Not known for this machine", "warn"),
+        };
+        NetworkState.Text = word;
+        NetworkNote.Text = list.NetworkNote;
+        Network.Classes.Set("ok", style == "ok");
+        Network.Classes.Set("warn", style == "warn");
+        Network.Classes.Set("bad", style == "bad");
+        Network.IsVisible = true;
+        // a machine that cannot download is not stopped from fetching - the
+        // stick may be for a different computer than the one making it
+        _blocked = verdict == "no";
+    }
+
+    bool _blocked;
 
     /// <summary>What the pane says, for the screenshot pass.
     ///
@@ -96,7 +126,9 @@ public partial class RecoveryView : UserControl
         var named = choices?.Select(c => c.Titled).ToList() ?? new List<string>();
         return named.Count == 0
             ? $"no recoveries listed: {Provenance.Text}"
-            : $"{named.Count} recoveries, newest {named[0]}, into {_folder}";
+            : $"{named.Count} recoveries, newest {named[0]}, into {_folder}"
+              + $", network {(Network.IsVisible ? NetworkState.Text : "not said")}"
+              + $", marks {named.Count(_ => true)}";
     }
 
     async Task Pick()

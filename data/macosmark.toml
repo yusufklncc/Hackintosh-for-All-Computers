@@ -1,0 +1,100 @@
+# A mark for each macOS release, so a grid of them can be read at a glance.
+#
+# PROVENANCE: chosen, not derived, and not Apple's.
+#
+# Two colours and a letter per release, which the program draws itself. Apple's
+# release artwork is Apple's, and this repository redistributes nothing of
+# Apple's - the About pane says so and the guide's footer says so, and shipping
+# their wallpapers inside the binary would make both untrue. So each release
+# gets a mark of our own: a gradient in the colour that release is popularly
+# associated with. That association is somebody's judgement here, not a fact
+# read off anything, and it is recorded as chosen for that reason.
+#
+# The names join to data/macos.toml, which is the list of releases. This file
+# adds nothing to that list and must not become a second copy of it.
+#
+# A release with no row here is not an error. The offer list grows out of
+# macrecovery's board table the day Apple serves something new, so anything
+# missing falls back to a hue derived from its own name - a new macOS gets a
+# mark without anybody editing this file, and the grid cannot arrive with a
+# hole in it. What this file adds is recognition, not correctness.
+
+[[mark]]
+name = "Tahoe"
+letter = "T"
+from = "#1f6feb"
+to = "#8957e5"
+
+[[mark]]
+name = "Sequoia"
+letter = "S"
+from = "#0b3d91"
+to = "#2f6fd0"
+
+[[mark]]
+name = "Sonoma"
+letter = "S"
+from = "#1f7a4d"
+to = "#5bbf7a"
+
+[[mark]]
+name = "Ventura"
+letter = "V"
+from = "#b5432a"
+to = "#e8894a"
+
+[[mark]]
+name = "Monterey"
+letter = "M"
+from = "#3b3a97"
+to = "#7d6bd0"
+
+[[mark]]
+name = "Big Sur"
+letter = "B"
+from = "#146b8c"
+to = "#3fb6c9"
+
+[[mark]]
+name = "Catalina"
+letter = "C"
+from = "#1b4f96"
+to = "#4b8fd6"
+
+[[mark]]
+name = "Mojave"
+letter = "M"
+from = "#4a2b6b"
+to = "#8a5fa8"
+
+[[mark]]
+name = "High Sierra"
+letter = "H"
+from = "#2a4a6b"
+to = "#5f88ab"
+
+[[mark]]
+name = "Sierra"
+letter = "S"
+from = "#334a5e"
+to = "#6b8296"
+
+[[mark]]
+name = "El Capitan"
+letter = "E"
+from = "#1f3a63"
+to = "#4a6d9c"
+
+[[mark]]
+name = "Yosemite"
+letter = "Y"
+from = "#2b4a7a"
+to = "#5b7fae"
+
+# The row with no version. It asks Apple for whatever is being served today, so
+# it is not a release and does not borrow a release's colour - it takes the
+# program's own accent, the one the navigation already uses.
+[latest]
+letter = "?"
+from = "#3e3ba8"
+to = "#6f6ad6"

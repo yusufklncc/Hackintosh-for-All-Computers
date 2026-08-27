@@ -23,6 +23,7 @@ import importlib.util
 import json
 import os
 import sys
+import textwrap
 import time
 from contextlib import redirect_stdout
 from pathlib import Path
@@ -31,7 +32,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import ocgen
 import ui
 
-BOLD, DIM, GREEN, YELLOW, RESET = ui.colours('bold', 'dim', 'green', 'yellow', 'reset')
+BOLD, DIM, GREEN, YELLOW, RED, RESET = ui.colours('bold', 'dim', 'green', 'yellow', 'red', 'reset')
 
 VENDOR = Path('vendor/opencore')
 FOLDER = 'com.apple.recovery.boot'
@@ -59,6 +60,136 @@ def _names():
     if not RELEASES.exists():
         return {}
     return {r['version']: r['name'] for r in ocgen.read_toml(RELEASES)['release']}
+
+
+MARKS = Path('data/macosmark.toml')
+
+
+def _marks():
+    """The per-release colours, if the table is there."""
+    try:
+        import ocgen
+        return ocgen.read_toml(MARKS)
+    except Exception:
+        return {}
+
+
+def mark(name):
+    """A letter and two colours for a release, by name.
+
+    Drawn rather than fetched: Apple's release artwork is Apple's, and nothing
+    of Apple's is redistributed here. See data/macos.toml.
+
+    A release the table has never heard of still gets a mark - the hue comes
+    from the name itself. The list of releases grows out of macrecovery's board
+    table the day Apple serves something new, so a table that had to be edited
+    first would put a hole in the grid every time that happened."""
+    table = _marks()
+    if not name:
+        latest = table.get('latest') or {}
+        return {'letter': latest.get('letter', '?'),
+                'from': latest.get('from', '#3e3ba8'),
+                'to': latest.get('to', '#6f6ad6'),
+                'source': 'chosen' if latest else 'fallback'}
+    for row in table.get('mark') or []:
+        if row.get('name', '').lower() == name.lower():
+            return {'letter': row.get('letter') or name[0].upper(),
+                    'from': row['from'], 'to': row['to'], 'source': 'chosen'}
+
+    # derived: a stable hue off the name, so the same release is the same
+    # colour on every machine and in every run
+    import colorsys
+    import hashlib
+    hue = int(hashlib.sha256(name.encode()).hexdigest()[:8], 16) % 360
+
+    def at(light, sat):
+        r, g, b = colorsys.hls_to_rgb(hue / 360, light, sat)
+        return '#%02x%02x%02x' % (round(r * 255), round(g * 255), round(b * 255))
+
+    return {'letter': name[0].upper(), 'from': at(0.30, 0.55),
+            'to': at(0.58, 0.50), 'source': 'derived'}
+
+
+def carries(hw):
+    """Can this machine finish a recovery install, and on what.
+
+    Recovery is 700 MB that boots and then downloads the rest of macOS **on
+    the machine being converted**. So the question is not whether the computer
+    making the stick has a connection - it is whether the target has a card
+    macOS drives, at install time, before anything has been configured.
+
+    Nothing asked this before. The pane said "it boots, connects, and downloads
+    the rest" and left the reader to work out that a Realtek Wi-Fi card makes
+    that sentence false, which is the shape of more than one issue in this
+    repository: the stick gets made, the BIOS gets set, the installer boots,
+    and only there does it turn out there was never going to be a network.
+
+    Returns (verdict, sentence). The verdict is one of:
+
+      'ready'    a card macOS drives is there; recovery can complete
+      'cable'    Wi-Fi is not driven but Ethernet is - it works, on a cable
+      'no'       neither is driven; recovery boots and cannot download
+      'unknown'  no report to read, so this declines to guess
+
+    The 'cable' case is the one worth spelling out. A laptop with a Realtek
+    Wi-Fi card and a Realtek Ethernet chip is extremely common, recovery works
+    perfectly on it, and the only thing standing between the person and a
+    finished install is knowing to plug a cable in first."""
+    import summary
+
+    if not hw:
+        return 'unknown', ('No hardware report, so nothing here knows whether '
+                           'the machine being installed has a network card '
+                           'macOS drives. Recovery downloads macOS on that '
+                           'machine; if it cannot reach the network, it boots '
+                           'and stops.')
+
+    # three states per role, not two. "No Ethernet port on this laptop" and
+    # "an Ethernet chip nothing here drives" lead to the same verdict and want
+    # different sentences, and collapsing them produces "no Ethernet macOS can
+    # drive" about a machine that has no Ethernet at all.
+    def state(part):
+        seen = [r for r in summary.network_rows(hw) or []
+                if r.get('part') == part]
+        if not seen:
+            return 'absent'
+        if any(r.get('verdict') in (summary.SUPPORTED, summary.DRIVEN)
+               for r in seen):
+            return 'driven'
+        if all(r.get('verdict') == summary.ABSENT for r in seen):
+            return 'absent'
+        if any(r.get('verdict') == summary.UNSUPPORTED for r in seen):
+            return 'unsupported'
+        return 'unknown'
+
+    wifi, wired = state('Wi-Fi'), state('Ethernet')
+
+    if wifi == 'driven':
+        return 'ready', ('Wi-Fi on this machine has a macOS driver, so recovery '
+                         'can connect and download during the install.')
+    if wired == 'driven':
+        # the case this function exists for: extremely common, works perfectly,
+        # and fails for everybody who did not know to plug a cable in
+        said = {'unsupported': 'The Wi-Fi card in this machine has no macOS driver here',
+                'absent': 'This machine has no Wi-Fi card',
+                'unknown': 'Nothing here recognises the Wi-Fi in this machine'}[wifi]
+        return 'cable', (f'{said}, but its Ethernet is driven. Recovery will '
+                         'work - plug in an Ethernet cable before you start '
+                         'the install. The download happens on this machine, '
+                         'and Wi-Fi will not be there to carry it.')
+    if 'unsupported' in (wifi, wired):
+        return 'no', ('Neither the Wi-Fi nor the Ethernet in this machine has '
+                      'a macOS driver here. Recovery would boot and then have '
+                      'nothing to download over: use a whole macOS image '
+                      'instead, or fit a card that is supported.')
+    if wifi == wired == 'absent':
+        return 'no', ('No network card was found on this machine at all. '
+                      'Recovery downloads macOS during the install and cannot '
+                      'do it without one: use a whole macOS image instead.')
+    return 'unknown', ('Nothing here recognised the network hardware in this '
+                       'machine, so whether recovery can download during the '
+                       'install is not something this can answer. It needs a '
+                       'card macOS drives, on the machine being installed.')
 
 
 def served(tool=None):
@@ -123,6 +254,10 @@ def choices(tool=None):
             # the tool uses when nobody names one.
             'board': sorted(ids)[0],
             'boards': len(ids),
+            # drawn by the front end, decided here: a window and a terminal
+            # colouring the same release differently is the same failure as
+            # wording the same row differently
+            'mark': mark(name if named else ''),
         })
     # newest first, and the one with no number is newer than all of them
     out.sort(reverse=True, key=lambda c: [int(n) for n in c['version'].split('.')]
@@ -286,6 +421,36 @@ def describe(choice, files):
     return f"{choice['label']}, {len(files)} files, {total:.0f} MB"
 
 
+def _say_network(report):
+    """The verdict on the machine being installed, on a console.
+
+    Same sentence as the window draws, from the same function: two surfaces
+    that disagree about whether a machine can finish an install are worse than
+    one that says nothing."""
+    hw = None
+    if report:
+        try:
+            import detect
+            hw = detect.read_report(report)
+        except Exception:
+            hw = None
+    else:
+        try:
+            import detect
+            hw = detect.probe()
+        except Exception:
+            hw = None
+    verdict, said = carries(hw)
+    colour = {'ready': GREEN, 'cable': YELLOW, 'no': RED}.get(verdict, DIM)
+    lead = {'ready': 'This machine can download during the install',
+            'cable': 'Use an Ethernet cable for the install',
+            'no': 'Recovery cannot finish on this machine'}.get(
+                verdict, 'Not known for this machine')
+    print(f'\n  {colour}{lead}{RESET}')
+    for line in textwrap.wrap(said, 72):
+        print(f'  {DIM}{line}{RESET}')
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -294,6 +459,10 @@ def main(argv=None):
     ap.add_argument('--macos', help='a version or a name, as --list prints them')
     ap.add_argument('--out', default='.',
                     help='the drive to write to; the folder goes at its root')
+    ap.add_argument('--machine', metavar='FILE',
+                    help='a hardware report for the machine being installed, '
+                         'so this can say whether recovery can reach the '
+                         'network there')
     a = ap.parse_args(argv)
 
     tool = vendored()
@@ -312,6 +481,7 @@ def main(argv=None):
               f"during the install.{RESET}")
         print(f"{DIM}  Read from macrecovery's own boards.json. Ask for one by "
               f"version, by name,\n  or 'latest'.{RESET}")
+        _say_network(a.machine)
         return 0
 
     choice = find(a.macos, tool)
@@ -328,6 +498,7 @@ def main(argv=None):
               f'somebody may be part way through{RESET}')
         return 1
 
+    _say_network(a.machine)
     print(f"{BOLD}Fetching {choice['label']} from Apple{RESET}")
     print(f"{DIM}  board {choice['board']}, serial {NO_SERIAL}, into "
           f"{Path(a.out) / FOLDER}{RESET}")

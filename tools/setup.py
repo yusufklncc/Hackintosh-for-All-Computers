@@ -605,7 +605,14 @@ def main():
 
     if a.inventory:
         import json as _json
-        document = inventory.DOCUMENTS[a.inventory]()
+        # the recovery document asks whether the machine can reach the network
+        # during the install, and the machine in question is the one being
+        # built for - which is the report when there is one, not this computer
+        if a.inventory == 'recovery':
+            carried = load_machine(a.machine) if a.machine else None
+            document = inventory.recoveries(carried)
+        else:
+            document = inventory.DOCUMENTS[a.inventory]()
         sys.stdout.write(_json.dumps(document, ensure_ascii=False) + '\n')
         return 0
 

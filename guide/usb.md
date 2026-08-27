@@ -46,8 +46,17 @@ and the installer downloads the rest of macOS itself.
 
 !!! warning "The download happens on the machine being converted"
     Not on the one that made the stick. That machine needs Ethernet, or a Wi-Fi
-    card macOS already drives, while it installs. If your Wi-Fi is not one of
-    them, plug in a cable for the install.
+    card macOS already drives, while it installs.
+
+    **The Recovery pane now says which of these you are**, before you download
+    anything, reading it off the hardware report:
+
+    | What it says | What it means |
+    |---|---|
+    | *This machine can download during the install* | Wi-Fi has a macOS driver. Nothing else to do. |
+    | *Use an Ethernet cable for the install* | Your Wi-Fi has no macOS driver, but your Ethernet does. Recovery works — plug a cable in before you start. This is the common case on laptops with Realtek Wi-Fi. |
+    | *Recovery cannot finish on this machine* | Neither card is driven. Use [a whole image](images.md) instead, or fit a supported card. |
+    | *Not known for this machine* | No report to read. It will not guess.  |
 
 ## With an image
 

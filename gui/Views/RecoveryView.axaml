@@ -5,7 +5,7 @@
              x:Class="Shell.Views.RecoveryView"
              x:DataType="v:RecoveryView">
   <ScrollViewer>
-    <StackPanel Margin="28,24" Spacing="20" MaxWidth="760" HorizontalAlignment="Left">
+    <StackPanel Margin="28,24" Spacing="20" MaxWidth="824" HorizontalAlignment="Left">
       <StackPanel Spacing="8">
         <TextBlock Classes="eyebrow" Text="RECOVERY INSTALLER" />
         <TextBlock FontSize="15" TextWrapping="Wrap" Foreground="{DynamicResource Ink}"
@@ -16,26 +16,47 @@
 
       <Border Classes="panel">
         <StackPanel Spacing="14">
-          <StackPanel Spacing="6">
+          <StackPanel Spacing="10">
             <TextBlock Classes="eyebrow" Text="WHICH MACOS" />
-            <ComboBox Name="Which" HorizontalAlignment="Stretch"
-                      x:DataType="e:RecoveryChoice">
-              <ComboBox.ItemTemplate>
+            <!-- A grid, not a drop-down. Eight releases is a set to look over,
+                 not a field to fill in, and a closed ComboBox showed one of
+                 them. The mark on each tile is drawn from data/macosmark.toml:
+                 Apple's own artwork is Apple's, and nothing of theirs is
+                 redistributed here. -->
+            <ListBox Name="Which" Classes="tiles" SelectionMode="Single"
+                     Background="Transparent" BorderThickness="0" Padding="0"
+                     x:DataType="e:RecoveryChoice">
+              <ListBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                  <WrapPanel Orientation="Horizontal" />
+                </ItemsPanelTemplate>
+              </ListBox.ItemsPanel>
+              <ListBox.ItemTemplate>
                 <DataTemplate x:DataType="e:RecoveryChoice">
-                  <Grid ColumnDefinitions="210,*,Auto" ColumnSpacing="10">
-                    <TextBlock Grid.Column="0" Text="{Binding Titled}" />
-                    <TextBlock Grid.Column="1" Text="{Binding Board}"
-                               Classes="mono" Foreground="{DynamicResource Faint}"
-                               VerticalAlignment="Center" />
-                    <!-- the board's ceiling, not the image that arrives. The
-                         note under the box says which is which. -->
-                    <TextBlock Grid.Column="2" Text="{Binding Version}"
-                               Classes="mono" Foreground="{DynamicResource Faint}"
-                               VerticalAlignment="Center" />
+                  <!-- wide enough, and wrapping rather than trimming: the
+                       first row is called "Whatever Apple serves now" and an
+                       ellipsis in the middle of it says nothing -->
+                  <Grid ColumnDefinitions="Auto,*" ColumnSpacing="11"
+                        Width="228" Height="44" Margin="0,2">
+                    <Border Grid.Column="0" Width="42" Height="42"
+                            CornerRadius="10" Background="{Binding Tile}">
+                      <TextBlock Text="{Binding Letter}" FontSize="19"
+                                 FontWeight="SemiBold" Foreground="#FFFFFF"
+                                 HorizontalAlignment="Center"
+                                 VerticalAlignment="Center" />
+                    </Border>
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="1">
+                      <TextBlock Text="{Binding Titled}" FontSize="14"
+                                 FontWeight="SemiBold" TextWrapping="Wrap"
+                                 MaxLines="2" LineHeight="17"
+                                 Foreground="{DynamicResource Ink}" />
+                      <TextBlock Text="{Binding Version}" Classes="mono"
+                                 FontSize="11.5" Foreground="{DynamicResource Faint}" />
+                    </StackPanel>
                   </Grid>
                 </DataTemplate>
-              </ComboBox.ItemTemplate>
-            </ComboBox>
+              </ListBox.ItemTemplate>
+            </ListBox>
             <TextBlock Name="Chosen" FontSize="12.5" TextWrapping="Wrap"
                        Foreground="{DynamicResource Muted}" IsVisible="False" />
             <TextBlock Name="Provenance" FontSize="12" TextWrapping="Wrap"
@@ -51,6 +72,20 @@
           </Grid>
           <TextBlock Name="Target" FontSize="12.5" TextWrapping="Wrap"
                      Foreground="{DynamicResource Faint}" />
+
+          <!-- Recovery downloads macOS on the machine being installed, so
+               whether that machine has a card macOS drives decides whether any
+               of this can finish. It was never asked before the stick was
+               made. -->
+          <Border Name="Network" Classes="verdict" CornerRadius="8"
+                  Padding="12,10" IsVisible="False">
+            <StackPanel Spacing="3">
+              <TextBlock Name="NetworkState" Classes="state" FontSize="12.5"
+                         FontWeight="SemiBold" />
+              <TextBlock Name="NetworkNote" FontSize="12.5" TextWrapping="Wrap"
+                         Foreground="{DynamicResource Muted}" />
+            </StackPanel>
+          </Border>
 
           <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Left">
             <Button Name="Fetch" Content="Download it" Classes="accent" />

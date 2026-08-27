@@ -5,6 +5,8 @@
 using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Avalonia;
+using Avalonia.Media;
 using System.Threading.Tasks;
 
 namespace Shell.Engine;
@@ -103,10 +105,37 @@ public sealed class RecoveryChoice
     [JsonPropertyName("note")] public string Note { get; set; } = "";
     [JsonPropertyName("board")] public string Board { get; set; } = "";
     [JsonPropertyName("boards")] public int Boards { get; set; }
+    // drawn by this window, decided by the engine: two surfaces colouring the
+    // same release differently is the same failure as wording it differently
+    [JsonPropertyName("mark")] public RecoveryMark? Mark { get; set; }
+
+    public IBrush Tile => Mark is null
+        ? new SolidColorBrush(Color.Parse("#3e3ba8"))
+        : new LinearGradientBrush
+          {
+              StartPoint = new RelativePoint(0, 0, RelativeUnit.Relative),
+              EndPoint = new RelativePoint(1, 1, RelativeUnit.Relative),
+              GradientStops =
+              {
+                  new GradientStop(Color.Parse(Mark.From), 0),
+                  new GradientStop(Color.Parse(Mark.To), 1),
+              },
+          };
+    public string Letter => Mark?.Letter ?? "?";
 
     public string Titled => Label is { Length: > 0 } said ? said
                                                           : $"{Name} {Version}".Trim();
     public bool Explained => Note.Length > 0;
+}
+
+public sealed class RecoveryMark
+{
+    [JsonPropertyName("letter")] public string Letter { get; set; } = "?";
+    [JsonPropertyName("from")] public string From { get; set; } = "#3e3ba8";
+    [JsonPropertyName("to")] public string To { get; set; } = "#6f6ad6";
+    // "chosen" or "derived" - a release the table never heard of still gets a
+    // mark, and the About pane is where that distinction is spelled out
+    [JsonPropertyName("source")] public string Source { get; set; } = "";
 }
 
 public sealed class RecoveryList
@@ -114,6 +143,10 @@ public sealed class RecoveryList
     [JsonPropertyName("folder")] public string Folder { get; set; } = "";
     [JsonPropertyName("available")] public bool Available { get; set; }
     [JsonPropertyName("choices")] public List<RecoveryChoice> Choices { get; set; } = new();
+    // whether the machine being installed can reach the network at all, which
+    // is the question this pane never asked and several issues turned on
+    [JsonPropertyName("network")] public string Network { get; set; } = "";
+    [JsonPropertyName("network_note")] public string NetworkNote { get; set; } = "";
 }
 
 public sealed class Stick

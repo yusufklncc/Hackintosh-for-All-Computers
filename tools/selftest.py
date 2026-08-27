@@ -2666,6 +2666,135 @@ def the_stick_it_writes_to():
           'ListSticks' in pass_ and 'usb-prepare' not in pass_)
 
 
+def whether_recovery_can_land():
+    """Recovery downloads on the machine being installed, not on this one.
+
+    The pane said "it boots, connects, and downloads the rest" and never asked
+    whether the target had a card macOS drives. A Realtek Wi-Fi laptop makes
+    that sentence false, and the way it fails is expensive: the stick is made,
+    the BIOS is set, the installer boots, and only there is there no network.
+
+    The case worth the most is 'cable' - Wi-Fi with no driver and Ethernet with
+    one. Recovery works perfectly on that machine, and the only missing piece
+    is knowing to plug the cable in first."""
+    import recovery
+    import summary
+
+    def machine(wifi, ethernet):
+        """A report shaped only as far as network_rows reads it."""
+        rows = []
+        for part, state in (('Wi-Fi', wifi), ('Ethernet', ethernet)):
+            if state == 'absent':
+                continue
+            rows.append({'part': part, 'verdict':
+                         summary.SUPPORTED if state == 'driven'
+                         else summary.UNSUPPORTED})
+        was = summary.network_rows
+        summary.network_rows = lambda _hw, rows=rows: rows
+        try:
+            return recovery.carries({'anything': True})
+        finally:
+            summary.network_rows = was
+
+    verdict, said = machine('driven', 'driven')
+    check('a machine with driven Wi-Fi is ready', verdict == 'ready', verdict)
+
+    verdict, said = machine('unsupported', 'driven')
+    check('Wi-Fi with no driver and Ethernet with one asks for a cable',
+          verdict == 'cable', verdict)
+    check('and says so in the sentence, not only in the verdict',
+          'Ethernet cable' in said, said)
+    check('and says why: the download happens on that machine',
+          'happens on this machine' in said, said)
+
+    verdict, said = machine('absent', 'driven')
+    check('a machine with no Wi-Fi at all still gets the cable answer',
+          verdict == 'cable', verdict)
+    check('and is not told its Wi-Fi lacks a driver',
+          'no macOS driver' not in said, said)
+
+    verdict, _ = machine('unsupported', 'unsupported')
+    check('neither driven is a refusal', verdict == 'no', verdict)
+    verdict, _ = machine('absent', 'absent')
+    check('and so is no card at all', verdict == 'no', verdict)
+
+    verdict, said = recovery.carries(None)
+    check('with no report it declines rather than guesses',
+          verdict == 'unknown', verdict)
+    check('and says the machine it means is the one being installed',
+          'machine being installed' in said or 'that machine' in said, said)
+
+    # both surfaces, one sentence
+    document = Path('tools/inventory.py').read_text()
+    check('the window is told the verdict',
+          "'network': verdict" in document and "'network_note'" in document)
+    console = Path('tools/recovery.py').read_text()
+    check('and the console says it too', '_say_network' in console)
+    pane = Path('gui/Views/RecoveryView.axaml.cs').read_text()
+    check('and the pane draws it', 'SayNetwork' in pane)
+    check('and names the cable case in the words a person acts on',
+          'Use an Ethernet cable' in pane and 'Use an Ethernet cable' in console)
+
+
+def a_mark_for_every_macos():
+    """Every release offered gets a mark, including ones nobody has seen.
+
+    The offer list comes from macrecovery's board table and grows the day Apple
+    serves something new. A grid whose tiles came from a hand-kept file would
+    arrive with a hole in it that day, so anything the table has not heard of
+    falls back to a hue derived from its own name.
+
+    None of these are Apple's artwork. The About pane and the guide's footer
+    both say nothing of Apple's is redistributed here, and a folder of their
+    wallpapers inside the binary would make both untrue."""
+    import recovery
+
+    table = Path('data/macosmark.toml')
+    check('the marks are a table of their own', table.exists())
+    # the prose is a wrapped comment block, so a sentence in it is split
+    # across lines and a plain substring search misses every time
+    said = re.sub(r'\s+', ' ', table.read_text(encoding='utf-8').replace('#', ' '))
+    check('and it says they are chosen rather than derived from anything',
+          'chosen, not derived' in said)
+    check('and why they are not Apple\'s', 'redistributes nothing of Apple' in said
+          or 'nothing of Apple' in said)
+    check('and that it is not a second list of releases',
+          'data/macos.toml' in said)
+
+    # it must not become a copy of the release list
+    import ocgen
+    releases = {r['name'] for r in ocgen.read_toml('data/macos.toml')['release']}
+    marks = {m['name'] for m in ocgen.read_toml(table)['mark']}
+    check('every mark names a release the repository knows',
+          not (marks - releases), sorted(marks - releases))
+
+    for choice in recovery.choices():
+        mark = choice.get('mark')
+        check(f"{choice['label']} has a mark", mark, choice['label'])
+        if not mark:
+            continue
+        check(f"  and it is a colour pair and a letter",
+              re.fullmatch(r'#[0-9a-f]{6}', mark['from'])
+              and re.fullmatch(r'#[0-9a-f]{6}', mark['to'])
+              and len(mark['letter']) >= 1, mark)
+
+    # the day Apple serves something with a name nobody has typed here
+    unheard = recovery.mark('Something Nobody Has Typed Here')
+    check('a release the table never heard of still gets one',
+          unheard['source'] == 'derived'
+          and re.fullmatch(r'#[0-9a-f]{6}', unheard['from']), unheard)
+    check('and the same one every time it is asked',
+          unheard == recovery.mark('Something Nobody Has Typed Here'))
+
+    # the grid, and what it replaced
+    pane = Path('gui/Views/RecoveryView.axaml').read_text()
+    check('the pane draws them as a grid', 'WrapPanel' in pane)
+    check('rather than the drop-down that showed one at a time',
+          '<ComboBox' not in pane)
+    check('and each tile carries its mark', 'Binding Tile' in pane
+          and 'Binding Letter' in pane)
+
+
 def the_mac_a_config_pretends_to_be():
     """The identity's own ceiling, which the hardware knows nothing about.
 
@@ -3181,6 +3310,7 @@ if __name__ == '__main__':
                     the_tools_a_window_can_drive,
                     the_recovery_it_can_fetch,
                     the_mac_a_config_pretends_to_be,
+                    whether_recovery_can_land, a_mark_for_every_macos,
                     what_it_looks_like_when_it_arrives,
                     what_to_show_the_igpu_as,
                     the_stick_it_writes_to,

@@ -15,6 +15,7 @@ import deviceids
 import ocgen
 import oclptable
 import provenance
+import detect
 import recovery
 import summary
 import thirdparty
@@ -277,16 +278,30 @@ def about():
     }
 
 
-def recoveries():
-    """What Apple will serve, and where it would go.
+def recoveries(hw=None):
+    """What Apple will serve, where it would go, and whether it can land.
 
     Offline: the list is macrecovery's own boards.json, which travels with the
-    OpenCore release. Only the download itself needs a network."""
+    OpenCore release. Only the download itself needs a network.
+
+    `network` is the answer to the question the pane never asked: recovery
+    downloads macOS on the machine being installed, so a stick made for a
+    laptop whose only card is a Realtek Wi-Fi boots and then stops. Read from
+    the report when there is one, and honest about not knowing when there is
+    not."""
+    if hw is None:
+        try:
+            hw = detect.probe()
+        except Exception:
+            hw = None
+    verdict, said = recovery.carries(hw)
     return {
         't': 'recovery',
         'folder': recovery.FOLDER,
         'available': recovery.vendored() is not None,
         'choices': recovery.choices(),
+        'network': verdict,
+        'network_note': said,
     }
 
 

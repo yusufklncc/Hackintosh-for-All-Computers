@@ -45,8 +45,17 @@ Onu seçin; yükleyici macOS'un kalanını kendisi indirir.
 
 !!! warning "İndirme, kurulum yapılan makinede olur"
     Belleği hazırlayan makinede değil. O makinenin kurulum sırasında Ethernet'e,
-    ya da macOS'un zaten sürdüğü bir Wi-Fi kartına ihtiyacı var. Wi-Fi'niz
-    onlardan biri değilse kurulum için kablo takın.
+    ya da macOS'un zaten sürdüğü bir Wi-Fi kartına ihtiyacı var.
+
+    **Recovery paneli artık hangisi olduğunuzu söylüyor** — hiçbir şey
+    indirmeden önce, donanım raporundan okuyarak:
+
+    | Ne diyor | Ne demek |
+    |---|---|
+    | *This machine can download during the install* | Wi-Fi'nin macOS sürücüsü var. Yapılacak başka bir şey yok. |
+    | *Use an Ethernet cable for the install* | Wi-Fi'nizin macOS sürücüsü yok ama Ethernet'inizin var. Recovery çalışır — başlamadan önce kablo takın. Realtek Wi-Fi'lı dizüstülerde en sık görülen durum bu. |
+    | *Recovery cannot finish on this machine* | İki kart da sürülmüyor. Onun yerine [tam imaj](images.md) kullanın, ya da desteklenen bir kart takın. |
+    | *Not known for this machine* | Okunacak rapor yok. Tahmin etmez. |
 
 ## İmaj ile
 

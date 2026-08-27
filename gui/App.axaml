@@ -94,6 +94,54 @@
       <Setter Property="Background" Value="{DynamicResource Surface}" />
     </Style>
 
+    <!-- The button that starts something. Avalonia's own accent class draws
+         the system blue, which is the one colour on screen that is nobody's
+         decision here - the accent is the program's, and it is the same one
+         the navigation and the site use. -->
+    <Style Selector="Button.accent">
+      <Setter Property="Background" Value="{DynamicResource Accent}" />
+      <Setter Property="Foreground" Value="{DynamicResource AccentInk}" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="Padding" Value="14,7" />
+      <Setter Property="CornerRadius" Value="6" />
+      <Setter Property="Cursor" Value="Hand" />
+    </Style>
+    <Style Selector="Button.accent /template/ ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource Accent}" />
+      <Setter Property="CornerRadius" Value="6" />
+    </Style>
+    <Style Selector="Button.accent:pointerover /template/ ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource AccentHot}" />
+      <Setter Property="TextBlock.Foreground" Value="{DynamicResource AccentInk}" />
+    </Style>
+    <Style Selector="Button.accent:disabled /template/ ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource Chrome}" />
+      <Setter Property="TextBlock.Foreground" Value="{DynamicResource Faint}" />
+    </Style>
+
+    <!-- A grid of choices, not a list of rows: each tile is its own card and
+         the selected one is outlined rather than filled, so the release mark
+         on it stays the colour it is. -->
+    <Style Selector="ListBox.tiles > ListBoxItem">
+      <Setter Property="Padding" Value="8" />
+      <Setter Property="Margin" Value="0,0,8,8" />
+      <Setter Property="MinHeight" Value="0" />
+      <Setter Property="CornerRadius" Value="10" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="BorderBrush" Value="{DynamicResource Line}" />
+      <Setter Property="Background" Value="{DynamicResource Surface2}" />
+      <Setter Property="Cursor" Value="Hand" />
+    </Style>
+    <Style Selector="ListBox.tiles > ListBoxItem:pointerover /template/ ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource Chrome}" />
+    </Style>
+    <Style Selector="ListBox.tiles > ListBoxItem:selected">
+      <Setter Property="BorderBrush" Value="{DynamicResource Accent}" />
+    </Style>
+    <Style Selector="ListBox.tiles > ListBoxItem:selected /template/ ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource AccentSoft}" />
+    </Style>
+
     <!-- Navigation: the current pane is the only accented thing on screen. -->
     <Style Selector="RadioButton.nav">
       <Setter Property="Template">
@@ -147,6 +195,8 @@
           <SolidColorBrush x:Key="Line" Color="#DDE2E9" />
           <SolidColorBrush x:Key="Accent" Color="#3E3BA8" />
           <SolidColorBrush x:Key="AccentSoft" Color="#ECECFA" />
+          <SolidColorBrush x:Key="AccentHot" Color="#332F8C" />
+          <SolidColorBrush x:Key="AccentInk" Color="#FFFFFF" />
           <SolidColorBrush x:Key="Ok" Color="#1B7A46" />
           <SolidColorBrush x:Key="OkSoft" Color="#E4F3EA" />
           <SolidColorBrush x:Key="Bad" Color="#AE2A20" />
@@ -167,6 +217,8 @@
           <SolidColorBrush x:Key="Line" Color="#252C38" />
           <SolidColorBrush x:Key="Accent" Color="#A6A2FF" />
           <SolidColorBrush x:Key="AccentSoft" Color="#20213B" />
+          <SolidColorBrush x:Key="AccentHot" Color="#B8B5FF" />
+          <SolidColorBrush x:Key="AccentInk" Color="#141024" />
           <SolidColorBrush x:Key="Ok" Color="#4FC489" />
           <SolidColorBrush x:Key="OkSoft" Color="#12281E" />
           <SolidColorBrush x:Key="Bad" Color="#F3736A" />
