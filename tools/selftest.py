@@ -2293,6 +2293,28 @@ def what_the_guide_holds():
               here.exists() and there.exists()
               and here.read_bytes() == there.read_bytes(), name)
 
+    # the site's colours are the window's colours, read across from the theme
+    # dictionaries in App.axaml. Two palettes for one product drift the moment
+    # either is touched, and nothing about a colour says so out loud.
+    css = (guide / 'assets' / 'extra.css').read_text(encoding='utf-8').lower()
+    check('the palette is custom rather than a stock Material one',
+          'primary: custom' in config and 'extra_css' in config)
+
+    # scoped to the Dark dictionary: App.axaml holds both, Light comes first,
+    # and matching the file as a whole reads the wrong one - which is exactly
+    # what the first version of this check did, and it compared the site's dark
+    # ground against #EEF1F5
+    axaml = Path('gui/App.axaml').read_text(encoding='utf-8')
+    dark = axaml[axaml.index('x:Key="Dark"'):]
+    dark = dark[:dark.index('</ResourceDictionary>')]
+    for token, what in (('Ground', 'the dark ground'),
+                        ('Surface', 'the raised surface'),
+                        ('Accent', 'the dark accent')):
+        colour = re.search(rf'x:Key="{token}" Color="(#[0-9A-Fa-f]{{6}})"', dark)
+        check(f'{what} is the one the window uses',
+              colour and colour.group(1).lower() in css,
+              colour.group(1) if colour else f'no {token} in the Dark theme')
+
     # the toggle, and the third state people forget: follow the machine
     check('the site offers light and dark',
           'scheme: default' in config and 'scheme: slate' in config)

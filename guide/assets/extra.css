@@ -1,0 +1,105 @@
+/* The site's colours are the program's colours.
+ *
+ * gui/App.axaml already defines this project's palette, in two theme
+ * dictionaries. Letting Material pick its own "deep purple" and its own slate
+ * grey meant the site and the window that the site is about looked like two
+ * different products - and neither could be corrected without the other
+ * quietly drifting. So these read across from there:
+ *
+ *   Ground   #0B0E13   Surface  #141922   Surface2 #1A202A
+ *   Ink      #E7EBF1   Muted    #98A2B0   Faint    #6E7887
+ *   Line     #252C38   Accent   #3E3BA8 light / #A6A2FF dark
+ *
+ * The header purple is that Accent taken down in lightness rather than a
+ * different hue - hsl(242, 48%) at 45% for light, 26% for dark.
+ */
+
+:root {
+  /* light: the app's own accent, which is already a good deal deeper than
+     Material's deep purple, and the same colour the window's navigation uses */
+  --md-primary-fg-color:        #3e3ba8;
+  --md-primary-fg-color--light: #514ec0;
+  --md-primary-fg-color--dark:  #2a2871;
+  --md-primary-bg-color:        #ffffff;
+  --md-primary-bg-color--light: rgba(255, 255, 255, 0.7);
+
+  --md-accent-fg-color:         #3e3ba8;
+  --md-accent-fg-color--transparent: rgba(62, 59, 168, 0.1);
+  --md-accent-bg-color:         #ffffff;
+  --md-accent-bg-color--light:  rgba(255, 255, 255, 0.7);
+}
+
+[data-md-color-scheme="slate"] {
+  /* the greys Material derives are all hung off this hue; the app's neutrals
+     sit at 218, a little blue rather than flat */
+  --md-hue: 218;
+
+  /* darker than slate's own ground, and exactly the window's */
+  --md-default-bg-color:          #0b0e13;
+  --md-default-fg-color:          #e7ebf1;
+  --md-default-fg-color--light:   rgba(231, 235, 241, 0.66);
+  --md-default-fg-color--lighter: rgba(231, 235, 241, 0.34);
+  --md-default-fg-color--lightest:rgba(231, 235, 241, 0.13);
+
+  /* the header, deeper than the light one rather than lighter: on this ground
+     a mid purple glares, and the bar is chrome, not the subject */
+  --md-primary-fg-color:        #242262;
+  --md-primary-fg-color--light: #2f2d80;
+  --md-primary-fg-color--dark:  #191844;
+  --md-primary-bg-color:        #e7ebf1;
+  --md-primary-bg-color--light: rgba(231, 235, 241, 0.7);
+
+  /* links and the search highlight take the light accent, which is what the
+     window uses for the same job on the same ground */
+  --md-accent-fg-color:         #a6a2ff;
+  --md-accent-fg-color--transparent: rgba(166, 162, 255, 0.1);
+  --md-typeset-a-color:         #a6a2ff;
+
+  /* raised surfaces: code, tables, cards. Two steps up from the ground, the
+     same two the window has */
+  --md-code-bg-color:           #141922;
+  --md-code-fg-color:           #d6dce6;
+  --md-footer-bg-color:         #141922;
+  --md-footer-bg-color--dark:   #0b0e13;
+
+  --md-typeset-table-color:     #252c38;
+}
+
+/* The search field sits on the header, so it has to move with it. */
+[data-md-color-scheme="slate"] .md-search__form {
+  background-color: rgba(231, 235, 241, 0.08);
+}
+[data-md-color-scheme="slate"] .md-search__form:hover {
+  background-color: rgba(231, 235, 241, 0.14);
+}
+
+/* The sidebars are chrome too: one step off the ground rather than on it, so
+   the column of text has an edge without a rule being drawn. */
+[data-md-color-scheme="slate"] .md-sidebar {
+  background-color: #0e1219;
+}
+[data-md-color-scheme="slate"] .md-nav__link--active,
+[data-md-color-scheme="slate"] .md-nav__link:focus,
+[data-md-color-scheme="slate"] .md-nav__link:hover {
+  color: #a6a2ff;
+}
+
+/* Admonitions and code blocks read as panels in the window; give them the
+   same border rather than Material's heavier tint. */
+[data-md-color-scheme="slate"] .md-typeset .admonition,
+[data-md-color-scheme="slate"] .md-typeset details {
+  background-color: #141922;
+  border-color: #252c38;
+}
+[data-md-color-scheme="slate"] .md-typeset pre > code {
+  border: 1px solid #1c2330;
+}
+
+/* Screenshots of a dark window on a dark page need an edge, or they bleed
+   into it. */
+.md-typeset img {
+  border-radius: 6px;
+}
+[data-md-color-scheme="slate"] .md-typeset img {
+  border: 1px solid #252c38;
+}

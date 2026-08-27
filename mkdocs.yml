@@ -46,15 +46,15 @@ theme:
         name: Follow this machine
     - media: "(prefers-color-scheme: light)"
       scheme: default
-      primary: deep purple
-      accent: deep purple
+      primary: custom
+      accent: custom
       toggle:
         icon: material/brightness-7
         name: Switch to dark
     - media: "(prefers-color-scheme: dark)"
       scheme: slate
-      primary: deep purple
-      accent: deep purple
+      primary: custom
+      accent: custom
       toggle:
         icon: material/brightness-4
         name: Follow this machine
@@ -139,3 +139,8 @@ nav:
   - More:
       - Without the window: terminal.md
       - Working on this repository: contributing.md
+
+# The palette above says `custom`; this is where custom is defined. It reads
+# across from gui/App.axaml so the site and the window are one product.
+extra_css:
+  - assets/extra.css
