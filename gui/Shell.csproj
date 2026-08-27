@@ -31,6 +31,9 @@
   <ItemGroup>
     <AvaloniaResource Include="Assets/Fonts/*.ttf" />
     <AvaloniaResource Include="Assets/Icon/png/*.png" />
+    <!-- may be empty: a release with no icon falls back to the
+         drawn mark, so this glob matching nothing is fine -->
+    <AvaloniaResource Include="Assets/macOS/*.png" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Avalonia" Version="11.*" />

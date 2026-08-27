@@ -5,8 +5,11 @@
 using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System;
 using Avalonia;
 using Avalonia.Media;
+using Avalonia.Media.Imaging;
+using Avalonia.Platform;
 using System.Threading.Tasks;
 
 namespace Shell.Engine;
@@ -108,6 +111,41 @@ public sealed class RecoveryChoice
     // drawn by this window, decided by the engine: two surfaces colouring the
     // same release differently is the same failure as wording it differently
     [JsonPropertyName("mark")] public RecoveryMark? Mark { get; set; }
+
+    /// <summary>Apple's own icon for this release, when there is one.
+    ///
+    /// Nothing here draws a placeholder in its place: a release with no file
+    /// falls back to the mark below, because the offer list grows out of
+    /// macrecovery's board table and a pane that needed a file per release
+    /// would show a hole the day Apple served something new.
+    ///
+    /// Looked up once. AssetLoader.Open throws on a missing resource, and
+    /// doing that per redraw for eight tiles is eight exceptions a frame.</summary>
+    Bitmap? _art;
+    bool _looked;
+    public Bitmap? Art
+    {
+        get
+        {
+            if (_looked) return _art;
+            _looked = true;
+            if (Name is not { Length: > 0 }) return null;
+            var file = Name.Replace(" ", "");
+            var where = new Uri($"avares://HackintoshEFIBuilder/Assets/macOS/{file}.png");
+            try
+            {
+                if (AssetLoader.Exists(where)) _art = new Bitmap(AssetLoader.Open(where));
+            }
+            catch (Exception)
+            {
+                // a file that is there and is not a picture is the packager's
+                // problem, not something to take the window down over
+                _art = null;
+            }
+            return _art;
+        }
+    }
+    public bool Drawn => Art is null;
 
     public IBrush Tile => Mark is null
         ? new SolidColorBrush(Color.Parse("#3e3ba8"))

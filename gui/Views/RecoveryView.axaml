@@ -5,7 +5,7 @@
              x:Class="Shell.Views.RecoveryView"
              x:DataType="v:RecoveryView">
   <ScrollViewer>
-    <StackPanel Margin="28,24" Spacing="20" MaxWidth="824" HorizontalAlignment="Left">
+    <StackPanel Margin="28,24" Spacing="20" MaxWidth="890" HorizontalAlignment="Left">
       <StackPanel Spacing="8">
         <TextBlock Classes="eyebrow" Text="RECOVERY INSTALLER" />
         <TextBlock FontSize="15" TextWrapping="Wrap" Foreground="{DynamicResource Ink}"
@@ -33,25 +33,34 @@
               </ListBox.ItemsPanel>
               <ListBox.ItemTemplate>
                 <DataTemplate x:DataType="e:RecoveryChoice">
-                  <!-- wide enough, and wrapping rather than trimming: the
-                       first row is called "Whatever Apple serves now" and an
-                       ellipsis in the middle of it says nothing -->
-                  <Grid ColumnDefinitions="Auto,*" ColumnSpacing="11"
-                        Width="228" Height="44" Margin="0,2">
-                    <Border Grid.Column="0" Width="42" Height="42"
-                            CornerRadius="10" Background="{Binding Tile}">
-                      <TextBlock Text="{Binding Letter}" FontSize="19"
+                  <!-- Bigger than a list row, because a grid is looked over
+                       rather than read down. Wrapping rather than trimming:
+                       the first row is called "Whatever Apple serves now" and
+                       an ellipsis in the middle of it says nothing. -->
+                  <Grid ColumnDefinitions="Auto,*" ColumnSpacing="13"
+                        Width="250" Height="72" Margin="0,2">
+                    <!-- Apple's own icon where there is one; the drawn mark
+                         where there is not. Only one of the two is ever
+                         visible, and neither leaves a gap. -->
+                    <Image Grid.Column="0" Width="64" Height="64"
+                           RenderOptions.BitmapInterpolationMode="HighQuality"
+                           Source="{Binding Art}"
+                           IsVisible="{Binding !Drawn}" />
+                    <Border Grid.Column="0" Width="64" Height="64"
+                            CornerRadius="15" Background="{Binding Tile}"
+                            IsVisible="{Binding Drawn}">
+                      <TextBlock Text="{Binding Letter}" FontSize="27"
                                  FontWeight="SemiBold" Foreground="#FFFFFF"
                                  HorizontalAlignment="Center"
                                  VerticalAlignment="Center" />
                     </Border>
-                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="1">
-                      <TextBlock Text="{Binding Titled}" FontSize="14"
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+                      <TextBlock Text="{Binding Titled}" FontSize="15"
                                  FontWeight="SemiBold" TextWrapping="Wrap"
-                                 MaxLines="2" LineHeight="17"
+                                 MaxLines="2" LineHeight="18"
                                  Foreground="{DynamicResource Ink}" />
                       <TextBlock Text="{Binding Version}" Classes="mono"
-                                 FontSize="11.5" Foreground="{DynamicResource Faint}" />
+                                 FontSize="12" Foreground="{DynamicResource Faint}" />
                     </StackPanel>
                   </Grid>
                 </DataTemplate>
