@@ -1,0 +1,141 @@
+## The guide, as a site. `docs/` in this repository is where maintainer notes
+## live, so the pages people read are kept apart in `guide/` and nothing has to
+## be excluded from the build to keep them out of it.
+site_name: macOS on All Computers
+site_description: Install macOS on PC hardware - a program that reads the machine, builds the OpenCore EFI it needs, and puts it on the stick.
+site_url: https://yusufklncc.github.io/Hackintosh-for-All-Computers/
+repo_url: https://github.com/yusufklncc/Hackintosh-for-All-Computers
+repo_name: yusufklncc/Hackintosh-for-All-Computers
+edit_uri: edit/main/guide/
+copyright: Apple, macOS and the Mac names belong to Apple Inc. Nothing of Apple's is redistributed here.
+
+docs_dir: guide
+site_dir: _site
+
+theme:
+  name: material
+  language: en
+  favicon: assets/icon-64.png
+  logo: assets/icon-256.png
+  icon:
+    repo: fontawesome/brands/github
+  font:
+    text: Instrument Sans
+    code: IBM Plex Mono
+  features:
+    # navigation.instant is deliberately absent: mkdocs-static-i18n's language
+    # switcher cannot keep you on the same page across locales with it on, and
+    # a switcher that always drops you at the front page is worse than a
+    # reload.
+    - navigation.tracking
+    - navigation.sections
+    - navigation.top
+    - navigation.footer
+    - toc.follow
+    - search.suggest
+    - search.highlight
+    - content.tabs.link
+    - content.code.copy
+  # Three states, not two: the machine's own setting decides first, and either
+  # button then overrides it. A site that opens in the wrong one and offers no
+  # way out is the complaint this is written to avoid.
+  palette:
+    - media: "(prefers-color-scheme)"
+      toggle:
+        icon: material/brightness-auto
+        name: Follow this machine
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: deep purple
+      accent: deep purple
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: deep purple
+      accent: deep purple
+      toggle:
+        icon: material/brightness-4
+        name: Follow this machine
+
+plugins:
+  # Suffix rather than folders: `bios.md` and `bios.tr.md` sit next to each
+  # other, so a page added in one language and forgotten in the other is
+  # visible in a directory listing rather than buried a folder away. The
+  # selftest fails on the pair being incomplete.
+  - i18n:
+      docs_structure: suffix
+      languages:
+        - locale: en
+          default: true
+          name: English
+          build: true
+        - locale: tr
+          name: Türkçe
+          build: true
+          site_name: Tüm Bilgisayarlar İçin macOS
+          nav_translations:
+            Start here: Buradan başlayın
+            What this is: Bu nedir
+            The app: Uygulama
+            When your system blocks it: Sisteminiz engellerse
+            Build: Kurulum
+            Get your EFI: EFI'nizi alın
+            Building for another machine: Başka bir makine için kurmak
+            Check compatibility: Uyumluluğu kontrol edin
+            Make the USB stick: USB belleği hazırlayın
+            macOS images: macOS imajları
+            Install: Yükleme
+            Adjust BIOS settings: BIOS ayarlarını yapın
+            First boot: İlk açılış
+            macOS installation steps: macOS yükleme adımları
+            Post installation: Yükleme sonrası
+            More: Dahası
+            Without the window: Pencere olmadan
+            Working on this repository: Bu depoda çalışmak
+  - search:
+      lang:
+        - en
+        - tr
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+      # The default slugify drops every non-ASCII letter rather than carrying
+      # it, so "yalnızca ... olmadığı" became "yalnzca ... olmadg" and every
+      # link written to the heading missed. This one keeps the letters.
+      slugify: !!python/object/apply:pymdownx.slugs.slugify {kwds: {case: lower}}
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.keys
+
+nav:
+  - Start here:
+      - What this is: index.md
+      - The app: app.md
+      - When your system blocks it: blocked.md
+  - Build:
+      - Get your EFI: efi.md
+      - Building for another machine: another-machine.md
+      - Check compatibility: compatibility.md
+      - Make the USB stick: usb.md
+      - macOS images: images.md
+  - Install:
+      - Adjust BIOS settings: bios.md
+      - First boot: first-boot.md
+      - macOS installation steps: installation.md
+      - Post installation: post-installation.md
+  - More:
+      - Without the window: terminal.md
+      - Working on this repository: contributing.md

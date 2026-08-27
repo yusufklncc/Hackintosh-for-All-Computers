@@ -1,0 +1,58 @@
+# The guide, built and published to Pages.
+#
+# The build is not the whole check. `mkdocs build --strict` catches a link to a
+# page that does not exist and says nothing at all about a link to a heading
+# that does not exist, which is the mistake the Turkish pages actually made -
+# so tools/guidecheck.py reads the built HTML and resolves every fragment.
+name: guide
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'guide/**'
+      - 'mkdocs.yml'
+      - '.github/workflows/guide.yml'
+      - 'tools/guidecheck.py'
+  pull_request:
+    paths:
+      - 'guide/**'
+      - 'mkdocs.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install -r guide/requirements.txt
+      - run: mkdocs build --strict
+      - name: every link lands, and both languages hold the same pages
+        run: python3 tools/guidecheck.py _site
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    # a pull request gets the build and the checks, and publishes nothing
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

@@ -2188,20 +2188,31 @@ def the_vendored_opencore():
 
 
 def what_the_readme_shows():
-    """The front page shows the window, and counts things that move.
+    """The front page and the guide, and the counts they both make.
 
-    Screenshots rot two ways: the file is renamed and the page draws a broken
-    image, or the numbers beside it drift from what the program now holds. Both
-    are silent to anyone who wrote the page and never reloads it."""
+    The process moved to the site; the README is the landing page that points
+    at it. Both still draw the window and both still count things that move,
+    and both rot the same two ways: the picture is renamed and the page draws a
+    hole, or the number beside it drifts from what the program now holds.
+    Neither is visible to anyone who wrote the page and never reloads it.
+
+    The counts are checked across README and every guide page at once, so a
+    number can live in either place - but a number that is there has to be
+    right."""
     import inventory
 
     readme = Path('README.md').read_text(encoding='utf-8')
+    guide = Path('guide')
+    pages = {p: p.read_text(encoding='utf-8') for p in sorted(guide.glob('*.md'))}
+    check('the guide has pages', pages, len(pages))
+    written = readme + '\n'.join(pages.values())
+
     shots = sorted(p.name for p in Path('Resources/App').glob('*.png'))
     check('there are screenshots of the window', shots, shots)
     for shot in shots:
-        check(f'{shot} is on the front page', f'Resources/App/{shot}' in readme)
-    drawn = set(re.findall(r'Resources/App/([\w.-]+\.png)', readme))
-    check('and every image it draws exists', not (drawn - set(shots)),
+        check(f'{shot} is shown somewhere', f'Resources/App/{shot}' in written)
+    drawn = set(re.findall(r'Resources/App/([\w.-]+\.png)', written))
+    check('and every image drawn exists', not (drawn - set(shots)),
           sorted(drawn - set(shots)))
 
     # the numbers beside those pictures are the program's own
@@ -2212,13 +2223,113 @@ def what_the_readme_shows():
                         (len(devices['categories']), 'categories'),
                         (len(kexts), 'kexts'),
                         (claimed, 'device ids')):
-        check(f'the page counts {count} {what}, and so does the program',
-              re.search(rf'\b{count}\b[^.]*{what}', readme, re.S), count)
+        check(f'the pages count {count} {what}, and so does the program',
+              re.search(rf'\b{count}\b[^.]*{what}', written, re.S), count)
+    # and the config count, read from the catalogue the build works off
+    listed = Path('profiles/catalogue.toml')
+    if listed.exists():
+        configs = len(ocgen.read_toml(listed)['config'])
+        check(f'and {configs} configs, which is what the catalogue holds',
+              str(configs) in written, configs)
 
     # a folder of two programs: the page has to name the one to open
     check('it names the window', 'HackintoshEFIBuilder' in readme)
     check('and the engine, by the name it ships under',
-          'EFIBuilderEngine' in readme)
+          'EFIBuilderEngine' in written)
+
+    # the README is a landing page now: its job is to hand the reader to the
+    # guide, and a landing page that has quietly grown the whole process back
+    # is the failure this notices
+    check('the README points at the guide',
+          'yusufklncc.github.io/Hackintosh-for-All-Computers' in readme)
+    check('and at the Turkish side of it',
+          'Hackintosh-for-All-Computers/tr/' in readme)
+    check('and stays a landing page rather than a second copy of the guide',
+          len(readme.splitlines()) < 250, len(readme.splitlines()))
+
+    # the refusal every first-time user hits, said on both sides
+    for page, words in (('blocked.md', ('Smart App Control', 'Open Anyway')),
+                        ('blocked.tr.md', ('Smart App Control', 'Yine de Aç'))):
+        text = (guide / page).read_text(encoding='utf-8')
+        for word in words:
+            check(f'{page} says "{word}"', word in text)
+    check('and the README warns that the first run is refused',
+          'Smart App Control' in readme and 'Privacy & Security' in readme)
+
+
+def what_the_guide_holds():
+    """Both languages, the same pages, and a build that proves it.
+
+    A page written in one language and forgotten in the other is invisible from
+    the side that has it. So is a link to a heading that was renamed: mkdocs
+    resolves the page and never the fragment. tools/guidecheck.py answers both,
+    and is run here against the sources so a clone with no mkdocs installed
+    still gets the half of it that does not need a build."""
+    import guidecheck
+
+    guide = Path('guide')
+    check('the guide is where mkdocs.yml says it is', guide.is_dir())
+    config = Path('mkdocs.yml').read_text(encoding='utf-8')
+    check('and mkdocs is pointed at it', 'docs_dir: guide' in config)
+
+    # docs/ is maintainer notes and must not be swept into the published site
+    check('the maintainer notes stay out of the site',
+          Path('docs/RELEASING.md').exists() and 'docs_dir: docs' not in config)
+
+    uneven = guidecheck.parity(guide)
+    check('every page exists in English and in Turkish', not uneven, uneven)
+
+    english = sorted(p.stem for p in guide.glob('*.md')
+                     if not p.stem.endswith('.tr'))
+    check('and there is a page for each step of the process', english, english)
+    for page in english:
+        check(f'{page} is in the navigation', f'{page}.md' in config, page)
+
+    # the site's icon is the program's icon, not a second copy that drifts
+    for name in ('icon-64.png', 'icon-256.png'):
+        here = guide / 'assets' / name
+        there = Path('gui/Assets/Icon/png') / name
+        check(f'the site\'s {name} is the one the program ships',
+              here.exists() and there.exists()
+              and here.read_bytes() == there.read_bytes(), name)
+
+    # the toggle, and the third state people forget: follow the machine
+    check('the site offers light and dark',
+          'scheme: default' in config and 'scheme: slate' in config)
+    check('and starts by following the machine',
+          'media: "(prefers-color-scheme)"' in config)
+
+    # the default slugify drops Turkish letters, and every link written to
+    # such a heading misses without a word from the build
+    check('headings keep their non-ASCII letters',
+          'pymdownx.slugs.slugify' in config)
+
+    # both languages are searchable, in their own language
+    check('search is set up for both languages',
+          re.search(r'search:\s*\n\s*lang:\s*\n\s*- en\s*\n\s*- tr', config))
+
+    # pinned, because a theme that moves under the site silently is the same
+    # failure as a table that moves under a config
+    reqs = Path('guide/requirements.txt').read_text(encoding='utf-8')
+    check('the build is pinned', re.search(r'mkdocs-material==[\d.]+', reqs))
+    check('and so is the plugin that makes it two languages',
+          re.search(r'mkdocs-static-i18n==[\d.]+', reqs))
+
+    flow = Path('.github/workflows/guide.yml').read_text(encoding='utf-8')
+    check('a workflow builds it', 'mkdocs build --strict' in flow)
+    check('and runs the link check on what it built',
+          'tools/guidecheck.py' in flow)
+    check('and publishes it to Pages', 'deploy-pages' in flow)
+
+    # a built site is not always here; when it is, every link has to land
+    built = Path('_site')
+    if built.is_dir():
+        broken = guidecheck.check(built)
+        check('every internal link in the built site lands', not broken,
+              broken[:5])
+    else:
+        print('  --    _site is not built here, so only the sources were '
+              'checked; the workflow builds it and runs the rest')
 
 
 def the_recovery_it_can_fetch():
@@ -3052,7 +3163,7 @@ if __name__ == '__main__':
                     what_to_show_the_igpu_as,
                     the_stick_it_writes_to,
                     what_oclp_restores, the_about_page,
-                    what_the_readme_shows):
+                    what_the_readme_shows, what_the_guide_holds):
         print(f'\n{section.__name__}')
         section()
     print()
