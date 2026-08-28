@@ -47,7 +47,7 @@ GiB = 1024 ** 3
 # of the difference is the recovery it lays down beside the installer - its own
 # output says "Copying the macOS RecoveryOS...". Rounded up, because being over
 # costs disk space and being under costs the whole run.
-OVERHEAD = 2.5 * GiB
+OVERHEAD = int(2.5 * GiB)
 EFI_SIZE = 500 * 10 ** 6           # the FAT32 partition, in diskutil's units
 VOLUME = 'USB'                      # what the HFS+ partition is called until
                                     # createinstallmedia renames it
@@ -92,8 +92,12 @@ def plan(app):
     # whole GiB, rounded up: hdiutil takes a number and a suffix, and a
     # fractional one is a way to be a hundred megabytes short
     gib = int(-(-image // GiB))
-    return {'app': used, 'overhead': OVERHEAD, 'volume_needs': volume,
-            'efi': EFI_SIZE, 'image': gib * GiB, 'gib': gib}
+    # and whole bytes, never floats. A front end reads these as integers, and
+    # a JSON 2684354560.0 is refused by a long - which is exactly what the
+    # pane did with it: "The JSON value could not be converted to Int64".
+    return {'app': int(used), 'overhead': int(OVERHEAD),
+            'volume_needs': int(volume), 'efi': int(EFI_SIZE),
+            'image': int(gib * GiB), 'gib': int(gib)}
 
 
 def creator(app):

@@ -210,13 +210,18 @@ public partial class InstallerView : UserControl
         if (engine is null || _app is null) { Say(missing); return; }
 
         var (said, complaint) = await Inventory.InstallerPlan(engine, _app);
-        if (said is null || !said.Available)
+        if (said is null)
         {
-            Plan.IsVisible = true;
-            PlanTitle.Text = "That is not an installer app";
-            PlanText.Text = said?.Why is { Length: > 0 } why ? why
-                          : complaint;
-            Build.IsEnabled = false;
+            // The app may be perfectly good and the answer unreadable, and
+            // saying "that is not an installer app" about a JSON fault sends
+            // somebody looking at the wrong thing. It did.
+            Trouble("The engine's answer could not be read", complaint);
+            return;
+        }
+        if (!said.Available)
+        {
+            Trouble("That is not an installer app",
+                    said.Why is { Length: > 0 } why ? why : complaint);
             return;
         }
         Plan.IsVisible = true;

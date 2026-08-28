@@ -2942,6 +2942,15 @@ def building_an_installer_image():
           abs(p['overhead'] - 2.5 * installer.GiB) < 1, p['overhead'])
     check('the volume it plans is bigger than the app',
           p['volume_needs'] > p['app'])
+    # every one of them whole. 2.5 * GiB is a float in Python, JSON writes it
+    # as 2684354560.0, and the pane refused it: "The JSON value could not be
+    # converted to System.Int64". Sizes are bytes, and bytes are integers.
+    floats = {k: v for k, v in p.items() if isinstance(v, float)}
+    check('and every size it reports is a whole number', not floats, floats)
+    import json as _json
+    written = _json.dumps(p)
+    check('so nothing in the JSON carries a decimal point',
+          '.' not in written, written)
 
     # the privileged half: readable, and the same text that runs
     tools = installer.legacy_tools()
@@ -2998,6 +3007,11 @@ def building_an_installer_image():
           'createinstallmedia' in pane.split('static List<string> Installers')[1][:400])
     check('and says so when there is none, or more than one',
           'No installer app in there' in pane and 'installers in there' in pane)
+    # an unreadable answer is not a bad app, and calling it one sends somebody
+    # to look at the wrong thing
+    check('an unreadable answer is told apart from a bad app',
+          "The engine's answer could not be read" in pane
+          and 'That is not an installer app' in pane)
     check('and a path inside the bundle is walked back up to it',
           'static string Bundled' in pane)
     # a picker and a bundle do not always get on, so a path can be typed
