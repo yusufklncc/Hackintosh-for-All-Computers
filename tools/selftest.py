@@ -2747,6 +2747,75 @@ def what_it_says_about_amd_integrated():
               'Empty until' in rows[0]['gap'], rows[0]['gap'])
 
 
+def what_the_download_shows():
+    """The bar is drawn from somebody else's print statement.
+
+    macrecovery redraws one line while it downloads, and the window reads the
+    numbers out of it to draw a bar, a rate and a time left. That makes the
+    window depend on the exact shape of a string in a vendored tool - and if
+    acidanthera reformats it, the bar stops moving and nothing says why.
+
+    So the format is checked here against the source it comes from: the print
+    statement is read out of the vendored macrecovery, a line is rendered the
+    way that statement would render it, and the pattern the window compiles is
+    applied to it. Both halves are read from the tree, so neither can be
+    updated without the other being checked."""
+    import recovery
+
+    tool = recovery.vendored()
+    check('macrecovery is vendored', tool is not None)
+    if tool is None:
+        return
+    source = tool.read_text(encoding='utf-8', errors='replace')
+
+    # the statement the bar depends on
+    printed = re.search(r"print\(f'\\r\{size / \(2\*\*20\):\.1f\}"
+                        r"/\{totalsize / \(2\*\*20\):\.1f\} MB ", source)
+    check('it still prints how much of how much has arrived', printed,
+          'the download progress line has been reformatted upstream')
+    check('and the percentage beside it',
+          "% downloaded" in source)
+
+    # a line exactly as that statement would produce it
+    size, total = 123.4 * 2 ** 20, 700.0 * 2 ** 20
+    progress = size / total
+    rendered = (f'{size / (2 ** 20):.1f}/{total / (2 ** 20):.1f} MB '
+                f'|{"=" * 6:<20}| {progress * 100:.1f}% downloaded')
+
+    # and the pattern the window compiles, read out of the window
+    pane = Path('gui/Views/RecoveryView.axaml.cs').read_text(encoding='utf-8')
+    found = re.search(r'new\(@"([^"]+)"', pane)
+    check('the window compiles a pattern for it', found)
+    if not found:
+        return
+    pattern = found.group(1).replace('\\\\', '\\')
+    hit = re.search(pattern, rendered)
+    check('and it matches what macrecovery prints', hit, (pattern, rendered))
+    if hit:
+        check('reading back the megabytes done and the total',
+              hit.group(1) == '123.4' and hit.group(2) == '700.0', hit.groups())
+
+    # what the pane does with them
+    check('the pane draws a bar', 'ProgressBar' in
+          Path('gui/Views/RecoveryView.axaml').read_text(encoding='utf-8'))
+    check('and a rate', 'MB/s' in pane)
+    check('and how much longer', 'left' in pane and 'static string Left' in pane)
+    # measured over a window: an average since the start hides a slow patch
+    check('and measures the rate over a window rather than since the start',
+          'seen.Dequeue' in pane, 'the rate is averaged over the whole download')
+    # the numbers are parsed with an invariant culture: a machine whose decimal
+    # separator is a comma parsed "123.4" as 1234 and the bar jumped to 100%
+    check('and parses them the same way on every machine',
+          'InvariantCulture' in pane)
+
+    # sampled often enough to move
+    every = re.search(r'def fetch\(choice, into, tool=None, every=([\d.]+)\)',
+                      Path('tools/recovery.py').read_text(encoding='utf-8'))
+    check('and the engine samples often enough for a bar to move',
+          every and float(every.group(1)) <= 1.0,
+          every.group(1) if every else 'no default found')
+
+
 def whether_recovery_can_land():
     """Recovery downloads on the machine being installed, not on this one.
 
@@ -3436,6 +3505,7 @@ if __name__ == '__main__':
                     the_mac_a_config_pretends_to_be,
                     whether_recovery_can_land, a_mark_for_every_macos,
                     what_it_says_about_amd_integrated,
+                    what_the_download_shows,
                     what_it_looks_like_when_it_arrives,
                     what_to_show_the_igpu_as,
                     the_stick_it_writes_to,

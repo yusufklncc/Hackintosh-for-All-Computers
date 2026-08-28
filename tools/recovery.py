@@ -450,7 +450,7 @@ class Progress:
         pass
 
 
-def fetch(choice, into, tool=None, every=2.0):
+def fetch(choice, into, tool=None, every=0.5):
     """Download one recovery into <into>/com.apple.recovery.boot.
 
     Returns (files, complaint). The tool verifies the image against Apple's

@@ -120,6 +120,23 @@
         <StackPanel Spacing="8">
           <TextBlock Name="ResultTitle" FontSize="15" FontWeight="SemiBold"
                      Foreground="{DynamicResource Ink}" />
+
+          <!-- macrecovery prints "123.4/700.0 MB |====| 17.6% downloaded" and
+               redraws it. A window can do better than echo that: the numbers
+               are in it, and how fast and how much longer are what somebody
+               watching a 700 MB download actually wants. -->
+          <StackPanel Name="Moving" Spacing="6" IsVisible="False">
+            <ProgressBar Name="Bar" Height="6" CornerRadius="3"
+                         Minimum="0" Maximum="100"
+                         Background="{DynamicResource Chrome}"
+                         Foreground="{DynamicResource Accent}" />
+            <Grid ColumnDefinitions="Auto,*,Auto">
+              <TextBlock Grid.Column="0" Name="Done" Classes="mono" FontSize="12.5"
+                         Foreground="{DynamicResource Ink}" />
+              <TextBlock Grid.Column="2" Name="Rate" Classes="mono" FontSize="12.5"
+                         Foreground="{DynamicResource Muted}" />
+            </Grid>
+          </StackPanel>
           <TextBlock Name="ResultText" Classes="mono" TextWrapping="Wrap" />
           <TextBlock Name="ResultNext" FontSize="12.5" TextWrapping="Wrap"
                      Foreground="{DynamicResource Muted}" IsVisible="False" />

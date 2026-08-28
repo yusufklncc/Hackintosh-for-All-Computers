@@ -24,6 +24,11 @@ public partial class RecoveryView : UserControl
     // that waits for ever.
     static readonly TimeSpan Bound = TimeSpan.FromHours(1);
 
+    // macrecovery's own line: "123.4/700.0 MB |=====     | 17.6% downloaded"
+    static readonly System.Text.RegularExpressions.Regex Moved =
+        new(@"(\d+(?:\.\d+)?)\s*/\s*(\d+(?:\.\d+)?)\s*MB",
+            System.Text.RegularExpressions.RegexOptions.Compiled);
+
     string _to = AppContext.BaseDirectory;
     string _folder = "com.apple.recovery.boot";
     Task? _read;
@@ -207,17 +212,62 @@ public partial class RecoveryView : UserControl
         Fetch.IsEnabled = Choose.IsEnabled = false;
         Open.IsVisible = false;
         Show($"Fetching {choice.Titled} from Apple…", "", null);
+        Moving.IsVisible = true;
+        Bar.IsIndeterminate = true;      // until the first megabyte is counted
+        Done.Text = "connecting…";
+        Rate.Text = "";
 
         var said = new List<string>();
+        // speed is measured over a window rather than since the start, so a
+        // slow patch shows as slow instead of being averaged away by a fast
+        // beginning - which is the number somebody watching is judging by
+        var seen = new Queue<(DateTime at, double mb)>();
+        var began = DateTime.UtcNow;
+
         var (complaint, code) = await Builder.Stream(engine, line =>
         {
             if (line.Trim().Length == 0) return;
+
+            var moved = Moved.Match(line);
+            if (moved.Success
+                && double.TryParse(moved.Groups[1].Value,
+                                   System.Globalization.NumberStyles.Float,
+                                   System.Globalization.CultureInfo.InvariantCulture,
+                                   out var mb)
+                && double.TryParse(moved.Groups[2].Value,
+                                   System.Globalization.NumberStyles.Float,
+                                   System.Globalization.CultureInfo.InvariantCulture,
+                                   out var whole)
+                && whole > 0)
+            {
+                Moving.IsVisible = true;
+                Bar.IsIndeterminate = false;
+                Bar.Value = Math.Clamp(mb / whole * 100, 0, 100);
+                Done.Text = $"{mb:0.0} / {whole:0.0} MB   {mb / whole * 100:0}%";
+
+                var now = DateTime.UtcNow;
+                seen.Enqueue((now, mb));
+                while (seen.Count > 2 && (now - seen.Peek().at).TotalSeconds > 8)
+                    seen.Dequeue();
+                var (first, firstMb) = seen.Peek();
+                var span = (now - first).TotalSeconds;
+                if (span >= 1 && mb > firstMb)
+                {
+                    var rate = (mb - firstMb) / span;
+                    var left = rate > 0 ? TimeSpan.FromSeconds((whole - mb) / rate)
+                                        : TimeSpan.Zero;
+                    Rate.Text = $"{rate:0.0} MB/s   {Left(left)} left";
+                }
+                return;                      // the bar says it; the log need not
+            }
+
             said.Add(line.TrimEnd());
-            // the tool redraws one progress line; the last few are what
-            // somebody watching wants, not all seven hundred
+            // whatever is not the progress line: the last few are what somebody
+            // watching wants, not all seven hundred
             ResultText.Text = string.Join("\n", said.TakeLast(6));
         }, Bound, "--recovery", choice.Version, "--recovery-to", _to);
         Fetch.IsEnabled = Choose.IsEnabled = true;
+        Moving.IsVisible = false;
 
         var landed = Path.Combine(_to, _folder);
         var files = Directory.Exists(landed)
@@ -236,6 +286,15 @@ public partial class RecoveryView : UserControl
              $"It sits in {_folder} at the root of {_to}. OpenCore lists it at the "
              + "boot menu. The rest of macOS comes down during the install, so that "
              + "machine needs Ethernet or a card macOS already drives.");
+    }
+
+    /// <summary>"4m 20s left", and never "0s left" for a whole minute.</summary>
+    static string Left(TimeSpan span)
+    {
+        if (span.TotalSeconds < 1) return "almost done";
+        if (span.TotalHours >= 1) return $"{(int)span.TotalHours}h {span.Minutes}m";
+        if (span.TotalMinutes >= 1) return $"{span.Minutes}m {span.Seconds}s";
+        return $"{span.Seconds}s";
     }
 
     void Show(string title, string body, string? next)
