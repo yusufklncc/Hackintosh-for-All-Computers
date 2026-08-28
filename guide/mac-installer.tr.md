@@ -25,14 +25,50 @@ Bu uzun yol. Şu durumda tercih edin:
 
 ## 1. Yükleyiciyi indirin
 
-App Store'dan, ya da komut satırından — daha hızlı ve hiçbir şey açmıyor:
+=== "Mist"
 
-```
-softwareupdate --list-full-installers
-softwareupdate --fetch-full-installer --full-installer-version 15.7.4
-```
+    [**Mist**](https://github.com/ninxsoft/Mist) daha kolay yol, ve bu Mac'e
+    sunulmayan bir sürümü istiyorsanız daha iyisi. Apple'ın yayımladığı her
+    macOS'u sürümü, yapısı, çıkış tarihi **ve boyutuyla** listeliyor, sonra
+    yükleyici uygulamasını sizin için kuruyor.
 
-`/Applications` içine `Install macOS <ad>.app` olarak iner.
+    ```
+    brew install --cask mist
+    ```
+
+    Ya da uygulamayı
+    [releases sayfasından](https://github.com/ninxsoft/Mist/releases) alın. MIT
+    lisanslı ve Monterey ve sonrasında çalışıyor. Pencere açmak istemiyorsanız
+    [`mist-cli`](https://github.com/ninxsoft/mist-cli) var.
+
+    **Generate an Application Bundle (.app)** seçin — `createinstallmedia`'nın
+    istediği bu. Sunduğu diğer çıktılar, `.iso` ve `.pkg`, sanal makineler ve
+    kurumsal dağıtım için, bunun için değil.
+
+    15 GB'lık bir indirmede önemli olan iki şeyi yapıyor: bitince chunklist
+    sağlamalarını doğruluyor, ve aktarım koptuğunda kendiliğinden yeniden
+    deniyor.
+
+    !!! note "Tam Disk Erişimi isteyebilir"
+        Kendi README'si böyle diyor; Sistem Ayarları → Gizlilik ve Güvenlik.
+
+    Listelediği boyut, 2. adımın cevabını siz daha hiçbir şey indirmeden
+    veriyor — buraya önce bakmanın asıl sebebi bu.
+
+=== "softwareupdate"
+
+    macOS kendi yükleyicilerini indirebiliyor, önceden hiçbir şey kurmadan:
+
+    ```
+    softwareupdate --list-full-installers
+    softwareupdate --fetch-full-installer --full-installer-version 26.6.2
+    ```
+
+    Yalnızca Apple'ın kataloğunun *bu* Mac'e sunduğunu veriyor, yani eski bir
+    sürüm listede olmayabilir. Olduğunda en kısa yol bu.
+
+Her iki durumda da yükleyici `/Applications` içine
+`Install macOS <ad>.app` olarak iner.
 
 ## 2. Belleğin ne kadar olması gerektiğini bulun
 

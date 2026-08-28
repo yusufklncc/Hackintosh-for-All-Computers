@@ -25,15 +25,51 @@ This is the long way round. Take it when:
 
 ## 1. Get the installer
 
-From the App Store, or from the command line, which is quicker and does not
-open anything:
+=== "Mist"
 
-```
-softwareupdate --list-full-installers
-softwareupdate --fetch-full-installer --full-installer-version 15.7.4
-```
+    [**Mist**](https://github.com/ninxsoft/Mist) is the easier route, and the
+    better one if you want a release this Mac is not being offered. It lists
+    every macOS Apple still publishes with its version, build, release date
+    **and size**, then builds the installer app for you.
 
-It lands in `/Applications` as `Install macOS <name>.app`.
+    ```
+    brew install --cask mist
+    ```
+
+    Or take the app from its
+    [releases page](https://github.com/ninxsoft/Mist/releases). MIT licensed,
+    and it runs on Monterey and later. There is a
+    [`mist-cli`](https://github.com/ninxsoft/mist-cli) if you would rather not
+    open a window.
+
+    Choose **Generate an Application Bundle (.app)** - that is what
+    `createinstallmedia` needs. The other outputs it offers, `.iso` and `.pkg`,
+    are for virtual machines and for deployment, not for this.
+
+    Two things it does that matter on a 15 GB download: it validates the
+    chunklist checksums when it finishes, and it retries by itself when a
+    transfer drops.
+
+    !!! note "It may ask for Full Disk Access"
+        Its own README says so, in System Settings → Privacy & Security.
+
+    The size it lists is the answer to step 2 before you have downloaded
+    anything - which is the whole reason to look here first.
+
+=== "softwareupdate"
+
+    macOS can fetch its own installers, with nothing to install first:
+
+    ```
+    softwareupdate --list-full-installers
+    softwareupdate --fetch-full-installer --full-installer-version 26.6.2
+    ```
+
+    It only offers what Apple's catalogue serves *this* Mac, so an older
+    release may not be in the list. When it is, this is the shortest path.
+
+Either way the installer lands in `/Applications` as
+`Install macOS <name>.app`.
 
 ## 2. Work out how big the stick has to be
 
