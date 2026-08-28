@@ -38,21 +38,54 @@ softwareupdate --fetch-full-installer --full-installer-version 15.7.4
 
 Apple'ın sayfası sadece şunu diyor: *"32GB'lık bir bellek herhangi bir macOS
 yükleyicisi için fazlasıyla yeterlidir, eski sürümlerin çoğu için 16GB yeter."*
-Bellek satın alırken iyi, disk imajı boyutlandırırken işe yaramaz. Onun yerine
-uygulamayı ölçün:
+İkinci yarısı artık doğru değil — tek başına Tahoe'nun yükleyicisi 17 GiB — ve
+iki yarısı da disk imajı boyutlandırmaya yaramıyor. O yüzden ölçün:
 
 ```
-du -sh "/Applications/Install macOS Sequoia.app"
+du -sh "/Applications/Install macOS Tahoe.app"
+17G
 ```
 
-Birimin buna ek olarak `createinstallmedia`'nın yanına koyduğu recovery
-parçalarına da yer vermesi gerekiyor. **Yarım gigabayt yukarı yuvarlayın** —
-kullanılacak pay tam olarak budur, çünkü hata şekli komutun on dakika çalışıp
-en sonda reddetmesi.
+**Sonra yarım gigabayt değil, yaklaşık 2.5 GiB ekleyin.** `createinstallmedia`
+uygulamayı öylece kopyalamıyor: yanına bir recovery seriyor, yani birimin
+yazılan şeyden belirgin biçimde büyük olması gerekiyor. Tahoe 26.6.2
+yükleyicisiyle ölçüldü:
+
+| | |
+|---|---|
+| `du -sh` diyor ki | 17.00 GiB |
+| `createinstallmedia`'nın kabul ettiği birim | **19.15 GiB** |
+| yani uygulamanın üzerine gereken pay | **2.15 GiB** |
+
+!!! danger "İki birim var ve aralarında %7 fark"
+    `hdiutil -size 18g` 18 **GiB** demek. `diskutil` ise **ondalık GB**
+    yazdırıyor. Yani `18g` diye istenen bir imaj `19.3 GB` olarak listelenir,
+    `18.8 GB` görünen bir birim aslında 17.5 GiB'dir. `du -sh` de `hdiutil`
+    gibi GiB sayar.
+
+    Bunları karıştırmak, yirmi dakikalık bir kopyalamadan sonra belleğin bir
+    gigabayt eksik çıkmasının yolu. Her şeyi GiB ile boyutlandırın ve
+    `diskutil`'in yazdırdığını aynı sayının başka bir söyleniş biçimi sayın.
 
 Üstüne EFI bölümünü ekleyin: 500 MB, bir EFI klasörünün ihtiyacından (yaklaşık
 7 MB) çok fazla, ve yanına bir iki yedek config koymaya yer bırakan en küçük
 ölçü.
+
+Yani 17 GiB'lik bir yükleyici için: `17 + 2.5 + 0.5` ≈ **21 GiB**.
+
+!!! tip "Ya da boyutu komuta hesaplatın"
+    Tahmin etmek zorunda değilsiniz. İmajı kafanızdaki boyutta kurun, 5. adımı
+    çalıştırın; reddederse neyin eksik olduğunu tam olarak söyler:
+
+    ```
+    /Volumes/USB is not large enough for install media.
+    An additional 1.76 GB is needed.
+    ```
+
+    Bunu `diskutil list`'in gösterdiği birim boyutuna ekleyin, yukarı
+    yuvarlayın ve yeniden kurun. Bedeli bir başarısız çalıştırma ve hiç hesap
+    yok — üstelik o çalıştırma hızlı, çünkü hiçbir şey kopyalamadan önce boyutu
+    kontrol ediyor.
 
 ## 3. Belleğe değil, disk imajına kurun
 
@@ -61,7 +94,7 @@ doldurun, sonra belleğe klonlayın — ya da beş belleğe, ya da bir yıl sonr
 bozduğunuzda aynı belleğe yeniden.
 
 ```
-hdiutil create -size 15g -type UDIF -layout NONE -o installer
+hdiutil create -size 21g -type UDIF -layout NONE -o installer
 ```
 
 `-layout NONE` önemli: hiç bölüm haritası olmayan ham bir aygıt verir, ki bir
@@ -87,9 +120,9 @@ Sonuç:
 
 ```
 #:                       TYPE NAME                    SIZE       IDENTIFIER
-0:     FDisk_partition_scheme                        +15.0 GB    disk4
+0:     FDisk_partition_scheme                        +22.5 GB    disk4
 1:                 DOS_FAT_32 EFI                     500.0 MB   disk4s1
-2:                  Apple_HFS USB                     14.5 GB    disk4s2
+2:                  Apple_HFS USB                     22.0 GB    disk4s2
 ```
 
 Bu komutta dört şey taşıyıcı:
@@ -124,8 +157,9 @@ Birimi siler, yaklaşık 12 GB kopyalar, açılabilir işaretler ve adını
 `Install macOS Sequoia` yapar. Bellekte on-yirmi dakika, imajda birkaç dakika.
 
 !!! failure "Sonda reddederse"
-    *"Not enough free space"* 2. adımın yetersiz kaldığı anlamına gelir —
-    imajın yeniden kurulması gerekir, yerinde büyütmenin yolu yok. *"The volume
+    *"is not large enough for install media. An additional N is needed"* 2.
+    adımın tam olarak o kadar eksik kaldığı anlamına gelir. İmajın daha büyük
+    boyutta yeniden kurulması gerekir; yerinde büyütmenin yolu yok. *"The volume
     could not be unmounted"* genelde Finder veya Spotlight'ın onu açık
     tutmasıdır; üzerindeki pencereleri kapatıp tekrar çalıştırın.
 

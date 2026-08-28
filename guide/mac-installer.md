@@ -38,22 +38,53 @@ It lands in `/Applications` as `Install macOS <name>.app`.
 ## 2. Work out how big the stick has to be
 
 Apple's page says only *"A 32GB flash drive has more than enough storage space
-for any macOS installer, and 16GB is enough for most earlier versions"*. That
-is fine for buying a stick and useless for sizing a disk image, so measure the
-app instead:
+for any macOS installer, and 16GB is enough for most earlier versions"*. The
+second half has stopped being true - Tahoe's installer alone is 17 GiB - and
+neither half helps you size a disk image. So measure:
 
 ```
-du -sh "/Applications/Install macOS Sequoia.app"
+du -sh "/Applications/Install macOS Tahoe.app"
+17G
 ```
 
-The volume needs that, plus room for the recovery bits `createinstallmedia`
-lays down beside it. **Round up by half a gigabyte** and you will not be caught
-out - which is exactly the margin to use, because the failure mode is the
-command running for ten minutes and then refusing at the end.
+**Then add about 2.5 GiB, not half a gigabyte.** `createinstallmedia` does not
+just copy the app across: it lays a recovery down beside it, so the volume has
+to be meaningfully bigger than the thing being written. Measured on a Tahoe
+26.6.2 installer:
+
+| | |
+|---|---|
+| `du -sh` reports | 17.00 GiB |
+| the volume `createinstallmedia` accepted | **19.15 GiB** |
+| so the overhead over the app is | **2.15 GiB** |
+
+!!! danger "Two units, and they are 7% apart"
+    `hdiutil -size 18g` means 18 **GiB**. `diskutil` prints **decimal GB**. So
+    an image asked for as `18g` lists as `19.3 GB`, and a volume that reads
+    `18.8 GB` is really 17.5 GiB. `du -sh` counts in GiB like `hdiutil`.
+
+    Mixing them is how a stick comes out a gigabyte short after a twenty
+    minute copy. Size everything in GiB and treat what `diskutil` prints as a
+    different way of saying the same number.
 
 Add the EFI partition on top: 500 MB is far more than an EFI folder needs
 (about 7 MB), and it is the smallest size that leaves room to keep a spare
 config or two beside it.
+
+So for a 17 GiB installer: `17 + 2.5 + 0.5` ≈ **21 GiB**.
+
+!!! tip "Or let the command size it for you"
+    Guessing is optional. Build the image at whatever you think, run step 5,
+    and if it refuses it tells you exactly what is missing:
+
+    ```
+    /Volumes/USB is not large enough for install media.
+    An additional 1.76 GB is needed.
+    ```
+
+    Add that to the volume size `diskutil list` shows, round up, and rebuild.
+    It costs one failed run and no arithmetic - and the failed run is quick,
+    because it checks the size before it copies anything.
 
 ## 3. Build it in a disk image, not on the stick
 
@@ -62,7 +93,7 @@ fill it, then clone it onto a stick - or onto five sticks, or onto the same
 stick again in a year when you have broken it.
 
 ```
-hdiutil create -size 15g -type UDIF -layout NONE -o installer
+hdiutil create -size 21g -type UDIF -layout NONE -o installer
 ```
 
 `-layout NONE` matters: it hands you a raw device with no partition map at all,
@@ -88,9 +119,9 @@ Which gives:
 
 ```
 #:                       TYPE NAME                    SIZE       IDENTIFIER
-0:     FDisk_partition_scheme                        +15.0 GB    disk4
+0:     FDisk_partition_scheme                        +22.5 GB    disk4
 1:                 DOS_FAT_32 EFI                     500.0 MB   disk4s1
-2:                  Apple_HFS USB                     14.5 GB    disk4s2
+2:                  Apple_HFS USB                     22.0 GB    disk4s2
 ```
 
 Four things in that command are load-bearing:
@@ -128,8 +159,9 @@ It erases the volume, copies about 12 GB, blesses it, and renames it to
 image.
 
 !!! failure "If it refuses at the end"
-    *"Not enough free space"* means step 2 was short - the image has to be
-    rebuilt, there is no growing it in place. *"The volume could not be
+    *"is not large enough for install media. An additional N is needed"* means
+    step 2 was short by exactly that much. The image has to be rebuilt at the
+    larger size; there is no growing it in place. *"The volume could not be
     unmounted"* usually means Finder or Spotlight has it open; close any window
     on it and run it again.
 
