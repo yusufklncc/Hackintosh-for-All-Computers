@@ -2779,27 +2779,53 @@ def a_kext_that_stops_below_the_target():
     check('the Broadcom Wi-Fi set is there', brcm)
     if not brcm:
         return
-    only = brcm['kext'][0]
-    check('and it stops at a macOS rather than running on for ever',
-          only.get('max_kernel'), only)
-    check('at Ventura, which is where the driver it patches was removed',
-          only.get('max_kernel', '').startswith('22.'), only.get('max_kernel'))
-    check('and quotes the README for it, rather than asserting it',
-          '[14+] Use with OCLP' in (only.get('note') or ''), only.get('note'))
-    check('and says what is needed above it',
-          'OpenCore Legacy Patcher' in (only.get('above') or ''), only.get('above'))
-    check('including that an EFI cannot do it',
-          'anything an EFI injects' in (only.get('above') or ''))
 
-    stops = summary._kext_ceiling('AirportBrcmFixup.kext')
-    check('the ceiling is read back as a release name', stops
-          and stops['name'] == 'Ventura', stops)
-    # a set that swaps one kext for another by version is not capped by the
-    # one that stops first - Broadcom Bluetooth runs from 10.11 to now across
-    # five bundles, and calling that "up to Mojave" would be wrong
+    # Per device, not per set. The first version of this bounded the whole set
+    # at Ventura, which is right for three ids and wrong for three more: the
+    # README's table has 432b gone after 10.14 and 4331/4353 after 10.15,
+    # because Apple removed the drivers one at a time. One ceiling over the set
+    # claimed four more years of support than the document gives.
+    rows = {d['id']: d for d in brcm.get('device') or []}
+    check('it is bounded per device rather than as a whole', rows, sorted(rows))
+    check('and the kext itself carries no ceiling to override them',
+          not brcm['kext'][0].get('max_kernel'), brcm['kext'][0].get('max_kernel'))
+    for ident, top, where in (('14e4:43a3', '22.99.99', '[13]'),
+                              ('14e4:43a0', '22.99.99', '[13]'),
+                              ('14e4:43ba', '22.99.99', '[13]'),
+                              ('14e4:4331', '19.99.99', '[10.15]'),
+                              ('14e4:4353', '19.99.99', '[10.15]'),
+                              ('14e4:432b', '18.99.99', '[10.14]')):
+        row = rows.get(ident)
+        check(f'{ident} stops where the table last names it, {where}',
+              row and row['max_kernel'] == top, row)
+        check(f'  and quotes the table rather than asserting it',
+              row and where in (row.get('note') or ''), row and row.get('note'))
+    check('and what is needed above them is said once, for the set',
+          'OpenCore Legacy Patcher' in (brcm.get('above') or {}).get('text', ''))
+    check('including that an EFI cannot do it',
+          'anything an EFI injects' in (brcm.get('above') or {}).get('text', ''))
+
+    stops = summary._device_ceiling('AirportBrcmFixup.kext', '14e4:43a3')
+    check('the ceiling is read back as a release name',
+          stops and stops['name'] == 'Ventura', stops)
+    older = summary._device_ceiling('AirportBrcmFixup.kext', '14e4:432b')
+    check('and an older card reads as its own, earlier one',
+          older and older['name'] == 'Mojave', older)
+
+    # the fifteen ids the kext matches and the table never names. Absent from
+    # the documentation is not supported for ever, and not unsupported either.
+    unnamed = summary._device_ceiling('AirportBrcmFixup.kext', '14e4:4312')
+    check('an id the table never names is marked as uncovered',
+          unnamed and not unnamed['covered'], unnamed)
+    check('and no ceiling is invented for it',
+          unnamed and unnamed['darwin'] is None, unnamed)
+
+    # a set that swaps one kext for another by version is not capped by the one
+    # that stops first - Broadcom Bluetooth runs from 10.11 to now across five
+    # bundles, and calling that "up to Mojave" would be wrong
     check('a set that hands over between kexts is not read as capped',
-          summary._kext_ceiling('BrcmPatchRAM3.kext') is None,
-          summary._kext_ceiling('BrcmPatchRAM3.kext'))
+          summary._device_ceiling('BrcmPatchRAM3.kext', '0a5c:6412') is None,
+          summary._device_ceiling('BrcmPatchRAM3.kext', '0a5c:6412'))
 
     import contextlib
     import io
@@ -2814,6 +2840,18 @@ def a_kext_that_stops_below_the_target():
     above = said(24)                     # Sequoia
     check('asking for a macOS past it is told so',
           'not on the macOS you asked for' in above and 'Ventura' in above, above)
+    # and the older card is told a different, earlier answer
+    with contextlib.redirect_stdout(io.StringIO()) as out:
+        advise.report(['14e4:432b'], [], 'a test', target=19)   # Catalina
+    older = re.sub(r'\s+', ' ', out.getvalue())
+    check('an older card is told its own ceiling, not this one',
+          'this stops at Mojave' in older, older)
+    # and one the table never names is told that, rather than a ceiling
+    with contextlib.redirect_stdout(io.StringIO()) as out:
+        advise.report(['14e4:4312'], [], 'a test', target=24)
+    quiet = re.sub(r'\s+', ' ', out.getvalue())
+    check('and an id with no documented range is told exactly that',
+          'no macOS range is documented' in quiet, quiet)
     check('and told to use Ethernet for the install',
           'Ethernet during the install' in above)
     within = said(22)                    # Ventura

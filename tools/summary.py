@@ -177,38 +177,67 @@ def audio_row(hw):
                note=f'{layouts} layout' + ('s to try' if layouts != 1 else ''))
 
 
-def _kext_ceiling(match):
-    """The newest macOS a driver set still applies to, and what is needed above.
+def _device_ceiling(match, device_id=None):
+    """The newest macOS a driver set still reaches, for one device.
 
-    A set whose only kext has a max_kernel stops there. Saying "supported" past
-    that is the claim this exists to stop: a Broadcom Wi-Fi card reads as
-    supported, the kext goes in, and on Sonoma there is no Apple driver left
-    for it to patch - so the card is simply absent, with nothing having said
-    so. data/network.toml carries the bound and the sentence."""
+    Per device, because the ids in a set do not stop together. AirportBrcmFixup
+    patches Apple's Broadcom drivers, and Apple removed them one at a time: its
+    README's table has 432b gone after 10.14, 4331 and 4353 after 10.15, and
+    43a0/43a3/43ba after 13. One ceiling over the set would be wrong for four
+    of the six and silent about the rest.
+
+    Returns None when nothing here has a bound to quote - which is the answer
+    for the fifteen ids the kext matches and that table never names. Absent
+    from the documentation is not the same as supported for ever, and it is not
+    the same as unsupported either; `covered` says which of the two this is."""
     for s in netkexts.sets():
         if s['match'] != match:
             continue
+        rows = s.get('device') or []
+        if rows:
+            if not device_id:
+                return None
+            for row in rows:
+                if row['id'].lower() == (device_id or '').lower():
+                    return _named_ceiling(row['max_kernel'],
+                                          (s.get('above') or {}).get('text', ''),
+                                          row.get('note', ''), covered=True)
+            # matched by the kext, named by no document here
+            return _named_ceiling(None, (s.get('above') or {}).get('text', ''),
+                                  '', covered=False)
+        # a whole-set bound: only when every kext in it stops, since a set that
+        # swaps one kext for another by version covers the range between them
         tops = [k.get('max_kernel') for k in s['kext']]
-        # only when every kext in the set stops: a set that swaps one kext for
-        # another by version covers the whole range between them
         if not tops or not all(tops):
             return None
         top = max(tops, key=lambda v: [int(n) for n in v.split('.')])
-        darwin = int(top.split('.')[0])
-        name = next((r['name'] for r in netkexts.releases()
-                     if r['darwin'] == darwin), None)
-        above = next((k.get('above') for k in s['kext'] if k.get('above')), '')
-        return {'darwin': darwin, 'name': name, 'above': above}
+        return _named_ceiling(top, (s.get('above') or {}).get('text', ''),
+                              '', covered=True)
     return None
 
 
-def _kext_note(match):
+def _named_ceiling(max_kernel, above, note, covered):
+    darwin = int(max_kernel.split('.')[0]) if max_kernel else None
+    name = next((r['name'] for r in netkexts.releases()
+                 if r['darwin'] == darwin), None) if darwin else None
+    return {'darwin': darwin, 'name': name, 'above': above,
+            'note': note, 'covered': covered}
+
+
+def _kext_ceiling(match):
+    """The set's bound where it has one for every device it claims."""
+    return _device_ceiling(match)
+
+
+def _kext_note(match, device_id=None):
     """What else the driver set for a kext brings, from data/network.toml."""
     for s in netkexts.sets():
         if s['match'] == match:
-            stops = _kext_ceiling(match)
+            stops = _device_ceiling(match, device_id)
             if stops and stops['name']:
                 return f"up to {stops['name']}"
+            if stops and not stops['covered']:
+                return 'no macOS range documented'
             extra = len(s['kext']) - 1
             return f'+{extra} by macOS version' if extra else ''
     for s in netkexts.variant_sets():
@@ -253,7 +282,7 @@ def network_rows(hw):
             for device_id, d in hits:
                 # the id goes right after the kext so a long note cannot push
                 # the most useful part of the line off the end
-                note = _kext_note(d['kext'])
+                note = _kext_note(d['kext'], device_id)
                 out.append(row(label, names.get(device_id) or d['label'], SUPPORTED,
                                f'{d["kext"]}  [{device_id}]'
                                + (f'  {note}' if note else ''),
@@ -516,6 +545,17 @@ def macos_windows(hw):
         his = [k.get('max_kernel') for k in s['kext']]
         ceiling = None if any(not h for h in his) else max(
             int(h.split('.')[0]) for h in his)
+        # a set bounded per device is bounded by the device this machine has,
+        # not by the set: Broadcom Wi-Fi stops at Mojave for one id and Ventura
+        # for another, and taking either as the set's answer is wrong for the
+        # rest. An id the documentation never names bounds nothing, because
+        # nothing here knows where it stops.
+        if s.get('device'):
+            mine = [d for d in s['device']
+                    if d['id'] in (hw.get('pci_ids') or [])
+                    or d['id'] in (hw.get('usb_ids') or [])]
+            ceiling = (min(int(d['max_kernel'].split('.')[0]) for d in mine)
+                       if mine else None)
         out.append((s['label'], min(los), ceiling))
     for s in netkexts.variant_sets():
         if s['match'] not in matched:

@@ -98,8 +98,13 @@ def report(pci, usb, source, names=None, target=None):
             model = names.get(device_id)
             print(f'      {GREEN}{device_id}{RESET}  needs {BOLD}{d["kext"]}{RESET}'
                   f'  {DIM}{model or d["label"]}, v{d["version"]}{RESET}')
-            stops = summary._kext_ceiling(d['kext'])
+            stops = summary._device_ceiling(d['kext'], device_id)
             if not stops:
+                continue
+            if not stops['covered']:
+                print(f'      {DIM}no macOS range is documented for this id; the '
+                      f'kext matches it, and nothing here states how far it '
+                      f'reaches{RESET}')
                 continue
             if target and target > stops['darwin']:
                 print(f'      {YELLOW}but not on the macOS you asked for: this stops at '

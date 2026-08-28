@@ -33,11 +33,22 @@ derleyici bunları bildirir:
 
 !!! note "Broadcom Wi-Fi, macOS 14'ten itibaren"
     `AirportBrcmFixup` Apple'ın kendi Broadcom sürücüsünün yerini almaz, onu
-    yamalar — ve Apple o sürücüyü kaldırdı: kextin README'si `AirPortBrcmNIC`'i
-    macOS 14'ten itibaren kaldırılmış olarak listeliyor ve *"[14+] Use with
-    OCLP"* diyor. Yani bu kartlar bir EFI'nin enjekte edebileceği hiçbir şeyle
-    Ventura'nın ötesine geçmiyor. Üstünde, kurulu sisteme uygulanan OpenCore
-    Legacy Patcher root patch'leri gerekiyor.
+    yamalar — ve Apple o sürücüleri teker teker kaldırdı, dolayısıyla kartların
+    hepsi aynı yerde bitmiyor. Kextin README'si her macOS için hangi sürücünün
+    hangi kimlikleri talep ettiğini sayıyor:
+
+    | Kart | Nereye kadar sürülüyor |
+    |---|---|
+    | `43a0`, `43a3`, `43ba` | **Ventura** — sonra *"[14+] Use with OCLP"*, `AirPortBrcmNIC: removed` |
+    | `4331`, `4353` | **Catalina** — `[11]`'de `AirPortBrcm4360: removed` |
+    | `432b` | **Mojave** — `[10.15]`'te `AirPortBrcm4331: removed` |
+
+    Kendi tavanının üstünde bir kart, kurulu sisteme uygulanan OpenCore Legacy
+    Patcher root patch'lerine ihtiyaç duyar; bir EFI'nin enjekte ettiği hiçbir
+    şey bunu yapamaz.
+
+    Kext başka Broadcom kimliklerini de eşliyor ve o tablo onları hiç anmıyor.
+    Onlar için builder bir aralık uydurmak yerine bunu açıkça söylüyor.
 
     Tavanın üstünde bir macOS istediğinizde builder bunu söylüyor; hiç
     yüklenmeyecek bir kexti sessizce eklemiyor.

@@ -34,11 +34,21 @@ reports them:
 
 !!! note "Broadcom Wi-Fi, from macOS 14"
     `AirportBrcmFixup` patches Apple's own Broadcom driver rather than
-    replacing it, and Apple removed that driver: the kext's README lists
-    `AirPortBrcmNIC` as removed from macOS 14 and says *"[14+] Use with
-    OCLP"*. So these cards are driven up to Ventura and no further by anything
-    an EFI can inject. Above that they need OpenCore Legacy Patcher's root
-    patches on the installed system.
+    replacing it, and Apple removed those drivers - one at a time, so the
+    cards do not all stop in the same place. The kext's README lists, per
+    macOS, which ids each driver still claims:
+
+    | Card | Driven up to |
+    |---|---|
+    | `43a0`, `43a3`, `43ba` | **Ventura** — then *"[14+] Use with OCLP"*, `AirPortBrcmNIC: removed` |
+    | `4331`, `4353` | **Catalina** — at `[11]`, `AirPortBrcm4360: removed` |
+    | `432b` | **Mojave** — at `[10.15]`, `AirPortBrcm4331: removed` |
+
+    Above its own ceiling a card needs OpenCore Legacy Patcher's root patches
+    on the installed system; nothing an EFI injects can do it.
+
+    The kext matches other Broadcom ids too, and that table never names them.
+    For those the builder says so plainly rather than inventing a range.
 
     The builder says so when you ask for a macOS past the ceiling, rather than
     adding a kext that will never load.

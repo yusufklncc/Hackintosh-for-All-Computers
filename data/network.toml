@@ -166,22 +166,53 @@ source = "acidanthera/AirportBrcmFixup README"
 [[set.kext]]
 bundle = "AirportBrcmFixup.kext"
 min_kernel = "14.0.0"
-max_kernel = "22.99.99"
-note = """'a set of patches required for non-native Airport Broadcom Wi-Fi cards'; \
-'currently this kext requires macOS 10.10 or newer'. The ceiling is the same \
-README's table of which driver each macOS ships: through [13] it lists \
-'AirPortBrcmNIC: 43ba, 43a3, 43a0 ... moved to the new location - \
-IO80211FamilyLegacy.kext/Contents/PlugIns', and then '[14+] Use with OCLP' \
-with 'AirPortBrcmNIC: removed'. This kext patches Apple's driver; from macOS \
-14 there is no longer one to patch, so above the ceiling it is not added and \
-would do nothing if it were."""
-above = """From macOS 14 these cards need OpenCore Legacy Patcher's root patches \
-on the installed system - the kext alone cannot do it, and neither can \
-anything an EFI injects. Use Ethernet during the install."""
+note = """'a set of patches required for non-native Airport Broadcom Wi-Fi \
+cards'; 'currently this kext requires macOS 10.10 or newer'. This kext patches \
+Apple's own Broadcom driver rather than replacing it, so where Apple has \
+removed the driver there is nothing left for it to do. The same README's table \
+'Matching device-id and kext name in different macOS versions' names, per \
+macOS, which ids each driver still claims - and they do not all stop in the \
+same place, so the ceiling is per device below rather than on the kext."""
 
-# optional: the device works without this kext, which only improves it. That
-# matters for working out the oldest macOS a machine can run: a kext that is
-# required drags the floor up with it, one that is an improvement does not.
+# Per device, because they differ. Read off that table: an id's ceiling is the
+# newest macOS it is still named at before the driver claiming it is listed as
+# removed. AirPortBrcm4331 goes at [10.15], AirPortBrcm4360 at [11], and
+# AirPortBrcmNIC at [14+] with 'Use with OCLP'.
+#
+# The other ids this kext matches are NOT listed here, and that is deliberate:
+# the table never names them, so this repository has no ceiling for them to
+# quote and does not invent one. tools/summary.py says so rather than implying
+# support that no document states.
+[[set.device]]
+id = "14e4:43a0"
+max_kernel = "22.99.99"
+note = "'[13] AirPortBrcmNIC: 43ba, 43a3, 43a0'; then '[14+] Use with OCLP', 'AirPortBrcmNIC: removed'"
+[[set.device]]
+id = "14e4:43a3"
+max_kernel = "22.99.99"
+note = "'[13] AirPortBrcmNIC: 43ba, 43a3, 43a0'; then '[14+] Use with OCLP', 'AirPortBrcmNIC: removed'"
+[[set.device]]
+id = "14e4:43ba"
+max_kernel = "22.99.99"
+note = "'[13] AirPortBrcmNIC: 43ba, 43a3, 43a0'; then '[14+] Use with OCLP', 'AirPortBrcmNIC: removed'"
+[[set.device]]
+id = "14e4:4331"
+max_kernel = "19.99.99"
+note = "'[10.15] AirPortBrcm4360: 4331, 4353'; at [11] 'AirPortBrcm4360: removed'"
+[[set.device]]
+id = "14e4:4353"
+max_kernel = "19.99.99"
+note = "'[10.15] AirPortBrcm4360: 4331, 4353'; at [11] 'AirPortBrcm4360: removed'"
+[[set.device]]
+id = "14e4:432b"
+max_kernel = "18.99.99"
+note = "'[10.14] AirPortBrcm4331: 4331, 4353, 432b'; at [10.15] 'AirPortBrcm4331: removed'"
+
+[set.above]
+text = """From the macOS above an id's ceiling these cards need OpenCore Legacy \
+Patcher's root patches on the installed system - the kext alone cannot do it, \
+and neither can anything an EFI injects. Use Ethernet during the install."""
+
 [[set]]
 role = "storage"
 match = "NVMeFix.kext"
