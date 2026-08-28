@@ -49,11 +49,13 @@ else is needed.
 </p>
 
 **Builder** asks the questions and writes the EFI folder - and answers none of
-them for you. **Recovery** fetches Apple's own installer, about 700 MB that
-fits where a 12 GB image never could. **USB stick** formats the drive and copies
-both folders onto it. **Report** carries a machine to another computer.
-**Compatible Hardware** lists 766 devices across 8 categories, **Kexts** the 42
-that ship inside, and **About** says where every answer came from.
+them for you. **Recovery** fetches Apple's own installer, about 700 MB that fits
+where a 12 GB image never could, and says first whether the machine you are
+building for can reach the network during the install at all. **USB stick**
+formats the drive and copies both folders onto it. **Report** carries a machine
+to another computer. **Compatible Hardware** lists 766 devices across 8
+categories, **Kexts** the 42 that ship inside, and **About** says where every
+answer came from.
 
 The window reimplements none of the builder. It runs the same program a terminal
 runs and draws its answers, so a screen cannot say something the console would

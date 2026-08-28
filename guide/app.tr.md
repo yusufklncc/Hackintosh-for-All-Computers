@@ -90,9 +90,16 @@ macOS'un kalanını kendi indiren yaklaşık 700 MB'lık bir parça. Tam imaj
 sığmadığında cevap budur: EFI'nin durduğu FAT32 bölümü 4 GB'tan büyük bir dosya
 tutamaz.
 
-Programda ağa uzanan tek şey budur ve yalnızca siz düğmeye bastığınızda çalışır.
-Liste OpenCore'un kendi kart tablosundan okunur; ilk satır Apple'ın o gün ne
-sunuyorsa onu ister.
+Kart tablosunun sunduğu her sürüm bir karo, en yenisi başta. En üstteki satır bir
+sürüm numarası yerine Apple o gün ne sunuyorsa onu ister; kart tablosu ona isim
+vermiyor, o yüzden yanındaki isim `data/mac.toml`'dan geliyor ve **Check with
+Apple** düğmesi bugünün cevabını Apple'a doğrudan sorar.
+
+Hiçbir şey indirmeden önce, kurulum yapacağınız makinenin bunu bitirip
+bitiremeyeceğini söyler: recovery macOS'u *o makinede* indirir, dolayısıyla tek
+kartı Realtek Wi-Fi olan bir dizüstü yükleyiciyi açar ve orada durur. Ethernet'i
+sürülüyorsa kablo kullanmanızı söyler. Bkz.
+[USB belleği hazırlayın](usb.md).
 
 ![Recovery paneli](https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/App/recovery.png)
 

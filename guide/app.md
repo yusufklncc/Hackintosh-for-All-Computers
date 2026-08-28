@@ -88,9 +88,16 @@ boots, connects, and downloads the rest of macOS itself. It is the answer when a
 whole image will not fit: the FAT32 partition an EFI lives on cannot hold a file
 over 4 GB.
 
-This is the one thing in the program that reaches the network, and it only runs
-when you press the button. The list is read from OpenCore's own board table, and
-the first row asks for whatever macOS Apple is serving today.
+Every release the board table offers is a tile, newest first. The top one asks
+for whatever macOS Apple is serving rather than for a version number; the board
+table will not name it, so the name beside it comes from `data/mac.toml`, and
+**Check with Apple** asks Apple directly for today's answer.
+
+Before you download anything it says whether the machine you are building for
+can actually finish: recovery pulls macOS down *on that machine*, so a laptop
+whose only card is a Realtek Wi-Fi boots the installer and then stops. If its
+Ethernet is driven it tells you to use a cable. See
+[Make the USB stick](usb.md).
 
 ![The Recovery pane](https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/App/recovery.png)
 
