@@ -1358,11 +1358,16 @@ def provenance():
     real = sum(len(d['ids']) for d in ocgen.read_toml('data/hardware.toml')['driver'])
     check('the counts are read from the files, not typed',
           str(real) in hardware['count'], hardware['count'])
+    # AMD integrated graphics moves between the two as the table fills: it is
+    # NONE while nobody has run one and REPORTED once somebody has, so pinning
+    # a frozen set here would fail the day a row is added.
+    empty = {r['area'] for r in table if r['kind'] == prov.NONE}
     check('the areas with no source are named as such',
-          {r['area'] for r in table if r['kind'] == prov.NONE} ==
-          {'Camera', 'AMD graphics kexts',
-           'Drivers OpenCore does not build'},
-          [r['area'] for r in table if r['kind'] == prov.NONE])
+          empty >= {'Camera', 'Drivers OpenCore does not build'}, sorted(empty))
+    amd = [r for r in table if r['area'] == 'AMD integrated graphics'][0]
+    rows = int(re.search(r'\d+', amd['count']).group())
+    check('and AMD integrated graphics is one of them only while it is empty',
+          (amd['kind'] == prov.NONE) == (rows == 0), (amd['kind'], amd['count']))
     import contextlib
     import io
     with contextlib.redirect_stdout(io.StringIO()) as printed:
@@ -2680,6 +2685,68 @@ def the_stick_it_writes_to():
           'ListSticks' in pass_ and 'usb-prepare' not in pass_)
 
 
+def what_it_says_about_amd_integrated():
+    """An AMD APU used to read as `unknown`, which means "no idea" to a reader.
+
+    The real answer is narrower: this repository does not cover AMD integrated
+    graphics. The kexts that drive them are maintained elsewhere, under terms
+    that forbid deriving anything here from them, so nothing in this table came
+    from that project and nothing may. Saying that is more useful than a blank,
+    and the table is shaped so somebody who has run one can fill it in.
+
+    What must not break: a discrete Radeon is a different question, answered by
+    the card table, and must not be swept into this."""
+    import gpu
+
+    table = Path('data/amdigpu.toml')
+    check('there is a table for them', table.exists())
+    said = re.sub(r'\s+', ' ', table.read_text(encoding='utf-8').replace('#', ' '))
+    check('it says nothing here was derived from that project',
+          'derived from that project' in said or 'Nothing here has been derived' in said)
+    check('and names where the drivers come from, without describing them',
+          'ChefKiss' in said)
+    check('and says what a row has to carry to earn its place',
+          'observed_by' in said and 'observed' in said)
+
+    apus = [{'name': 'AMD Radeon Graphics (Renoir)', 'id': '1002:1636'},
+            {'name': 'AMD Radeon(TM) Vega 8 Graphics', 'id': '1002:15dd'},
+            {'name': 'AMD Radeon Vega 3 Graphics', 'id': '1002:15d8'},
+            {'name': 'AMD Radeon(TM) Graphics', 'id': '1002:1638'}]
+    for apu in apus:
+        check(f"{apu['name']} reads as integrated", gpu.looks_amd_integrated(apu), apu)
+
+    cards = [{'name': 'AMD Radeon RX 6600', 'id': '1002:73ff'},
+             {'name': 'AMD Radeon RX 580', 'id': '1002:67df'},
+             {'name': 'AMD Radeon RX 7900 XTX', 'id': '1002:744c'},
+             {'name': 'AMD Radeon Pro W5700', 'id': '1002:7319'}]
+    for card in cards:
+        check(f"{card['name']} does not", not gpu.looks_amd_integrated(card), card)
+
+    # and an Intel part is not touched by any of this
+    intel = {'name': 'Intel(R) UHD Graphics 620', 'id': '8086:5917'}
+    check('an Intel iGPU is not caught by the AMD rule',
+          not gpu.looks_amd_integrated(intel))
+
+    lines, _ = gpu.report([apus[0]], 'zen')
+    said = ' '.join(lines)
+    check('the report says it is not covered here',
+          'not covered by this repository' in said, said)
+    check('and names whose work the drivers are', 'ChefKiss' in said, said)
+    check('and says the rest of the build is unaffected',
+          'rest of the build applies' in said, said)
+    check('rather than leaving a bare unknown',
+          said.count('unknown') <= 1, said)
+
+    # the About page carries the gap, and calls it a gap
+    import provenance
+    rows = [r for r in provenance.catalogue()
+            if 'integrated' in r['area'].lower() and 'AMD' in r['area']]
+    check('the About page names it as an area', rows, [r['area'] for r in rows])
+    if rows:
+        check('and says it is empty until somebody fills it',
+              'Empty until' in rows[0]['gap'], rows[0]['gap'])
+
+
 def whether_recovery_can_land():
     """Recovery downloads on the machine being installed, not on this one.
 
@@ -3368,6 +3435,7 @@ if __name__ == '__main__':
                     the_recovery_it_can_fetch,
                     the_mac_a_config_pretends_to_be,
                     whether_recovery_can_land, a_mark_for_every_macos,
+                    what_it_says_about_amd_integrated,
                     what_it_looks_like_when_it_arrives,
                     what_to_show_the_igpu_as,
                     the_stick_it_writes_to,

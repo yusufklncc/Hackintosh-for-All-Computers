@@ -72,6 +72,15 @@ def _recoveries():
     return len(recovery.choices())
 
 
+def _amd_igpu():
+    """How many AMD APUs anybody has recorded. Zero is the honest answer today."""
+    try:
+        import ocgen
+        return len(ocgen.read_toml(Path('data/amdigpu.toml')).get('igpu', []))
+    except Exception:
+        return 0
+
+
 def catalogue():
     return [
         dict(area='CPU generation', kind=DERIVED, file='profiles/cpu/',
@@ -317,12 +326,26 @@ def catalogue():
                     'is made with',
              gap='The version is the newest that board is recorded to reach, '
                  'not the image Apple hands back: the 12.7.6 board served a '
-                 '12.6 BaseSystem. One row has no version at all, because the '
-                 'board list gives it none.'),
-        dict(area='AMD graphics kexts', kind=NONE, file='-',
-             source='out of scope by request', tool='-',
-             count='-', covers='-',
-             gap='NootedRed and NootRX are excluded deliberately.'),
+                 '12.6 BaseSystem. One row has no version of its own, because '
+                 'the board list gives it none - it is named from data/mac.toml '
+                 'instead, which records what Apple served when that table was '
+                 'refreshed, and the pane offers to ask Apple for today.'),
+        # REPORTED once somebody has run one; NONE while the table is empty,
+        # because an area with no rows in it reports nothing, and claiming a
+        # kind of evidence that produced no answers is the sort of thing this
+        # page exists to prevent.
+        dict(area='AMD integrated graphics',
+             kind=REPORTED if _amd_igpu() else NONE,
+             file='data/amdigpu.toml', source='machines somebody has run',
+             tool='tools/gpu.py',
+             count=f'{_amd_igpu()} rows',
+             covers='what an AMD APU did on a machine somebody ran it on',
+             gap='Empty until somebody fills it. The kexts that drive these '
+                 'are ChefKiss\'s work, maintained outside this repository '
+                 'under terms that forbid deriving anything here from them - '
+                 'so no rule in this table came from that project, and none '
+                 'may. An APU with no row is reported as not covered here, '
+                 'which is narrower and more useful than "unknown".'),
     ]
 
 

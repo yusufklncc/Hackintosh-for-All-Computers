@@ -1,0 +1,46 @@
+# AMD integrated graphics - the APUs in Ryzen laptops and desktops.
+#
+# PROVENANCE: reported, and empty until somebody reports.
+#
+# This table has no rows in it, and that is not an oversight. The kexts that
+# drive AMD integrated graphics on macOS are maintained outside this
+# repository, by a project whose terms forbid the use of large language models
+# on it, its copies, or works derived from it. Nothing here has been derived
+# from that project, and nothing here may be.
+#
+# So the rows below are for a person to write from a machine they have run.
+# Same discipline as data/field.toml: an entry earns its place by being
+# specific about what was observed, and by naming who observed it. "Works" is
+# not an entry; "installs, and the display comes up accelerated after the kext
+# is added, at 1920x1080 on the internal panel" is.
+#
+# Until there are rows, the builder says what is true - that AMD integrated
+# graphics are outside what this repository covers, and where the drivers come
+# from - rather than the bare `unknown` it used to print, which read as "no
+# idea" when the real answer is "deliberately not covered here".
+#
+# Shape of a row:
+#
+#   [[igpu]]
+#   id = "1002:1636"            # the PCI id, vendor:device, lower case
+#   codename = "Renoir"         # what the silicon is called
+#   status = "works"            # works | works-patched | unsupported | unknown
+#   kext = ""                   # the kext that drives it, by its own filename
+#   macos = ""                  # the range it was seen working on, e.g. "12-14"
+#   observed_by = ""            # who ran it
+#   observed = ""               # exactly what they saw
+#   note = ""                   # anything a person would need to repeat it
+#
+# `status` is about this device id, not about the generation: an APU family
+# whose other members work says nothing about the one in front of you, which is
+# the same rule data/field.toml applies to Intel.
+
+# Where the drivers come from. Named so a person is not left searching, and
+# named only - nothing here describes, summarises or reproduces them.
+[source]
+project = "ChefKiss"
+url = "https://chefkiss.dev/"
+note = """AMD integrated and discrete graphics kexts for macOS are that \
+project's work. This repository does not vendor them, does not describe how \
+they work, and does not ship rules derived from them. If you run one and it \
+works, the row you write below is your own observation and belongs to you."""

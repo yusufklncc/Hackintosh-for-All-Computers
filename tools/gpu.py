@@ -102,6 +102,62 @@ def native_ids(generation):
             if generation in e.get('profiles', [])}
 
 
+AMD_IGPU = Path('data/amdigpu.toml')
+
+
+def amd_igpu(device_id):
+    """What is recorded about one AMD integrated GPU, or None.
+
+    Empty by design. The kexts that drive these are maintained outside this
+    repository under terms this repository respects, so no rule here was
+    derived from them - the table is for machines somebody has actually run.
+    See data/amdigpu.toml."""
+    if not device_id or not AMD_IGPU.exists():
+        return None
+    wanted = device_id.lower()
+    for row in ocgen.read_toml(AMD_IGPU).get('igpu', []):
+        if row.get('id', '').lower() == wanted:
+            return row
+    return None
+
+
+def amd_igpu_source():
+    """Where those drivers come from, named and nothing more."""
+    if not AMD_IGPU.exists():
+        return None
+    return ocgen.read_toml(AMD_IGPU).get('source') or None
+
+
+# How an AMD APU names itself, as against a discrete card. The processor's
+# graphics report as "Radeon Graphics" or "Radeon Vega Graphics" with no model
+# number; a card says "Radeon RX 6600". IGPU_HINTS is not reused because it is
+# Intel-shaped, and widening it would change what looks_integrated() answers
+# about Intel parts, which several fallback rules turn on.
+# "Vega 8 Graphics" and "Vega 3 Graphics" carry a number in the middle, so a
+# fixed phrase misses them; the thing they share is the word Graphics with no
+# RX in front of it.
+AMD_IGPU_MARK = 'graphics'
+AMD_IGPU_NOT = (' rx ', 'rx ', 'firepro', 'radeon pro')
+
+
+def looks_amd_integrated(device):
+    """An AMD APU's graphics, by vendor and by the way it names itself.
+
+    Discrete Radeons are in the card table and answered there; this is the one
+    on the processor, which that table has never held. A card that IS in the
+    table is never this, whatever it is called."""
+    ident = (device.get('id') or '').lower()
+    if not ident.startswith('1002:'):
+        return False
+    cards, _, _, _ = load()
+    if ident in cards:
+        return False              # a known discrete card, answered elsewhere
+    name = (device.get('name') or '').lower()
+    if AMD_IGPU_MARK not in name:
+        return False
+    return not any(no in name for no in AMD_IGPU_NOT)
+
+
 def field_igpu(cpu_name):
     """A field report about this exact processor's iGPU, if there is one.
 
@@ -268,6 +324,30 @@ def report(devices, generation=None, cpu_name=None):
             lines.append(f'      {entry["note"]}')
         if entry and entry.get('quote'):
             lines.append(f'      "{entry["quote"]}"')
+
+        # `unknown` on an AMD APU used to read as "no idea". The real answer is
+        # narrower and more useful: this repository does not cover these, and
+        # the drivers are somebody else's work.
+        if verdict == 'unknown' and looks_amd_integrated(device):
+            said = amd_igpu(device.get('id'))
+            if said:
+                lines.append(f'      {said.get("codename", "")} '
+                             f'{said.get("status", "")}'.strip())
+                if said.get('kext'):
+                    lines.append(f'      needs {said["kext"]}')
+                if said.get('observed'):
+                    lines.append(f'      {said["observed"]}, reported by '
+                                 f'{said.get("observed_by", "somebody")}')
+            else:
+                lines.append('      AMD integrated graphics are not covered by '
+                             'this repository')
+                where = amd_igpu_source()
+                if where and where.get('project'):
+                    lines.append(f'      the kexts that drive them are '
+                                 f'{where["project"]}\'s work'
+                                 + (f' - {where["url"]}' if where.get('url') else ''))
+                lines.append('      the rest of the build applies as normal; '
+                             'this is the graphics only')
         for arg in (entry or {}).get('boot_args', []):
             if arg not in args:
                 args.append(arg)
