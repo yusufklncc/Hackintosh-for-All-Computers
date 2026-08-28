@@ -14,6 +14,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Platform.Storage;
 using Shell.Engine;
 
@@ -33,6 +34,23 @@ public partial class InstallerView : UserControl
     {
         InitializeComponent();
         Pick.Click += async (_, _) => await ChooseApp();
+
+        // Dropped, which the note under the box promises and a TextBox does
+        // not do on its own. It is also the way that never argues with a file
+        // panel about what a package is.
+        DragDrop.SetAllowDrop(this, true);
+        AddHandler(DragDrop.DragOverEvent, (_, e) =>
+        {
+            e.DragEffects = e.Data.Contains(DataFormats.Files)
+                ? DragDropEffects.Copy : DragDropEffects.None;
+        });
+        AddHandler(DragDrop.DropEvent, async (_, e) =>
+        {
+            var dropped = e.Data.GetFiles()?.FirstOrDefault();
+            if (dropped is null) return;
+            var path = Local(dropped);
+            if (path is not null) await Chosen(Bundled(path));
+        });
         // a typed or dragged path counts the moment it points at something
         AppPath.LostFocus += async (_, _) => await Typed();
         AppPath.KeyDown += async (_, e) =>
@@ -77,6 +95,25 @@ public partial class InstallerView : UserControl
               + $"legacy={Legacy.IsChecked}";
     }
 
+    /// <summary>A local path for a picked item, however it can be had.
+    ///
+    /// TryGetLocalPath is the documented way and returns null for some
+    /// providers; the Uri behind it still carries the path, so that is the
+    /// second try rather than giving up on it.</summary>
+    static string? Local(IStorageItem item)
+    {
+        var said = item.TryGetLocalPath();
+        if (said is { Length: > 0 }) return said;
+        try
+        {
+            var uri = item.Path;
+            if (uri is not null && uri.IsFile && uri.LocalPath.Length > 0)
+                return uri.LocalPath;
+        }
+        catch (Exception) { }
+        return null;
+    }
+
     async Task Typed()
     {
         var said = (AppPath.Text ?? "").Trim().Trim('\'', '"');
@@ -101,8 +138,22 @@ public partial class InstallerView : UserControl
             Title = "Which installer app? Install macOS ….app",
             AllowMultiple = false,
         });
-        var path = picked.FirstOrDefault()?.TryGetLocalPath();
-        if (path is null) return;
+        var item = picked.FirstOrDefault();
+        if (item is null) return;                 // cancelled, which is fine
+
+        var path = Local(item);
+        if (path is null)
+        {
+            // Silence here is what this looked like: the panel closed, the
+            // field stayed empty, and nothing said why. A package a provider
+            // will not give a path for has to be reported, not shrugged at.
+            Plan.IsVisible = true;
+            PlanTitle.Text = "That could not be read as a path";
+            PlanText.Text = $"macOS handed back {item.Name} with no usable "
+                          + "location. Drag it onto this pane, or type the "
+                          + "path into the box above.";
+            return;
+        }
 
         // Whatever came back, end up on the bundle. A panel that treats
         // packages as directories lets somebody wander into

@@ -3002,6 +3002,18 @@ def building_an_installer_image():
           '<TextBox' in markup_app and 'Name="AppPath"' in markup_app)
     check('and a typed path is read when it is finished',
           'LostFocus' in pane and 'Key.Enter' in pane)
+    # the note says it can be dragged in, so it has to be droppable: a TextBox
+    # does not take files on its own, and a promise the pane does not keep is
+    # worse than no promise
+    check('and the pane really accepts a dropped app',
+          'DragDrop.SetAllowDrop' in pane and 'DragDrop.DropEvent' in pane)
+    check('which is what the note under the box promises',
+          'drag it in from the Finder' in markup_app)
+    # a picker that hands back nothing has to say so rather than doing nothing
+    check('and a path that cannot be read is reported, not swallowed',
+          'could not be read as a path' in pane)
+    check('with a second way of getting one before giving up',
+          'static string? Local(' in pane and 'uri.LocalPath' in pane)
 
     # macOS only, said rather than half-worked
     check('the pane knows it is macOS only',
