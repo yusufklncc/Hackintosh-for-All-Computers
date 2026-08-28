@@ -2978,8 +2978,22 @@ def building_an_installer_image():
           '--installer-script' in
           Path('gui/Engine/Inventory.cs').read_text(encoding='utf-8'))
 
-    # macOS only, said rather than half-worked
+    # An .app is a directory and a package at once. A folder picker greys it
+    # out - macOS does not offer a bundle as somewhere to descend into - so it
+    # has to be asked for as a file, by the type it is. This was the first
+    # thing that went wrong with the pane: Choose... opened, and the app could
+    # not be clicked.
     pane = Path('gui/Views/InstallerView.axaml.cs').read_text(encoding='utf-8')
+    check('the installer app is picked as a file, not as a folder',
+          'OpenFilePickerAsync' in pane and
+          'Which installer app' in pane.split('OpenFilePickerAsync')[1][:200],
+          'a folder picker cannot select an .app on macOS')
+    check('and named by the type macOS knows it as',
+          'com.apple.application-bundle' in pane)
+    check('and a path inside the bundle is walked back up to it',
+          'static string Bundled' in pane)
+
+    # macOS only, said rather than half-worked
     check('the pane knows it is macOS only',
           'IsOSPlatform(OSPlatform.OSX)' in pane)
     check('and says so instead of drawing buttons that cannot work',

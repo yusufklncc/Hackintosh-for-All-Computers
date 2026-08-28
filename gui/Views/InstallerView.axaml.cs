@@ -71,21 +71,35 @@ public partial class InstallerView : UserControl
               + $"legacy={Legacy.IsChecked}";
     }
 
+    // An .app is a directory on disk and a *package* to the Finder, which is
+    // the whole difficulty: a folder picker greys it out, because macOS does
+    // not offer a bundle as a folder to descend into. It has to be offered as
+    // a file, and named by the type it is.
+    static readonly FilePickerFileType Bundle = new("macOS installer")
+    {
+        Patterns = new[] { "*.app" },
+        AppleUniformTypeIdentifiers = new[] { "com.apple.application-bundle" },
+    };
+
     async Task ChooseApp()
     {
         var top = TopLevel.GetTopLevel(this);
         if (top is null) return;
-        // an .app is a folder, so it is picked as one
-        var picked = await top.StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
+        var picked = await top.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
         {
             Title = "Which installer app? Install macOS ….app",
             AllowMultiple = false,
+            FileTypeFilter = new[] { Bundle },
         });
         var path = picked.FirstOrDefault()?.TryGetLocalPath();
         if (path is null) return;
 
-        _app = path;
-        AppPath.Text = path;
+        // Whatever came back, end up on the bundle. A panel that treats
+        // packages as directories lets somebody wander into
+        // Contents/Resources and pick a file there, and the engine would then
+        // be handed a path that is not an app at all.
+        _app = Bundled(path);
+        AppPath.Text = _app;
         await Sized();
     }
 
@@ -112,6 +126,15 @@ public partial class InstallerView : UserControl
           + $"createinstallmedia wants about {Gib(said.Overhead)} more\n"
           + $"so the image will be {said.Gib} GiB";
         Ready();
+    }
+
+    /// <summary>The enclosing .app for a path, or the path unchanged.</summary>
+    static string Bundled(string path)
+    {
+        for (var here = new DirectoryInfo(path); here is not null; here = here.Parent)
+            if (here.Name.EndsWith(".app", StringComparison.OrdinalIgnoreCase))
+                return here.FullName;
+        return path;
     }
 
     static string Gib(long bytes) => $"{bytes / 1024.0 / 1024 / 1024:0.00} GiB";
