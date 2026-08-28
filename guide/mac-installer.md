@@ -232,23 +232,58 @@ The installer volume is untouched by any of this: Apple's installer is on
 `disk4s2` and OpenCore is on `disk4s1`, and neither knows about the other until
 the boot picker offers you both.
 
-## 8. Clone it onto a stick
+## 8. Write it to a stick
 
-Detach the image, then restore it:
+Detach the image first - nothing below should run while it is still attached:
 
 ```
 hdiutil detach /dev/disk4
-diskutil list                       # find the stick, and check twice
-sudo asr restore --source installer.dmg --target /dev/disk5 --erase --noprompt
 ```
 
-`asr` copies the partition map with it, so the stick comes out exactly as the
-image was - MBR, both partitions, the boot record and all. **`--erase` destroys
-everything on the target.** Read the device number out loud before pressing
-return.
+=== "From this Mac"
 
-Keep the `.dmg`. Next time you need this stick you are one command away from
-it, and `hdiutil convert -format UDZO` will squeeze it down for keeping.
+    `asr` is the native route and copies the partition map with it, so the
+    stick comes out exactly as the image was: MBR, both partitions, the boot
+    record and all.
+
+    ```
+    diskutil list                       # find the stick, and check twice
+    sudo asr restore --source installer.dmg --target /dev/disk5 \
+      --erase --noprompt
+    ```
+
+    **`--erase` destroys everything on the target.** Read the device number out
+    loud before pressing return.
+
+=== "From anywhere, with balenaEtcher"
+
+    `hdiutil create -type UDIF -layout NONE` writes a **flat sector image**, not
+    a wrapped disk image: the file has no `koly` trailer, it begins with the
+    partition table, and it is exactly the size that was asked for. It is
+    already what an imaging tool wants.
+
+    So rename it and write it like any other image:
+
+    ```
+    mv installer.dmg tahoe-installer.raw
+    ```
+
+    Then open it in [balenaEtcher](https://www.balena.io/etcher/) - **on
+    Windows, Linux or macOS** - pick the USB drive, and flash. The name is only
+    for Etcher's file picker; `.raw` and `.img` both work, and the bytes are
+    unchanged either way.
+
+    This is what makes the disk image worth building: the stick can be made
+    again later on a machine that has no macOS on it at all.
+
+!!! warning "The stick has to be at least as big as the image"
+    A 20 GiB image is 21.5 GB in the units a stick is sold in, so a drive
+    labelled *20 GB* is too small and a *32 GB* one is the next size that fits.
+    This is the same GiB-against-GB gap as in step 2.
+
+Keep the file. Next time you need this stick you are one flash away from it,
+and `gzip` will squeeze it right down for keeping - Etcher reads a compressed
+image as happily as a bare one.
 
 ---
 

@@ -232,22 +232,56 @@ Yükleyici birimi bunların hiçbirinden etkilenmiyor: Apple'ın yükleyicisi
 `disk4s2`'de, OpenCore `disk4s1`'de, ve açılış seçicisi ikisini birden size
 sunana kadar birbirlerinden haberleri yok.
 
-## 8. Belleğe klonlayın
+## 8. Belleğe yazın
 
-İmajı çıkarın, sonra geri yazın:
+Önce imajı çıkarın — aşağıdakilerin hiçbiri imaj takılıyken çalışmamalı:
 
 ```
 hdiutil detach /dev/disk4
-diskutil list                       # belleği bulun, iki kere kontrol edin
-sudo asr restore --source installer.dmg --target /dev/disk5 --erase --noprompt
 ```
 
-`asr` bölüm haritasını da kopyalar, yani bellek imajın olduğu gibi çıkar — MBR,
-iki bölüm, açılış kaydı, hepsi. **`--erase` hedefteki her şeyi yok eder.**
-Return'e basmadan önce aygıt numarasını sesli okuyun.
+=== "Bu Mac'ten"
 
-`.dmg`'yi saklayın. Bu belleğe bir daha ihtiyacınız olduğunda tek komut
-uzağınızda, ve `hdiutil convert -format UDZO` onu saklamak için sıkıştırır.
+    `asr` yerel yol ve bölüm haritasını da kopyalıyor, yani bellek imajın
+    olduğu gibi çıkıyor: MBR, iki bölüm, açılış kaydı, hepsi.
+
+    ```
+    diskutil list                       # belleği bulun, iki kere kontrol edin
+    sudo asr restore --source installer.dmg --target /dev/disk5 \
+      --erase --noprompt
+    ```
+
+    **`--erase` hedefteki her şeyi yok eder.** Return'e basmadan önce aygıt
+    numarasını sesli okuyun.
+
+=== "Her yerden, balenaEtcher ile"
+
+    `hdiutil create -type UDIF -layout NONE` **düz bir sektör imajı** yazıyor,
+    sarmalanmış bir disk imajı değil: dosyada `koly` kuyruğu yok, bölüm
+    tablosuyla başlıyor ve tam istenen boyutta. Yani zaten bir imaj yazma
+    aracının istediği şey.
+
+    Dolayısıyla adını değiştirip herhangi bir imaj gibi yazın:
+
+    ```
+    mv installer.dmg tahoe-installer.raw
+    ```
+
+    Sonra [balenaEtcher](https://www.balena.io/etcher/) ile açın — **Windows,
+    Linux ya da macOS'ta** — USB sürücüyü seçin ve yazın. Ad yalnızca Etcher'ın
+    dosya seçicisi için; `.raw` da `.img` de olur, baytlar iki türlü de aynı.
+
+    Disk imajı kurmayı değerli kılan şey bu: bellek daha sonra, üzerinde hiç
+    macOS olmayan bir makinede yeniden yapılabilir.
+
+!!! warning "Bellek en az imaj kadar büyük olmalı"
+    20 GiB'lik bir imaj, belleklerin satıldığı birimde 21.5 GB eder; yani
+    üzerinde *20 GB* yazan bir sürücü küçük kalır, sığan bir sonraki boy
+    *32 GB*'tır. Bu, 2. adımdaki GiB–GB farkının aynısı.
+
+Dosyayı saklayın. Bu belleğe bir daha ihtiyacınız olduğunda tek yazma
+uzağınızda, ve `gzip` onu saklamak için epeyce küçültür — Etcher sıkıştırılmış
+bir imajı da çıplak olanı okuduğu gibi okur.
 
 ---
 
