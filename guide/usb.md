@@ -93,4 +93,9 @@ Now you can boot from USB.
     Generate your own with the [Post installation](post-installation.md) steps
     before signing in to iCloud, iMessage or FaceTime.
 
+!!! tip "If you have a Mac, and the target is a legacy BIOS machine"
+    There is a third way: build a full offline installer, the EFI and legacy
+    boot onto one stick, inside a disk image you can clone again later. See
+    [Building the stick on a Mac](mac-installer.md).
+
 [Adjust BIOS settings :material-arrow-right:](bios.md){ .md-button .md-button--primary }

@@ -85,6 +85,7 @@ plugins:
             Building for another machine: Başka bir makine için kurmak
             Check compatibility: Uyumluluğu kontrol edin
             Make the USB stick: USB belleği hazırlayın
+            Building the stick on a Mac: Belleği bir Mac üzerinde hazırlamak
             macOS images: macOS imajları
             Install: Yükleme
             Adjust BIOS settings: BIOS ayarlarını yapın
@@ -130,6 +131,7 @@ nav:
       - Building for another machine: another-machine.md
       - Check compatibility: compatibility.md
       - Make the USB stick: usb.md
+      - Building the stick on a Mac: mac-installer.md
       - macOS images: images.md
   - Install:
       - Adjust BIOS settings: bios.md

@@ -91,4 +91,9 @@ Artık USB'den açabilirsiniz.
     iCloud, iMessage veya FaceTime'a girmeden önce
     [Yükleme sonrası](post-installation.md) adımlarıyla kendinizinkini üretin.
 
+!!! tip "Elinizde bir Mac varsa ve hedef legacy BIOS bir makineyse"
+    Üçüncü bir yol daha var: tam offline yükleyiciyi, EFI'yi ve legacy açılışı
+    tek bellekte, sonradan tekrar klonlayabileceğiniz bir disk imajı içinde
+    kurmak. Bkz. [Belleği bir Mac üzerinde hazırlamak](mac-installer.md).
+
 [BIOS ayarlarını yapın :material-arrow-right:](bios.md){ .md-button .md-button--primary }
