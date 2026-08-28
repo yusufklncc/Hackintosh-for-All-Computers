@@ -186,6 +186,13 @@ public static class Builder
             CreateNoWindow = true,
             StandardOutputEncoding = Encoding.UTF8,
             StandardErrorEncoding = Encoding.UTF8,
+            // Unbuffered, or a progress line is not progress. Python
+            // block-buffers stdout when it is a pipe, so a download that
+            // reports a hundred times arrived here as one burst at the end -
+            // the bar sat on "connecting..." for the whole download and then
+            // jumped to 100%. This is the whole fix, and it applies to the
+            // frozen engine too: PyInstaller ships a real Python.
+            Environment = { ["PYTHONUNBUFFERED"] = "1" },
         };
         foreach (var a in engine.Prefix) info.ArgumentList.Add(a);
         foreach (var a in arguments) info.ArgumentList.Add(a);
@@ -234,6 +241,13 @@ public static class Builder
             CreateNoWindow = true,
             StandardOutputEncoding = Encoding.UTF8,
             StandardErrorEncoding = Encoding.UTF8,
+            // Unbuffered, or a progress line is not progress. Python
+            // block-buffers stdout when it is a pipe, so a download that
+            // reports a hundred times arrived here as one burst at the end -
+            // the bar sat on "connecting..." for the whole download and then
+            // jumped to 100%. This is the whole fix, and it applies to the
+            // frozen engine too: PyInstaller ships a real Python.
+            Environment = { ["PYTHONUNBUFFERED"] = "1" },
         };
         foreach (var a in engine.Prefix) info.ArgumentList.Add(a);
         foreach (var a in arguments) info.ArgumentList.Add(a);

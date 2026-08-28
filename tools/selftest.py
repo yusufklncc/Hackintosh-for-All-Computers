@@ -2905,6 +2905,26 @@ def what_the_download_shows():
     check('and parses them the same way on every machine',
           'InvariantCulture' in pane)
 
+    # and the stream has to arrive while it is happening. Python block-buffers
+    # stdout into a pipe, so without this the whole download reported at once
+    # at the end and the bar sat on "connecting..." throughout.
+    launcher = Path('gui/Engine/Builder.cs').read_text(encoding='utf-8')
+    check('the window runs the engine unbuffered',
+          launcher.count('PYTHONUNBUFFERED') >= 2,
+          'both Run and Stream have to set it, or one of the two buffers')
+
+    # a failure has to say which failure it was
+    src = Path('tools/recovery.py').read_text(encoding='utf-8')
+    check('a bad download and a moved folder are told apart',
+          'No such file or directory' in src and 'moved or renamed it' in src)
+    check('and the bad-bytes case says downloading again is the fix',
+          'downloading it again is the fix' in src)
+    # which needs the tool's own last words kept
+    import io as _io
+    said = recovery.Progress(0.5, out=_io.StringIO())
+    said.write('Image verification failed. ([Errno 2] No such file or directory)\n')
+    check('the tool\'s last lines are kept to say it with', said.frames, said.frames)
+
     # sampled often enough to move
     every = re.search(r'def fetch\(choice, into, tool=None, every=([\d.]+)\)',
                       Path('tools/recovery.py').read_text(encoding='utf-8'))

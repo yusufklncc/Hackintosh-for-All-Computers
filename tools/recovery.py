@@ -414,8 +414,13 @@ class Progress:
         self.out = out or sys.stdout
         self.every, self.last, self.frame = every, 0.0, ''
         self.pending = ''
+        # the last lines that went past, so a caller can say what the tool
+        # complained about rather than only that it did
+        self.frames = []
 
     def say(self, text):
+        self.frames.append(text)
+        del self.frames[:-40]
         self.out.write(f'{DIM}    {text}{RESET}\n')
 
     def write(self, s):
@@ -489,8 +494,23 @@ def fetch(choice, into, tool=None, every=0.5):
 
     files = present(into)
     if code:
+        # Two very different failures arrive with the same exit code. A hash
+        # mismatch means the bytes are wrong and downloading again is the
+        # answer. A missing file means what was written is no longer where it
+        # was written - the folder was renamed or moved while the download ran,
+        # which is easy to do and impossible to guess at from "could not
+        # verify".
+        gone = any('No such file or directory' in line
+                   for line in said.frames[-12:])
+        if gone:
+            return _sweep(folder, before), (
+                f'the download finished and then {FOLDER} was not where it had '
+                f'been written. Something moved or renamed it while it ran - '
+                f'leave that folder alone until it finishes, and try again')
         return _sweep(folder, before), ('the tool could not verify what it '
-                                       'downloaded')
+                                       'downloaded against Apple\'s chunklist, '
+                                       'so the bytes are not the ones Apple '
+                                       'sent; downloading it again is the fix')
     if not files:
         return [], 'the download reported success but wrote nothing'
     return files, None
