@@ -126,40 +126,81 @@ public partial class InstallerView : UserControl
     {
         var top = TopLevel.GetTopLevel(this);
         if (top is null) return;
-        // An .app is a directory on disk and a *package* to the Finder, and
-        // both of the obvious ways to ask for one fail: a folder picker will
-        // not offer a package as somewhere to descend into, and a file picker
-        // with a type filter greys it out even when the filter names
-        // com.apple.application-bundle. So nothing is filtered - the bundle is
-        // selectable as a file - and whether it is an installer is decided
-        // here and by the engine, which has to check anyway.
-        var picked = await top.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+
+        // Not a file picker. An .app is a package, and macOS will not let one
+        // be confirmed in a panel that is choosing files - the Open button
+        // stays grey however the type filter is written. It will happily
+        // choose the folder the app is *in*, so that is what is asked for and
+        // the bundle is found here.
+        var picked = await top.StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
         {
-            Title = "Which installer app? Install macOS ….app",
+            Title = "Which folder is the installer in? Applications, say",
             AllowMultiple = false,
         });
         var item = picked.FirstOrDefault();
         if (item is null) return;                 // cancelled, which is fine
 
-        var path = Local(item);
-        if (path is null)
+        var where = Local(item);
+        if (where is null)
         {
-            // Silence here is what this looked like: the panel closed, the
-            // field stayed empty, and nothing said why. A package a provider
-            // will not give a path for has to be reported, not shrugged at.
-            Plan.IsVisible = true;
-            PlanTitle.Text = "That could not be read as a path";
-            PlanText.Text = $"macOS handed back {item.Name} with no usable "
-                          + "location. Drag it onto this pane, or type the "
-                          + "path into the box above.";
+            Trouble("That could not be read as a path",
+                    $"macOS handed back {item.Name} with no usable location. "
+                    + "Drag the app onto this pane, or type its path above.");
             return;
         }
 
-        // Whatever came back, end up on the bundle. A panel that treats
-        // packages as directories lets somebody wander into
-        // Contents/Resources and pick a file there, and the engine would then
-        // be handed a path that is not an app at all.
-        await Chosen(Bundled(path));
+        // the folder itself may be the bundle, if the panel allowed it
+        if (where.EndsWith(".app", StringComparison.OrdinalIgnoreCase))
+        {
+            await Chosen(where);
+            return;
+        }
+
+        var found = Installers(where);
+        if (found.Count == 0)
+        {
+            Trouble("No installer app in there",
+                    $"{where} holds no Install macOS ….app. The app is usually "
+                    + "in /Applications, or wherever Mist or softwareupdate "
+                    + "left it. You can also drag it onto this pane.");
+            return;
+        }
+        if (found.Count == 1)
+        {
+            await Chosen(found[0]);
+            return;
+        }
+        // more than one: say which, and let the next click settle it
+        Trouble($"{found.Count} installers in there",
+                string.Join("\n", found.Select(Path.GetFileName))
+                + "\n\nDrag the one you want onto this pane, or type its path.");
+    }
+
+    /// <summary>The installer apps directly inside a folder.
+    ///
+    /// By what makes one - a createinstallmedia inside it - rather than by the
+    /// name, which is localised and has the version stuck on the end.</summary>
+    static List<string> Installers(string folder)
+    {
+        var out_ = new List<string>();
+        try
+        {
+            foreach (var entry in Directory.EnumerateDirectories(folder, "*.app"))
+                if (File.Exists(Path.Combine(entry, "Contents", "Resources",
+                                             "createinstallmedia")))
+                    out_.Add(entry);
+        }
+        catch (Exception) { }
+        out_.Sort(StringComparer.OrdinalIgnoreCase);
+        return out_;
+    }
+
+    void Trouble(string title, string body)
+    {
+        Plan.IsVisible = true;
+        PlanTitle.Text = title;
+        PlanText.Text = body;
+        Build.IsEnabled = false;
     }
 
     /// <summary>Ask the engine what this app would take, before anything runs.</summary>
@@ -187,7 +228,7 @@ public partial class InstallerView : UserControl
         Ready();
     }
 
-    /// <summary>Take a path, from the picker or typed, and read it.</summary>
+    /// <summary>Take a path, from the picker, a drop or typed, and read it.</summary>
     async Task Chosen(string path)
     {
         _app = path;

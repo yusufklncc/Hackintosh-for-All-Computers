@@ -2984,16 +2984,20 @@ def building_an_installer_image():
     # thing that went wrong with the pane: Choose... opened, and the app could
     # not be clicked.
     pane = Path('gui/Views/InstallerView.axaml.cs').read_text(encoding='utf-8')
-    check('the installer app is picked as a file, not as a folder',
-          'OpenFilePickerAsync' in pane,
-          'a folder picker cannot select an .app on macOS')
-    # and with nothing filtered. A type filter greyed the bundle out even when
-    # it named com.apple.application-bundle, which is the second way this
-    # button failed; whether the thing chosen is an installer is decided in
-    # code, and by the engine, which has to check regardless.
-    chooser = pane.split('async Task ChooseApp()')[1][:700]
-    check('and with no type filter, which greys a bundle out',
-          'FileTypeFilter' not in chooser, chooser)
+    # macOS will not let a package be confirmed in a panel that is choosing
+    # files: Open stays grey however the type filter is written, with or
+    # without com.apple.application-bundle. Both were tried. So the button asks
+    # for the folder the app is in - which a panel is happy to return - and the
+    # bundle is found inside it.
+    chooser = pane.split('async Task ChooseApp()')[1][:1400]
+    check('the button asks for a folder, which macOS will return',
+          'OpenFolderPickerAsync' in chooser, chooser[:200])
+    check('and finds the installer inside it',
+          'Installers(' in chooser and 'static List<string> Installers' in pane)
+    check('by what makes one, not by its name, which is localised',
+          'createinstallmedia' in pane.split('static List<string> Installers')[1][:400])
+    check('and says so when there is none, or more than one',
+          'No installer app in there' in pane and 'installers in there' in pane)
     check('and a path inside the bundle is walked back up to it',
           'static string Bundled' in pane)
     # a picker and a bundle do not always get on, so a path can be typed

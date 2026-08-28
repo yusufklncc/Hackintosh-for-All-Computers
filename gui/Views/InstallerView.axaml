@@ -42,7 +42,7 @@
             </Grid>
             <TextBlock FontSize="12.5" TextWrapping="Wrap"
                        Foreground="{DynamicResource Faint}"
-                       Text="Install macOS ….app, from the App Store, softwareupdate, or Mist. You can drag it in from the Finder instead of browsing." />
+                       Text="Install macOS ….app, from the App Store, softwareupdate, or Mist. Choose… asks for the folder it is in - macOS will not let a panel confirm an app bundle - so you can also drag the app onto this pane, or type its path." />
           </StackPanel>
 
           <Border Name="Plan" Classes="panel" IsVisible="False"
