@@ -34,12 +34,35 @@ modele çevirip tekrar açmayı deneyin.
 
 ## Legacy BIOS
 
-Önce EFI bölümündeki `boot` dosyasına dokunmadan açmayı deneyin. Açılmıyorsa:
+Hangi dosyanın açtığı, onu oraya hangi önyükleyicinin koyduğuna bağlı ve iki
+cevap farklı. EFI bölümünün köküne bakın.
 
-1. `boot` dosyasının adını `boot-default` yapın.
-2. İşlemcinize göre `bootx64` (ya da `bootx32`) dosyasının adını `boot`
-   yapın.
-3. Hâlâ açılmıyorsa sırayla `boot6`, `boot7` ve `boot9` dosyalarını deneyin.
+=== "Bu depodan bir EFI (OpenCore)"
+
+    Tek bir dosya var, adı `boot`, ve onu `BootInstall` yazdı. Denenecek
+    numaralı çeşitler yok — açmıyorsa, var olan diğer şey aynı dosyanın
+    **BlockIO** derlemesi; diski olağan yoldan okuyamayan firmware için.
+
+    EFI'nizle eşleşen
+    [OpenCore sürümünden](https://github.com/acidanthera/OpenCorePkg/releases)
+    `Utilities/LegacyBoot/` klasörünü alın ve `BootInstall_X64.tool` yerine
+    `BootInstall_X64_BlockIO.tool` çalıştırın. Aynı işin macOS'tan yapılışı
+    için bkz.
+    [Belleği bir Mac üzerinde hazırlamak](mac-installer.md#6-efi-bölümünü-legacy-biosta-açılabilir-yapın).
+
+=== "Hazır bir imaj (Clover)"
+
+    `boot6`, `boot7`, `boot9` ve diğerleri **Clover'ın** üçüncü aşama
+    dosyaları, ve bu sitedeki [imajlardan](images.md) biriyle yazılmış bir
+    bellek onları taşıyor olabilir. Farklı disk denetleyicileri için
+    çeşitlemeler, dolayısıyla sırayla denemek gerçekten yapılacak bir şey:
+
+    1. `boot` dosyasının adını `boot-default` yapın.
+    2. `boot6` dosyasının adını `boot` yapın ve deneyin.
+    3. Sonra `boot7`, sonra `boot9`.
+
+    Bunların hiçbiri bir OpenCore EFI'si için geçerli değil; orada o dosyalar
+    zaten yok.
 
 ---
 

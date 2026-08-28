@@ -32,12 +32,36 @@ are here anyway, open `config.plist` in a text editor and change
 
 ## Legacy BIOS
 
-Try booting first without touching the `boot` file that comes in the EFI
-partition. If it will not boot:
+Which file boots depends on which bootloader put it there, and the two answers
+are different. Look in the root of the EFI partition.
 
-1. Rename `boot` to `boot-default`.
-2. Rename `bootx64` (or `bootx32`, according to your processor) to `boot`.
-3. If it still will not boot, try `boot6`, `boot7` and `boot9` in turn.
+=== "An EFI from this repository (OpenCore)"
+
+    There is one file, called `boot`, and `BootInstall` wrote it. There are no
+    numbered variants to try - if it does not boot, the other thing that exists
+    is the **BlockIO** build of the same file, for firmware that cannot read
+    the disk the ordinary way.
+
+    Take `Utilities/LegacyBoot/` from the
+    [OpenCore release](https://github.com/acidanthera/OpenCorePkg/releases)
+    matching your EFI, and run `BootInstall_X64_BlockIO.tool` instead of
+    `BootInstall_X64.tool`. See
+    [Building the stick on a Mac](mac-installer.md#6-make-the-efi-partition-bootable-on-a-legacy-bios),
+    which is the same job done from macOS.
+
+=== "A ready image (Clover)"
+
+    `boot6`, `boot7`, `boot9` and the rest are **Clover's** third-stage files,
+    and a stick written from one of the [images](images.md) on this site may
+    carry them. They are variants for different disk controllers, so trying
+    them in turn is a real thing to do:
+
+    1. Rename `boot` to `boot-default`.
+    2. Rename `boot6` to `boot`, and try it.
+    3. Then `boot7`, then `boot9`.
+
+    None of this applies to an OpenCore EFI, where those files are simply not
+    there.
 
 ---
 
