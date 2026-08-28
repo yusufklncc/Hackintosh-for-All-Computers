@@ -3012,7 +3012,8 @@ def building_an_installer_image():
     check('and the pane really accepts a dropped app',
           'DragDrop.SetAllowDrop' in pane and 'DragDrop.DropEvent' in pane)
     check('which is what the note under the box promises',
-          'drag it in from the Finder' in markup_app)
+          'drag the app onto this pane' in markup_app, markup_app[:0] or
+          'the note and the handler have to promise the same thing')
     # a picker that hands back nothing has to say so rather than doing nothing
     check('and a path that cannot be read is reported, not swallowed',
           'could not be read as a path' in pane)
