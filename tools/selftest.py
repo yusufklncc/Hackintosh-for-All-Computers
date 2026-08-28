@@ -2985,13 +2985,23 @@ def building_an_installer_image():
     # not be clicked.
     pane = Path('gui/Views/InstallerView.axaml.cs').read_text(encoding='utf-8')
     check('the installer app is picked as a file, not as a folder',
-          'OpenFilePickerAsync' in pane and
-          'Which installer app' in pane.split('OpenFilePickerAsync')[1][:200],
+          'OpenFilePickerAsync' in pane,
           'a folder picker cannot select an .app on macOS')
-    check('and named by the type macOS knows it as',
-          'com.apple.application-bundle' in pane)
+    # and with nothing filtered. A type filter greyed the bundle out even when
+    # it named com.apple.application-bundle, which is the second way this
+    # button failed; whether the thing chosen is an installer is decided in
+    # code, and by the engine, which has to check regardless.
+    chooser = pane.split('async Task ChooseApp()')[1][:700]
+    check('and with no type filter, which greys a bundle out',
+          'FileTypeFilter' not in chooser, chooser)
     check('and a path inside the bundle is walked back up to it',
           'static string Bundled' in pane)
+    # a picker and a bundle do not always get on, so a path can be typed
+    markup_app = Path('gui/Views/InstallerView.axaml').read_text(encoding='utf-8')
+    check('and the path can be typed or dragged in instead',
+          '<TextBox' in markup_app and 'Name="AppPath"' in markup_app)
+    check('and a typed path is read when it is finished',
+          'LostFocus' in pane and 'Key.Enter' in pane)
 
     # macOS only, said rather than half-worked
     check('the pane knows it is macOS only',

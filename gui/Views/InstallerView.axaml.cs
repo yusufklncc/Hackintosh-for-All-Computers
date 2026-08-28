@@ -33,6 +33,12 @@ public partial class InstallerView : UserControl
     {
         InitializeComponent();
         Pick.Click += async (_, _) => await ChooseApp();
+        // a typed or dragged path counts the moment it points at something
+        AppPath.LostFocus += async (_, _) => await Typed();
+        AppPath.KeyDown += async (_, e) =>
+        {
+            if (e.Key == Avalonia.Input.Key.Enter) await Typed();
+        };
         PickEfi.Click += async (_, _) => await ChooseEfi();
         PickOut.Click += async (_, _) => await ChooseOut();
         Show.Click += async (_, _) => await ShowScript();
@@ -71,25 +77,29 @@ public partial class InstallerView : UserControl
               + $"legacy={Legacy.IsChecked}";
     }
 
-    // An .app is a directory on disk and a *package* to the Finder, which is
-    // the whole difficulty: a folder picker greys it out, because macOS does
-    // not offer a bundle as a folder to descend into. It has to be offered as
-    // a file, and named by the type it is.
-    static readonly FilePickerFileType Bundle = new("macOS installer")
+    async Task Typed()
     {
-        Patterns = new[] { "*.app" },
-        AppleUniformTypeIdentifiers = new[] { "com.apple.application-bundle" },
-    };
+        var said = (AppPath.Text ?? "").Trim().Trim('\'', '"');
+        if (said.Length == 0 || said == _app) return;
+        if (!Directory.Exists(said) && !File.Exists(said)) return;
+        await Chosen(Bundled(said));
+    }
 
     async Task ChooseApp()
     {
         var top = TopLevel.GetTopLevel(this);
         if (top is null) return;
+        // An .app is a directory on disk and a *package* to the Finder, and
+        // both of the obvious ways to ask for one fail: a folder picker will
+        // not offer a package as somewhere to descend into, and a file picker
+        // with a type filter greys it out even when the filter names
+        // com.apple.application-bundle. So nothing is filtered - the bundle is
+        // selectable as a file - and whether it is an installer is decided
+        // here and by the engine, which has to check anyway.
         var picked = await top.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
         {
             Title = "Which installer app? Install macOS ….app",
             AllowMultiple = false,
-            FileTypeFilter = new[] { Bundle },
         });
         var path = picked.FirstOrDefault()?.TryGetLocalPath();
         if (path is null) return;
@@ -98,9 +108,7 @@ public partial class InstallerView : UserControl
         // packages as directories lets somebody wander into
         // Contents/Resources and pick a file there, and the engine would then
         // be handed a path that is not an app at all.
-        _app = Bundled(path);
-        AppPath.Text = _app;
-        await Sized();
+        await Chosen(Bundled(path));
     }
 
     /// <summary>Ask the engine what this app would take, before anything runs.</summary>
@@ -126,6 +134,14 @@ public partial class InstallerView : UserControl
           + $"createinstallmedia wants about {Gib(said.Overhead)} more\n"
           + $"so the image will be {said.Gib} GiB";
         Ready();
+    }
+
+    /// <summary>Take a path, from the picker or typed, and read it.</summary>
+    async Task Chosen(string path)
+    {
+        _app = path;
+        AppPath.Text = path;
+        await Sized();
     }
 
     /// <summary>The enclosing .app for a path, or the path unchanged.</summary>
