@@ -166,7 +166,18 @@ source = "acidanthera/AirportBrcmFixup README"
 [[set.kext]]
 bundle = "AirportBrcmFixup.kext"
 min_kernel = "14.0.0"
-note = "'a set of patches required for non-native Airport Broadcom Wi-Fi cards'; 'currently this kext requires macOS 10.10 or newer'"
+max_kernel = "22.99.99"
+note = """'a set of patches required for non-native Airport Broadcom Wi-Fi cards'; \
+'currently this kext requires macOS 10.10 or newer'. The ceiling is the same \
+README's table of which driver each macOS ships: through [13] it lists \
+'AirPortBrcmNIC: 43ba, 43a3, 43a0 ... moved to the new location - \
+IO80211FamilyLegacy.kext/Contents/PlugIns', and then '[14+] Use with OCLP' \
+with 'AirPortBrcmNIC: removed'. This kext patches Apple's driver; from macOS \
+14 there is no longer one to patch, so above the ceiling it is not added and \
+would do nothing if it were."""
+above = """From macOS 14 these cards need OpenCore Legacy Patcher's root patches \
+on the installed system - the kext alone cannot do it, and neither can \
+anything an EFI injects. Use Ethernet during the install."""
 
 # optional: the device works without this kext, which only improves it. That
 # matters for working out the oldest macOS a machine can run: a kext that is

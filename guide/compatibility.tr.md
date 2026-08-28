@@ -31,6 +31,22 @@ derleyici bunları bildirir:
 
     *Gözlemleyen: yusufklncc.*
 
+!!! note "Broadcom Wi-Fi, macOS 14'ten itibaren"
+    `AirportBrcmFixup` Apple'ın kendi Broadcom sürücüsünün yerini almaz, onu
+    yamalar — ve Apple o sürücüyü kaldırdı: kextin README'si `AirPortBrcmNIC`'i
+    macOS 14'ten itibaren kaldırılmış olarak listeliyor ve *"[14+] Use with
+    OCLP"* diyor. Yani bu kartlar bir EFI'nin enjekte edebileceği hiçbir şeyle
+    Ventura'nın ötesine geçmiyor. Üstünde, kurulu sisteme uygulanan OpenCore
+    Legacy Patcher root patch'leri gerekiyor.
+
+    Tavanın üstünde bir macOS istediğinizde builder bunu söylüyor; hiç
+    yüklenmeyecek bir kexti sessizce eklemiyor.
+
+    *Dell Wireless 1820A üzerinde yusufklncc'nin gözlemi: Sequoia recovery'de
+    eski sürücüler elle enjekte edilince Wi-Fi ikonu çıkıyor, bağlı olduğunu
+    bildiriyor ve hiçbir ağ listelemiyor. Recovery'de root patch'lerin hiçbiri
+    olmadığı için bu beklenen davranış.*
+
 Realtek tabanlı Wi-Fi kartlarının macOS sürücüsü hiç yok. Dizüstünüzde o varsa,
 kurulum sırasında Ethernet kablosu kullanmak yolun etrafından dolaşmanın yoludur
 — bkz. [USB belleği hazırlayın](usb.md).

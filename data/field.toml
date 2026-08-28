@@ -51,3 +51,23 @@ observed = "a published EFI for an HP Pavilion 15 with an i5-1035G1, running Ven
 note = """WhateverGreen lists the Ice Lake UHD/Iris Plus G1 as unsupported and \
 states no fake for it. This is one config that does it and reports working, \
 not a sentence from the project that writes the driver."""
+
+# Network cards, where a kext's own documentation bounds it and somebody has
+# run the combination past that bound. The bound belongs in data/network.toml,
+# which quotes the project; what belongs here is what actually happened.
+[[network]]
+id = "14e4:43a3"
+card = "Dell Wireless 1820A (BCM4350)"
+macos = "15"
+status = "unsupported"
+observed_by = "yusufklncc"
+observed = """Sequoia recovery shows no Wi-Fi at all with AirportBrcmFixup \
+alone. With IO80211FamilyLegacy.kext and its AirPortBrcmNIC plug-in injected \
+as well, bounded 23.0.0 to 24.9.9, the Wi-Fi icon appears and reports being \
+connected, but it lists no networks and has no internet."""
+note = """Consistent with the kext's own README, which lists AirPortBrcmNIC \
+as removed from macOS 14 and says '[14+] Use with OCLP'; and with \
+data/oclp.toml, which records Legacy Wireless Patches as needed from 12.0. \
+Injecting the kexts creates the interface; the root patches that make it work \
+live on the installed system, and a recovery environment has none of them. \
+Ethernet during the install is the way through."""

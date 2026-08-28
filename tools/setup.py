@@ -1212,8 +1212,12 @@ def main():
     if matched or storage_kexts or input_kexts:
         if matched and not manual:
             print(f'\n{BOLD}Network kexts{RESET}')
+            # the macOS asked for at question 5, so a kext whose set stops
+            # below it can say so here rather than being added and then never
+            # loaded
             advise.report(hw.get('pci_ids', []), hw.get('usb_ids', []),
-                          source or 'the ids you passed', hw.get('device_names'))
+                          source or 'the ids you passed', hw.get('device_names'),
+                          target=target)
         mode = ask(0, 0, 'Add these to the EFI?',
                    [('all', 'Yes, for every macOS version they support'),
                     ('one', 'Yes, for one macOS version only'),

@@ -32,6 +32,22 @@ reports them:
 
     *Observed by yusufklncc.*
 
+!!! note "Broadcom Wi-Fi, from macOS 14"
+    `AirportBrcmFixup` patches Apple's own Broadcom driver rather than
+    replacing it, and Apple removed that driver: the kext's README lists
+    `AirPortBrcmNIC` as removed from macOS 14 and says *"[14+] Use with
+    OCLP"*. So these cards are driven up to Ventura and no further by anything
+    an EFI can inject. Above that they need OpenCore Legacy Patcher's root
+    patches on the installed system.
+
+    The builder says so when you ask for a macOS past the ceiling, rather than
+    adding a kext that will never load.
+
+    *Observed on a Dell Wireless 1820A by yusufklncc: in a Sequoia recovery the
+    Wi-Fi icon appears once the legacy drivers are injected by hand, reports
+    being connected, and lists no networks. A recovery has none of the root
+    patches, so this is expected.*
+
 Realtek-based Wi-Fi cards have no macOS driver at all. If that is what your
 laptop has, an Ethernet cable during the install is the way around it - see
 [Make the USB stick](usb.md).

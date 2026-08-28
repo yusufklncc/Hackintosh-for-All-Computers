@@ -13,6 +13,7 @@ has to be replaced, and a vague answer there costs somebody a day.
 """
 import argparse
 import collections
+import textwrap
 import os
 import sys
 from pathlib import Path
@@ -20,6 +21,7 @@ from pathlib import Path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import detect
 import ocgen
+import summary
 import ui
 
 TABLE = Path('data/hardware.toml')
@@ -54,8 +56,14 @@ def matched_kexts(pci, usb):
     return out
 
 
-def report(pci, usb, source, names=None):
-    """Print what the given devices need. Shared with setup.py."""
+def report(pci, usb, source, names=None, target=None):
+    """Print what the given devices need. Shared with setup.py.
+
+    `target` is the macOS being installed, as a Darwin major. A kext whose set
+    stops below it is not going to help: it is added with a MaxKernel that
+    release is past, so OpenCore never loads it and the card is simply absent.
+    That used to be silent - a Broadcom Wi-Fi card read as supported, the kext
+    went in, and Sonoma showed no Wi-Fi at all with nothing having said why."""
     index = load_table()
     names = names or {}
     hits = collections.defaultdict(list)
@@ -90,6 +98,17 @@ def report(pci, usb, source, names=None):
             model = names.get(device_id)
             print(f'      {GREEN}{device_id}{RESET}  needs {BOLD}{d["kext"]}{RESET}'
                   f'  {DIM}{model or d["label"]}, v{d["version"]}{RESET}')
+            stops = summary._kext_ceiling(d['kext'])
+            if not stops:
+                continue
+            if target and target > stops['darwin']:
+                print(f'      {YELLOW}but not on the macOS you asked for: this stops at '
+                      f'{stops["name"]}{RESET}')
+                for line in textwrap.wrap(stops['above'], 66):
+                    print(f'      {DIM}{line}{RESET}')
+            elif stops['name']:
+                print(f'      {DIM}up to {stops["name"]}; above that see the note in '
+                      f'data/network.toml{RESET}')
 
     if [r for r in hits if len({d['kext'] for _, d in hits[r]}) > 1]:
         print(f'\n  {DIM}Some devices match more than one kext, because they target different\n'

@@ -177,10 +177,38 @@ def audio_row(hw):
                note=f'{layouts} layout' + ('s to try' if layouts != 1 else ''))
 
 
+def _kext_ceiling(match):
+    """The newest macOS a driver set still applies to, and what is needed above.
+
+    A set whose only kext has a max_kernel stops there. Saying "supported" past
+    that is the claim this exists to stop: a Broadcom Wi-Fi card reads as
+    supported, the kext goes in, and on Sonoma there is no Apple driver left
+    for it to patch - so the card is simply absent, with nothing having said
+    so. data/network.toml carries the bound and the sentence."""
+    for s in netkexts.sets():
+        if s['match'] != match:
+            continue
+        tops = [k.get('max_kernel') for k in s['kext']]
+        # only when every kext in the set stops: a set that swaps one kext for
+        # another by version covers the whole range between them
+        if not tops or not all(tops):
+            return None
+        top = max(tops, key=lambda v: [int(n) for n in v.split('.')])
+        darwin = int(top.split('.')[0])
+        name = next((r['name'] for r in netkexts.releases()
+                     if r['darwin'] == darwin), None)
+        above = next((k.get('above') for k in s['kext'] if k.get('above')), '')
+        return {'darwin': darwin, 'name': name, 'above': above}
+    return None
+
+
 def _kext_note(match):
     """What else the driver set for a kext brings, from data/network.toml."""
     for s in netkexts.sets():
         if s['match'] == match:
+            stops = _kext_ceiling(match)
+            if stops and stops['name']:
+                return f"up to {stops['name']}"
             extra = len(s['kext']) - 1
             return f'+{extra} by macOS version' if extra else ''
     for s in netkexts.variant_sets():

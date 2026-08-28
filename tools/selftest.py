@@ -1291,7 +1291,14 @@ def macos_window():
     floor, ceiling = summary.macos_range(e570)
     check('the oldest is the highest floor of them all',
           floor[1] == 16 and floor[0] == 'Intel graphics', floor)
-    check('and with nothing capped, there is no ceiling', ceiling is None, ceiling)
+    # This used to read "with nothing capped, there is no ceiling". Something
+    # is capped now: AirportBrcmFixup patches Apple's Broadcom driver, and its
+    # own README lists that driver as removed from macOS 14 ("[14+] Use with
+    # OCLP"), so data/network.toml stops the set at Ventura. The card in this
+    # machine is a DW1820A, so the machine really does top out there - and
+    # saying so is the point. The part that sets it has to be named.
+    check('the newest is the lowest ceiling of them all',
+          ceiling and ceiling[0] == 'Broadcom Wi-Fi' and ceiling[2] == 22, ceiling)
 
     haswell = dict(e570, generation='haswell',
                    gpu_devices=[{'id': '8086:0a16', 'name': 'Intel HD Graphics 4400'}])
@@ -1306,7 +1313,11 @@ def macos_window():
           summary.macos_windows(cml))
 
     rendered = '\n'.join(summary.render(e570, 'test'))
-    check('the range reaches the screen', 'Sierra 10.12 or newer' in rendered)
+    check('the range reaches the screen', 'Sierra 10.12 to Ventura 13' in rendered,
+          [l for l in rendered.splitlines() if 'macOS' in l])
+    check('and the kext that stops it says so on its own row',
+          'up to Ventura' in rendered,
+          [l for l in rendered.splitlines() if 'Brcm' in l])
     check('with what these tables cannot see said next to it',
           'SMBIOS' in rendered and 'discrete card' in rendered)
 
@@ -2747,6 +2758,92 @@ def what_it_says_about_amd_integrated():
               'Empty until' in rows[0]['gap'], rows[0]['gap'])
 
 
+def a_kext_that_stops_below_the_target():
+    """A kext bound below the macOS asked for has to say so, not be added quietly.
+
+    The failure this exists for: a DW1820A read as supported, AirportBrcmFixup
+    went into the config, and Sequoia came up with no Wi-Fi at all and nothing
+    having said why. The kext patches Apple's own Broadcom driver, and Apple
+    removed that driver - the kext's own README lists it as removed from macOS
+    14 and says "[14+] Use with OCLP". A MaxKernel that release is past means
+    OpenCore never loads it, so the card is simply absent.
+
+    Reported rather than guessed: the bound is in data/network.toml, quoting
+    the project that published it."""
+    import advise
+    import netkexts
+    import summary
+
+    sets = {s['match']: s for s in netkexts.sets()}
+    brcm = sets.get('AirportBrcmFixup.kext')
+    check('the Broadcom Wi-Fi set is there', brcm)
+    if not brcm:
+        return
+    only = brcm['kext'][0]
+    check('and it stops at a macOS rather than running on for ever',
+          only.get('max_kernel'), only)
+    check('at Ventura, which is where the driver it patches was removed',
+          only.get('max_kernel', '').startswith('22.'), only.get('max_kernel'))
+    check('and quotes the README for it, rather than asserting it',
+          '[14+] Use with OCLP' in (only.get('note') or ''), only.get('note'))
+    check('and says what is needed above it',
+          'OpenCore Legacy Patcher' in (only.get('above') or ''), only.get('above'))
+    check('including that an EFI cannot do it',
+          'anything an EFI injects' in (only.get('above') or ''))
+
+    stops = summary._kext_ceiling('AirportBrcmFixup.kext')
+    check('the ceiling is read back as a release name', stops
+          and stops['name'] == 'Ventura', stops)
+    # a set that swaps one kext for another by version is not capped by the
+    # one that stops first - Broadcom Bluetooth runs from 10.11 to now across
+    # five bundles, and calling that "up to Mojave" would be wrong
+    check('a set that hands over between kexts is not read as capped',
+          summary._kext_ceiling('BrcmPatchRAM3.kext') is None,
+          summary._kext_ceiling('BrcmPatchRAM3.kext'))
+
+    import contextlib
+    import io
+
+    def said(target):
+        with contextlib.redirect_stdout(io.StringIO()) as out:
+            advise.report(['14e4:43a3'], [], 'a test', target=target)
+        # the sentence is wrapped to the console width, so a phrase in it is
+        # split across lines and a plain substring search misses
+        return re.sub(r'\s+', ' ', out.getvalue())
+
+    above = said(24)                     # Sequoia
+    check('asking for a macOS past it is told so',
+          'not on the macOS you asked for' in above and 'Ventura' in above, above)
+    check('and told to use Ethernet for the install',
+          'Ethernet during the install' in above)
+    within = said(22)                    # Ventura
+    check('asking for one it covers is not warned off',
+          'not on the macOS you asked for' not in within, within)
+    check('but still told where it stops', 'up to Ventura' in within, within)
+
+    # the builder has to pass the answer through, or none of this ever fires
+    flow = Path('tools/setup.py').read_text(encoding='utf-8')
+    check('the builder passes the macOS it asked for into the report',
+          'target=target' in flow)
+
+    # and the machine's own range moves with it
+    e570, _ = detect.read_report('tools/fixtures/thinkpad-e570.json')
+    _, ceiling = summary.macos_range(e570)
+    check('a machine with that card reads as topping out at Ventura',
+          ceiling and ceiling[0] == 'Broadcom Wi-Fi' and ceiling[2] == 22, ceiling)
+
+    # what was actually seen, recorded as an observation rather than a rule
+    field = ocgen.read_toml('data/field.toml')
+    seen = [r for r in field.get('network', []) if r.get('id') == '14e4:43a3']
+    check('and somebody ran it, and said what they saw', seen, seen)
+    if seen:
+        check('naming who', seen[0].get('observed_by'), seen[0])
+        check('and that the icon appears without working',
+              'lists no networks' in seen[0].get('observed', ''), seen[0])
+        check('and that a recovery has none of the patches anyway',
+              'recovery environment has none' in seen[0].get('note', ''), seen[0])
+
+
 def what_the_download_shows():
     """The bar is drawn from somebody else's print statement.
 
@@ -3506,6 +3603,7 @@ if __name__ == '__main__':
                     whether_recovery_can_land, a_mark_for_every_macos,
                     what_it_says_about_amd_integrated,
                     what_the_download_shows,
+                    a_kext_that_stops_below_the_target,
                     what_it_looks_like_when_it_arrives,
                     what_to_show_the_igpu_as,
                     the_stick_it_writes_to,
