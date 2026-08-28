@@ -1,0 +1,121 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:v="clr-namespace:Shell.Views"
+             x:Class="Shell.Views.InstallerView"
+             x:DataType="v:InstallerView">
+  <ScrollViewer>
+    <StackPanel Margin="28,24" Spacing="20" MaxWidth="820" HorizontalAlignment="Left">
+      <StackPanel Spacing="8">
+        <TextBlock Classes="eyebrow" Text="INSTALLER IMAGE" />
+        <TextBlock FontSize="15" TextWrapping="Wrap" Foreground="{DynamicResource Ink}"
+                   Text="Turn an installer app into a whole bootable image, in one run." />
+        <TextBlock FontSize="13.5" TextWrapping="Wrap" Foreground="{DynamicResource Muted}"
+                   Text="Apple's installer, the EFI folder and legacy BIOS boot, on one image sized to fit. What comes out is a flat sector image - balenaEtcher writes it to a stick from Windows, Linux or macOS, so the stick can be made again later on a machine with no macOS on it." />
+      </StackPanel>
+
+      <!-- Everything here rests on createinstallmedia, which is an Apple
+           binary inside the app and runs on macOS only. Saying so beats a
+           pane that half-works. -->
+      <Border Name="NotHere" Classes="panel" IsVisible="False">
+        <StackPanel Spacing="6">
+          <TextBlock FontSize="14" FontWeight="SemiBold"
+                     Foreground="{DynamicResource Ink}"
+                     Text="This one needs a Mac" />
+          <TextBlock Name="NotHereWhy" FontSize="13" TextWrapping="Wrap"
+                     Foreground="{DynamicResource Muted}" />
+        </StackPanel>
+      </Border>
+
+      <Border Name="Work" Classes="panel" IsVisible="False">
+        <StackPanel Spacing="14">
+          <StackPanel Spacing="6">
+            <TextBlock Classes="eyebrow" Text="THE INSTALLER APP" />
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+              <TextBlock Grid.Column="0" Name="AppPath" Classes="mono"
+                         VerticalAlignment="Center" TextTrimming="CharacterEllipsis"
+                         Text="none chosen" />
+              <Button Grid.Column="1" Name="Pick" Content="Choose…" />
+            </Grid>
+            <TextBlock FontSize="12.5" TextWrapping="Wrap"
+                       Foreground="{DynamicResource Faint}"
+                       Text="Install macOS ….app, from the App Store, softwareupdate, or Mist." />
+          </StackPanel>
+
+          <Border Name="Plan" Classes="panel" IsVisible="False"
+                  Background="{DynamicResource Surface2}">
+            <StackPanel Spacing="4">
+              <TextBlock Name="PlanTitle" FontSize="14" FontWeight="SemiBold"
+                         Foreground="{DynamicResource Ink}" />
+              <TextBlock Name="PlanText" Classes="mono" FontSize="12.5"
+                         TextWrapping="Wrap" />
+            </StackPanel>
+          </Border>
+
+          <StackPanel Spacing="6">
+            <TextBlock Classes="eyebrow" Text="THE EFI FOLDER" />
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+              <TextBlock Grid.Column="0" Name="EfiPath" Classes="mono"
+                         VerticalAlignment="Center" TextTrimming="CharacterEllipsis"
+                         Text="none chosen - the image will carry the installer only" />
+              <Button Grid.Column="1" Name="PickEfi" Content="Choose…" />
+            </Grid>
+          </StackPanel>
+
+          <StackPanel Spacing="6">
+            <TextBlock Classes="eyebrow" Text="WRITE THE IMAGE TO" />
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+              <TextBlock Grid.Column="0" Name="OutPath" Classes="mono"
+                         VerticalAlignment="Center" TextTrimming="CharacterEllipsis"
+                         Text="none chosen" />
+              <Button Grid.Column="1" Name="PickOut" Content="Choose…" />
+            </Grid>
+          </StackPanel>
+
+          <CheckBox Name="Legacy" IsChecked="True"
+                    Content="Make it bootable on a legacy BIOS machine too" />
+          <TextBlock FontSize="12.5" TextWrapping="Wrap"
+                     Foreground="{DynamicResource Faint}"
+                     Text="OpenCore's own DuetPkg, from the version this program carries. A UEFI machine does not need it and is not harmed by it." />
+
+          <!-- Said before the button, not after it: an unsigned program asking
+               for an administrator password should say what it is for and what
+               it will run, before it asks. -->
+          <Border Classes="verdict warn" CornerRadius="8" Padding="12,10">
+            <StackPanel Spacing="4">
+              <TextBlock Classes="state" FontSize="12.5" FontWeight="SemiBold"
+                         Text="macOS will ask for your administrator password" />
+              <TextBlock FontSize="12.5" TextWrapping="Wrap"
+                         Foreground="{DynamicResource Muted}"
+                         Text="Two things here cannot be done without it: createinstallmedia blesses a volume, and BootInstall writes a master boot record. Press Show what will run to read the exact script before you approve it - it is the same text either way." />
+              <Button Name="Show" Content="Show what will run"
+                      HorizontalAlignment="Left" Margin="0,4,0,0" />
+            </StackPanel>
+          </Border>
+
+          <TextBox Name="Script" IsVisible="False" IsReadOnly="True"
+                   FontFamily="{DynamicResource Mono}" FontSize="12"
+                   AcceptsReturn="True" TextWrapping="NoWrap"
+                   MaxHeight="200" />
+
+          <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Left">
+            <Button Name="Build" Content="Build the image" Classes="accent"
+                    IsEnabled="False" />
+          </StackPanel>
+        </StackPanel>
+      </Border>
+
+      <Border Name="Result" Classes="panel" IsVisible="False">
+        <StackPanel Spacing="8">
+          <TextBlock Name="ResultTitle" FontSize="15" FontWeight="SemiBold"
+                     Foreground="{DynamicResource Ink}" />
+          <ProgressBar Name="Bar" Height="6" CornerRadius="3" IsIndeterminate="True"
+                       Background="{DynamicResource Chrome}"
+                       Foreground="{DynamicResource Accent}" IsVisible="False" />
+          <TextBlock Name="ResultText" Classes="mono" TextWrapping="Wrap" />
+          <TextBlock Name="ResultNext" FontSize="12.5" TextWrapping="Wrap"
+                     Foreground="{DynamicResource Muted}" IsVisible="False" />
+        </StackPanel>
+      </Border>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

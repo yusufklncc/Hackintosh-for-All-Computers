@@ -60,8 +60,9 @@ public partial class App : Application
                 try
                 {
                     Console.WriteLine("drive: " + await window.DriveBuilder());
-                    foreach (var pane in new[] { "report", "recovery", "stick",
-                                                 "devices", "kexts", "about" })
+                    foreach (var pane in new[] { "report", "recovery", "installer",
+                                                 "stick", "devices", "kexts",
+                                                 "about" })
                     {
                         await window.Show(pane);
                         // the report pane's whole job is behind a button, so
@@ -78,6 +79,13 @@ public partial class App : Application
                         // says so rather than offering the disk it booted from.
                         if (pane == "stick")
                             Console.WriteLine("stick: " + await window.ListSticks());
+                        // asked what it would do, never asked to do it: its
+                        // button copies twelve gigabytes and wants a password,
+                        // and neither belongs in a build. On a runner that is
+                        // not a Mac the answer is that it says so, which is
+                        // the half worth proving anyway.
+                        if (pane == "installer")
+                            Console.WriteLine("installer: " + await window.InstallerState());
                         // one turn of the loop, so what was just loaded is laid
                         // out before its picture is taken
                         await Task.Delay(1200);

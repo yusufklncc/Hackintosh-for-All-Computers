@@ -10,7 +10,8 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
         foreach (var nav in new[] { ToMachine, ToBuilder, ToReport, ToRecovery,
-                                    ToStick, ToDevices, ToKexts, ToAbout })
+                                    ToInstaller, ToStick, ToDevices, ToKexts,
+                                    ToAbout })
             nav.IsCheckedChanged += async (_, _) => await Swap();
         _ = Standing();
     }
@@ -38,6 +39,7 @@ public partial class MainWindow : Window
         BuilderPane.IsVisible = ToBuilder.IsChecked == true;
         ReportPane.IsVisible = ToReport.IsChecked == true;
         RecoveryPane.IsVisible = ToRecovery.IsChecked == true;
+        InstallerPane.IsVisible = ToInstaller.IsChecked == true;
         StickPane.IsVisible = ToStick.IsChecked == true;
         DevicesPane.IsVisible = ToDevices.IsChecked == true;
         KextsPane.IsVisible = ToKexts.IsChecked == true;
@@ -45,6 +47,7 @@ public partial class MainWindow : Window
         // read on first sight rather than at startup: opening the program
         // should not wait on three documents nobody has asked for yet
         if (ToRecovery.IsChecked == true) await RecoveryPane.Load();
+        if (ToInstaller.IsChecked == true) await InstallerPane.Load();
         if (ToStick.IsChecked == true) await StickPane.Load();
         if (ToDevices.IsChecked == true) await DevicesPane.Load();
         if (ToKexts.IsChecked == true) await KextsPane.Load();
@@ -65,6 +68,7 @@ public partial class MainWindow : Window
     public Task<string> ListRecoveries() => RecoveryPane.ListForRender();
 
     public Task<string> ListSticks() => StickPane.ListForRender();
+    public Task<string> InstallerState() => InstallerPane.StateForRender();
 
     public Task<string> DriveBuilder() => BuilderPane.DriveToEnd();
 
@@ -73,7 +77,8 @@ public partial class MainWindow : Window
     {
         var nav = pane switch
         {
-            "report" => ToReport, "recovery" => ToRecovery, "stick" => ToStick,
+            "report" => ToReport, "recovery" => ToRecovery,
+            "installer" => ToInstaller, "stick" => ToStick,
             "devices" => ToDevices, "kexts" => ToKexts,
             "about" => ToAbout,
             "builder" => ToBuilder, _ => ToMachine,

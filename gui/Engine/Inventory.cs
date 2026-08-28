@@ -241,6 +241,7 @@ public sealed class StickList
     [JsonPropertyName("sticks")] public List<Stick> Sticks { get; set; } = new();
 }
 
+[JsonSerializable(typeof(InstallerPlan))]
 [JsonSerializable(typeof(Newest))]
 [JsonSerializable(typeof(StickList))]
 [JsonSerializable(typeof(RecoveryList))]
@@ -263,8 +264,48 @@ public sealed class Newest
     [JsonPropertyName("complaint")] public string Complaint { get; set; } = "";
 }
 
+/// <summary>What building an installer image from one app would take.
+///
+/// Asked before anything is created, so the size is known while it can still
+/// be changed rather than after a twenty minute copy refuses.</summary>
+public sealed class InstallerPlan
+{
+    [JsonPropertyName("available")] public bool Available { get; set; }
+    [JsonPropertyName("why")] public string Why { get; set; } = "";
+    [JsonPropertyName("name")] public string Name { get; set; } = "";
+    [JsonPropertyName("version")] public string Version { get; set; } = "";
+    [JsonPropertyName("app")] public long App { get; set; }
+    [JsonPropertyName("overhead")] public long Overhead { get; set; }
+    [JsonPropertyName("gib")] public int Gib { get; set; }
+}
+
 public static class Inventory
 {
+    /// <summary>Sizes for one installer app. Reads nothing and writes nothing.</summary>
+    public static async Task<(InstallerPlan? said, string complaint)> InstallerPlan(
+        Located engine, string app)
+    {
+        var (output, error, code) = await Builder.Run(engine, "--installer-plan", app);
+        try
+        {
+            var got = JsonSerializer.Deserialize(output, Carried.Default.InstallerPlan);
+            if (got is not null) return (got, "");
+            return (null, Said(error, code));
+        }
+        catch (JsonException e) { return (null, e.Message); }
+    }
+
+    /// <summary>The privileged half as text, so it can be read before it runs.</summary>
+    public static async Task<(string text, string complaint)> InstallerScript(
+        Located engine, string app, bool legacy)
+    {
+        var arguments = new List<string> { "--make-installer", app,
+                                           "--installer-script" };
+        if (!legacy) arguments.Add("--no-legacy");
+        var (output, error, code) = await Builder.Run(engine, arguments.ToArray());
+        return code == 0 ? (output, "") : ("", Said(error, code));
+    }
+
     /// <summary>Asks Apple. Opens a connection, so only a button calls it.</summary>
     public static async Task<(RecoveryChoice? said, string complaint)> Newest(Located engine)
     {

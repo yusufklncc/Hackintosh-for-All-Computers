@@ -52,7 +52,18 @@ FOLDERS = ('OC/Drivers', 'OC/Tools')
 # recovery.py drives it; boards.json is where the version list comes from, so
 # taking the script without it would leave us keeping a list of our own.
 PROGRAMS = ('ocvalidate', 'macserial')
-SCRIPTS = {'macrecovery': ('macrecovery.py', 'boards.json', 'README.md')}
+# LegacyBoot is DuetPkg: what makes a BIOS machine able to boot an EFI at all.
+# The .tool scripts are driven rather than reimplemented - they write the MBR
+# and patch a boot sector, and doing that by hand from a copy of what they do
+# is how the two come to disagree. They must travel with the OpenCore they
+# belong to, so they are vendored with the rest of it and not fetched later.
+SCRIPTS = {'macrecovery': ('macrecovery.py', 'boards.json', 'README.md'),
+           'LegacyBoot': ('boot0', 'boot1f32', 'bootX64', 'bootIA32',
+                          'BootInstallBase.sh', 'BootInstall_X64.tool',
+                          'BootInstall_X64_BlockIO.tool', 'README.md')}
+# and the ones that have to be runnable when they land
+RUNNABLE = {'LegacyBoot': ('BootInstallBase.sh', 'BootInstall_X64.tool',
+                           'BootInstall_X64_BlockIO.tool')}
 
 
 def binaries():
@@ -164,7 +175,12 @@ def apply(version, release, changes):
         target = into / 'Utilities' / tool
         target.mkdir(parents=True, exist_ok=True)
         for name in wanted:
-            shutil.copy2(release / 'Utilities' / tool / name, target / name)
+            landed = target / name
+            shutil.copy2(release / 'Utilities' / tool / name, landed)
+            # a script nobody can execute is a script that fails on the machine
+            # it was needed on, and git records the bit
+            if name in RUNNABLE.get(tool, ()):
+                landed.chmod(0o755)
     for tool in PROGRAMS:
         target = into / 'Utilities' / tool
         target.mkdir(parents=True, exist_ok=True)

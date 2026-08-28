@@ -538,6 +538,20 @@ def main():
     ap.add_argument('--usb-prepare', metavar='DEVICE',
                     help='ERASE that removable disk and format it FAT32 under '
                          'GPT; only ever a disk --usb-list offered')
+    ap.add_argument('--installer-plan', metavar='APP',
+                    help='what building an installer image from that app would '
+                         'take; macOS only, and it says so')
+    ap.add_argument('--make-installer', metavar='APP',
+                    help='build the whole installer image from that app')
+    ap.add_argument('--installer-out', metavar='FILE',
+                    help='where --make-installer writes the image')
+    ap.add_argument('--installer-efi', metavar='DIR',
+                    help='the EFI folder to put on the image')
+    ap.add_argument('--no-legacy', action='store_true',
+                    help='skip the DuetPkg step a BIOS machine needs')
+    ap.add_argument('--installer-script', action='store_true',
+                    help='print the part of --make-installer that needs root, '
+                         'instead of running any of it')
     ap.add_argument('--recovery-newest', action='store_true',
                     help="ask Apple which macOS it is serving now; this opens "
                          "a connection, which nothing else in the listing does")
@@ -573,7 +587,8 @@ def main():
         # tables inside its own unpacked copy, where they never are.
         for opt in ('machine', 'report', 'usb_map', 'acpi_tables',
                     'recovery_to', 'usb_place', 'recovery_from',
-                    'recovery_newest'):
+                    'recovery_newest', 'installer_plan', 'make_installer',
+                    'installer_out', 'installer_efi', 'installer_script'):
             if getattr(a, opt):
                 setattr(a, opt, str((started_in / getattr(a, opt)).resolve()))
 
@@ -606,6 +621,29 @@ def main():
         # what a person gets here and from that tool cannot differ.
         where = a.recovery_to or str(Path(a.out).resolve().parent)
         return recovery.main(['--macos', a.recovery, '--out', where])
+
+    if a.installer_plan:
+        import installer as _inst
+        return _inst.main(['--app', a.installer_plan, '--plan', '--json'])
+
+    if a.make_installer:
+        import installer as _inst
+        argv2 = ['--app', a.make_installer]
+        if a.installer_script:
+            # print and stop. Nothing is created, nothing is asked for: this is
+            # what somebody reads before approving a password prompt, so it
+            # must not be a dry run that still does things.
+            argv2 += ['--out', a.installer_out or '/dev/null', '--script']
+            if a.no_legacy:
+                argv2.append('--no-legacy')
+            return _inst.main(argv2)
+        if a.installer_out:
+            argv2 += ['--out', a.installer_out]
+        if a.installer_efi:
+            argv2 += ['--efi', a.installer_efi]
+        if a.no_legacy:
+            argv2.append('--no-legacy')
+        return _inst.main(argv2)
 
     if a.recovery_newest:
         import json as _json

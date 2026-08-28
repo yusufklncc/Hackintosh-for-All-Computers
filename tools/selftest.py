@@ -2915,6 +2915,92 @@ def a_kext_that_stops_below_the_target():
               'recovery environment has none' in seen[0].get('note', ''), seen[0])
 
 
+def building_an_installer_image():
+    """The guide's long way round, done in one run - and what it must not do.
+
+    Two of its steps need root, and this is the only place in the program that
+    asks for a password. An unsigned application asking for one is a thing to
+    be careful with, so what is asked for has to be readable before it is
+    approved and identical to what then runs. `--installer-script` prints it
+    and must create nothing while doing so.
+
+    It is macOS-only, because createinstallmedia is an Apple binary inside the
+    installer app. The pane says that on other systems rather than offering
+    buttons that cannot work."""
+    import installer
+
+    # sizing, against the run that was actually done
+    was = installer.app_size
+    installer.app_size = lambda _app: int(17 * installer.GiB)
+    try:
+        p = installer.plan('anything')
+    finally:
+        installer.app_size = was
+    check('a 17 GiB app plans a 20 GiB image', p['gib'] == 20, p['gib'])
+    check('which is what the Tahoe stick was really built with', p['gib'] == 20)
+    check('and the overhead is the measured one, not a guess',
+          abs(p['overhead'] - 2.5 * installer.GiB) < 1, p['overhead'])
+    check('the volume it plans is bigger than the app',
+          p['volume_needs'] > p['app'])
+
+    # the privileged half: readable, and the same text that runs
+    tools = installer.legacy_tools()
+    check('the DuetPkg files are vendored with OpenCore', tools,
+          'tools/opencore.py vendors Utilities/LegacyBoot')
+    if tools:
+        for name in ('boot0', 'boot1f32', 'bootX64', 'BootInstall_X64.tool'):
+            check(f'  {name} is there', (tools / name).exists())
+        runnable = tools / 'BootInstall_X64.tool'
+        check('  and the tool can be executed', os.access(runnable, os.X_OK),
+              oct(runnable.stat().st_mode)[-3:])
+
+    was_creator = installer.creator
+    installer.creator = lambda app: Path(app) / 'Contents/Resources/createinstallmedia'
+    try:
+        script = installer.privileged('/Applications/Install macOS X.app', '/dev/disk9')
+    finally:
+        installer.creator = was_creator
+    check('the script names createinstallmedia', 'createinstallmedia' in script)
+    check('and drives the vendored tool rather than repeating what it does',
+          'BootInstall_X64.tool' in script and 'dd if=' not in script, script)
+    check('and answers its question with the disk it made',
+          'echo 9 |' in script, script)
+    check('and says why root is needed, in the script itself',
+          'needs root' in script, script)
+    check('and stops on the first failure',
+          'set -e' in script, script)
+
+    # what --installer-script must not do
+    flow = Path('tools/setup.py').read_text(encoding='utf-8')
+    check('the engine can print that script without running any of it',
+          "'--script'" in flow and 'installer_script' in flow)
+    check('and the window asks for the printed one, not the doing one',
+          '--installer-script' in
+          Path('gui/Engine/Inventory.cs').read_text(encoding='utf-8'))
+
+    # macOS only, said rather than half-worked
+    pane = Path('gui/Views/InstallerView.axaml.cs').read_text(encoding='utf-8')
+    check('the pane knows it is macOS only',
+          'IsOSPlatform(OSPlatform.OSX)' in pane)
+    check('and says so instead of drawing buttons that cannot work',
+          'NotHere.IsVisible = true' in pane)
+    check('and points at what does work on this system',
+          'Everything else in this program works here' in pane)
+
+    # the password is explained before it is asked for
+    markup = Path('gui/Views/InstallerView.axaml').read_text(encoding='utf-8')
+    check('the pane warns about the password before the button',
+          markup.index('administrator password') < markup.index('Build the image'))
+    check('and offers the script to read first',
+          'Show what will run' in markup)
+
+    # and the render pass looks at it
+    capture = Path('gui/App.axaml.cs').read_text(encoding='utf-8')
+    check('the screenshot pass opens the pane', '"installer"' in capture)
+    check('but never presses the button',
+          'make-installer' not in capture and 'InstallerState' in capture)
+
+
 def what_the_download_shows():
     """The bar is drawn from somebody else's print statement.
 
@@ -3694,6 +3780,7 @@ if __name__ == '__main__':
                     whether_recovery_can_land, a_mark_for_every_macos,
                     what_it_says_about_amd_integrated,
                     what_the_download_shows,
+                    building_an_installer_image,
                     a_kext_that_stops_below_the_target,
                     what_it_looks_like_when_it_arrives,
                     what_to_show_the_igpu_as,

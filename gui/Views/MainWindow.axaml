@@ -48,6 +48,8 @@
           <RadioButton Name="ToReport" Classes="nav" GroupName="pane" Content="Report" />
           <RadioButton Name="ToRecovery" Classes="nav" GroupName="pane"
                        Content="Recovery" />
+          <RadioButton Name="ToInstaller" Classes="nav" GroupName="pane"
+                       Content="Installer" />
           <RadioButton Name="ToStick" Classes="nav" GroupName="pane"
                        Content="USB stick" />
           <RadioButton Name="ToDevices" Classes="nav" GroupName="pane"
@@ -68,6 +70,7 @@
       <v:BuilderView Name="BuilderPane" IsVisible="False" />
       <v:ReportView Name="ReportPane" IsVisible="False" />
       <v:RecoveryView Name="RecoveryPane" IsVisible="False" />
+      <v:InstallerView Name="InstallerPane" IsVisible="False" />
       <v:StickView Name="StickPane" IsVisible="False" />
       <v:DevicesView Name="DevicesPane" IsVisible="False" />
       <v:KextsView Name="KextsPane" IsVisible="False" />
