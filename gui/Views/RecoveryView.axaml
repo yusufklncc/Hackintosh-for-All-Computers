@@ -46,8 +46,11 @@
                            RenderOptions.BitmapInterpolationMode="HighQuality"
                            Source="{Binding Art}"
                            IsVisible="{Binding !Drawn}" />
+                    <!-- A disc, because Apple's installer icons are discs and
+                         a grid holding both shapes agrees with neither. Half
+                         the side, so it stays a circle if the size changes. -->
                     <Border Grid.Column="0" Width="64" Height="64"
-                            CornerRadius="15" Background="{Binding Tile}"
+                            CornerRadius="32" Background="{Binding Tile}"
                             IsVisible="{Binding Drawn}">
                       <TextBlock Text="{Binding Letter}" FontSize="27"
                                  FontWeight="SemiBold" Foreground="#FFFFFF"

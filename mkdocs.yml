@@ -7,7 +7,7 @@ site_url: https://yusufklncc.github.io/Hackintosh-for-All-Computers/
 repo_url: https://github.com/yusufklncc/Hackintosh-for-All-Computers
 repo_name: yusufklncc/Hackintosh-for-All-Computers
 edit_uri: edit/main/guide/
-copyright: Apple, macOS and the Mac names belong to Apple Inc. Nothing of Apple's is redistributed here.
+copyright: Apple, macOS and the Mac names belong to Apple Inc. The macOS release icons are Apple's, shown to identify which release a tile stands for. No Apple software is redistributed here - no installer, no BaseSystem, no image.
 
 docs_dir: guide
 site_dir: _site

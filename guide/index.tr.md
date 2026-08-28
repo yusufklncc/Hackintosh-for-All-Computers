@@ -43,8 +43,10 @@ işaretlenmiş yanlış bir cevap kimsenin bir daha bakmadığı cevaptır.
 `unknown`, buradaki hiçbir tablonun o aygıt hakkında bir şey söylemediği
 anlamına gelir; çalışmayacağı anlamına değil.
 
-**Apple'a ait hiçbir şeyi yeniden dağıtmaz.** Recovery indirmesi Apple'dan,
-Apple'ın kendi protokolüyle, OpenCore'un bunun için verdiği araçla yapılır.
+**Apple'ın yazılımını yeniden dağıtmaz.** Ne yükleyici, ne BaseSystem, ne imaj:
+recovery indirmesi Apple'dan, Apple'ın kendi protokolüyle, OpenCore'un bunun
+için verdiği araçla yapılır. Recovery panelindeki macOS sürüm simgeleri Apple'a
+aittir ve bir karonun hangi sürüm olduğunu göstermek için oradadır.
 
 !!! question "Bir şey ters gittiyse"
     Elinizde ne olduğunu ve ne olduğunu yazarak issue açın. **Report** paneli

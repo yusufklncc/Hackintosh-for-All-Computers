@@ -42,8 +42,10 @@ answer that arrives already ticked is one nobody rechecks.
 It does not claim to know hardware it has no data for. `unknown` next to a
 device means no table here says anything about that device, not that it fails.
 
-It does not redistribute anything of Apple's. The recovery download comes from
-Apple, over Apple's own protocol, using the tool OpenCore ships for it.
+It does not redistribute Apple's software. No installer, no BaseSystem, no
+image: the recovery download comes from Apple, over Apple's own protocol, using
+the tool OpenCore ships for it. The macOS release icons in the Recovery pane are
+Apple's, and are there to identify which release a tile stands for.
 
 !!! question "Something went wrong"
     Open an issue with what you have and what happened. The **Report** pane
