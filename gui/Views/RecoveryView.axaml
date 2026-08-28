@@ -71,6 +71,16 @@
             </ListBox>
             <TextBlock Name="Chosen" FontSize="12.5" TextWrapping="Wrap"
                        Foreground="{DynamicResource Muted}" IsVisible="False" />
+            <!-- The one row the board table will not name. Apple can name it,
+                 so this asks - and only when pressed, because it is the second
+                 thing in this program that opens a connection. -->
+            <StackPanel Name="AskRow" Orientation="Horizontal" Spacing="10"
+                        IsVisible="False" VerticalAlignment="Center">
+              <Button Name="Ask" Content="Ask Apple which one that is" />
+              <TextBlock Name="Answered" FontSize="12.5" TextWrapping="Wrap"
+                         VerticalAlignment="Center"
+                         Foreground="{DynamicResource Muted}" />
+            </StackPanel>
             <TextBlock Name="Provenance" FontSize="12" TextWrapping="Wrap"
                        Foreground="{DynamicResource Faint}" />
           </StackPanel>

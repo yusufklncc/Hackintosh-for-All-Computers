@@ -538,6 +538,9 @@ def main():
     ap.add_argument('--usb-prepare', metavar='DEVICE',
                     help='ERASE that removable disk and format it FAT32 under '
                          'GPT; only ever a disk --usb-list offered')
+    ap.add_argument('--recovery-newest', action='store_true',
+                    help="ask Apple which macOS it is serving now; this opens "
+                         "a connection, which nothing else in the listing does")
     ap.add_argument('--recovery-from', metavar='DIR',
                     help='where com.apple.recovery.boot already is, for --usb-place')
     ap.add_argument('--describe', action='store_true',
@@ -569,7 +572,8 @@ def main():
         # acpi_tables out of this meant the frozen build looked for the dumped
         # tables inside its own unpacked copy, where they never are.
         for opt in ('machine', 'report', 'usb_map', 'acpi_tables',
-                    'recovery_to', 'usb_place', 'recovery_from'):
+                    'recovery_to', 'usb_place', 'recovery_from',
+                    'recovery_newest'):
             if getattr(a, opt):
                 setattr(a, opt, str((started_in / getattr(a, opt)).resolve()))
 
@@ -602,6 +606,14 @@ def main():
         # what a person gets here and from that tool cannot differ.
         where = a.recovery_to or str(Path(a.out).resolve().parent)
         return recovery.main(['--macos', a.recovery, '--out', where])
+
+    if a.recovery_newest:
+        import json as _json
+        got, complaint = recovery.newest()
+        sys.stdout.write(_json.dumps(
+            {'t': 'newest', 'newest': got, 'complaint': complaint or ''},
+            ensure_ascii=False) + '\n')
+        return 0 if got else 1
 
     if a.inventory:
         import json as _json

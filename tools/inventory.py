@@ -261,12 +261,15 @@ def about():
         'kexts': vendored,
         'shipped': len(list(SHIPPED.iterdir())) if SHIPPED.is_dir() else 0,
         # Building reaches nothing, because the machine being converted
-        # usually cannot. One thing does, and naming it is the point: a page
+        # usually cannot. Two things do, and naming them is the point: a page
         # that says "never" while a button downloads 700 MB is worse than a
-        # page that says nothing.
+        # page that says nothing. The second one was added later, and this
+        # sentence had to grow with it rather than stay at "one thing".
         'offline': True,
         'network': ('the recovery installer on the Recovery tab, fetched from '
-                    'Apple only when asked for'),
+                    'Apple only when asked for; and, on the same tab, asking '
+                    'Apple which macOS it is serving today, which is the one '
+                    'row the board table will not name'),
         'sources': sources,
         'tally': tally,
         'tools': thirdparty.vendored_tools(),

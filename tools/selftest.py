@@ -2780,6 +2780,26 @@ def a_mark_for_every_macos():
 
     # the day Apple serves something with a name nobody has typed here
     unheard = recovery.mark('Something Nobody Has Typed Here')
+    # the row the board table refuses to name, and the one thing that can
+    check('the latest row is offered a way to be named',
+          'def newest' in Path('tools/recovery.py').read_text())
+    engine = Path('tools/setup.py').read_text()
+    check('and the engine exposes it as a command of its own',
+          "'--recovery-newest'" in engine or '--recovery-newest' in engine)
+    pane = Path('gui/Views/RecoveryView.axaml.cs').read_text()
+    check('and the pane asks only when pressed',
+          'AskApple' in pane and 'Ask.Click' in pane)
+    # renaming the row has to drop the cached icon lookup, or it keeps the
+    # placeholder on a row that now knows what it is
+    model = Path('gui/Engine/Inventory.cs').read_text()
+    check('and naming it drops the cached icon lookup',
+          '_looked = false' in model)
+    # the About page counted one connection, and there are two now
+    import inventory as _inv
+    said = _inv.about()['network']
+    check('the About page names both connections',
+          'recovery installer' in said and 'serving today' in said, said)
+
     check('a release the table never heard of still gets one',
           unheard['source'] == 'derived'
           and re.fullmatch(r'#[0-9a-f]{6}', unheard['from']), unheard)

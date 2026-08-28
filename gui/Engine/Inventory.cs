@@ -100,7 +100,17 @@ public sealed class DeviceList
 public sealed class RecoveryChoice
 {
     [JsonPropertyName("version")] public string Version { get; set; } = "";
-    [JsonPropertyName("name")] public string Name { get; set; } = "";
+    // Setting this has to drop the cached lookup below. The `latest` row
+    // starts with no name, draws its mark, and is renamed once Apple has been
+    // asked - and a cache that remembered "there was no icon" would keep the
+    // placeholder on a row that now knows it is Tahoe.
+    string _name = "";
+    [JsonPropertyName("name")]
+    public string Name
+    {
+        get => _name;
+        set { _name = value; _looked = false; _art = null; }
+    }
     // what to call the row. The engine decides it, because one of these has no
     // version to print and a window inventing its own wording for that is how
     // two surfaces come to say different things about the same thing.
@@ -219,6 +229,7 @@ public sealed class StickList
     [JsonPropertyName("sticks")] public List<Stick> Sticks { get; set; } = new();
 }
 
+[JsonSerializable(typeof(Newest))]
 [JsonSerializable(typeof(StickList))]
 [JsonSerializable(typeof(RecoveryList))]
 [JsonSerializable(typeof(DeviceList))]
@@ -228,8 +239,34 @@ public partial class Carried : JsonSerializerContext
 {
 }
 
+/// <summary>What Apple says it is serving right now.
+///
+/// The `latest` rows in the board table are the Macs Apple still updates, so
+/// they fetch whatever is newest - and nothing in a binary built months ago
+/// can name what that is. This is the answer, asked of Apple at the moment
+/// somebody presses for it.</summary>
+public sealed class Newest
+{
+    [JsonPropertyName("newest")] public RecoveryChoice? Choice { get; set; }
+    [JsonPropertyName("complaint")] public string Complaint { get; set; } = "";
+}
+
 public static class Inventory
 {
+    /// <summary>Asks Apple. Opens a connection, so only a button calls it.</summary>
+    public static async Task<(RecoveryChoice? said, string complaint)> Newest(Located engine)
+    {
+        var (output, error, code) = await Builder.Run(engine, "--recovery-newest");
+        try
+        {
+            var got = JsonSerializer.Deserialize(output, Carried.Default.Newest);
+            if (got?.Choice is { } choice) return (choice, "");
+            return (null, got?.Complaint is { Length: > 0 } said ? said
+                        : Said(error, code));
+        }
+        catch (JsonException e) { return (null, e.Message); }
+    }
+
     public static async Task<(KextList? list, string complaint)> Kexts(Located engine)
     {
         var (output, error, code) = await Builder.Run(engine, "--inventory", "kexts");

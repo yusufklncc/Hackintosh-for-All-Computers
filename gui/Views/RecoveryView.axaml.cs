@@ -37,10 +37,14 @@ public partial class RecoveryView : UserControl
         // the row with no version has something to say about itself
         Which.SelectionChanged += (_, _) =>
         {
-            var note = (Which.SelectedItem as RecoveryChoice)?.Note ?? "";
+            var picked = Which.SelectedItem as RecoveryChoice;
+            var note = picked?.Note ?? "";
             Chosen.Text = note;
             Chosen.IsVisible = note.Length > 0;
+            // the offer to ask belongs to the row that cannot name itself
+            AskRow.IsVisible = picked is { Version: "latest" };
         };
+        Ask.Click += async (_, _) => await AskApple();
         Choose.Click += async (_, _) => await Pick();
         Fetch.Click += async (_, _) => await Get();
         Open.Click += (_, _) => Reveal.Show(Path.Combine(_to, _folder));
@@ -129,6 +133,52 @@ public partial class RecoveryView : UserControl
             : $"{named.Count} recoveries, newest {named[0]}, into {_folder}"
               + $", network {(Network.IsVisible ? NetworkState.Text : "not said")}"
               + $", marks {named.Count(_ => true)}";
+    }
+
+    /// <summary>Name the unnamed row, from Apple.
+    ///
+    /// The board table records those boards as `latest` and stops there, so
+    /// the row reads "Whatever Apple serves now" and everybody asks the same
+    /// question about it. Apple's own device-management metadata answers it.
+    /// Nothing calls this on its own: it opens a connection.</summary>
+    async Task AskApple()
+    {
+        var engine = Builder.Find(out var missing);
+        if (engine is null) { Answered.Text = missing; return; }
+
+        Ask.IsEnabled = false;
+        Answered.Text = "asking Apple…";
+        var (said, complaint) = await Inventory.Newest(engine);
+        Ask.IsEnabled = true;
+
+        if (said is null)
+        {
+            Answered.Text = complaint is { Length: > 0 } ? complaint
+                          : "Apple did not answer";
+            return;
+        }
+
+        // relabel the row in place. The version stays `latest` - that is what
+        // the download is asked for, and what Apple serves it may have moved
+        // on by the time the button is pressed again.
+        if (Which.ItemsSource is List<RecoveryChoice> rows)
+        {
+            var row = rows.FirstOrDefault(r => r.Version == "latest");
+            if (row is not null)
+            {
+                row.Name = said.Name;
+                row.Label = said.Name is { Length: > 0 }
+                          ? $"{said.Name} {said.Version}" : said.Version;
+                row.Mark = said.Mark;
+                var at = Which.SelectedIndex;
+                Which.ItemsSource = null;
+                Which.ItemsSource = rows;
+                Which.SelectedIndex = at;
+            }
+        }
+        Answered.Text = $"Apple is serving {said.Name} {said.Version} today. "
+                      + "The row still asks for whatever is newest when you "
+                      + "press download, not for this number.";
     }
 
     async Task Pick()

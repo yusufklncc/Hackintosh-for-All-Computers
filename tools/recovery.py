@@ -203,6 +203,45 @@ def served(tool=None):
     return json.loads((tool.parent / 'boards.json').read_text(encoding='utf-8'))
 
 
+def newest(url=None):
+    """What macOS Apple is serving right now, asked of Apple.
+
+    The `latest` rows in boards.json are the Macs Apple still updates, so they
+    fetch whatever is newest - but the table does not name what that is, and
+    neither can a binary that was built months ago. The row therefore reads
+    "Whatever Apple serves now", which is honest and leaves everybody asking
+    the same question: *is that Tahoe?*
+
+    This answers it from Apple's own device-management metadata, the same
+    endpoint tools/mactable.py reads. It opens a connection, so nothing calls
+    it on its own - it is behind a button, like the download is.
+
+    Returns (version, name) or (None, complaint).
+    """
+    import mactable
+
+    try:
+        payload = mactable.fetch(url or mactable.SOURCE)
+    except Exception as exc:
+        return None, f'Apple could not be asked: {exc}'
+
+    seen = set()
+    for asset in (payload.get('AssetSets') or {}).get('macOS') or []:
+        version = asset.get('ProductVersion') or ''
+        if version and version[0].isdigit():
+            seen.add(version)
+    if not seen:
+        return None, 'Apple answered, and listed no macOS in it'
+
+    def order(v):
+        return [int(n) for n in v.split('.') if n.isdigit()]
+
+    top = max(seen, key=order)
+    short = top.rsplit('.', 1)[0] if top.startswith('10.') else top.split('.')[0]
+    return {'version': top, 'name': _names().get(short, ''),
+            'mark': mark(_names().get(short, ''))}, None
+
+
 def choices(tool=None):
     """What can be fetched, newest first, read from macrecovery's board list.
 

@@ -20,9 +20,14 @@ bağlantı güvenilmeyecek kadar yavaşsa devreye giren cevap.
 
 1. **Recovery** panelini açın, istediğiniz macOS'u seçin ve indirmeye basın.
 
-    En üstteki satır Apple'ın o gün ne sunuyorsa onu ister; altındakiler adı
-    konmuş sürümlerdir. `BaseSystem.dmg` ve `BaseSystem.chunklist` dosyalarını
-    bir `com.apple.recovery.boot` klasörüne kaydeder.
+    Alttaki satırlar adı konmuş sürümler. **En üstteki satır en yeni macOS'tur**
+    — Apple'a o gün ne sunuyorsa onu sorar. OpenCore'un getirdiği kart tablosu o
+    kartları `latest` diye kaydediyor ve sürüme isim vermiyor, satır da vermiyor;
+    **Ask Apple which one that is** düğmesine basın, Apple'ın kendi verisinden
+    söylesin.
+
+    `BaseSystem.dmg` ve `BaseSystem.chunklist` dosyalarını bir
+    `com.apple.recovery.boot` klasörüne kaydeder.
 
 2. **USB stick** panelini açın. Gördüğü çıkarılabilir diskleri listeler ve her
    biri için, olduğu gibi hazır mı — GPT altında yeterli yeri olan FAT32 — yoksa
