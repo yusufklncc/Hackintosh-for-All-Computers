@@ -21,10 +21,13 @@ or when the connection is too slow to trust.
 1. Open the **Recovery** pane, pick the macOS you want, and press download.
 
     The rows under the top one are named releases. **The top row is the newest
-    macOS** - it asks Apple for whatever is being served today. The board table
-    OpenCore ships records those boards as `latest` and never names the
-    release, so neither does the row; press **Ask Apple which one that is** and
-    it will, from Apple's own metadata.
+    macOS** - it asks Apple for whatever is being served today rather than for
+    a version number.
+
+    The board table OpenCore ships records those boards as `latest` and never
+    names the release, so the name beside it comes from `data/mac.toml`, which
+    this repository refreshes from Apple's own metadata. **Check with Apple**
+    asks Apple directly, for today's answer.
 
     It saves `BaseSystem.dmg` and `BaseSystem.chunklist` into a
     `com.apple.recovery.boot` folder.

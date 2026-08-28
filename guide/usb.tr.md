@@ -21,10 +21,12 @@ bağlantı güvenilmeyecek kadar yavaşsa devreye giren cevap.
 1. **Recovery** panelini açın, istediğiniz macOS'u seçin ve indirmeye basın.
 
     Alttaki satırlar adı konmuş sürümler. **En üstteki satır en yeni macOS'tur**
-    — Apple'a o gün ne sunuyorsa onu sorar. OpenCore'un getirdiği kart tablosu o
-    kartları `latest` diye kaydediyor ve sürüme isim vermiyor, satır da vermiyor;
-    **Ask Apple which one that is** düğmesine basın, Apple'ın kendi verisinden
-    söylesin.
+    — bir sürüm numarası yerine, Apple'a o gün ne sunuyorsa onu sorar.
+
+    OpenCore'un getirdiği kart tablosu o kartları `latest` diye kaydediyor ve
+    sürüme isim vermiyor; yanındaki isim `data/mac.toml`'dan geliyor, ki bu depo
+    onu Apple'ın kendi verisinden tazeliyor. **Check with Apple** düğmesi
+    Apple'a doğrudan sorar, bugünün cevabı için.
 
     `BaseSystem.dmg` ve `BaseSystem.chunklist` dosyalarını bir
     `com.apple.recovery.boot` klasörüne kaydeder.

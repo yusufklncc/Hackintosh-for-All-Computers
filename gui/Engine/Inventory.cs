@@ -121,6 +121,14 @@ public sealed class RecoveryChoice
     // drawn by this window, decided by the engine: two surfaces colouring the
     // same release differently is the same failure as wording it differently
     [JsonPropertyName("mark")] public RecoveryMark? Mark { get; set; }
+    // which release to draw an icon for, when the row is not named after one
+    string _artName = "";
+    [JsonPropertyName("art")]
+    public string ArtName
+    {
+        get => _artName;
+        set { _artName = value; _looked = false; _art = null; }
+    }
 
     /// <summary>Apple's own icon for this release, when there is one.
     ///
@@ -139,8 +147,12 @@ public sealed class RecoveryChoice
         {
             if (_looked) return _art;
             _looked = true;
-            if (Name is not { Length: > 0 }) return null;
-            var file = Name.Replace(" ", "");
+            // ArtName, not Name: the `latest` row keeps an empty Name so a
+            // console `--macos tahoe` cannot match two rows once boards.json
+            // grows a real Tahoe. It still knows which release to draw.
+            var which = ArtName is { Length: > 0 } ? ArtName : Name;
+            if (which is not { Length: > 0 }) return null;
+            var file = which.Replace(" ", "");
             var where = new Uri($"avares://HackintoshEFIBuilder/Assets/macOS/{file}.png");
             try
             {

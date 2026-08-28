@@ -2410,10 +2410,24 @@ def the_recovery_it_can_fetch():
           [c['version'] for c in current])
     if current:
         check('and it comes first', offered[0] is current[0])
-        check('named for what it is, since nothing here knows the number',
-              not any(ch.isdigit() for ch in current[0]['label']),
-              current[0]['label'])
-        check('and it says why it has no version', current[0]['note'])
+        # This used to assert the label carried no number, "since nothing
+        # here knows" it. Something here does: data/mac.toml records every
+        # macOS line Apple serves, refreshed from Apple's own metadata, so the
+        # row opens named. What must stay true is the harder half - the number
+        # in the label is a record, and the request is still for whatever is
+        # newest, so nothing promises that number is what will arrive.
+        recorded = recovery.recorded()
+        if recorded:
+            check('named from what the repository records Apple serving',
+                  recorded['name'] in current[0]['label'], current[0]['label'])
+        else:
+            check('named for what it is, when nothing here knows the number',
+                  not any(ch.isdigit() for ch in current[0]['label']),
+                  current[0]['label'])
+        check('but the request stays "whatever is newest"',
+              current[0]['version'] == 'latest', current[0]['version'])
+        check('and it says so rather than promising the number',
+              'whatever' in current[0]['note'].lower(), current[0]['note'])
     # the number is the board's ceiling, not the image: asked for the 12.7.6
     # board Apple served a 12.6 BaseSystem. Printing the number as the name
     # would be a promise nothing here can keep, so the row is named and the
@@ -2780,8 +2794,31 @@ def a_mark_for_every_macos():
 
     # the day Apple serves something with a name nobody has typed here
     unheard = recovery.mark('Something Nobody Has Typed Here')
-    # the row the board table refuses to name, and the one thing that can
-    check('the latest row is offered a way to be named',
+    # the row the board table refuses to name, named without a connection
+    top = recovery.choices()[0]
+    check('the unnamed row is the newest one', top['version'] == 'latest', top['version'])
+    said = recovery.recorded()
+    check('and the repository already records what that is', said, said)
+    if said:
+        check('so the row opens with a name rather than a question',
+              said['name'] and said['name'] in top['label'], top['label'])
+        check('and with the release to draw an icon for',
+              top.get('art') == said['name'], top.get('art'))
+        # the version stays `latest`: that is what the download asks for, and
+        # what Apple serves it may have moved on by then
+        check('while still asking for whatever is newest',
+              top['version'] == 'latest', top['version'])
+        # `name` stays empty so find() cannot match two rows on one release
+        check('and its name stays empty, for the day a real row appears',
+              top['name'] == '', top['name'])
+        check('asking for that release by name still reaches it',
+              (recovery.find(said['name']) or {}).get('version') == 'latest')
+        # a real row wins over the stand-in
+        check('and a named row wins over it',
+              (recovery.find('sequoia') or {}).get('name') == 'Sequoia')
+
+    # and the live answer, which is what the button is for
+    check('Apple can still be asked directly',
           'def newest' in Path('tools/recovery.py').read_text())
     engine = Path('tools/setup.py').read_text()
     check('and the engine exposes it as a command of its own',

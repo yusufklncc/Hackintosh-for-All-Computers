@@ -42,6 +42,8 @@ public partial class RecoveryView : UserControl
             Chosen.Text = note;
             Chosen.IsVisible = note.Length > 0;
             // the offer to ask belongs to the row that cannot name itself
+            // the row is named from data/mac.toml when the pane opens; this
+            // offers to check that against Apple rather than to fill a blank
             AskRow.IsVisible = picked is { Version: "latest" };
         };
         Ask.Click += async (_, _) => await AskApple();
@@ -166,7 +168,7 @@ public partial class RecoveryView : UserControl
             var row = rows.FirstOrDefault(r => r.Version == "latest");
             if (row is not null)
             {
-                row.Name = said.Name;
+                row.ArtName = said.Name;
                 row.Label = said.Name is { Length: > 0 }
                           ? $"{said.Name} {said.Version}" : said.Version;
                 row.Mark = said.Mark;

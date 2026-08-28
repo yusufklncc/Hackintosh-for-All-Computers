@@ -76,7 +76,7 @@
                  thing in this program that opens a connection. -->
             <StackPanel Name="AskRow" Orientation="Horizontal" Spacing="10"
                         IsVisible="False" VerticalAlignment="Center">
-              <Button Name="Ask" Content="Ask Apple which one that is" />
+              <Button Name="Ask" Content="Check with Apple" />
               <TextBlock Name="Answered" FontSize="12.5" TextWrapping="Wrap"
                          VerticalAlignment="Center"
                          Foreground="{DynamicResource Muted}" />

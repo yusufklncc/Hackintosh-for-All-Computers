@@ -203,6 +203,34 @@ def served(tool=None):
     return json.loads((tool.parent / 'boards.json').read_text(encoding='utf-8'))
 
 
+def recorded():
+    """The newest macOS Apple was serving when data/mac.toml was refreshed.
+
+    The `latest` rows fetch whatever is newest and boards.json will not name
+    it, so the row used to read "Whatever Apple serves now" and left everybody
+    asking whether that meant Tahoe. It did.
+
+    Apple's own metadata answers it, and this repository already keeps that
+    answer: tools/mactable.py --refresh writes every macOS line Apple serves
+    into data/mac.toml, and the refresh workflow keeps it current. Reading the
+    top of that list names the row without opening a connection, which is what
+    makes it usable the moment the pane opens.
+
+    It is a record rather than a reading: what Apple served when the table was
+    last refreshed. `newest()` asks Apple directly, and the pane offers it."""
+    try:
+        import ocgen
+        lines = ocgen.read_toml(Path('data/mac.toml')).get('lines') or []
+    except Exception:
+        return None
+    usable = [v for v in lines if v and v[0].isdigit()]
+    if not usable:
+        return None
+    top = max(usable, key=lambda v: [int(n) for n in v.split('.') if n.isdigit()])
+    short = top.rsplit('.', 1)[0] if top.startswith('10.') else top.split('.')[0]
+    return {'version': top, 'name': _names().get(short, '')}
+
+
 def newest(url=None):
     """What macOS Apple is serving right now, asked of Apple.
 
@@ -242,6 +270,27 @@ def newest(url=None):
             'mark': mark(_names().get(short, ''))}, None
 
 
+def _latest_label():
+    """What to call the row the board table leaves unnamed."""
+    said = recorded()
+    if not said:
+        return 'Whatever Apple serves now'
+    return f"{said['name']} {said['version']}".strip() or said['version']
+
+
+def _latest_note():
+    said = recorded()
+    if not said:
+        return ('these boards are kept current, so this is the newest macOS '
+                'Apple is serving today - the board list does not name it in '
+                'advance, and neither does this')
+    return (f"these boards are kept current, so this row asks for whatever "
+            f"macOS is newest rather than for a version. boards.json does not "
+            f"name it; data/mac.toml does, from Apple's own metadata, and it "
+            f"said {said['name']} {said['version']} when that table was last "
+            f"refreshed. Press the button to ask Apple for today's answer.")
+
+
 def choices(tool=None):
     """What can be fetched, newest first, read from macrecovery's board list.
 
@@ -279,14 +328,12 @@ def choices(tool=None):
             # BaseSystem. Recovery then fetches the rest, so what gets
             # installed is a current build - but printing "Monterey 12.7.6" on
             # a row that downloads 12.6 is a claim nothing here can keep.
-            'label': name or version if named else 'Whatever Apple serves now',
+            'label': name or version if named else _latest_label(),
             'note': (f'the board list records {version} as the newest this board '
                      f'reaches. The image Apple hands back is some build of '
                      f'{name or version}; recovery downloads the rest during the '
                      f'install.') if named else
-                    'these boards are kept current, so this is the newest macOS '
-                    'Apple is serving today - the board list does not name it in '
-                    'advance, and neither does this',
+                    _latest_note(),
             # deterministic: the same board every time, so two people asking
             # for the same macOS ask Apple the same question. For the current
             # one that lands on macrecovery's own default, which is the board
@@ -296,7 +343,11 @@ def choices(tool=None):
             # drawn by the front end, decided here: a window and a terminal
             # colouring the same release differently is the same failure as
             # wording the same row differently
-            'mark': mark(name if named else ''),
+            'mark': mark(name if named else ((recorded() or {}).get('name') or '')),
+            # which release to draw an icon for. Separate from `name`, which
+            # stays empty on the `latest` row: the day boards.json grows a real
+            # Tahoe row, `find('tahoe')` must not match two of them.
+            'art': name if named else ((recorded() or {}).get('name') or ''),
         })
     # newest first, and the one with no number is newer than all of them
     out.sort(reverse=True, key=lambda c: [int(n) for n in c['version'].split('.')]
@@ -305,12 +356,26 @@ def choices(tool=None):
 
 
 def find(wanted, tool=None):
-    """One choice, by version, by name, or by 'latest'. None if nothing matches."""
+    """One choice, by version, by name, or by 'latest'. None if nothing matches.
+
+    Two passes, and the order is the point. The `latest` row is now labelled
+    with the release Apple was serving when data/mac.toml was refreshed, so
+    asking for "tahoe" should reach it - but only while no row of its own says
+    Tahoe. The day boards.json grows a real one, that row has to win, and a
+    single pass over a list that holds both would return whichever came
+    first."""
     asked = (wanted or '').strip().lower()
-    for choice in choices(tool):
-        if asked and asked in (choice['version'].lower(),
-                               choice['name'].lower(),
-                               choice['label'].lower()):
+    if not asked:
+        return None
+    offered = choices(tool)
+    for choice in offered:
+        if asked in (choice['version'].lower(),
+                     choice['name'].lower(),
+                     choice['label'].lower()):
+            return choice
+    # then the release the unnamed row currently stands for
+    for choice in offered:
+        if not choice['name'] and asked == (choice.get('art') or '').lower():
             return choice
     return None
 
