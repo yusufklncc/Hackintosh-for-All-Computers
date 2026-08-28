@@ -128,6 +128,28 @@ def amd_igpu_source():
     return ocgen.read_toml(AMD_IGPU).get('source') or None
 
 
+def guide_for(device_id):
+    """The page this repository's own card table came from, for that vendor.
+
+    Read out of data/gpu.toml rather than written here: the AMD cards are
+    parsed from one guide page and the NVIDIA and Intel family rules carry
+    their own `source`, so a card nothing claims can still be pointed at the
+    document that would have claimed it."""
+    vendor = (device_id or '').split(':')[0].lower()
+    if not TABLE.exists():
+        return None
+    for row in ocgen.read_toml(TABLE).get('family', []):
+        if row.get('vendor', '').lower() == vendor and row.get('source'):
+            return row['source']
+    if vendor == '1002':
+        # the AMD cards are a parsed table rather than a family rule, so the
+        # page they came from is in the file's own header
+        for line in TABLE.read_text(encoding='utf-8').splitlines()[:20]:
+            if line.lower().startswith('# source:'):
+                return line.split(':', 1)[1].strip()
+    return None
+
+
 # How an AMD APU names itself, as against a discrete card. The processor's
 # graphics report as "Radeon Graphics" or "Radeon Vega Graphics" with no model
 # number; a card says "Radeon RX 6600". IGPU_HINTS is not reused because it is
@@ -324,6 +346,20 @@ def report(devices, generation=None, cpu_name=None):
             lines.append(f'      {entry["note"]}')
         if entry and entry.get('quote'):
             lines.append(f'      "{entry["quote"]}"')
+
+        # `unknown` on a card nothing here claims used to be the whole answer,
+        # which reads as "no idea" when what is meant is "no table here has
+        # heard of this one". Say that, and name the document that would know.
+        if (verdict == 'unknown' and not looks_amd_integrated(device)
+                and not looks_integrated(device.get('name'))):
+            lines.append('      no table here claims this card, so nothing is '
+                         'added for it')
+            guide = guide_for(device.get('id'))
+            if guide:
+                lines.append(f'      whether it is supported is answered by '
+                             f'{guide}')
+            lines.append('      the rest of the build applies as normal; this '
+                         'is the graphics only')
 
         # `unknown` on an AMD APU used to read as "no idea". The real answer is
         # narrower and more useful: this repository does not cover these, and

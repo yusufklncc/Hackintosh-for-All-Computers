@@ -2738,6 +2738,39 @@ def what_it_says_about_amd_integrated():
     check('an Intel iGPU is not caught by the AMD rule',
           not gpu.looks_amd_integrated(intel))
 
+    # a discrete card nothing claims is a different answer from an APU, and
+    # used to be a bare `unknown` with nowhere to go next
+    stranger = {'name': 'AMD Radeon RX 7900 XTX', 'id': '1002:744c'}
+    check('the RX 7900 XTX really is absent from the card table',
+          gpu.classify(stranger, 'zen')[0] == 'unknown',
+          gpu.classify(stranger, 'zen'))
+    told = ' '.join(gpu.report([stranger], 'zen')[0])
+    check('an unclaimed card says no table here claims it',
+          'no table here claims this card' in told, told)
+    check('and names the guide this repository read its own table from',
+          'GPU-Buyers-Guide' in told, told)
+    check('and is not mistaken for an APU',
+          'ChefKiss' not in told, told)
+    check('and says the rest of the build is unaffected',
+          'rest of the build applies' in told, told)
+    # the pointer comes from the data, not from a URL typed in the code
+    check('the guide is read out of data/gpu.toml',
+          gpu.guide_for('1002:744c') and 'amd-gpu' in gpu.guide_for('1002:744c'),
+          gpu.guide_for('1002:744c'))
+    check('and per vendor, not one link for everything',
+          gpu.guide_for('10de:2684') != gpu.guide_for('1002:744c'),
+          (gpu.guide_for('10de:2684'), gpu.guide_for('1002:744c')))
+    # a card the tables DO judge keeps its own answer
+    known = ' '.join(gpu.report([{'name': 'AMD Radeon RX 6600',
+                                  'id': '1002:73ff'}], 'zen')[0])
+    check('a card the table knows is untouched by any of this',
+          'no table here claims' not in known and 'agdpmod=pikera' in known, known)
+    nvidia = ' '.join(gpu.report([{'name': 'NVIDIA GeForce RTX 4090',
+                                   'id': '10de:2684'}], 'zen')[0])
+    check('and a family rule still answers for its whole vendor',
+          'no driver was ever written' in nvidia
+          and 'no table here claims' not in nvidia, nvidia)
+
     lines, _ = gpu.report([apus[0]], 'zen')
     said = ' '.join(lines)
     check('the report says it is not covered here',
