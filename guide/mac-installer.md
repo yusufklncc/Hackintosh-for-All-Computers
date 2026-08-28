@@ -71,7 +71,9 @@ Add the EFI partition on top: 500 MB is far more than an EFI folder needs
 (about 7 MB), and it is the smallest size that leaves room to keep a spare
 config or two beside it.
 
-So for a 17 GiB installer: `17 + 2.5 + 0.5` ≈ **21 GiB**.
+So for a 17 GiB installer: `17 + 2.15 + 0.5` = 19.65, rounded up to the next
+whole gigabyte - **`-size 20g`**. That is what a Tahoe stick was actually built
+with, and it finished with about 0.4 GiB to spare.
 
 !!! tip "Or let the command size it for you"
     Guessing is optional. Build the image at whatever you think, run step 5,
@@ -93,7 +95,7 @@ fill it, then clone it onto a stick - or onto five sticks, or onto the same
 stick again in a year when you have broken it.
 
 ```
-hdiutil create -size 21g -type UDIF -layout NONE -o installer
+hdiutil create -size 20g -type UDIF -layout NONE -o installer
 ```
 
 `-layout NONE` matters: it hands you a raw device with no partition map at all,
@@ -119,9 +121,9 @@ Which gives:
 
 ```
 #:                       TYPE NAME                    SIZE       IDENTIFIER
-0:     FDisk_partition_scheme                        +22.5 GB    disk4
+0:     FDisk_partition_scheme                        +21.5 GB    disk4
 1:                 DOS_FAT_32 EFI                     500.0 MB   disk4s1
-2:                  Apple_HFS USB                     22.0 GB    disk4s2
+2:                  Apple_HFS USB                     21.0 GB    disk4s2
 ```
 
 Four things in that command are load-bearing:
@@ -154,9 +156,21 @@ sudo "/Applications/Install macOS Sequoia.app/Contents/Resources/createinstallme
 `--nointeraction` skips the *type Y to erase* prompt. Leave it off the first
 time if you would rather be asked.
 
-It erases the volume, copies about 12 GB, blesses it, and renames it to
-`Install macOS Sequoia`. Ten to twenty minutes on a stick, a couple on an
-image.
+```
+Erasing disk: 0%... 10%... 20%... 30%... 100%
+Copying essential files...
+Copying the macOS RecoveryOS...
+Making disk bootable...
+Copying to disk: 0%... 10%... 20%... 100%
+Install media now available at "/Volumes/Install macOS Tahoe"
+```
+
+*Copying the macOS RecoveryOS* is the line that explains step 2: the recovery
+goes on beside the installer, and it is most of the two gigabytes the app's own
+size does not account for.
+
+The volume is erased, filled and renamed. Under a minute onto a disk image on
+an internal SSD; ten to twenty onto a stick, where the write speed decides.
 
 !!! failure "If it refuses at the end"
     *"is not large enough for install media. An additional N is needed"* means

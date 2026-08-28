@@ -71,7 +71,9 @@ yükleyicisiyle ölçüldü:
 7 MB) çok fazla, ve yanına bir iki yedek config koymaya yer bırakan en küçük
 ölçü.
 
-Yani 17 GiB'lik bir yükleyici için: `17 + 2.5 + 0.5` ≈ **21 GiB**.
+Yani 17 GiB'lik bir yükleyici için: `17 + 2.15 + 0.5` = 19.65, bir üst tam
+gigabayta yuvarlanınca **`-size 20g`**. Bir Tahoe belleği gerçekten bununla
+kuruldu ve yaklaşık 0.4 GiB payla tamamlandı.
 
 !!! tip "Ya da boyutu komuta hesaplatın"
     Tahmin etmek zorunda değilsiniz. İmajı kafanızdaki boyutta kurun, 5. adımı
@@ -94,7 +96,7 @@ doldurun, sonra belleğe klonlayın — ya da beş belleğe, ya da bir yıl sonr
 bozduğunuzda aynı belleğe yeniden.
 
 ```
-hdiutil create -size 21g -type UDIF -layout NONE -o installer
+hdiutil create -size 20g -type UDIF -layout NONE -o installer
 ```
 
 `-layout NONE` önemli: hiç bölüm haritası olmayan ham bir aygıt verir, ki bir
@@ -120,9 +122,9 @@ Sonuç:
 
 ```
 #:                       TYPE NAME                    SIZE       IDENTIFIER
-0:     FDisk_partition_scheme                        +22.5 GB    disk4
+0:     FDisk_partition_scheme                        +21.5 GB    disk4
 1:                 DOS_FAT_32 EFI                     500.0 MB   disk4s1
-2:                  Apple_HFS USB                     22.0 GB    disk4s2
+2:                  Apple_HFS USB                     21.0 GB    disk4s2
 ```
 
 Bu komutta dört şey taşıyıcı:
@@ -153,8 +155,22 @@ sudo "/Applications/Install macOS Sequoia.app/Contents/Resources/createinstallme
 `--nointeraction`, *silmek için Y yazın* sorusunu atlar. İlk seferde sorulmasını
 istiyorsanız koymayın.
 
-Birimi siler, yaklaşık 12 GB kopyalar, açılabilir işaretler ve adını
-`Install macOS Sequoia` yapar. Bellekte on-yirmi dakika, imajda birkaç dakika.
+```
+Erasing disk: 0%... 10%... 20%... 30%... 100%
+Copying essential files...
+Copying the macOS RecoveryOS...
+Making disk bootable...
+Copying to disk: 0%... 10%... 20%... 100%
+Install media now available at "/Volumes/Install macOS Tahoe"
+```
+
+*Copying the macOS RecoveryOS* satırı 2. adımı açıklıyor: recovery yükleyicinin
+yanına gidiyor ve uygulamanın kendi boyutunun hesaba katmadığı iki gigabaytın
+büyük kısmı bu.
+
+Birim siliniyor, dolduruluyor ve adı değişiyor. Dahili SSD üzerindeki bir disk
+imajına bir dakikanın altında; belleğe on-yirmi dakika, orada yazma hızı
+belirliyor.
 
 !!! failure "Sonda reddederse"
     *"is not large enough for install media. An additional N is needed"* 2.
