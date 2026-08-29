@@ -46,7 +46,7 @@ console would not.
     is one dialog on each system, and [When your system blocks
     it](blocked.md) has the steps.
 
-## The eight panes
+## The nine panes
 
 ### Machine
 
@@ -100,6 +100,23 @@ Ethernet is driven it tells you to use a cable. See
 [Make the USB stick](usb.md).
 
 ![The Recovery pane](https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/App/recovery.png)
+
+### Installer
+
+Turns an installer app into a whole bootable image in one run: sizes it,
+partitions it, calls Apple's `createinstallmedia`, makes it bootable on a
+legacy BIOS machine with OpenCore's own DuetPkg, and copies the EFI folder in.
+
+What comes out is a flat sector image, so balenaEtcher writes it to a stick
+from any system - the stick can be made again later on a machine with no macOS
+on it.
+
+macOS only, because `createinstallmedia` is an Apple binary that ships inside
+the app; on Windows and Linux the pane says so. It is the one place in the
+program that asks for an administrator password, and it shows the script it
+will run before asking.
+
+[Building the stick on a Mac :material-arrow-right:](mac-installer.md){ .md-button }
 
 ### USB stick
 

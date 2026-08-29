@@ -18,6 +18,20 @@ Bu uzun yol. Şu durumda tercih edin:
 - **ve** başkasının hazırladığı [hazır imaj](images.md) yerine Apple'ın kendi
   yükleyicisini tercih ediyorsunuz.
 
+!!! tip "Program bunların hepsini sizin için yapıyor"
+    **Installer** panelini açın, yükleyici uygulamasını gösterin; bu sayfadaki
+    her adımı tek seferde çalıştırır: imajı boyutlandırır, böler,
+    `createinstallmedia`'yı çağırır, BIOS makinede açılabilir yapar, EFI
+    klasörünü kopyalar ve imajı size bırakır.
+
+    macOS bir kez yönetici parolası sorar — iki adım onsuz yapılamıyor — ve
+    panel onaylamadan önce çalışacak betiği aynen gösterir.
+
+    **Bu sayfanın geri kalanı aynı işin elle yapılışı.** Panelin ne yaptığını
+    bilmek istiyorsanız, ayrıcalıklı kısmı kendiniz çalıştırmayı tercih
+    ediyorsanız (`--script` onu yazdırıyor), ya da bir şey ters gidip yarıdan
+    devam etmeniz gerekiyorsa okumaya değer.
+
 !!! info "Bu sayfa için Mac gerekiyor, ve yalnızca bu sayfa için"
     `createinstallmedia` yükleyici uygulamasının içinde gelen bir Apple
     ikilisidir ve sadece macOS'ta çalışır. Bu deponun yaptığı diğer her şey

@@ -3057,6 +3057,26 @@ def building_an_installer_image():
     check('and offers the script to read first',
           'Show what will run' in markup)
 
+    # the guide has to know the pane exists, or the two describe the same job
+    # without either mentioning the other
+    for page in ('guide/mac-installer.md', 'guide/mac-installer.tr.md'):
+        said = Path(page).read_text(encoding='utf-8')
+        check(f'{page} points at the pane',
+              'Installer' in said and 'by hand' in said or 'elle' in said, page)
+    for page in ('guide/app.md', 'guide/app.tr.md'):
+        said = Path(page).read_text(encoding='utf-8')
+        check(f'{page} lists it among the panes',
+              '### Installer' in said, page)
+    # and counts them right, since the number is written out
+    panes = Path('gui/Views/MainWindow.axaml').read_text(encoding='utf-8')
+    how_many = panes.count('Classes="nav"')
+    for page, word in (('guide/app.md', 'nine'), ('guide/app.tr.md', 'Dokuz')):
+        check(f'{page} says how many there are, and is right',
+              f'{word} pane' in Path(page).read_text(encoding='utf-8')
+              or f'{word} panel' in Path(page).read_text(encoding='utf-8'),
+              f'{how_many} in the window')
+    check('and the window really has that many', how_many == 9, how_many)
+
     # and the render pass looks at it
     capture = Path('gui/App.axaml.cs').read_text(encoding='utf-8')
     check('the screenshot pass opens the pane', '"installer"' in capture)

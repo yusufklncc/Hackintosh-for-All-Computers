@@ -12,11 +12,27 @@ onto as many sticks as you like without doing any of it twice.
 This is the long way round. Take it when:
 
 - the machine you are installing on has [no network macOS can drive](usb.md),
-  so [recovery](usb.md#with-recovery---the-program-does-all-of-it) cannot finish;
+  so [recovery](usb.md#with-recovery---the-program-does-all-of-it) cannot
+  finish;
 - **and** it is a legacy BIOS machine, or you want the same stick to work on
   one;
 - **and** you would rather have Apple's own installer than a
   [ready image](images.md) somebody else prepared.
+
+!!! tip "The program does all of this for you"
+    Open the **Installer** pane, point it at the installer app, and it runs
+    every step on this page in one go: sizes the image, partitions it, calls
+    `createinstallmedia`, makes it bootable on a BIOS machine, copies the EFI
+    folder in, and leaves you the image.
+
+    macOS asks for an administrator password once - two of the steps cannot be
+    done without it - and the pane shows the exact script before you approve
+    it.
+
+    **The rest of this page is that same job by hand**, which is worth reading
+    if you want to know what the pane is doing, if you would rather run the
+    privileged part yourself (`--script` prints it), or if something went wrong
+    and you need to pick up halfway.
 
 !!! info "You need a Mac for this page, and only for this page"
     `createinstallmedia` is an Apple binary that ships inside the installer app

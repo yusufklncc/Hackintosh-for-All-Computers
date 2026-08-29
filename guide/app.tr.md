@@ -47,7 +47,7 @@ konsolun söylemeyeceği bir şeyi söyleyemez.
     tarafından imzalanmış değil. Her sistemde bir iletişim kutusu demek bu;
     adımlar [Sisteminiz engellerse](blocked.md) sayfasında.
 
-## Sekiz panel
+## Dokuz panel
 
 ### Machine
 
@@ -102,6 +102,24 @@ sürülüyorsa kablo kullanmanızı söyler. Bkz.
 [USB belleği hazırlayın](usb.md).
 
 ![Recovery paneli](https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/App/recovery.png)
+
+### Installer
+
+Bir yükleyici uygulamasını tek seferde bütün bir açılabilir imaja çeviriyor:
+boyutlandırıyor, bölüyor, Apple'ın `createinstallmedia`'sını çağırıyor,
+OpenCore'un kendi DuetPkg'siyle legacy BIOS makinede açılabilir yapıyor ve EFI
+klasörünü kopyalıyor.
+
+Çıkan şey düz bir sektör imajı, yani balenaEtcher onu her sistemden belleğe
+yazıyor — bellek daha sonra üzerinde hiç macOS olmayan bir makinede yeniden
+yapılabiliyor.
+
+Yalnızca macOS'ta, çünkü `createinstallmedia` uygulamanın içinde gelen bir
+Apple ikilisi; Windows ve Linux'ta panel bunu söylüyor. Programda yönetici
+parolası isteyen tek yer burası, ve sormadan önce çalıştıracağı betiği
+gösteriyor.
+
+[Belleği bir Mac üzerinde hazırlamak :material-arrow-right:](mac-installer.md){ .md-button }
 
 ### USB stick
 
