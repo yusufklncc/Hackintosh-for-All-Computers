@@ -28,12 +28,20 @@ public partial class InstallerView : UserControl
     static readonly TimeSpan Bound = TimeSpan.FromHours(2);
 
     string? _app, _efi, _out;
+    List<string> _found = new();
     Task? _read;
 
     public InstallerView()
     {
         InitializeComponent();
         Pick.Click += async (_, _) => await ChooseApp();
+        Found.SelectionChanged += async (_, _) =>
+        {
+            var at = Found.SelectedIndex;
+            if (at < 0 || at >= _found.Count) return;
+            Several.IsVisible = false;
+            await Chosen(_found[at]);
+        };
 
         // Dropped, which the note under the box promises and a TextBox does
         // not do on its own. It is also the way that never argues with a file
@@ -170,10 +178,25 @@ public partial class InstallerView : UserControl
             await Chosen(found[0]);
             return;
         }
-        // more than one: say which, and let the next click settle it
-        Trouble($"{found.Count} installers in there",
-                string.Join("\n", found.Select(Path.GetFileName))
-                + "\n\nDrag the one you want onto this pane, or type its path.");
+        // more than one: offer them, because naming them and stopping is a
+        // dead end - somebody has to be able to say which
+        Offer(found);
+    }
+
+    /// <summary>Put the ones found in front of somebody to choose from.</summary>
+    void Offer(List<string> found)
+    {
+        // the paths are kept here rather than closed over: subscribing inside
+        // this method stacks a handler every time a folder is chosen, and the
+        // second choice would then fire the first one's list too
+        _found = found;
+        Several.IsVisible = true;
+        Found.ItemsSource = found.Select(Path.GetFileName).ToList();
+        Found.SelectedIndex = -1;
+        Plan.IsVisible = true;
+        PlanTitle.Text = $"{found.Count} installers in that folder";
+        PlanText.Text = "Pick the one to build from.";
+        Build.IsEnabled = false;
     }
 
     /// <summary>The installer apps directly inside a folder.
@@ -236,6 +259,7 @@ public partial class InstallerView : UserControl
     /// <summary>Take a path, from the picker, a drop or typed, and read it.</summary>
     async Task Chosen(string path)
     {
+        Several.IsVisible = false;
         _app = path;
         AppPath.Text = path;
         await Sized();

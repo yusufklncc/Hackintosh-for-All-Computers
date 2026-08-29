@@ -3005,8 +3005,16 @@ def building_an_installer_image():
           'Installers(' in chooser and 'static List<string> Installers' in pane)
     check('by what makes one, not by its name, which is localised',
           'createinstallmedia' in pane.split('static List<string> Installers')[1][:400])
-    check('and says so when there is none, or more than one',
-          'No installer app in there' in pane and 'installers in there' in pane)
+    check('and says so when there is none',
+          'No installer app in there' in pane)
+    # several in one folder is a choice, not a dead end. Naming them and
+    # stopping left somebody with nothing to click.
+    check('and offers a choice when there is more than one',
+          'void Offer(' in pane and 'Found.ItemsSource' in pane)
+    check('with the handler bound once, not once per folder chosen',
+          pane.count('Found.SelectionChanged') == 1
+          and 'List<string> _found' in pane,
+          'subscribing inside Offer stacks a handler per choice')
     # an unreadable answer is not a bad app, and calling it one sends somebody
     # to look at the wrong thing
     check('an unreadable answer is told apart from a bad app',

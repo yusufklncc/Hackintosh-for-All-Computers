@@ -45,6 +45,16 @@
                        Text="Install macOS ….app, from the App Store, softwareupdate, or Mist. Choose… asks for the folder it is in - macOS will not let a panel confirm an app bundle - so you can also drag the app onto this pane, or type its path." />
           </StackPanel>
 
+          <!-- More than one installer in the folder somebody chose. Listing
+               their names and stopping was a dead end; one click settles it. -->
+          <StackPanel Name="Several" Spacing="6" IsVisible="False">
+            <TextBlock Classes="eyebrow" Text="WHICH ONE" />
+            <ListBox Name="Found" Classes="rows" MaxHeight="180"
+                     Background="{DynamicResource Surface2}"
+                     BorderBrush="{DynamicResource Line}" BorderThickness="1"
+                     CornerRadius="8" />
+          </StackPanel>
+
           <Border Name="Plan" Classes="panel" IsVisible="False"
                   Background="{DynamicResource Surface2}">
             <StackPanel Spacing="4">
