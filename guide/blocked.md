@@ -47,10 +47,20 @@ The app is signed ad-hoc - enough that macOS will run it at all on Apple silicon
 - but it is not notarised, so Gatekeeper refuses the first open.
 
 !!! tip "Move it before you open it"
-    Unzip the download and drag the app into your **Applications** folder
-    first. An app still sitting where the zip left it is run from a read-only
-    copy somewhere else on the disk, which is why it can be allowed and still
-    behave as if it were not. Moving it in Finder ends that.
+    Unzip the download and **move the app in Finder** before opening it -
+    anywhere will do; Applications is only the habit.
+
+    macOS runs a quarantined app from a read-only copy somewhere else on the
+    disk when it is launched from where it was unarchived. That is App
+    Translocation, and it is why an app can be allowed and still behave as
+    though it were not. Moving it in Finder ends it.
+
+    If you would rather not move it, clearing the quarantine flag does the same
+    thing and leaves the app where it is:
+
+    ```
+    xattr -dr com.apple.quarantine "Hackintosh EFI Builder.app"
+    ```
 
 The way through is to try once and then allow it, in that order:
 

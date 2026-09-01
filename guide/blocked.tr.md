@@ -52,10 +52,20 @@ yetecek kadar — ama notarize edilmiş değil, bu yüzden Gatekeeper ilk açıl
 reddediyor.
 
 !!! tip "Açmadan önce taşıyın"
-    İndirmeyi açın ve uygulamayı önce **Uygulamalar** klasörüne sürükleyin.
-    Zip'in bıraktığı yerde duran bir uygulama, diskin başka bir yerindeki salt
-    okunur bir kopyadan çalıştırılır; izin verilmesine rağmen verilmemiş gibi
-    davranmasının sebebi budur. Finder'da taşımak bunu bitirir.
+    İndirmeyi açın ve uygulamayı **Finder'da taşıyın** — nereye olursa;
+    Uygulamalar klasörü sadece alışkanlık.
+
+    macOS, karantina damgalı bir uygulamayı arşivden çıktığı yerden
+    çalıştırdığınızda diskin başka bir yerindeki salt okunur bir kopyadan
+    açıyor. Buna App Translocation deniyor, ve izin verilmesine rağmen
+    verilmemiş gibi davranmasının sebebi bu. Finder'da taşımak bunu bitiriyor.
+
+    Taşımak istemiyorsanız karantina bayrağını silmek de aynı işi görür ve
+    uygulama yerinde kalır:
+
+    ```
+    xattr -dr com.apple.quarantine "Hackintosh EFI Builder.app"
+    ```
 
 Doğru sıra: önce bir kez deneyin, sonra izin verin.
 
