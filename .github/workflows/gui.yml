@@ -171,12 +171,15 @@ jobs:
             shell_exe: HackintoshEFIBuilder
             engine_exe: EFIBuilderEngine
           # Intel Macs are the ones people still convert things for, and the
-          # arm64 build will not run on one
-          - os: macos-latest
+          # arm64 build will not run on one. This has to be an Intel runner:
+          # .NET cross-compiles happily with -r osx-x64, PyInstaller does not
+          # cross-compile at all, so building here on Apple silicon produced a
+          # package with an x86_64 window and an arm64 engine. It shipped, and
+          # an Intel Mac answered "Bad CPU type in executable" - issue #101.
+          - os: macos-26-intel
             rid: osx-x64
             shell_exe: HackintoshEFIBuilder
             engine_exe: EFIBuilderEngine
-            cross: true
     runs-on: ${{ matrix.os }}
     timeout-minutes: 25
     steps:
@@ -208,11 +211,29 @@ jobs:
           -p:EnableCompressionInSingleFile=true
           -p:DebugType=none -p:DebugSymbols=false
 
+      # Both halves, the architecture the package is named for. .NET will
+      # cross-compile the window and PyInstaller will not cross-compile the
+      # engine, so a macOS package built on the wrong runner comes out mixed -
+      # and the only symptom is "Bad CPU type in executable" on somebody
+      # else's Mac. That is issue #101, and this is what would have caught it.
+      - name: Both programs are the architecture on the tin
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          want=$([ "${{ matrix.rid }}" = "osx-arm64" ] && echo arm64 || echo x86_64)
+          bad=0
+          for part in "package/${{ matrix.shell_exe }}" \
+                      "package/EFIBuilderEngine/${{ matrix.engine_exe }}"; do
+            got=$(lipo -archs "$part" 2>/dev/null || file -b "$part")
+            echo "  $part -> $got"
+            case "$got" in *"$want"*) ;; *) echo "    wanted $want"; bad=1 ;; esac
+          done
+          [ "$bad" = 0 ] || { echo "this package would not run on the Mac it names"; exit 1; }
+
       # The window looks for the engine beside itself first and falls back to a
       # clone. On this runner a clone is right there, so the check is not that
       # it worked - it is that it used the packaged engine and not the source.
       - name: It uses the engine it shipped with
-        if: ${{ !matrix.cross }}
         shell: bash
         run: |
           # from a scratch directory, not from inside the package: a build
@@ -227,7 +248,6 @@ jobs:
           test -s shot.png || { echo 'it drew nothing'; exit 1; }
 
       - name: How long reading a machine takes here
-        if: ${{ !matrix.cross }}
         shell: bash
         run: |
           mkdir -p scratch && cd scratch

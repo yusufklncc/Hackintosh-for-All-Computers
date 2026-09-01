@@ -3077,6 +3077,21 @@ def building_an_installer_image():
               f'{how_many} in the window')
     check('and the window really has that many', how_many == 9, how_many)
 
+    # A macOS package holds two programs and both have to be the architecture
+    # the file is named for. .NET cross-compiles the window from -r osx-x64;
+    # PyInstaller cannot cross-compile at all, so an x64 package built on an
+    # Apple silicon runner ships an arm64 engine. It did, and an Intel Mac
+    # answered "Bad CPU type in executable" - issue #101.
+    flow = Path('.github/workflows/gui.yml').read_text(encoding='utf-8')
+    check('the x64 macOS package is built on an Intel runner',
+          'macos-26-intel' in flow,
+          'PyInstaller builds for the runner it is on, whatever -r says')
+    check('and both halves are checked against the name on the file',
+          'Both programs are the architecture on the tin' in flow)
+    check('with no flag left that skips running the package',
+          'matrix.cross' not in flow,
+          'the skipped run is what let the mixed package through')
+
     # and the render pass looks at it
     capture = Path('gui/App.axaml.cs').read_text(encoding='utf-8')
     check('the screenshot pass opens the pane', '"installer"' in capture)
