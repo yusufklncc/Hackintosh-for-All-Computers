@@ -15,10 +15,12 @@ Hazır yazılmış yükleyiciler, her sürüm için bir tane. Her biri zip için
 
 | Sürüm | Numara | USB | Komut seti |
 |---|---|---|---|
-| [Sonoma](#macos-sonoma) | 14.4 (23E214) | 16GB | SSE4,1 |
-| [Ventura](#macos-ventura) | 13.6.4 (22G513) | 16GB | SSE4,1 |
-| [Monterey](#macos-monterey) | 12.7.3 (21H1015) | 16GB | SSE |
-| [Big Sur](#macos-big-sur) | 11.7.10 (20G1427) | 16GB | SSE |
+| [Tahoe](#macos-tahoe) | *henüz kaydedilmedi* | 16GB | SSE4,1 |
+| [Sequoia](#macos-sequoia) | *henüz kaydedilmedi* | 16GB | SSE4,1 |
+| [Sonoma](#macos-sonoma) | *henüz kaydedilmedi* | 16GB | SSE4,1 |
+| [Ventura](#macos-ventura) | *henüz kaydedilmedi* | 16GB | SSE4,1 |
+| [Monterey](#macos-monterey) | *henüz kaydedilmedi* | 16GB | SSE |
+| [Big Sur](#macos-big-sur) | *henüz kaydedilmedi* | 16GB | SSE |
 | [Catalina](#macos-catalina) | 10.15.7 (19H15) | 16GB | SSE |
 | [Mojave](#macos-mojave) | 10.14.6 (18G103) | 8GB | SSE |
 | [High Sierra](#macos-high-sierra) | 10.13.6 (17G66) | 8GB | SSE |
@@ -29,11 +31,29 @@ Hazır yazılmış yükleyiciler, her sürüm için bir tane. Her biri zip için
 Her imaj, kurulumdan hemen sonra çoğu kişinin isteyeceği programları içeren
 *Kurulum Sonrası - Post Installation* klasörünü taşır.
 
+## macOS Tahoe
+
+**sürüm henüz kaydedilmedi** — [Google Drive](https://drive.google.com/drive/folders/13Fl_QriDjEB8SymvEE31QaCLixqWnLxx?usp=sharing)
+
+- 16GB ve üzeri USB bellek.
+- Dizüstü ve masaüstü, UEFI ve Legacy, Intel ve AMD işlemciler.
+- Mevcut GPT Windows diskinin yanına kurulabilir.
+- Gerçek bir Mac'e de kurulabilir: balenaEtcher ile yazın, açılışta ++option++ tuşunu basılı tutup *Install macOS* seçeneğini seçin.
+
+## macOS Sequoia
+
+**sürüm henüz kaydedilmedi** — [Google Drive](https://drive.google.com/drive/folders/186obAE8_qlTjShXBcggNR7AHKL91wFdA?usp=sharing)
+
+- 16GB ve üzeri USB bellek.
+- Dizüstü ve masaüstü, UEFI ve Legacy, Intel ve AMD işlemciler.
+- Mevcut GPT Windows diskinin yanına kurulabilir.
+- Gerçek bir Mac'e de kurulabilir: balenaEtcher ile yazın, açılışta ++option++ tuşunu basılı tutup *Install macOS* seçeneğini seçin.
+
 ## macOS Sonoma
 
 ![macOS Sonoma](https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/macOS%20Sonoma%20%C4%B0maj.png){ width="700" }
 
-**14.4 (23E214)** — [Yandex Disk](https://disk.yandex.com/d/V2HBod0kqR--7w)
+**sürüm henüz kaydedilmedi** — [Google Drive](https://drive.google.com/drive/folders/1ROL3QiMtBYy1qbj6oF0-ryb4FtWZYhnH?usp=sharing)
 
 - 16GB ve üzeri USB bellek.
 - SSE4,1 desteği gerekir.
@@ -45,7 +65,7 @@ Her imaj, kurulumdan hemen sonra çoğu kişinin isteyeceği programları içere
 
 ![macOS Ventura](https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/macOS%20Ventura%20%C4%B0maj.png){ width="700" }
 
-**13.6.4 (22G513)** — [Techolay](https://techolay.net/sosyal/konu/macos-ventura-13-6-4-intel-amd-kurulum-imaji.8867/) · [Yandex Disk](https://disk.yandex.com.tr/d/rJr68ehwyTqDqQ)
+**sürüm henüz kaydedilmedi** — [Google Drive](https://drive.google.com/drive/folders/1L8HQ_2esRIYufS_mlRxa6XbMvXXqVJ03?usp=share_link)
 
 - 16GB ve üzeri USB bellek.
 - SSE4,1 desteği gerekir.
@@ -57,7 +77,7 @@ Her imaj, kurulumdan hemen sonra çoğu kişinin isteyeceği programları içere
 
 ![macOS Monterey](https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/macOS%20Monterey%20%C4%B0maj.png){ width="700" }
 
-**12.7.3 (21H1015)** — [Techolay](https://techolay.net/sosyal/konu/macos-monterey-12-7-3-intel-amd-kurulum-imaji.9318/) · [Yandex Disk](https://disk.yandex.com.tr/d/Er0c_wlvct3Zsw)
+**sürüm henüz kaydedilmedi** — [Google Drive](https://drive.google.com/drive/folders/11aujqWHtOdLRxar0_uXD205DQMJ77QcI?usp=sharing)
 
 - 16GB ve üzeri USB bellek.
 - SSE desteği gerekir.
@@ -69,7 +89,7 @@ Her imaj, kurulumdan hemen sonra çoğu kişinin isteyeceği programları içere
 
 ![macOS Big Sur](https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/macOS%20Big%20Sur%20%C4%B0maj.png){ width="700" }
 
-**11.7.10 (20G1427)** — [Techolay](https://techolay.net/sosyal/konu/macos-big-sur-11-7-10-intel-amd-kurulum-imaji.9679/) · [Yandex Disk](https://disk.yandex.com.tr/d/T80jcRkR11QoYA)
+**sürüm henüz kaydedilmedi** — [Google Drive](https://drive.google.com/drive/folders/1hlgBUlr1UIH7WCeJEQO_MIQKpZK-kx2M?usp=sharing)
 
 - 16GB ve üzeri USB bellek.
 - SSE desteği gerekir.
@@ -81,7 +101,7 @@ Her imaj, kurulumdan hemen sonra çoğu kişinin isteyeceği programları içere
 
 ![macOS Catalina](https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/macOS%20Catalina%20%C4%B0maj.png){ width="700" }
 
-**10.15.7 (19H15)** — [Google Drive](https://drive.google.com/u/0/uc?id=1su1aht3HdKle8KhFdh8Hgis8iVdCS0Av&export=download) · [Yandex Disk](https://disk.yandex.com.tr/d/9BL9JNpdO30xvg)
+**10.15.7 (19H15)** — [Google Drive](https://drive.google.com/u/0/uc?id=1su1aht3HdKle8KhFdh8Hgis8iVdCS0Av&export=download)
 
 - 16GB ve üzeri USB bellek.
 - SSE desteği gerekir.
@@ -93,7 +113,7 @@ Her imaj, kurulumdan hemen sonra çoğu kişinin isteyeceği programları içere
 
 ![macOS Mojave](https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/macOS%20Mojave%20%C4%B0maj.png){ width="700" }
 
-**10.14.6 (18G103)** — [Google Drive](https://drive.google.com/uc?id=1CZI7VDSVkBP0RFTkFjKSWA1jRTRCFMea&export=download) · [Yandex Disk](https://disk.yandex.com.tr/d/xPv1jGkvlTA_0A)
+**10.14.6 (18G103)** — [Google Drive](https://drive.google.com/uc?id=1CZI7VDSVkBP0RFTkFjKSWA1jRTRCFMea&export=download)
 
 - 8GB ve üzeri USB bellek.
 - SSE desteği gerekir.
@@ -105,7 +125,7 @@ Her imaj, kurulumdan hemen sonra çoğu kişinin isteyeceği programları içere
 
 ![macOS High Sierra](https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/macOS%20High%20Sierra%20%C4%B0maj.png){ width="700" }
 
-**10.13.6 (17G66)** — [Google Drive](https://drive.google.com/uc?id=1reS464pquOVKLCI-V5VF3OA5_uzGvele&export=download) · [Yandex Disk](https://disk.yandex.com.tr/d/52J3Y2axXJeAzg)
+**10.13.6 (17G66)** — [Google Drive](https://drive.google.com/uc?id=1reS464pquOVKLCI-V5VF3OA5_uzGvele&export=download)
 
 - 8GB ve üzeri USB bellek.
 - SSE desteği gerekir.
@@ -117,7 +137,7 @@ Her imaj, kurulumdan hemen sonra çoğu kişinin isteyeceği programları içere
 
 ![macOS Sierra](https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/macOS/macOS%20Sierra.png){ width="700" }
 
-**10.12.6 (16G29)** — [Google Drive](https://drive.google.com/uc?id=1JpAKVwvF9v5ivZDOKR65xBDi7uoZRcwR&export=download) · [Yandex Disk](https://disk.yandex.com.tr/d/SDMVIO070FSlqQ)
+**10.12.6 (16G29)** — [Google Drive](https://drive.google.com/uc?id=1JpAKVwvF9v5ivZDOKR65xBDi7uoZRcwR&export=download)
 
 - 8GB ve üzeri USB bellek.
 - SSE desteği gerekir.

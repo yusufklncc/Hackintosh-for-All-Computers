@@ -92,7 +92,7 @@ on the site, in English and Turkish:
 | [Get your EFI](https://yusufklncc.github.io/Hackintosh-for-All-Computers/efi/) | Every question the builder asks, and why |
 | [Make the USB stick](https://yusufklncc.github.io/Hackintosh-for-All-Computers/usb/) | Recovery, or a whole image |
 | [Building the stick on a Mac](https://yusufklncc.github.io/Hackintosh-for-All-Computers/mac-installer/) | A full offline installer, the EFI and legacy boot on one stick |
-| [macOS images](https://yusufklncc.github.io/Hackintosh-for-All-Computers/images/) | Ten releases, Yosemite to Sonoma |
+| [macOS images](https://yusufklncc.github.io/Hackintosh-for-All-Computers/images/) | Twelve releases, Yosemite to Tahoe |
 | [Adjust BIOS settings](https://yusufklncc.github.io/Hackintosh-for-All-Computers/bios/) | Intel and AMD Ryzen |
 | [macOS installation steps](https://yusufklncc.github.io/Hackintosh-for-All-Computers/installation/) | Screen by screen |
 | [Post installation](https://yusufklncc.github.io/Hackintosh-for-All-Computers/post-installation/) | Your own ROM and serial - not optional |
