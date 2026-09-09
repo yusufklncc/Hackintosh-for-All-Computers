@@ -15,12 +15,12 @@ Hazır yazılmış yükleyiciler, her sürüm için bir tane. Her biri zip için
 
 | Sürüm | Numara | USB | Komut seti |
 |---|---|---|---|
-| [Tahoe](#macos-tahoe) | *henüz kaydedilmedi* | 16GB | SSE4,1 |
-| [Sequoia](#macos-sequoia) | *henüz kaydedilmedi* | 16GB | SSE4,1 |
-| [Sonoma](#macos-sonoma) | *henüz kaydedilmedi* | 16GB | SSE4,1 |
-| [Ventura](#macos-ventura) | *henüz kaydedilmedi* | 16GB | SSE4,1 |
-| [Monterey](#macos-monterey) | *henüz kaydedilmedi* | 16GB | SSE |
-| [Big Sur](#macos-big-sur) | *henüz kaydedilmedi* | 16GB | SSE |
+| [Tahoe](#macos-tahoe) | 26.0.1 (25A362) | 16GB | SSE4,1 |
+| [Sequoia](#macos-sequoia) | 15.7.1 (24G231) | 16GB | SSE4,1 |
+| [Sonoma](#macos-sonoma) | 14.8.1 (23J30) | 16GB | SSE4,1 |
+| [Ventura](#macos-ventura) | 13.6.4 (22G513) | 16GB | SSE4,1 |
+| [Monterey](#macos-monterey) | 12.7.3 (21H1015) | 16GB | SSE |
+| [Big Sur](#macos-big-sur) | 11.7.10 (20G1427) | 16GB | SSE |
 | [Catalina](#macos-catalina) | 10.15.7 (19H15) | 16GB | SSE |
 | [Mojave](#macos-mojave) | 10.14.6 (18G103) | 8GB | SSE |
 | [High Sierra](#macos-high-sierra) | 10.13.6 (17G66) | 8GB | SSE |
@@ -33,7 +33,7 @@ Her imaj, kurulumdan hemen sonra çoğu kişinin isteyeceği programları içere
 
 ## macOS Tahoe
 
-**sürüm henüz kaydedilmedi** — [Google Drive](https://drive.google.com/drive/folders/13Fl_QriDjEB8SymvEE31QaCLixqWnLxx?usp=sharing)
+**26.0.1 (25A362)** — [Google Drive](https://drive.google.com/drive/folders/13Fl_QriDjEB8SymvEE31QaCLixqWnLxx?usp=sharing)
 
 - 16GB ve üzeri USB bellek.
 - Dizüstü ve masaüstü, UEFI ve Legacy, Intel ve AMD işlemciler.
@@ -42,7 +42,7 @@ Her imaj, kurulumdan hemen sonra çoğu kişinin isteyeceği programları içere
 
 ## macOS Sequoia
 
-**sürüm henüz kaydedilmedi** — [Google Drive](https://drive.google.com/drive/folders/186obAE8_qlTjShXBcggNR7AHKL91wFdA?usp=sharing)
+**15.7.1 (24G231)** — [Google Drive](https://drive.google.com/drive/folders/186obAE8_qlTjShXBcggNR7AHKL91wFdA?usp=sharing)
 
 - 16GB ve üzeri USB bellek.
 - Dizüstü ve masaüstü, UEFI ve Legacy, Intel ve AMD işlemciler.
@@ -53,7 +53,7 @@ Her imaj, kurulumdan hemen sonra çoğu kişinin isteyeceği programları içere
 
 ![macOS Sonoma](https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/macOS%20Sonoma%20%C4%B0maj.png){ width="700" }
 
-**sürüm henüz kaydedilmedi** — [Google Drive](https://drive.google.com/drive/folders/1ROL3QiMtBYy1qbj6oF0-ryb4FtWZYhnH?usp=sharing)
+**14.8.1 (23J30)** — [Google Drive](https://drive.google.com/drive/folders/1ROL3QiMtBYy1qbj6oF0-ryb4FtWZYhnH?usp=sharing)
 
 - 16GB ve üzeri USB bellek.
 - SSE4,1 desteği gerekir.
@@ -65,7 +65,7 @@ Her imaj, kurulumdan hemen sonra çoğu kişinin isteyeceği programları içere
 
 ![macOS Ventura](https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/macOS%20Ventura%20%C4%B0maj.png){ width="700" }
 
-**sürüm henüz kaydedilmedi** — [Google Drive](https://drive.google.com/drive/folders/1L8HQ_2esRIYufS_mlRxa6XbMvXXqVJ03?usp=share_link)
+**13.6.4 (22G513)** — [Google Drive](https://drive.google.com/drive/folders/1L8HQ_2esRIYufS_mlRxa6XbMvXXqVJ03?usp=share_link)
 
 - 16GB ve üzeri USB bellek.
 - SSE4,1 desteği gerekir.
@@ -77,7 +77,7 @@ Her imaj, kurulumdan hemen sonra çoğu kişinin isteyeceği programları içere
 
 ![macOS Monterey](https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/macOS%20Monterey%20%C4%B0maj.png){ width="700" }
 
-**sürüm henüz kaydedilmedi** — [Google Drive](https://drive.google.com/drive/folders/11aujqWHtOdLRxar0_uXD205DQMJ77QcI?usp=sharing)
+**12.7.3 (21H1015)** — [Google Drive](https://drive.google.com/drive/folders/11aujqWHtOdLRxar0_uXD205DQMJ77QcI?usp=sharing)
 
 - 16GB ve üzeri USB bellek.
 - SSE desteği gerekir.
@@ -89,7 +89,7 @@ Her imaj, kurulumdan hemen sonra çoğu kişinin isteyeceği programları içere
 
 ![macOS Big Sur](https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/macOS%20Big%20Sur%20%C4%B0maj.png){ width="700" }
 
-**sürüm henüz kaydedilmedi** — [Google Drive](https://drive.google.com/drive/folders/1hlgBUlr1UIH7WCeJEQO_MIQKpZK-kx2M?usp=sharing)
+**11.7.10 (20G1427)** — [Google Drive](https://drive.google.com/drive/folders/1hlgBUlr1UIH7WCeJEQO_MIQKpZK-kx2M?usp=sharing)
 
 - 16GB ve üzeri USB bellek.
 - SSE desteği gerekir.
