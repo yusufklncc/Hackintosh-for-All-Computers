@@ -12,7 +12,7 @@
 kext = "RealtekCardReader.kext"
 project = "0xFireWolf/RealtekCardReader"
 license = "BSD-3-Clause"
-systems = ["macOS Monterey", "macOS Big Sur", "macOS Catalina", "macOS Mojave"]
+systems = ["macOS Tahoe", "macOS Sequoia", "macOS Sonoma", "macOS Ventura", "macOS Monterey", "macOS Big Sur", "macOS Catalina", "macOS Mojave"]
 note = "the project calls itself Pre-1.0 Beta and says other systems are not tested yet"
 
 [[device]]

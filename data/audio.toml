@@ -9,7 +9,7 @@
 # table shows both the version bump and what it changed.
 [source]
 project = "acidanthera/AppleALC"
-ref = "1.9.7"
+ref = "1.9.8"
 
 [[audio]]
 codec = "AD1884"
@@ -572,6 +572,10 @@ id = 15
 note = "Realtek ALC255 Gigabyte Brix BRI5(H) by Najdanovic Ivan"
 
 [[audio.layout]]
+id = 16
+note = "Custom - Realtek ALC255 for Gigabyte Aorus 15G (warm-reboot/sleep audio fix, same as layout 3) by Andergraw"
+
+[[audio.layout]]
 id = 17
 note = "InsanelyDeepak - Realtek ALC255_v2"
 
@@ -642,6 +646,10 @@ note = "Realtek ALC255 for minisforum U820 by DalianSky"
 [[audio.layout]]
 id = 86
 note = "Armênio - Realtek ALC255/ALC3234 - Dell 7348"
+
+[[audio.layout]]
+id = 89
+note = "ALC3234/ALC255 - Dell OptiPlex 3060 MFF - Lorys89"
 
 [[audio.layout]]
 id = 96
@@ -1126,6 +1134,10 @@ note = "ALC269 for GPD P2 Max by DalianSky"
 [[audio.layout]]
 id = 111
 note = "ALC269 for minisforum NAG6 by DalianSky"
+
+[[audio.layout]]
+id = 120
+note = "ALC269 for Infinix XBOOK B15 by kodeaqua"
 
 [[audio.layout]]
 id = 127
@@ -1843,6 +1855,10 @@ id = 94
 note = "Custom - Realtek ALC298 for Lenovo Yoga C940 by idalin"
 
 [[audio.layout]]
+id = 98
+note = "sunbo - Realtek ALC298 for Lenovo Yoga 9 15IMH5"
+
+[[audio.layout]]
 id = 99
 note = "Daliansky - Realtek ALC298 XiaoMi Pro"
 
@@ -2456,6 +2472,10 @@ id = 77
 note = "ONDA H510D4 IPC ALC897"
 
 [[audio.layout]]
+id = 97
+note = "B560M Tuf Gaming Plus"
+
+[[audio.layout]]
 id = 98
 note = "liangyi - ALC897 for MSI PRO B760M-P DDR4"
 
@@ -2577,7 +2597,7 @@ note = "GeorgeWan - ALCS1200A for ASROCK-Z490-Steel-Legend"
 
 [[audio.layout]]
 id = 52
-note = "GeorgeWan - ALCS1200A for MSI-Mortar-B460M"
+note = "GeorgeWan - ALCS1200A for MSI-Mortar-B460M and MAG B660M MORTAR WIFI DDR4"
 
 [[audio.layout]]
 id = 69
@@ -2632,6 +2652,10 @@ note = "Realtek ALC S1220A RodionS, Nacho 2.0 outputs(green)+2 inputs+front pane
 [[audio.layout]]
 id = 21
 note = "Realtek ALC S1220A RodionS, Nacho 5.1 outputs(green, black, orange)+2 inputs+front panel+SPDIF/Optical "
+
+[[audio.layout]]
+id = 88
+note = "MSI MPG Z390 GAMING PRO CARBON AC - Realtek ALC1220P-VB2 (0x10EC1168, subsystem 0x1462CB17) - independent rear green, front headphone, rear orange, rear black and optical S/PDIF outputs; rear/front microphone and line-in - layout 88 - Tahsin Faiyaz"
 
 [[audio.layout]]
 id = 89
