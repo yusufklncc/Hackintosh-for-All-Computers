@@ -142,9 +142,11 @@ install = "efi"
 licence = "BSD-3-Clause"
 archived = false
 covers = "Realtek SD card readers; its device table is already read into data/cardreader.toml"
-release = "v0.9.7"
+release = "v0.9.8"
 ids_from = "kext"
 ids = ["0bda:0129", "0bda:0139", "0bda:0140", "10ec:5209", "10ec:5227", "10ec:5229", "10ec:522a", "10ec:5249", "10ec:524a", "10ec:525a", "10ec:5260", "10ec:5286", "10ec:5287", "10ec:5289"]
+asset = "RealtekCardReader_0.9.8_380819f_RELEASE.zip"
+sha256 = "46c8bccdb1fad730b3dfd06ac1b0b986df04c3b0b5a83bd9505d7c8c927026e1"
 
 [[project]]
 name = "AirPort_RTW89"
@@ -338,17 +340,17 @@ role = "graphics"
 stage = "experimental"
 install = "efi"
 licence = "BSD-3-Clause"
-release = "v0.3.3"
-asset = "AMDRadeonRDNA4-0.3.3-RELEASE.zip"
-sha256 = "38d1eee5da08dc4522ac0ac78ddd5a1689a4cbbd047561d380088418ef416808"
-commit = "5ffdaf64b51df2c910ac7ce597892e6817d7d883"
+release = "v0.4.0"
+asset = "AMDRadeonRDNA4-0.4.0-RELEASE.zip"
+sha256 = "a63d8b4123408f5148c1d9504632865a0a69bc7bdb8fc29e191d6fe09fa0e246"
+commit = "9d9eecb19320577fa9760351f7a7ce900597492d"
 source = "README.md"
 ids_from = "quoted"
-ids = ["1002:7550", "1002:7551"]
+ids = ["1002:7550", "1002:7551", "1002:7590"]
 macos = "| **Tahoe 26.6.2** | **Tested**: the main test system."
 min_darwin = 24
-quote = "A macOS driver for AMD Radeon **RDNA 4** graphics cards (Navi 48: RX 9070 XT, RX 9070, RX 9070 GRE) on x86_64 Hackintosh."
-covers = "AMD Radeon RX 9070 XT, RX 9070, RX 9070 GRE and AI PRO R9700"
+quote = "A macOS driver for AMD Radeon **RDNA 4** graphics cards (Navi 48: RX 9070 XT, RX 9070, RX 9070 GRE; Navi 44: RX 9060 XT, not yet run on one under macOS) on x86_64 Hackintosh."
+covers = "AMD Radeon RX 9070 XT, RX 9070, RX 9070 GRE and AI PRO R9700; RX 9060 XT and RX 9060 not yet run"
 requires_kext = "Lilu 1.7.1 or newer on macOS 26"
 how = "a Lilu plugin, injected by OpenCore"
 
