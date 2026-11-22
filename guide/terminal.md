@@ -101,7 +101,7 @@ It needs nothing but Python 3.11 and a clone. See [tools/README.md](https://gith
 
 ## Adding a kext by hand
 
-The builder does this for you, and it knows 531 device ids and which kext drives
+The builder does this for you, and it knows 533 device ids and which kext drives
 each. This is the route if you are working from the release zips, or if you have
 hardware it does not cover.
 

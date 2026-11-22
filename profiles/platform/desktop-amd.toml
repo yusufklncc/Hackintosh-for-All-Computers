@@ -62,6 +62,7 @@ GraphicsInputMirroring = false
 Arguments = ""
 Comment = ""
 Enabled = true
+HideVerbose = false
 LoadEarly = false
 Path = "HfsPlus.efi"
 
@@ -69,6 +70,7 @@ Path = "HfsPlus.efi"
 Arguments = ""
 Comment = ""
 Enabled = true
+HideVerbose = false
 LoadEarly = false
 Path = "OpenCanopy.efi"
 
@@ -76,6 +78,7 @@ Path = "OpenCanopy.efi"
 Arguments = ""
 Comment = ""
 Enabled = true
+HideVerbose = false
 LoadEarly = false
 Path = "OpenRuntime.efi"
 
@@ -83,6 +86,7 @@ Path = "OpenRuntime.efi"
 Arguments = ""
 Comment = ""
 Enabled = true
+HideVerbose = false
 LoadEarly = false
 Path = "ToggleSipEntry.efi"
 
@@ -90,6 +94,7 @@ Path = "ToggleSipEntry.efi"
 Arguments = ""
 Comment = ""
 Enabled = true
+HideVerbose = false
 LoadEarly = false
 Path = "ResetNvramEntry.efi"
 

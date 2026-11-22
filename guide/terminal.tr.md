@@ -105,7 +105,7 @@ Python 3.11 ve bir klondan başka bir şey istemez. Bkz.
 
 ## Elle kext eklemek
 
-Derleyici bunu sizin için yapıyor ve 531 aygıt kimliğiyle her birini hangi
+Derleyici bunu sizin için yapıyor ve 533 aygıt kimliğiyle her birini hangi
 kext'in sürdüğünü biliyor. Bu yol, release zip'leriyle çalışıyorsanız ya da
 kapsamadığı bir donanımınız varsa geçerli.
 

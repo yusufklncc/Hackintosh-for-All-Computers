@@ -11,7 +11,7 @@
 kext = "AirportBrcmFixup.kext"
 role = "wifi"
 label = "Broadcom Wi-Fi"
-version = "2.2.0"
+version = "2.2.1"
 bus = "pci"
 ids = ["14e4:4311", "14e4:4312", "14e4:4313", "14e4:4318", "14e4:4319", "14e4:431a", "14e4:4320", "14e4:4324", "14e4:4325", "14e4:4328", "14e4:432b", "14e4:432c", "14e4:432d", "14e4:4331", "14e4:4353", "14e4:4357", "14e4:43a0", "14e4:43a3", "14e4:43b1", "14e4:43b2", "14e4:43ba"]
 
@@ -83,9 +83,9 @@ ids = ["8086:0d4c", "8086:0d4d", "8086:0d4e", "8086:0d4f", "8086:0d53", "8086:0d
 kext = "LucyRTL8125Ethernet.kext"
 role = "ethernet"
 label = "Realtek 2.5G Ethernet"
-version = "1.2.3"
+version = "1.2.4"
 bus = "pci"
-ids = ["10ec:3000", "10ec:8125", "1186:8125"]
+ids = ["10ec:3000", "10ec:5000", "10ec:8125", "10ec:8126", "1186:8125"]
 
 [[driver]]
 kext = "RealtekRTL8111.kext"

@@ -134,7 +134,8 @@ def main(argv=None):
     ap.add_argument('--no-engine', action='store_true',
                     help='wrap the window without the engine, which only makes '
                          'sense for a bundle that will sit inside a clone')
-    ap.add_argument('--version', default='1.0.7',
+    vendored = sorted(p.name for p in Path('vendor/opencore').glob('*') if p.is_dir())
+    ap.add_argument('--version', default=vendored[-1] if vendored else '0',
                     help='the OpenCore version this builds, which is the '
                          'release number')
     a = ap.parse_args(argv)

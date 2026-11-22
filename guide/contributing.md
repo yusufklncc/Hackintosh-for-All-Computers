@@ -46,7 +46,7 @@ mkdocs serve                                       preview at localhost:8000
 
 ## The release version
 
-The tag mirrors the **OpenCore version** vendored in the repository - `v1.0.7`
-means OpenCore 1.0.7. It is never bumped for features. When OpenCore has not
+The tag mirrors the **OpenCore version** vendored in the repository - `v1.0.8`
+means OpenCore 1.0.8. It is never bumped for features. When OpenCore has not
 moved and a fix has to go out, the release is republished on the same tag; see
 [docs/RELEASING.md](https://github.com/yusufklncc/Hackintosh-for-All-Computers/blob/main/docs/RELEASING.md).

@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>BuildMachineOSBuild</key>
-	<string>24G517</string>
+	<string>24H232</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleExecutable</key>
@@ -17,7 +17,7 @@
 	<key>CFBundlePackageType</key>
 	<string>KEXT</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.2.3</string>
+	<string>1.2.4</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleSupportedPlatforms</key>
@@ -25,23 +25,23 @@
 		<string>MacOSX</string>
 	</array>
 	<key>CFBundleVersion</key>
-	<string>1.2.300</string>
+	<string>1.2.400</string>
 	<key>DTCompiler</key>
 	<string>com.apple.compilers.llvm.clang.1_0</string>
 	<key>DTPlatformBuild</key>
-	<string>24C94</string>
+	<string>25C58</string>
 	<key>DTPlatformName</key>
 	<string>macosx</string>
 	<key>DTPlatformVersion</key>
-	<string>15.2</string>
+	<string>26.2</string>
 	<key>DTSDKBuild</key>
-	<string>24C94</string>
+	<string>25C58</string>
 	<key>DTSDKName</key>
-	<string>macosx15.2</string>
+	<string>macosx26.2</string>
 	<key>DTXcode</key>
-	<string>1620</string>
+	<string>2630</string>
 	<key>DTXcodeBuild</key>
-	<string>16C5032a</string>
+	<string>17C529</string>
 	<key>IOKitPersonalities</key>
 	<dict>
 		<key>LucyRTL8125</key>
@@ -50,11 +50,7 @@
 			<string>com.insanelymac.LucyRTL8125Ethernet</string>
 			<key>Driver Parameters</key>
 			<dict>
-				<key>disableASPM</key>
-				<true/>
-				<key>enableCSO6</key>
-				<true/>
-				<key>enableEEE</key>
+				<key>enableASPM</key>
 				<true/>
 				<key>enableTSO4</key>
 				<true/>
@@ -62,17 +58,21 @@
 				<true/>
 				<key>fallbackMAC</key>
 				<string></string>
-				<key>µsPollInt2500</key>
-				<integer>110</integer>
+				<key>µsPollTime10G</key>
+				<integer>100</integer>
+				<key>µsPollTime2G</key>
+				<integer>160</integer>
+				<key>µsPollTime5G</key>
+				<integer>130</integer>
 			</dict>
 			<key>Driver Version</key>
-			<string>1.2.300</string>
+			<string>1.2.400</string>
 			<key>IOClass</key>
 			<string>LucyRTL8125</string>
 			<key>IOPCIMatch</key>
-			<string>0x812510ec 0x81251186 0x300010ec</string>
+			<string>0x812510ec 0x81251186 0x300010ec 0x812610ec 0x500010ec</string>
 			<key>IOProbeScore</key>
-			<integer>1000</integer>
+			<integer>2000</integer>
 			<key>IOProviderClass</key>
 			<string>IOPCIDevice</string>
 			<key>Model</key>

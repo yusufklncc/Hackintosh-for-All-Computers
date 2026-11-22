@@ -53,7 +53,7 @@ them for you. **Recovery** fetches Apple's own installer, about 700 MB that fits
 where a 12 GB image never could, and says first whether the machine you are
 building for can reach the network during the install at all. **USB stick**
 formats the drive and copies both folders onto it. **Report** carries a machine
-to another computer. **Compatible Hardware** lists 770 devices across 8
+to another computer. **Compatible Hardware** lists 772 devices across 8
 categories, **Kexts** the 42 that ship inside, and **About** says where every
 answer came from.
 

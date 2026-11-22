@@ -48,7 +48,7 @@ mkdocs serve                                       localhost:8000 üzerinde öni
 
 ## Sürüm numarası
 
-Etiket, depoda taşınan **OpenCore sürümünü** yansıtır — `v1.0.7`, OpenCore 1.0.7
+Etiket, depoda taşınan **OpenCore sürümünü** yansıtır — `v1.0.8`, OpenCore 1.0.8
 demektir. Özellik eklendi diye asla yükseltilmez. OpenCore yerinde dururken bir
 düzeltmenin çıkması gerekiyorsa, release aynı etiket üzerinde yeniden yayımlanır;
 bkz.

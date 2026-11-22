@@ -3,13 +3,13 @@
 # or truncated checkout is caught before it is copied.
 
 [kext."AMDRyzenCPUPowerManagement.kext"]
-version = "0.7.1"
-sha256 = "1a9fb557747afe810b2179a741b5b60200cc84c41d7facd724e6bbbb73479bb0"
+version = "0.7.2"
+sha256 = "549a142e661cc21fe46759a6c4787d712ab15b7399ab68dcec78d378241cbb51"
 upstream = "trulyspinach/SMCAMDProcessor"
 
 [kext."AirportBrcmFixup.kext"]
-version = "2.2.0"
-sha256 = "94002ff668071e6dacc998041132e8c0c2386747dd795695bf3fc1ff4d8923ce"
+version = "2.2.1"
+sha256 = "60cfac7e3ab2a9f491b962d9e62e4b3897eb94f248a3c5d13d359d6b1aac7d61"
 upstream = "acidanthera/AirportBrcmFixup"
 
 [kext."AirportItlwm.kext"]
@@ -88,13 +88,13 @@ sha256 = "a8b016e05ae290f06d83f682580b32c0e633dab1cd3a5643f99deddba0ecf9c7"
 upstream = "acidanthera/IntelMausi"
 
 [kext."Lilu.kext"]
-version = "1.7.1"
-sha256 = "bcc22f3066b1d059036e6ca8670699d768e498b4315e9c608cf54642dac4b6ae"
+version = "1.7.2"
+sha256 = "8da9151c5116b6978447dad47e516c97d4792abf6bbffe66cf664136d9a27f40"
 upstream = "acidanthera/Lilu"
 
 [kext."LucyRTL8125Ethernet.kext"]
-version = "1.2.3"
-sha256 = "1e7e9724848511b671a2b7d8254620b7c74ab8f171777dffa85f79f7fe08a262"
+version = "1.2.4"
+sha256 = "3ec0d30e28a8228ff7f2b3cfbfc31c34afaa1d5ebf2c0275a8d7b7d9b153dd09"
 upstream = "Mieze/LucyRTL8125Ethernet"
 
 [kext."NVMeFix.kext"]
@@ -113,23 +113,23 @@ sha256 = "4869bd2c8796d9e7b40e15f1cb8f8fc252895b17e62e7733c99bc46655bfc135"
 upstream = "trulyspinach/SMCAMDProcessor"
 
 [kext."SMCBatteryManager.kext"]
-version = "1.3.7"
-sha256 = "a835bc62dde8c0cc8321999f8fc9cefe4dc0f9ff4cd56e9948940241ba31bea9"
+version = "1.3.8"
+sha256 = "a32d65b102ca30ba377bfa790875dc82feabf940f0e35aa2fce0caa48f507dfd"
 upstream = "acidanthera/VirtualSMC"
 
 [kext."SMCDellSensors.kext"]
-version = "1.3.7"
-sha256 = "bf510df0f9b01c6c65de3702d7a3aeac004fba9ab99a53dbf0ff58eadc162539"
+version = "1.3.8"
+sha256 = "598ee1ab11ec52f71eff5cf7cb0837aea97c6be2e1932447c5dc6445fe8245b5"
 upstream = "acidanthera/VirtualSMC"
 
 [kext."SMCProcessor.kext"]
-version = "1.3.7"
-sha256 = "2c9161accb957df9606f0bb9830f8842a928d16c1e713238641425113057cea2"
+version = "1.3.8"
+sha256 = "28e1c597223a5c90d62dafc44e5ccf1b1435d4a827aaadafee7da4411086c0d2"
 upstream = "acidanthera/VirtualSMC"
 
 [kext."SMCSuperIO.kext"]
-version = "1.3.7"
-sha256 = "70579066f4c09455b5028f918fe2fc1588a7b9a9fb8d7d59f4dba7b7a15fae05"
+version = "1.3.8"
+sha256 = "7fe5061b334551da33cac215e97acea8cd501de2dbc0f717281eea2dbd213460"
 upstream = "acidanthera/VirtualSMC"
 
 [kext."USBInjectAll.kext"]
@@ -148,8 +148,8 @@ sha256 = "0b789ececabb65959e9d2f560603b62f25ee3de92d9883e822680ed3de6a9860"
 upstream = "USBToolBox/kext"
 
 [kext."VirtualSMC.kext"]
-version = "1.3.7"
-sha256 = "c40719bd8a5ba3c6bcb06c5d46cb556b03a9d908ccd60257a0b24ad5ce1a8f49"
+version = "1.3.8"
+sha256 = "58ded06b3eb6240e2aa0f7f96248b2a114018ca04ce87214ddb58d159f928ec4"
 upstream = "acidanthera/VirtualSMC"
 
 [kext."VoodooI2C.kext"]
@@ -193,8 +193,8 @@ sha256 = "79e04a6450e081699642d9f108844a1b2b59db6052e495aa9e604fe83961f72b"
 upstream = "VoodooSMBus/VoodooRMI"
 
 [kext."WhateverGreen.kext"]
-version = "1.7.0"
-sha256 = "204297d1f37b29fd91d05f067540a995186d8cfa2e729bec3e8e71e2538c02e7"
+version = "1.7.1"
+sha256 = "72c1ba95d96bfe7c7a5e1dc89a4dd649b23eacf89b1f1829aa6213eecdb4e83b"
 upstream = "acidanthera/WhateverGreen"
 
 [kext."XHCI-unsupported.kext"]

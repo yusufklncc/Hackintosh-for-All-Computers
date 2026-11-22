@@ -9,7 +9,7 @@ platform = "desktop"
 cpu = "bulldozer-jaguar"
 vendor = "amd"
 cores = 4
-sha256 = "6493327065c02684cbdfd35017ef705bf5492fe03ff072eb551a584826cae188"
+sha256 = "4e03464346240c3cb309914767d4c7d0930e7ae33b89c43cb65e23237f45be4f"
 
 [[config]]
 name = "Desktop/AMD/002 - Desktop - Bulldozer ve Jaguar 6 Core"
@@ -17,7 +17,7 @@ platform = "desktop"
 cpu = "bulldozer-jaguar"
 vendor = "amd"
 cores = 6
-sha256 = "be5903e1173385b705ba9d29b55810ef5694269d311bc63dade3372c823ed9c6"
+sha256 = "0efe5b6afe7143d0548097ded5eca5bfcb1939e9aa1322bbe2906422912fe70b"
 
 [[config]]
 name = "Desktop/AMD/003 - Desktop - Bulldozer ve Jaguar 8 Core"
@@ -25,7 +25,7 @@ platform = "desktop"
 cpu = "bulldozer-jaguar"
 vendor = "amd"
 cores = 8
-sha256 = "23a0cc12977151d59039cac6a9d4cebced98122f680692fa5fe7867d6728e431"
+sha256 = "7e4813060a9338e77718bd13223e89d8e04c976fc2e8b84bea7645b1ad6eadab"
 
 [[config]]
 name = "Desktop/AMD/004 - Desktop - Ryzen ve Threadripper 4 Core"
@@ -33,7 +33,7 @@ platform = "desktop"
 cpu = "ryzen-threadripper"
 vendor = "amd"
 cores = 4
-sha256 = "f8e64f90fcb5607c9bf95682ffb28c54dd86d05b4fcd2ffdfec3d5e0c1a9aa95"
+sha256 = "1812a805c2df93aab05a9f8603a9187e81dc52607de5c8ebf81d5f456e248e58"
 
 [[config]]
 name = "Desktop/AMD/005 - Desktop - Ryzen ve Threadripper 6 Core"
@@ -41,7 +41,7 @@ platform = "desktop"
 cpu = "ryzen-threadripper"
 vendor = "amd"
 cores = 6
-sha256 = "a347c329b0505eae3150e360ba17d06591ea83e2c1d34c1def2e19864ec0fd2e"
+sha256 = "e49dcb300daa755a131c2a6d717a857183f89d6a87695c56ef5fbc6177890865"
 
 [[config]]
 name = "Desktop/AMD/006 - Desktop - Ryzen ve Threadripper 8 Core"
@@ -49,7 +49,7 @@ platform = "desktop"
 cpu = "ryzen-threadripper"
 vendor = "amd"
 cores = 8
-sha256 = "73077c9d6caa06ba803802c9a8a5f10e4a53426e11cd3db035a40f3cf4f1d5c4"
+sha256 = "7effb6651a0f470b3a1097411008bd16d9c1aa2c13b77aee418dfe32e7e82125"
 
 [[config]]
 name = "Desktop/AMD/007 - Desktop - Ryzen ve Threadripper 12 Core"
@@ -57,7 +57,7 @@ platform = "desktop"
 cpu = "ryzen-threadripper"
 vendor = "amd"
 cores = 12
-sha256 = "fd9c2af62585b4c475df4539dc7e77488f437ca361c1f9d515deebf3fe263da9"
+sha256 = "f538f4c4ec6742652399d8308b6842092b785947904ea66f220459f6e4a0583a"
 
 [[config]]
 name = "Desktop/AMD/008 - Desktop - Ryzen ve Threadripper 16 Core"
@@ -65,7 +65,7 @@ platform = "desktop"
 cpu = "ryzen-threadripper"
 vendor = "amd"
 cores = 16
-sha256 = "46d606d914902b78a658be983a32e768bc722c023d0d6505e9312d1b61fb3079"
+sha256 = "1dc74949d9e102ec58c18505fc1f3709cc016801897fab99aedca9c2f71414b5"
 
 [[config]]
 name = "Desktop/AMD/009 - Desktop - Ryzen ve Threadripper 24 Core"
@@ -73,7 +73,7 @@ platform = "desktop"
 cpu = "ryzen-threadripper"
 vendor = "amd"
 cores = 24
-sha256 = "5d66fb90da345f35cd87f011682b72925774d3ad8ac56a3840aef1a05c9f0f23"
+sha256 = "4b235f3b16316cada3800775d4c1ef4f0f172ce71fb21f0e6e79d9ee4d1d2695"
 
 [[config]]
 name = "Desktop/AMD/010 - Desktop - Ryzen ve Threadripper 32 Core"
@@ -81,7 +81,7 @@ platform = "desktop"
 cpu = "ryzen-threadripper"
 vendor = "amd"
 cores = 32
-sha256 = "7e814a404f7a02d3f405ef5f566450cb3530cd9fba7fb760e0cdb7a3df57a7f6"
+sha256 = "499f6b6cab23bf2c9252d2fd1207787dfd8f444ecc586e95b50b14cd55e4d4d1"
 
 [[config]]
 name = "Desktop/AMD/011 - Desktop - Ryzen ve Threadripper 64 Core"
@@ -89,7 +89,7 @@ platform = "desktop"
 cpu = "ryzen-threadripper"
 vendor = "amd"
 cores = 64
-sha256 = "daaf1d938c5f57942653f8fbac0b5ae052340e5bde380fa266c6fc2f91ebc5d5"
+sha256 = "a16567939e8ed1a7ed40d820b93a36d1656dfb32e0102b40ca9888f19b147ef7"
 
 [[config]]
 name = "Desktop/AMD/B450 - X470 - X570/001 - Desktop - Ryzen ve Threadripper 4 Core"
@@ -98,7 +98,7 @@ cpu = "ryzen-threadripper"
 vendor = "amd"
 chipset = "b450-x470-x570"
 cores = 4
-sha256 = "f01fef1bde2fce24bf9fa070ccdb4e1e1277f354ac1ddb9fafff5132aa3db30c"
+sha256 = "2351b436d160343172888ff95a2e30c0bd2c5172669add93135715220c8c6ee6"
 
 [[config]]
 name = "Desktop/AMD/B450 - X470 - X570/002 - Desktop - Ryzen ve Threadripper 6 Core"
@@ -107,7 +107,7 @@ cpu = "ryzen-threadripper"
 vendor = "amd"
 chipset = "b450-x470-x570"
 cores = 6
-sha256 = "7826cd7fdbc6e9ed2e3462347dc86480425434f2c363ac7aaa7ca2d3bd411644"
+sha256 = "ce990bcc224a1312bc3313dfd6ccf151bb8e10cbb4efb0fa36fb3b3ec75171c0"
 
 [[config]]
 name = "Desktop/AMD/B450 - X470 - X570/003 - Desktop - Ryzen ve Threadripper 8 Core"
@@ -116,7 +116,7 @@ cpu = "ryzen-threadripper"
 vendor = "amd"
 chipset = "b450-x470-x570"
 cores = 8
-sha256 = "28fdf28b4080bf430e61af20a529a4c8ef5fbacf25ef7f9504d412e0db77787c"
+sha256 = "c1a2dd4983707ab0ccee72cd880acefd0c8a342e8ff4dd1b3982cba4b6dbe3db"
 
 [[config]]
 name = "Desktop/AMD/B450 - X470 - X570/004 - Desktop - Ryzen ve Threadripper 12 Core"
@@ -125,7 +125,7 @@ cpu = "ryzen-threadripper"
 vendor = "amd"
 chipset = "b450-x470-x570"
 cores = 12
-sha256 = "6c0701f36c39c04b2baf30349f079559d81e3ca136e158cf1fc1b056d94bb064"
+sha256 = "959016fe0730fc58ab45124667f0f812d65483007d54417ba5a165d413433082"
 
 [[config]]
 name = "Desktop/AMD/B450 - X470 - X570/005 - Desktop - Ryzen ve Threadripper 16 Core"
@@ -134,7 +134,7 @@ cpu = "ryzen-threadripper"
 vendor = "amd"
 chipset = "b450-x470-x570"
 cores = 16
-sha256 = "3aefec36d04614a986c3dd9af34b6502252a3182e8fc5529c8dd53a0e4d394bd"
+sha256 = "de5ad6eb67356510ccdcc5b0c2a9e50fcc43c816c49780ff92aaa093d690902c"
 
 [[config]]
 name = "Desktop/AMD/B450 - X470 - X570/006 - Desktop - Ryzen ve Threadripper 24 Core"
@@ -143,7 +143,7 @@ cpu = "ryzen-threadripper"
 vendor = "amd"
 chipset = "b450-x470-x570"
 cores = 24
-sha256 = "43980c56b410697af61357c8cdf87d07f6ba010b88cac41b929527a5e6fd950c"
+sha256 = "6796d784303cf14b714ee98ed6e6246a5ef2a03b91caad33244ac4c7b17f1a85"
 
 [[config]]
 name = "Desktop/AMD/B450 - X470 - X570/007 - Desktop - Ryzen ve Threadripper 32 Core"
@@ -152,7 +152,7 @@ cpu = "ryzen-threadripper"
 vendor = "amd"
 chipset = "b450-x470-x570"
 cores = 32
-sha256 = "fa0c78061a7a0939a8df12a44f4d14badbaf73ffcd4edb8fe766c3a479a801d2"
+sha256 = "49821eae024ed184c29c992a8103f10896c3b197e4ad0f3ac69d8cd21a7007f7"
 
 [[config]]
 name = "Desktop/AMD/B450 - X470 - X570/008 - Desktop - Ryzen ve Threadripper 64 Core"
@@ -161,7 +161,7 @@ cpu = "ryzen-threadripper"
 vendor = "amd"
 chipset = "b450-x470-x570"
 cores = 64
-sha256 = "cfea8fad45dd69567cde1dc59bec3ca3e147b22111973f05f032740af7bdfcb8"
+sha256 = "7f19f5762a4e1f97c86e537a518fe67eb4f5168dac175eceae8676ea4a30ef93"
 
 [[config]]
 name = "Desktop/AMD/B550 - A520/001 - Desktop - Ryzen ve Threadripper 4 Core"
@@ -170,7 +170,7 @@ cpu = "ryzen-threadripper"
 vendor = "amd"
 chipset = "b550-a520"
 cores = 4
-sha256 = "18feb110897cedb24eaddf716e1ae976ffcb39070cc38e376aeedf17da7ab816"
+sha256 = "2e38fc8a3e4da3ff6f5258c365111baf42b6db9c37ebec10876d9cb3226a1794"
 
 [[config]]
 name = "Desktop/AMD/B550 - A520/002 - Desktop - Ryzen ve Threadripper 6 Core"
@@ -179,7 +179,7 @@ cpu = "ryzen-threadripper"
 vendor = "amd"
 chipset = "b550-a520"
 cores = 6
-sha256 = "4e48ce378b6fd905c3e0109af714bb362269ccf505db13da0f914810ab055eca"
+sha256 = "0b5f8f3e4d1983e32481525a23ae1cc48e17a3e4ff4d5565c5ab833373fb6fad"
 
 [[config]]
 name = "Desktop/AMD/B550 - A520/003 - Desktop - Ryzen ve Threadripper 8 Core"
@@ -188,7 +188,7 @@ cpu = "ryzen-threadripper"
 vendor = "amd"
 chipset = "b550-a520"
 cores = 8
-sha256 = "28ccec084861df84746d6e183266c7b45457c37ff361bb3d3b7f597ea66639f2"
+sha256 = "7c2d73dfade801a70584744c315b978d880a1ad52ee5b7431ff5d2c6eb7d4ba3"
 
 [[config]]
 name = "Desktop/AMD/B550 - A520/004 - Desktop - Ryzen ve Threadripper 12 Core"
@@ -197,7 +197,7 @@ cpu = "ryzen-threadripper"
 vendor = "amd"
 chipset = "b550-a520"
 cores = 12
-sha256 = "52c5882861b5c04f4f9082e39ca5c28576c7ecbc64716525471c973025a9bf9d"
+sha256 = "b336aeebbdb221c9393b790eba9241c681cdd5e19c11c25b53164ecb3491e259"
 
 [[config]]
 name = "Desktop/AMD/B550 - A520/005 - Desktop - Ryzen ve Threadripper 16 Core"
@@ -206,7 +206,7 @@ cpu = "ryzen-threadripper"
 vendor = "amd"
 chipset = "b550-a520"
 cores = 16
-sha256 = "3c63be68c13147b55a644c1af175304b60347ea2798f425fd88d91b03ce373c3"
+sha256 = "e357378f2e45552d056dd351562fab94393b8d09db9445d46f8c00ed25114969"
 
 [[config]]
 name = "Desktop/AMD/B550 - A520/006 - Desktop - Ryzen ve Threadripper 24 Core"
@@ -215,7 +215,7 @@ cpu = "ryzen-threadripper"
 vendor = "amd"
 chipset = "b550-a520"
 cores = 24
-sha256 = "f0ee73a522151037cbdd6f7e7e48927109ba016bf21fe66104e7e8adef9918e1"
+sha256 = "2632f6002edfcbf98618df1b8ee2f71b0549bd0a299a3c92d1705dd91b38a7eb"
 
 [[config]]
 name = "Desktop/AMD/B550 - A520/007 - Desktop - Ryzen ve Threadripper 32 Core"
@@ -224,7 +224,7 @@ cpu = "ryzen-threadripper"
 vendor = "amd"
 chipset = "b550-a520"
 cores = 32
-sha256 = "49487992eb02e8fbfad9a8262de537181abbf3d77805c46d13d72ba561b2a783"
+sha256 = "dde42ab4fe7e37325886b27584af3ada410015b55979337e7de0f33d433332b4"
 
 [[config]]
 name = "Desktop/AMD/B550 - A520/008 - Desktop - Ryzen ve Threadripper 64 Core"
@@ -233,7 +233,7 @@ cpu = "ryzen-threadripper"
 vendor = "amd"
 chipset = "b550-a520"
 cores = 64
-sha256 = "87885558e0c6dafff6861f1a0a5065830567e27722ca98b3d0dcb5dea18f6518"
+sha256 = "a342122c90699cf466425f79818ed9f61315062173455316c286553c564927a5"
 
 [[config]]
 name = "Desktop/AMD/TRx40/001 - Desktop - Ryzen ve Threadripper 4 Core"
@@ -242,7 +242,7 @@ cpu = "ryzen-threadripper"
 vendor = "amd"
 chipset = "trx40"
 cores = 4
-sha256 = "40e281feffd58a297c98ea4cdedd4490d89f4a5799019e96b6e99fa4b420290f"
+sha256 = "9969feb9294bd68845d92fa89cfe655246b6e4ecd637719979dd64282084f7c8"
 
 [[config]]
 name = "Desktop/AMD/TRx40/002 - Desktop - Ryzen ve Threadripper 6 Core"
@@ -251,7 +251,7 @@ cpu = "ryzen-threadripper"
 vendor = "amd"
 chipset = "trx40"
 cores = 6
-sha256 = "d63b3e3275fdf1e9389e194aca8dbe859e33d065e4068de17479288ef9cffcca"
+sha256 = "69b96005f35c2f76acf5e1ae75552020333e85beed8e856bf61c446c18191218"
 
 [[config]]
 name = "Desktop/AMD/TRx40/003 - Desktop - Ryzen ve Threadripper 8 Core"
@@ -260,7 +260,7 @@ cpu = "ryzen-threadripper"
 vendor = "amd"
 chipset = "trx40"
 cores = 8
-sha256 = "9728e28c825eb485418ad9eeb380e2bb07bdaeb60fe082f8d1144c2423edfd7b"
+sha256 = "470a35ff39bf8bc5e0740d828bb09dace1a5eda6b82010ad413be37cbcc314fa"
 
 [[config]]
 name = "Desktop/AMD/TRx40/004 - Desktop - Ryzen ve Threadripper 12 Core"
@@ -269,7 +269,7 @@ cpu = "ryzen-threadripper"
 vendor = "amd"
 chipset = "trx40"
 cores = 12
-sha256 = "46db1e2de2c54d283471bdf24d9e1b0541b93a3ba402c9c4b7d8a11281d43e4c"
+sha256 = "b47c03c65892b8914a92cfdd40aa68a547ff13b32065f629c782509bb74d7da1"
 
 [[config]]
 name = "Desktop/AMD/TRx40/005 - Desktop - Ryzen ve Threadripper 16 Core"
@@ -278,7 +278,7 @@ cpu = "ryzen-threadripper"
 vendor = "amd"
 chipset = "trx40"
 cores = 16
-sha256 = "d058ec1ddc73ce09fe4abeb6b1b6739b92bec2d44692aea0fd702df359f2ea30"
+sha256 = "5f2f9ddd37f864bcc7baf0e8cf1db6ec16ed6ecf1c72f70b7f150799592171f1"
 
 [[config]]
 name = "Desktop/AMD/TRx40/006 - Desktop - Ryzen ve Threadripper 24 Core"
@@ -287,7 +287,7 @@ cpu = "ryzen-threadripper"
 vendor = "amd"
 chipset = "trx40"
 cores = 24
-sha256 = "0a3a0bafecffe8aa69ec947a008402619568262433a34776a9788add9730893b"
+sha256 = "0dfd5c8357874975464fefb8a7d3e45ac67386ee749d867ff8774bb924442ed6"
 
 [[config]]
 name = "Desktop/AMD/TRx40/007 - Desktop - Ryzen ve Threadripper 32 Core"
@@ -296,7 +296,7 @@ cpu = "ryzen-threadripper"
 vendor = "amd"
 chipset = "trx40"
 cores = 32
-sha256 = "564fe809d4ac1772cc40a7665abb861913461ae8f727f4102d21d63b2f525b5a"
+sha256 = "0e040b847bdc4d79128dd7e3165773d9949e7839c42d2a688ba2ee95456b8f95"
 
 [[config]]
 name = "Desktop/AMD/TRx40/008 - Desktop - Ryzen ve Threadripper 64 Core"
@@ -305,161 +305,161 @@ cpu = "ryzen-threadripper"
 vendor = "amd"
 chipset = "trx40"
 cores = 64
-sha256 = "28b10fac9443a186ef95b35efc3dbcb3c404dc2b112b156808113a8b96fffa84"
+sha256 = "e8fad0e071f80c7a707ab75f6a15a0fd6cb7cc36b3c9c0af766d878a099f088a"
 
 [[config]]
 name = "Desktop/Intel/001 - Desktop - Yonah, Conroe ve Penryn Legacy BIOS"
 platform = "desktop"
 cpu = "yonah-conroe-penryn-legacy-bios"
 vendor = "intel"
-sha256 = "8b73c96be87636f03dd0074845bb1d248cc19caad28b4f8ab3db17fe89c861f0"
+sha256 = "90ed2dbe9b1bc1717802219ebf713ab1e1a73a934fd0549cda34d53a603e6e8f"
 
 [[config]]
 name = "Desktop/Intel/002 - Desktop - Yonah, Conroe ve Penryn UEFI BIOS"
 platform = "desktop"
 cpu = "yonah-conroe-penryn-uefi-bios"
 vendor = "intel"
-sha256 = "fca7cac8d4827a085e46651480b7234024f2a551e007dbcd53b88bccc8c5dc57"
+sha256 = "eff49e22a3df5626521a6e79836a8f685b1cd85790741a51e116c1f3dd052ae0"
 
 [[config]]
 name = "Desktop/Intel/003 - Desktop - Lynnfield ve Clarkdale Legacy BIOS"
 platform = "desktop"
 cpu = "lynnfield-clarkdale-legacy-bios"
 vendor = "intel"
-sha256 = "60c176879e412b88668690ef55d177edbfbae5fca8fce5ae1dccdf847fe3cf64"
+sha256 = "0dbc836959b2858354d25f4195d98525bfedf872210c9dbf35809a9bd216014d"
 
 [[config]]
 name = "Desktop/Intel/004 - Desktop - Lynnfield ve Clarkdale UEFI BIOS"
 platform = "desktop"
 cpu = "lynnfield-clarkdale-uefi-bios"
 vendor = "intel"
-sha256 = "6ea18d0580b75ebc9378065dc771828f94be2d54f034a746c623cc08d6c8097a"
+sha256 = "75e926cd3594d278d907a0a323f143e7c312bdf71faa74c0302ce07808efe474"
 
 [[config]]
 name = "Desktop/Intel/005 - Desktop - Sandy Bridge Legacy"
 platform = "desktop"
 cpu = "sandy-bridge-legacy"
 vendor = "intel"
-sha256 = "2aeb275d8263d28a5c3efcc7720cdf8a06adb74c5fa1d58d0442a4e6378bed3d"
+sha256 = "a90e18262564495f7e267feccd78f3a7082f9331b2fab4fb85c71873b9414fd5"
 
 [[config]]
 name = "Desktop/Intel/006 - Desktop - Sandy Bridge UEFI"
 platform = "desktop"
 cpu = "sandy-bridge-uefi"
 vendor = "intel"
-sha256 = "91b8c8ff1009cc6d8d6fd1374b2140756a0f77882f4c2789fc89e8985e1ddafe"
+sha256 = "a5885429b862f27417e51dcdf9618078425f3ebcac9cdc49ffff5f90bf36ecad"
 
 [[config]]
 name = "Desktop/Intel/007 - Desktop - Ivy Bridge"
 platform = "desktop"
 cpu = "ivy-bridge"
 vendor = "intel"
-sha256 = "fe0c851bbef92d2f44fa938d69787bc5fc8566ab844d22637aefa0172a8ac2d8"
+sha256 = "42df544e8593b2651e34dd1bdc62346dc02fd88961e1b3dfc07850ee4326ab9a"
 
 [[config]]
 name = "Desktop/Intel/008 - Desktop - Haswell"
 platform = "desktop"
 cpu = "haswell"
 vendor = "intel"
-sha256 = "d6c9b8923e1815beb68d640fe65335b6bfa058425464518fac899b09987b0bfe"
+sha256 = "ae9e7c114e79f5d15c711a8ee1282489b51a04515947ab6878fa5827114aca1b"
 
 [[config]]
 name = "Desktop/Intel/009 - Desktop - Broadwell"
 platform = "desktop"
 cpu = "broadwell"
 vendor = "intel"
-sha256 = "8eb4144b532548561cd770a68c9f4aa8da75aa5821590c26575df9450e33f426"
+sha256 = "22d5d488727ff602c5cba1f7e799812aee6611254ba6c0f28737d0db9374c1f5"
 
 [[config]]
 name = "Desktop/Intel/010 - Desktop - Sky Lake"
 platform = "desktop"
 cpu = "sky-lake"
 vendor = "intel"
-sha256 = "e9291015d5c4b9a3e7d0fc36f81293ca273d85e494a231d63618b2e0e90dfa8b"
+sha256 = "6507a228e5966ae6753fc664ac8767e48b222c03f6a54a29f4756dec499aa4dd"
 
 [[config]]
 name = "Desktop/Intel/011 - Desktop - Kaby Lake"
 platform = "desktop"
 cpu = "kaby-lake"
 vendor = "intel"
-sha256 = "ee67199cb86d8280cfcbd6c19fb85fa3aa4360209087c4356a1e94abb6312e6b"
+sha256 = "7144fb90f6554e4ae271452f6b0a9523d376385f29080bcbd6cf95567f27e3ac"
 
 [[config]]
 name = "Desktop/Intel/012 - Desktop - Coffe Lake"
 platform = "desktop"
 cpu = "coffe-lake"
 vendor = "intel"
-sha256 = "1352f01c429ebacf6b14bf34fc6e4b945a3634c2d25393130d1dd7be882f0e3a"
+sha256 = "c0e9d8f92d3085362561dc1135c05027b6200da4a51cf5275ce4fd8d82365146"
 
 [[config]]
 name = "Desktop/Intel/013 - Desktop - Comet Lake"
 platform = "desktop"
 cpu = "comet-lake"
 vendor = "intel"
-sha256 = "59a83a44dddc958c204d7a12967f64d59a5c762872b37da3091d66352d3a1395"
+sha256 = "d935fea0ff2ff26e9a5dce292cd04b573fca052d560982d897bd99b5b09fbdbc"
 
 [[config]]
 name = "Desktop/Intel/014 - Desktop - Rocket Lake"
 platform = "desktop"
 cpu = "rocket-lake"
 vendor = "intel"
-sha256 = "3ec6efa25469b7e0fc3a1c1712ac61e2bc670c1a04b4a38c833e8d78f7712156"
+sha256 = "a4a11316c77e04cc38584d3f140de42d445387bed249adb0673e7a5bedd5873e"
 
 [[config]]
 name = "Desktop/Intel/015 - Desktop - Alder Lake"
 platform = "desktop"
 cpu = "alder-lake"
 vendor = "intel"
-sha256 = "7b5f2961bb448cc06e6064eea74aa06284a413bdc5ffbfc87a7b3ea86ebd6319"
+sha256 = "cbf07d5ef5465c39237e6d4d169e03d360028eabb78b1e57e9ebcb3d3c55687c"
 
 [[config]]
 name = "Desktop/Intel/016 - Desktop - Raptor Lake"
 platform = "desktop"
 cpu = "raptor-lake"
 vendor = "intel"
-sha256 = "7c73457e0b1b43b45d5270539a1114da208bb65c6613baa5de9169ab8098a372"
+sha256 = "59ce5f0fbaae95d7472f066b73a632d6244f474aa06a5344fad6d336a0b008fa"
 
 [[config]]
 name = "Desktop/Intel/017 - Desktop - Nehalem ve Westmere Legacy"
 platform = "desktop"
 cpu = "nehalem-westmere-legacy"
 vendor = "intel"
-sha256 = "51b0fc4b4528f8483cff3836ac6ff965f5994f0f89561a20ea85b2accd0e33d5"
+sha256 = "05fa91c4ac61c8d8f9aa750da1f74ae971fbc29c6bcba8a7f0fac1325db80791"
 
 [[config]]
 name = "Desktop/Intel/018 - Desktop - Nehalem ve Westmere UEFI"
 platform = "desktop"
 cpu = "nehalem-westmere-uefi"
 vendor = "intel"
-sha256 = "0e4db7cd5ec9171bbd39140433cd56dc1eccd77696263643ab6da86728ebe6e5"
+sha256 = "87e37c340e7d232ffe1e5ae6dc42ec6e8fefa2a904998db406ecef66b178c716"
 
 [[config]]
 name = "Desktop/Intel/019 - Desktop - Sandy Bridge E ve Ivy Bridge-E"
 platform = "desktop"
 cpu = "sandy-bridge-e-ivy-bridge-e"
 vendor = "intel"
-sha256 = "51108c97cc66bba07759b6d93a2fef349cf73ee7914a2871fbf1f324e2d30e7f"
+sha256 = "31387662923ecadc0ec5a9014793dfdbee98c93aa8aab7d37ec3a5968e4ef0d6"
 
 [[config]]
 name = "Desktop/Intel/020 - Desktop - Haswell-E"
 platform = "desktop"
 cpu = "haswell-e"
 vendor = "intel"
-sha256 = "8201ffc6772f1f0fd6d951bdfcabf0db014c4cc2668dd5daf196d0e00d74c108"
+sha256 = "b93babee5c67efd3db1c339d97ffc95625298745ffbb508dc6b7414025f32256"
 
 [[config]]
 name = "Desktop/Intel/021 - Desktop - Broadwell-E"
 platform = "desktop"
 cpu = "broadwell-e"
 vendor = "intel"
-sha256 = "23b1dee160c838e1b3e7f2094add13bd2632206f84c5ca8fa2a65a98b150ad83"
+sha256 = "ed0dbe13fe2b7638c4f8673f5eee19d72003dba2fc2cf9e8936a3b275e2421df"
 
 [[config]]
 name = "Desktop/Intel/022 - Desktop - Skylake-X_W ve Cascade Lake-X_W"
 platform = "desktop"
 cpu = "skylake-x-w-cascade-lake-x-w"
 vendor = "intel"
-sha256 = "b47a7f8866dfa1515b247432ff43946e8a872844b9b04979cb3d08a48da490c8"
+sha256 = "80883dc737df5914bdbfb0d72634cebb149442350906304bedebe309d89991d4"
 
 [[config]]
 name = "Desktop/Intel/ASUS/001 - Desktop - Comet Lake"
@@ -467,7 +467,7 @@ platform = "desktop"
 cpu = "comet-lake"
 vendor = "intel"
 oem = "asus"
-sha256 = "c779cfecc780ccd7c34cf97fb8f93b02bd63698ccf9288b7fd9105c6d2ba7df1"
+sha256 = "bf7b9ea642da41270a67114ff73e4c6d3039e59ddbdc3b8f7b2d98c943c75ab2"
 
 [[config]]
 name = "Desktop/Intel/ASUS/002 - Desktop - Rocket Lake"
@@ -475,7 +475,7 @@ platform = "desktop"
 cpu = "rocket-lake"
 vendor = "intel"
 oem = "asus"
-sha256 = "b55cb01deb6dfb53e3b64c47e25f1d566784430ee1de331d53d1d24c60dfcf16"
+sha256 = "01d0ea6cc4e8ccd981986db084f298f8a8a07e28a761a0e43e6ae12a8a5346fc"
 
 [[config]]
 name = "Desktop/Intel/ASUS/003 - Desktop - Alder Lake"
@@ -483,7 +483,7 @@ platform = "desktop"
 cpu = "alder-lake"
 vendor = "intel"
 oem = "asus"
-sha256 = "97aa65894547ebde9b73fb6a1f92a03d17f0a4e66ddcf3933a8cdb8bd8f71049"
+sha256 = "cd46920a996ec7b2e5e5254f5d429929d918ee3cbf64304ce264dabbdf0e5aa2"
 
 [[config]]
 name = "Desktop/Intel/ASUS/004 - Desktop - Raptor Lake"
@@ -491,7 +491,7 @@ platform = "desktop"
 cpu = "raptor-lake"
 vendor = "intel"
 oem = "asus"
-sha256 = "7c73457e0b1b43b45d5270539a1114da208bb65c6613baa5de9169ab8098a372"
+sha256 = "59ce5f0fbaae95d7472f066b73a632d6244f474aa06a5344fad6d336a0b008fa"
 
 [[config]]
 name = "Desktop/Intel/ASUS/BIOS (v3006+)/001 - Desktop - Skylake-X_W ve Cascade Lake-X_W"
@@ -500,7 +500,7 @@ cpu = "skylake-x-w-cascade-lake-x-w"
 vendor = "intel"
 oem = "asus"
 variant = "bios-v3006"
-sha256 = "bdcaf267237e2c79425c5bd1032328562a6f0a134f928ef56b1172411217abda"
+sha256 = "f8262bfb76cc606b92133577758a9a3f55a566364451eaa688604af205ae85e7"
 
 [[config]]
 name = "Desktop/Intel/DELL - SONY/001 - Desktop - Yonah, Conroe ve Penryn Legacy BIOS"
@@ -508,7 +508,7 @@ platform = "desktop"
 cpu = "yonah-conroe-penryn-legacy-bios"
 vendor = "intel"
 oem = "dell-sony"
-sha256 = "5ae050c82ebdb7be115624b9c1046d35c49ec39c263db6a6978af2087f9f9899"
+sha256 = "611a5e9c77a9dbabe7f2e77c5ddd7a4c81b41d3c9540fa06a4cb35751c5872dd"
 
 [[config]]
 name = "Desktop/Intel/DELL - SONY/002 - Desktop - Yonah, Conroe ve Penryn UEFI BIOS"
@@ -516,7 +516,7 @@ platform = "desktop"
 cpu = "yonah-conroe-penryn-uefi-bios"
 vendor = "intel"
 oem = "dell-sony"
-sha256 = "99db4f89151ee3025396b3c018034a3f474e110f70557500d8a7e99c5d48ba13"
+sha256 = "18b49f37888a8cf47d6fb396d65011aaf815c2e0721aa441bfd1b9d031f437ce"
 
 [[config]]
 name = "Desktop/Intel/DELL - SONY/003 - Desktop - Lynnfield ve Clarkdale Legacy BIOS"
@@ -524,7 +524,7 @@ platform = "desktop"
 cpu = "lynnfield-clarkdale-legacy-bios"
 vendor = "intel"
 oem = "dell-sony"
-sha256 = "d4f1f39b19d615595d8b57b976ecc3cbd1a040cc44098b4c73c5a3ead2fa95d4"
+sha256 = "65e41e2ead12a2d18b844bf89f7d3e3ef4ff315dd7718a4f11a866a151851179"
 
 [[config]]
 name = "Desktop/Intel/DELL - SONY/004 - Desktop - Lynnfield ve Clarkdale UEFI BIOS"
@@ -532,7 +532,7 @@ platform = "desktop"
 cpu = "lynnfield-clarkdale-uefi-bios"
 vendor = "intel"
 oem = "dell-sony"
-sha256 = "44101e23144846ef7f53ac7634541d8f8ee66cd2fd532dbede36834852ac7abe"
+sha256 = "28765ba903a29b9ef26639358795fdaf1eaa60c026de85240b8b4c92515b5eeb"
 
 [[config]]
 name = "Desktop/Intel/DELL - SONY/005 - Desktop - Sandy Bridge Legacy"
@@ -540,7 +540,7 @@ platform = "desktop"
 cpu = "sandy-bridge-legacy"
 vendor = "intel"
 oem = "dell-sony"
-sha256 = "d264d0f7a9791471f6306c078cf19d0ee2ba631fcee78aea4eacb20fe0c8d696"
+sha256 = "fdf9a0511e4760e688440115ad33a4917cbab8946f093fb758b1bb5122f97a0d"
 
 [[config]]
 name = "Desktop/Intel/DELL - SONY/006 - Desktop - Sandy Bridge UEFI"
@@ -548,7 +548,7 @@ platform = "desktop"
 cpu = "sandy-bridge-uefi"
 vendor = "intel"
 oem = "dell-sony"
-sha256 = "4995b0859dd48a05042db2bc926b87fa74c896cd9ec56230064a1a9e5acb3af6"
+sha256 = "eaabbcf3908a66bffed1aafa7cc3c606c51184bd8e994f2b67906658919d6d4f"
 
 [[config]]
 name = "Desktop/Intel/DELL - SONY/007 - Desktop - Ivy Bridge"
@@ -556,7 +556,7 @@ platform = "desktop"
 cpu = "ivy-bridge"
 vendor = "intel"
 oem = "dell-sony"
-sha256 = "c0c4a74c12257b3a457c037f5ed7c17a07dd1499b0316f0bf7c4ec6bd7f0b725"
+sha256 = "d246e6e9e2aec485a22a5f1d2cb8b71763c00030884e9ed58fc18554f6400ab0"
 
 [[config]]
 name = "Desktop/Intel/DELL - SONY/008 - Desktop - Haswell"
@@ -564,7 +564,7 @@ platform = "desktop"
 cpu = "haswell"
 vendor = "intel"
 oem = "dell-sony"
-sha256 = "6fb16a210956f76aaaf9846fb18dc49d3bde53223bb31704e955bdf3b917a964"
+sha256 = "487afda5e209e7281b229f5ab8665e9b4676a574bf90caf9903d8c3f74ff113e"
 
 [[config]]
 name = "Desktop/Intel/DELL - SONY/009 - Desktop - Broadwell"
@@ -572,7 +572,7 @@ platform = "desktop"
 cpu = "broadwell"
 vendor = "intel"
 oem = "dell-sony"
-sha256 = "486e22e74bff3e47cdbcd3d41561bc0255eb2b5ea577cb759db3297db6ca8b04"
+sha256 = "7783fe4952d813d328833cab6e1aa334ac5a11f268d011eb0c7c7aa12e171e27"
 
 [[config]]
 name = "Desktop/Intel/DELL - SONY/010 - Desktop - Sky Lake"
@@ -580,7 +580,7 @@ platform = "desktop"
 cpu = "sky-lake"
 vendor = "intel"
 oem = "dell-sony"
-sha256 = "c4a1a0d89d40ff9e98706836df86bc591ecb56235c290219ed34121e6b4d5f4e"
+sha256 = "d73be0b6061ea3ca98ee27be728a2e4fd9160cec1f859efeecbc54b2c6b77bf3"
 
 [[config]]
 name = "Desktop/Intel/DELL - SONY/011 - Desktop - Kaby Lake"
@@ -588,7 +588,7 @@ platform = "desktop"
 cpu = "kaby-lake"
 vendor = "intel"
 oem = "dell-sony"
-sha256 = "6bbaf226e79e4d9ddcdbf078cac08d4d83ef15edbd162c4b0389cd348708c76e"
+sha256 = "d4dce9d6b17b1cadf1e9fc5f96f8aef5cdef5625ae09b3bbb539c4b96bd22cc3"
 
 [[config]]
 name = "Desktop/Intel/DELL - SONY/012 - Desktop - Coffe Lake"
@@ -596,7 +596,7 @@ platform = "desktop"
 cpu = "coffe-lake"
 vendor = "intel"
 oem = "dell-sony"
-sha256 = "5aa5a6f895da93cd5b9d2a58cf8acad7b6fc8396fe8ca8fb5b5c4556a91e8f82"
+sha256 = "61012b4d95639d24ec7184ed3dc33f834afa54019a31d1179f3669369d6d2f21"
 
 [[config]]
 name = "Desktop/Intel/DELL - SONY/013 - Desktop - Comet Lake"
@@ -604,7 +604,7 @@ platform = "desktop"
 cpu = "comet-lake"
 vendor = "intel"
 oem = "dell-sony"
-sha256 = "d40fe87c150306b4bfbb531f61d5e5f8666569f0226ed8c2d18af2de5c31e19c"
+sha256 = "890e8a9d9cb1232c058736efa23a1c7ba4a5e2d6fd99743b3fa731f5ddd37618"
 
 [[config]]
 name = "Desktop/Intel/DELL - SONY/014 - Desktop - Rocket Lake"
@@ -612,7 +612,7 @@ platform = "desktop"
 cpu = "rocket-lake"
 vendor = "intel"
 oem = "dell-sony"
-sha256 = "76c3163c0dd3aa6e1125f577b8ac2b5cc3304c79239b85cdd516ec6f85b4c75c"
+sha256 = "9936d46a5a7ce4995341239602fb6930cf8f76de9d84a9fe4238bbb0f1122c1f"
 
 [[config]]
 name = "Desktop/Intel/DELL - SONY/015 - Desktop - Alder Lake"
@@ -620,7 +620,7 @@ platform = "desktop"
 cpu = "alder-lake"
 vendor = "intel"
 oem = "dell-sony"
-sha256 = "91ba1a7ebb82d0f891ac22e8dc7fcdace419bcc237b603676a65c23942af0db8"
+sha256 = "17eec24a1848619550fedd154c30306363cc04970cee66c6dfc6a3cd64de3025"
 
 [[config]]
 name = "Desktop/Intel/DELL - SONY/016 - Desktop - Raptor Lake"
@@ -628,7 +628,7 @@ platform = "desktop"
 cpu = "raptor-lake"
 vendor = "intel"
 oem = "dell-sony"
-sha256 = "c181b3156b04d2e5ab21be0ef81c84da7cab5d08339e9f85dda207344b959ebf"
+sha256 = "16f50137cd7a321b0935f995f926a3a5a65e6dfa93f530747994cd5d197b9047"
 
 [[config]]
 name = "Desktop/Intel/DELL - SONY/017 - Desktop - Nehalem ve Westmere Legacy"
@@ -636,7 +636,7 @@ platform = "desktop"
 cpu = "nehalem-westmere-legacy"
 vendor = "intel"
 oem = "dell-sony"
-sha256 = "aefaa8c1f70b50d5ad1de85d999457b9e2f1156afeb58ec6559a2d232bfcdf9f"
+sha256 = "e4933f5497e8dba37713c37276d952837404a5396400a58b8399611c40cc2c03"
 
 [[config]]
 name = "Desktop/Intel/DELL - SONY/018 - Desktop - Nehalem ve Westmere UEFI"
@@ -644,7 +644,7 @@ platform = "desktop"
 cpu = "nehalem-westmere-uefi"
 vendor = "intel"
 oem = "dell-sony"
-sha256 = "91dbbb39d77c5c582ce228c9142ec507460633d8f2eb65681ee39bbd93259157"
+sha256 = "c6d5baa50597f4d9363027a161b262632d3e541dcec3dc13144e9165282109d7"
 
 [[config]]
 name = "Desktop/Intel/DELL - SONY/019 - Desktop - Sandy Bridge E ve Ivy Bridge-E"
@@ -652,7 +652,7 @@ platform = "desktop"
 cpu = "sandy-bridge-e-ivy-bridge-e"
 vendor = "intel"
 oem = "dell-sony"
-sha256 = "d93a6ed1a9fe2a2803e83c071e8486b4de9ef3764dc7b70fb45e73347699cf33"
+sha256 = "1e788aa5429ee0b555c7a072bb535f8d85f566b823d0b730abd4c73e0a76bc99"
 
 [[config]]
 name = "Desktop/Intel/DELL - SONY/020 - Desktop - Haswell-E"
@@ -660,7 +660,7 @@ platform = "desktop"
 cpu = "haswell-e"
 vendor = "intel"
 oem = "dell-sony"
-sha256 = "2e2a786190fc709f9e57b91000b8b0b7697f466f9f6409fe48e6906a168bc733"
+sha256 = "e92463bf125c62f85f06523e8afb570cb0ef9cb46ae494eb735d3f6e31245f03"
 
 [[config]]
 name = "Desktop/Intel/DELL - SONY/021 - Desktop - Broadwell-E"
@@ -668,7 +668,7 @@ platform = "desktop"
 cpu = "broadwell-e"
 vendor = "intel"
 oem = "dell-sony"
-sha256 = "cfc80ed074cec1d5ed2053c0ff3a3049778547a269c4739f6b789266e33b0cbc"
+sha256 = "b36a38a3a29c15108ac305a6ed128e2cf12a0fa25bdcf50fe91dc22e09c8da93"
 
 [[config]]
 name = "Desktop/Intel/DELL - SONY/022 - Desktop - Skylake-X_W ve Cascade Lake-X_W"
@@ -676,7 +676,7 @@ platform = "desktop"
 cpu = "skylake-x-w-cascade-lake-x-w"
 vendor = "intel"
 oem = "dell-sony"
-sha256 = "4d34d8b469e48f5b7f076b7b937942dc3b702c78b59a80ffeb58607e148bebeb"
+sha256 = "90f5e7d7989d15b1bbcbe6c2218bba3ff2cb079ffe8ee5bcc61000adba32cd22"
 
 [[config]]
 name = "Desktop/Intel/DELL - SONY/H61 - H67 - Z68 - Q65 - Q67 - B65 - P67/001 - Desktop - Ivy Bridge"
@@ -685,7 +685,7 @@ cpu = "ivy-bridge"
 vendor = "intel"
 chipset = "h61-h67-z68-q65-q67-b65-p67"
 oem = "dell-sony"
-sha256 = "350c32a244a191ccb1b597818fc08791d52d57c944befbb171ee72ac10c74ef5"
+sha256 = "ecffdd9341836294cf864b95642ffb2d58dd100a06e3d707d204622a9b24f55e"
 
 [[config]]
 name = "Desktop/Intel/DELL - SONY/H77 - Q77 - Q75 - Z77 - Z75 - B75 - X79/001 - Desktop - Sandy Bridge Legacy"
@@ -694,7 +694,7 @@ cpu = "sandy-bridge-legacy"
 vendor = "intel"
 chipset = "h77-q77-q75-z77-z75-b75-x79"
 oem = "dell-sony"
-sha256 = "698ce6c4ec3b5880b5f34b2bcbb5fd90d400bd5186a33662994c79afbdf5affc"
+sha256 = "48cba3bf5255f2ebf7d530845b5d2f19cc9d541ad7f8833504fad74396ff9af0"
 
 [[config]]
 name = "Desktop/Intel/DELL - SONY/H77 - Q77 - Q75 - Z77 - Z75 - B75 - X79/002 - Desktop - Sandy Bridge UEFI"
@@ -703,7 +703,7 @@ cpu = "sandy-bridge-uefi"
 vendor = "intel"
 chipset = "h77-q77-q75-z77-z75-b75-x79"
 oem = "dell-sony"
-sha256 = "582e3b9de6c5bf6cecbe35b9b0c71d535fbfe28fd4c6259a26e754b02d9c3eda"
+sha256 = "4126fcf3ef0a74d51bd8a81790def7f26a25ad15451e36e2feb84db63d719320"
 
 [[config]]
 name = "Desktop/Intel/H61 - H67 - Z68 - Q65 - Q67 - B65 - P67/001 - Desktop - Ivy Bridge"
@@ -711,7 +711,7 @@ platform = "desktop"
 cpu = "ivy-bridge"
 vendor = "intel"
 chipset = "h61-h67-z68-q65-q67-b65-p67"
-sha256 = "9bb2ff1ae7241732afc6c6f6fc45dc04872dd235a2d6d6d772ec4be0768f06b9"
+sha256 = "cc53368c69d13f7048ba3fc8a054661b6897695c373356184dcf47316bf39bc6"
 
 [[config]]
 name = "Desktop/Intel/H77 - Q77 - Q75 - Z77 - Z75 - B75 - X79/001 - Desktop - Sandy Bridge Legacy"
@@ -719,7 +719,7 @@ platform = "desktop"
 cpu = "sandy-bridge-legacy"
 vendor = "intel"
 chipset = "h77-q77-q75-z77-z75-b75-x79"
-sha256 = "700252b9fd19ef52cdf75f752b9d518c344bb9d488a5f1b66c9630457405f503"
+sha256 = "b7c3cdd537870edb97ae9b720c4c1697cf1a6288108a29b9bbf9f1732003f6ef"
 
 [[config]]
 name = "Desktop/Intel/H77 - Q77 - Q75 - Z77 - Z75 - B75 - X79/002 - Desktop - Sandy Bridge UEFI"
@@ -727,7 +727,7 @@ platform = "desktop"
 cpu = "sandy-bridge-uefi"
 vendor = "intel"
 chipset = "h77-q77-q75-z77-z75-b75-x79"
-sha256 = "cf3bc7978dbf818b9687c4fde0ab8b41f2e8252562b337a9bb3cb901ca52b99b"
+sha256 = "220d6ff101adaaaea443be91f1743efb93690861163a98b239b8f069f56a7fd0"
 
 [[config]]
 name = "Desktop/Intel/HP/001 - Desktop - Yonah, Conroe ve Penryn Legacy BIOS"
@@ -735,7 +735,7 @@ platform = "desktop"
 cpu = "yonah-conroe-penryn-legacy-bios"
 vendor = "intel"
 oem = "hp"
-sha256 = "5cffcbf77c8b696a58dfaee5f32ee58303453664a0df74b3b1046768df524e44"
+sha256 = "924323eb668524f918e2d6ba49705327f45799ca6f5e76ee53ce8fbb7593ef72"
 
 [[config]]
 name = "Desktop/Intel/HP/002 - Desktop - Yonah, Conroe ve Penryn UEFI BIOS"
@@ -743,7 +743,7 @@ platform = "desktop"
 cpu = "yonah-conroe-penryn-uefi-bios"
 vendor = "intel"
 oem = "hp"
-sha256 = "fbfa9a6585a2bae3f378f3b6407fd783b65c5f836757db9938d963f840c613a0"
+sha256 = "1f815ef7977aabdac371efed444bd45d19c3fd9d14b9f0f20b03a385bd6a2c04"
 
 [[config]]
 name = "Desktop/Intel/HP/003 - Desktop - Lynnfield ve Clarkdale Legacy BIOS"
@@ -751,7 +751,7 @@ platform = "desktop"
 cpu = "lynnfield-clarkdale-legacy-bios"
 vendor = "intel"
 oem = "hp"
-sha256 = "b4bccda7232696b645c47a54f558948cda09729f207347c88c23b17c92b1bcbb"
+sha256 = "882cb10188d5d669a16a0a6cbe75a6450c374c9c2d34e2bf1f8a89a5919e7b2b"
 
 [[config]]
 name = "Desktop/Intel/HP/004 - Desktop - Lynnfield ve Clarkdale UEFI BIOS"
@@ -759,7 +759,7 @@ platform = "desktop"
 cpu = "lynnfield-clarkdale-uefi-bios"
 vendor = "intel"
 oem = "hp"
-sha256 = "a5555dbd91bddbdfdb8877c5b54558267c8e353959f686be7525a87c50ae1387"
+sha256 = "201c507c98509e1b9cdacbf20b16c7f0f57e8931779cf72db110abc75a74dc73"
 
 [[config]]
 name = "Desktop/Intel/HP/005 - Desktop - Sandy Bridge Legacy"
@@ -767,7 +767,7 @@ platform = "desktop"
 cpu = "sandy-bridge-legacy"
 vendor = "intel"
 oem = "hp"
-sha256 = "86053eb03651ca27e65ace33700e851d5a98f6a0afe0e4a70b74d9a376d743cd"
+sha256 = "a3eec8fd3be9cad9083319003f58616edbf0abf9c29a1f3ea9bd294b9eea58d8"
 
 [[config]]
 name = "Desktop/Intel/HP/006 - Desktop - Sandy Bridge UEFI"
@@ -775,7 +775,7 @@ platform = "desktop"
 cpu = "sandy-bridge-uefi"
 vendor = "intel"
 oem = "hp"
-sha256 = "db34ef32e2f7e1917db54f5d1b3316cfe8024311fc5cd369074e7d5200fbd328"
+sha256 = "b1df76c6c9cdfc818c94796ee647b68a0fb859487d000d4792cc9d4fc06b361c"
 
 [[config]]
 name = "Desktop/Intel/HP/007 - Desktop - Ivy Bridge"
@@ -783,7 +783,7 @@ platform = "desktop"
 cpu = "ivy-bridge"
 vendor = "intel"
 oem = "hp"
-sha256 = "cd1afbb3e61c57e0858822a15cb8dca61843296fea2364e0e071eefb5ee2951f"
+sha256 = "71e8e18ce917f3fe82cf13e71804c5da13b9bdf71d6845144912c4cc0a22e4f8"
 
 [[config]]
 name = "Desktop/Intel/HP/008 - Desktop - Haswell"
@@ -791,7 +791,7 @@ platform = "desktop"
 cpu = "haswell"
 vendor = "intel"
 oem = "hp"
-sha256 = "407b896b2751fcc3f216a20a26cce0fd65934b774d3521077ced4846d0acc837"
+sha256 = "c27e085fd9e58703dcad3786c2065f82149f0114861d4b85fce59da13d2b44c1"
 
 [[config]]
 name = "Desktop/Intel/HP/009 - Desktop - Broadwell"
@@ -799,7 +799,7 @@ platform = "desktop"
 cpu = "broadwell"
 vendor = "intel"
 oem = "hp"
-sha256 = "3fd0d016a6b61b0d14f018ec59715c396e3bb92dedcbab20c76cfa2345ae423a"
+sha256 = "1844da026453adb5d35497b43bf1605052c9d92c2309deeb33c02453caacb0dd"
 
 [[config]]
 name = "Desktop/Intel/HP/010 - Desktop - Sky Lake"
@@ -807,7 +807,7 @@ platform = "desktop"
 cpu = "sky-lake"
 vendor = "intel"
 oem = "hp"
-sha256 = "b6bd78d8bbdb449d76c22c13e50e10422e50fa025d8818085df577965775f70a"
+sha256 = "09313ed57bb3c7984adb6081e4a99659bcbfdfe338c5ea960f87604a00eaa715"
 
 [[config]]
 name = "Desktop/Intel/HP/011 - Desktop - Kaby Lake"
@@ -815,7 +815,7 @@ platform = "desktop"
 cpu = "kaby-lake"
 vendor = "intel"
 oem = "hp"
-sha256 = "e47c49a7a430aa8ddc28e7736de9d5024124a9b59d9ac66693320e661b2a2ae1"
+sha256 = "e6ae21024edebfdc7cd485fa7ae0ce3007addc49e685513ff7e5a8c9b87cfb0f"
 
 [[config]]
 name = "Desktop/Intel/HP/012 - Desktop - Coffe Lake"
@@ -823,7 +823,7 @@ platform = "desktop"
 cpu = "coffe-lake"
 vendor = "intel"
 oem = "hp"
-sha256 = "ea0e93f62afcee4a179e3b042e4f8c3111e1dc016a40f7fa7ad3ddda3485ed1b"
+sha256 = "60bfb1390494f5a8c51039f7e87d8198843ffa58ab77a92c9e2d5d3179e06103"
 
 [[config]]
 name = "Desktop/Intel/HP/013 - Desktop - Comet Lake"
@@ -831,7 +831,7 @@ platform = "desktop"
 cpu = "comet-lake"
 vendor = "intel"
 oem = "hp"
-sha256 = "5d87bf88895c856f6b1b9648448d86f61c0886261dbc3555b2a9ae1925cd2dbf"
+sha256 = "0cb608a4602ddc1fbfd0d85e9f6d383013662359758a9dd74d54b5663f359942"
 
 [[config]]
 name = "Desktop/Intel/HP/014 - Desktop - Rocket Lake"
@@ -839,7 +839,7 @@ platform = "desktop"
 cpu = "rocket-lake"
 vendor = "intel"
 oem = "hp"
-sha256 = "e289933fca0ae2b5d70006572fd854186e4594a73cc8e026e3a43d893b48d9ef"
+sha256 = "5e6af0b9d84e8e88c6fca85d7db7fb12d54b2f38fa216c2e1e26dadb65ddd026"
 
 [[config]]
 name = "Desktop/Intel/HP/015 - Desktop - Alder Lake"
@@ -847,7 +847,7 @@ platform = "desktop"
 cpu = "alder-lake"
 vendor = "intel"
 oem = "hp"
-sha256 = "5e35e554978c0591bd6011d0a23769bb635f7f820994dca1de2c3bf4d71aefc1"
+sha256 = "5ae3795b8caec19c2bbb0d3c6978a2b5df95cf22153ef993a1ec1326092a1172"
 
 [[config]]
 name = "Desktop/Intel/HP/016 - Desktop - Raptor Lake"
@@ -855,7 +855,7 @@ platform = "desktop"
 cpu = "raptor-lake"
 vendor = "intel"
 oem = "hp"
-sha256 = "243e321bce92c32aba139eac51c8088f50e20fad6247a598ffcdc858f25618c6"
+sha256 = "e03e07911fac9232d76586567d99fbaa9523a4923df56293737bad33923f21f1"
 
 [[config]]
 name = "Desktop/Intel/HP/017 - Desktop - Nehalem ve Westmere Legacy"
@@ -863,7 +863,7 @@ platform = "desktop"
 cpu = "nehalem-westmere-legacy"
 vendor = "intel"
 oem = "hp"
-sha256 = "c0be0c8b9eaf7961128a0159c9043d5f4a2bbf663e7834446fa973e1675f28ae"
+sha256 = "c62d198430a62f6c6ca948b16975dc5aa97114b42dd8938ec98d5666a8c73845"
 
 [[config]]
 name = "Desktop/Intel/HP/018 - Desktop - Nehalem ve Westmere UEFI"
@@ -871,7 +871,7 @@ platform = "desktop"
 cpu = "nehalem-westmere-uefi"
 vendor = "intel"
 oem = "hp"
-sha256 = "d24fbe33a834485cc5d1aed128267e3423641fe2d2adb6d0d683e3d8952fff06"
+sha256 = "5dbc3c320283bd600c1435e784730c4c0614068e1e7e0f0f1b4d519aac4fba19"
 
 [[config]]
 name = "Desktop/Intel/HP/019 - Desktop - Sandy Bridge E ve Ivy Bridge-E"
@@ -879,7 +879,7 @@ platform = "desktop"
 cpu = "sandy-bridge-e-ivy-bridge-e"
 vendor = "intel"
 oem = "hp"
-sha256 = "43a1f2ee1434a281f8db0a51b2e945b60c8ff9e68ed922e2bb1b517154bdc291"
+sha256 = "5de3002b468fef0e18a8e340354bae66a8c523f7c9baa4542816532727d4aa0a"
 
 [[config]]
 name = "Desktop/Intel/HP/020 - Desktop - Haswell-E"
@@ -887,7 +887,7 @@ platform = "desktop"
 cpu = "haswell-e"
 vendor = "intel"
 oem = "hp"
-sha256 = "1da208766be451018041e6d509f6c7e4b2431891ccbbd76c2caaf1f353766ece"
+sha256 = "293786348aafa8ff91dd7cd00c739f442b6483560a47836eb507f18c8f9054e9"
 
 [[config]]
 name = "Desktop/Intel/HP/021 - Desktop - Broadwell-E"
@@ -895,7 +895,7 @@ platform = "desktop"
 cpu = "broadwell-e"
 vendor = "intel"
 oem = "hp"
-sha256 = "4f0a6b2664ba028efbb8ccf33af5d7f5c170f6354ddbe2e50635926dc76f3a15"
+sha256 = "236f76d7a5801e3d4e543812087515e4ab379966424e452354298f32e9c134cf"
 
 [[config]]
 name = "Desktop/Intel/HP/022 - Desktop - Skylake-X_W ve Cascade Lake-X_W"
@@ -903,7 +903,7 @@ platform = "desktop"
 cpu = "skylake-x-w-cascade-lake-x-w"
 vendor = "intel"
 oem = "hp"
-sha256 = "dd97fe7f677f03b9717dc575507c75924932bb4641a5a1e6c29d9a685ee60637"
+sha256 = "fa6480fd42ea7e16c7f9c06bd63df50a77f099564aabf9487429785a2be279bb"
 
 [[config]]
 name = "Desktop/Intel/HP/H61 - H67 - Z68 - Q65 - Q67 - B65 - P67/001 - Desktop - Ivy Bridge"
@@ -912,7 +912,7 @@ cpu = "ivy-bridge"
 vendor = "intel"
 chipset = "h61-h67-z68-q65-q67-b65-p67"
 oem = "hp"
-sha256 = "71d7bbab44aecef412630017dbd6e086bd9838ba5f3592134f7352cacafe4286"
+sha256 = "157c74ea106b8fe5bd0408f6489b779d0c4e65b70aad4b7b984713aff4286b72"
 
 [[config]]
 name = "Desktop/Intel/HP/H77 - Q77 - Q75 - Z77 - Z75 - B75 - X79/001 - Desktop - Sandy Bridge Legacy"
@@ -921,7 +921,7 @@ cpu = "sandy-bridge-legacy"
 vendor = "intel"
 chipset = "h77-q77-q75-z77-z75-b75-x79"
 oem = "hp"
-sha256 = "cf7f8d1caa6151756a4d94b4c9ff37f123885c8365e9f41c95517cc15b6bafa5"
+sha256 = "cd9d4387d1da6834003f1184ec1a114a6b17add50b0cc0e16acaf01c79908716"
 
 [[config]]
 name = "Desktop/Intel/HP/H77 - Q77 - Q75 - Z77 - Z75 - B75 - X79/002 - Desktop - Sandy Bridge UEFI"
@@ -930,7 +930,7 @@ cpu = "sandy-bridge-uefi"
 vendor = "intel"
 chipset = "h77-q77-q75-z77-z75-b75-x79"
 oem = "hp"
-sha256 = "a9e1ec7c180c09be710be8e22387a1c101dcc7e319d4d727083f6e8781e743e7"
+sha256 = "ba80a6f94813e0442e53ecde63f47d263e316b2124a588f22e2bd2f7b7d49e1d"
 
 [[config]]
 name = "Desktop/Intel/MSI/001 - Desktop - Comet Lake"
@@ -938,7 +938,7 @@ platform = "desktop"
 cpu = "comet-lake"
 vendor = "intel"
 oem = "msi"
-sha256 = "c779cfecc780ccd7c34cf97fb8f93b02bd63698ccf9288b7fd9105c6d2ba7df1"
+sha256 = "bf7b9ea642da41270a67114ff73e4c6d3039e59ddbdc3b8f7b2d98c943c75ab2"
 
 [[config]]
 name = "Desktop/Intel/Z370/001 - Desktop - Coffe Lake"
@@ -946,7 +946,7 @@ platform = "desktop"
 cpu = "coffe-lake"
 vendor = "intel"
 chipset = "z370"
-sha256 = "ee9ff7a0b6c75aaeeb5150890901da6cc46fe9c8838ff1755944994179656c35"
+sha256 = "bfcba572a0735c1ee1565b2de6865ed16f642703493782ac836826a3eec9ee8c"
 
 [[config]]
 name = "Desktop/Intel/Z390/001 - Desktop - Coffe Lake"
@@ -954,183 +954,183 @@ platform = "desktop"
 cpu = "coffe-lake"
 vendor = "intel"
 chipset = "z390"
-sha256 = "e5e7ff23e83e643533e4f6c9998e10f24f598f0d4d60b1118b239d5b693b45af"
+sha256 = "4937bfcad33386bd2d557e3faf8bd1b785bcd45228a768a0db14959fe742d3bd"
 
 [[config]]
 name = "Laptop/001 - Laptop - Clarksfield ve Arrandale Legacy BIOS"
 platform = "laptop"
 cpu = "clarksfield-arrandale-legacy-bios"
-sha256 = "fa9e7514b6fa02997d1e734f772d5f9b87fe404c96f4d83d65ce2db98175a2d6"
+sha256 = "9c874fd8f349f44111bb1d044d9e3967610ca489c561b22dfcf4d13f667f7d8c"
 
 [[config]]
 name = "Laptop/002 - Laptop - Clarksfield ve Arrandale UEFI BIOS"
 platform = "laptop"
 cpu = "clarksfield-arrandale-uefi-bios"
-sha256 = "1f2348259245c0ee10082831fdc30bf2b9ed75d9adb08a198c7d5de204378b6b"
+sha256 = "814cd7341dca4447032b3831a9b462aeec57504237d148a34cadafd4e4605b64"
 
 [[config]]
 name = "Laptop/003 - Laptop - Sandy Bridge Legacy BIOS"
 platform = "laptop"
 cpu = "sandy-bridge-legacy-bios"
-sha256 = "8179c9b7729b883ea027fe7c907ac478569f868b0f3afc709272c8301c88d68d"
+sha256 = "f9504a20b474b1bf3f4f59e244a66622c5babd4e0f4f549b578c410fa4930850"
 
 [[config]]
 name = "Laptop/004 - Laptop - Sandy Bridge UEFI BIOS"
 platform = "laptop"
 cpu = "sandy-bridge-uefi-bios"
-sha256 = "aa7203575195414d6285737289a44617d618b4b2d47ebae952d47aa621b68626"
+sha256 = "348be79a0b00701c92f836c39e18a1499f019bbff030a406f738c750376b54b4"
 
 [[config]]
 name = "Laptop/005 - Laptop - Ivy Bridge"
 platform = "laptop"
 cpu = "ivy-bridge"
-sha256 = "a6bc84a6658c89d1d7bfe52abc77b156c8be7d52ed0538466b062d3effeb63d1"
+sha256 = "cf782fa9589022301e3d9c448662bacb3c4e4ba649d8ab985d3f54d56a2141c0"
 
 [[config]]
 name = "Laptop/006 - Laptop - Haswell"
 platform = "laptop"
 cpu = "haswell"
-sha256 = "cebfb09f1a36091cf85729b0b3b5aac047101cddb1b388409d1f59eb8844a4fa"
+sha256 = "bea62d10493bcfcb80f3ca55291d2121b28ddfdba86db2aff46223ba14e22d26"
 
 [[config]]
 name = "Laptop/007 - Laptop - Broadwell"
 platform = "laptop"
 cpu = "broadwell"
-sha256 = "5bf808d74e75456a57128d51662e159503ecbf33ad3d2c84391eaff56dd45a3e"
+sha256 = "f8a867b968b5c941a40167a2ecab391d86da68860e41478757741bee5f437441"
 
 [[config]]
 name = "Laptop/008 - Laptop - Sky Lake"
 platform = "laptop"
 cpu = "sky-lake"
-sha256 = "d90cd5f8dcef904725c7fa29f2ea6158743b03baf5aa5b5e57842a16c79e21cb"
+sha256 = "7565bc020035ad2e8bf8faf954634d4ba2dbb4445105ae9cc033f4738e0124a0"
 
 [[config]]
 name = "Laptop/009 - Laptop - Kaby Lake"
 platform = "laptop"
 cpu = "kaby-lake"
-sha256 = "3c6b811d27eae18f21b2e5f12536fae05bb753be5bda1f3aad80813f860db85c"
+sha256 = "8b3da4b405462d3527d3669d120c0ce594a0ad843832828144743af88b4e96ca"
 
 [[config]]
 name = "Laptop/010 - Laptop - Coffee Lake ve Whiskey Lake"
 platform = "laptop"
 cpu = "coffee-lake-whiskey-lake"
-sha256 = "5b9eac46718a99a7f4eec9063b64daf5910b2e130c471eb3c3c515bc88907cd6"
+sha256 = "859a66334ce46ece520526382d2bed68be91487e488c74ed078c9ba8dbdd1f7b"
 
 [[config]]
 name = "Laptop/011 - Laptop - Coffe Lake Plus"
 platform = "laptop"
 cpu = "coffe-lake-plus"
-sha256 = "c04361d133003e82a9eab697ecc5a85a335a53fd98d0f4e36d2e18c1d3ae46b5"
+sha256 = "d154b1ea3ac400992d36461d88bb2bdf2190228516ca18dc58d5923a5bfccbea"
 
 [[config]]
 name = "Laptop/012 - Laptop - Comet Lake"
 platform = "laptop"
 cpu = "comet-lake"
-sha256 = "902f48a8d611fa1b30790dd7adf9f1844568124a1a5f6ad76b956503ff40a6df"
+sha256 = "585683f01e66b7a4d247fc9a1452d9eafe777c98d4dfe41fce2cc95bf7d90a87"
 
 [[config]]
 name = "Laptop/013 - Laptop - Ice Lake"
 platform = "laptop"
 cpu = "ice-lake"
-sha256 = "1b7fe951ef1e3be9f819bd9136962f824d2c45284378cca93f9298fe52b3ebf3"
+sha256 = "0960870f0562f93be61be2e147d586da279bea9a604417d2e6a57d70334befc5"
 
 [[config]]
 name = "Laptop/DELL/001 - Laptop - Clarksfield ve Arrandale Legacy BIOS"
 platform = "laptop"
 cpu = "clarksfield-arrandale-legacy-bios"
 oem = "dell"
-sha256 = "2ac3dc28975519bd0d6a524d664607c57c16b10728670dc48183069e0d7adf03"
+sha256 = "5e5b89ecb7dd6bdb72d7a57b4865e05848c2124ff9872e5f67b78d598f5ee666"
 
 [[config]]
 name = "Laptop/DELL/002 - Laptop - Clarksfield ve Arrandale UEFI BIOS"
 platform = "laptop"
 cpu = "clarksfield-arrandale-uefi-bios"
 oem = "dell"
-sha256 = "d2712c4cae2693054492115baf772a985303517c90b09110b2445f84378b3c4f"
+sha256 = "ee843389c1a380b0b059e8a7f1d9ab237cb6c6c1c34bc7e183a368403c677d81"
 
 [[config]]
 name = "Laptop/DELL/003 - Laptop - Sandy Bridge Legacy BIOS"
 platform = "laptop"
 cpu = "sandy-bridge-legacy-bios"
 oem = "dell"
-sha256 = "bba8ff62abdd92c143dfce397fbc53c497089dfb229e75fd91af06e860f1a21e"
+sha256 = "b1cce469a67ec7aefe809bc9b9f429dcc8f95eabb0716ae9d8aed415c019522d"
 
 [[config]]
 name = "Laptop/DELL/004 - Laptop - Sandy Bridge UEFI BIOS"
 platform = "laptop"
 cpu = "sandy-bridge-uefi-bios"
 oem = "dell"
-sha256 = "344326e60b8215184dc521994f1047e55f4d512ed9801b81e0461a9e5b08724a"
+sha256 = "24bb6adf56f3e6d382b1437a1ce276672bfc6a3deb8cd23d7ef38d7a2b458243"
 
 [[config]]
 name = "Laptop/DELL/005 - Laptop - Ivy Bridge"
 platform = "laptop"
 cpu = "ivy-bridge"
 oem = "dell"
-sha256 = "0d19a1747e5e7afba4a242f9f8f072197cc10211d8ae6852cfbf99d107a0f429"
+sha256 = "24550684e908edd8b67ed19e6a813651007b95c3ad4492542ef6e5a07ed872c8"
 
 [[config]]
 name = "Laptop/DELL/006 - Laptop - Haswell"
 platform = "laptop"
 cpu = "haswell"
 oem = "dell"
-sha256 = "5e8ee97b318e8d5d0768e797f3c914d163b7a76e286e90a105694fd06c6f572e"
+sha256 = "053e2f6d74ca8aa3ab6aa57afa77a86d7793fdbec18237622d97b9d7761cbae1"
 
 [[config]]
 name = "Laptop/DELL/007 - Laptop - Broadwell"
 platform = "laptop"
 cpu = "broadwell"
 oem = "dell"
-sha256 = "c2f0e32f98a3b6c568d7dd8834e69e6afa56cd39e634062091a6bb0355399e2a"
+sha256 = "875d71b3d7249c78456170daf49eb809681dc8d2b2ad7e9439e964463aabbb5a"
 
 [[config]]
 name = "Laptop/DELL/008 - Laptop - Sky Lake"
 platform = "laptop"
 cpu = "sky-lake"
 oem = "dell"
-sha256 = "1041a2cd20e7ce5e6fd7744e7335ba9863efd4fd7a7b429cbcfed0eb3ea58c45"
+sha256 = "18bb1a838c8f3a65dc0cad3db5b05a2a577c0f0c8882cf485e08e7130d1c0c2b"
 
 [[config]]
 name = "Laptop/DELL/009 - Laptop - Kaby Lake"
 platform = "laptop"
 cpu = "kaby-lake"
 oem = "dell"
-sha256 = "c15ee64715a15bbe3bbc662947530347d3098f962538f7b408db61bda28324de"
+sha256 = "00887c6f1f55e57faa4ff5e0ee2e3009807f3c7819afeb8b0ef3849662e5b8de"
 
 [[config]]
 name = "Laptop/DELL/010 - Laptop - Coffee Lake ve Whiskey Lake"
 platform = "laptop"
 cpu = "coffee-lake-whiskey-lake"
 oem = "dell"
-sha256 = "36cbfef6bde099e4abdf73df703e524169c73da198ee06e4f34094bd9427b8c0"
+sha256 = "2774f4907de110876bf99736c1c827d93765e1d1d5ca1f7d97e829995fba71ed"
 
 [[config]]
 name = "Laptop/DELL/011 - Laptop - Coffe Lake Plus"
 platform = "laptop"
 cpu = "coffe-lake-plus"
 oem = "dell"
-sha256 = "249bb7528b58724256efd9a2e494c9da9f732e344bc87cd2fba20ae0a104c0ed"
+sha256 = "0b2147c93e4a3bdefb2adec68dbe4c2a54fd529657c765803273cb52a7c2949b"
 
 [[config]]
 name = "Laptop/DELL/012 - Laptop - Comet Lake"
 platform = "laptop"
 cpu = "comet-lake"
 oem = "dell"
-sha256 = "ecad620fbc992faa6d5d36e904beda7b343a1c5c730c53c7760cb9ca11209421"
+sha256 = "de789b40f76f3a7ac4bda5bfd004256a04bc7549d599e5d9d00b975dd04be1c4"
 
 [[config]]
 name = "Laptop/DELL/013 - Laptop - Ice Lake"
 platform = "laptop"
 cpu = "ice-lake"
 oem = "dell"
-sha256 = "4eeebc018cfdd9374e87c2bf27a097cdf24e3243b30b6af92e1190575aef0d84"
+sha256 = "b442af9b920711f74910377971e41c1119fc435484acd6730cb58a7aaeb2fc2c"
 
 [[config]]
 name = "Laptop/HM67 - HM65 - QM67 - QS67 - UM67/001 - Laptop - Ivy Bridge"
 platform = "laptop"
 cpu = "ivy-bridge"
 chipset = "hm67-hm65-qm67-qs67-um67"
-sha256 = "4bbd606c12ae68cea16b7a0c8ef899c3854cc22d1e6ab3a5e9753c04b56d793d"
+sha256 = "15b4f97c61e0456e3ca037d12acd76e161c4ba326163b1c48ae5c49a374b1a6b"
 
 [[config]]
 name = "Laptop/HM67 - HM65 - QM67 - QS67 - UM67/DELL - SONY/001 - Laptop - Ivy Bridge"
@@ -1138,7 +1138,7 @@ platform = "laptop"
 cpu = "ivy-bridge"
 chipset = "hm67-hm65-qm67-qs67-um67"
 oem = "dell-sony"
-sha256 = "03953bb740ffe41611f0782b54b3ed47e926baa5c053037913c9e0fa83ac7655"
+sha256 = "dea91cd2de46bbea17b4937efa281e33f7c1da18458d3ee656c9d498b041990f"
 
 [[config]]
 name = "Laptop/HM67 - HM65 - QM67 - QS67 - UM67/HP/001 - Laptop - Ivy Bridge"
@@ -1146,21 +1146,21 @@ platform = "laptop"
 cpu = "ivy-bridge"
 chipset = "hm67-hm65-qm67-qs67-um67"
 oem = "hp"
-sha256 = "f6829a7de31268607b1997624688a126ea0be8b833f7e3d2f56570d231fc4514"
+sha256 = "bb8760172abab745b85cea3d39e7b93c2dd22fb8806c044dec583bde990a7efb"
 
 [[config]]
 name = "Laptop/HM77 - HM76 - HM75 - HM70 - UM77 - QM77 - QS77/001 - Laptop - Sandy Bridge Legacy BIOS"
 platform = "laptop"
 cpu = "sandy-bridge-legacy-bios"
 chipset = "hm77-hm76-hm75-hm70-um77-qm77-qs77"
-sha256 = "9e71b05e0c85c2e8ae3c022580f77d2ca122561f8b6886f5458be710bedb9a7d"
+sha256 = "c28992725db7eb31fa043fce880790e8b5bdfff9b0c530db485813c0b6356c0a"
 
 [[config]]
 name = "Laptop/HM77 - HM76 - HM75 - HM70 - UM77 - QM77 - QS77/002 - Laptop - Sandy Bridge UEFI BIOS"
 platform = "laptop"
 cpu = "sandy-bridge-uefi-bios"
 chipset = "hm77-hm76-hm75-hm70-um77-qm77-qs77"
-sha256 = "59f6506ae94f1f3ab7a0d4b78443dd601c551df93cea73e205a320c725e09b85"
+sha256 = "be1c3e0e7bb3af2e9aa5e177c9ae1764996262ff131377b9c18c853234304965"
 
 [[config]]
 name = "Laptop/HM77 - HM76 - HM75 - HM70 - UM77 - QM77 - QS77/DELL - SONY/001 - Laptop - Sandy Bridge Legacy BIOS"
@@ -1168,7 +1168,7 @@ platform = "laptop"
 cpu = "sandy-bridge-legacy-bios"
 chipset = "hm77-hm76-hm75-hm70-um77-qm77-qs77"
 oem = "dell-sony"
-sha256 = "0e8148e8212ece41d7695c45d27446c873def09492e762071e20eae107f0c9f7"
+sha256 = "9676a98e0163d353fa1e795a17770991ad7dcbf407cdfd95f23218b841326908"
 
 [[config]]
 name = "Laptop/HM77 - HM76 - HM75 - HM70 - UM77 - QM77 - QS77/DELL - SONY/002 - Laptop - Sandy Bridge UEFI BIOS"
@@ -1176,7 +1176,7 @@ platform = "laptop"
 cpu = "sandy-bridge-uefi-bios"
 chipset = "hm77-hm76-hm75-hm70-um77-qm77-qs77"
 oem = "dell-sony"
-sha256 = "a181080c4ccd039e1be43bcb8ea12345b3efe2b226955e04ca77f6b40643c8d9"
+sha256 = "bcfaa0370416ac2482f8ce45aabdad1d2f2ef85e8cc228eb41b9dbab58711c9e"
 
 [[config]]
 name = "Laptop/HM77 - HM76 - HM75 - HM70 - UM77 - QM77 - QS77/HP/001 - Laptop - Sandy Bridge Legacy BIOS"
@@ -1184,7 +1184,7 @@ platform = "laptop"
 cpu = "sandy-bridge-legacy-bios"
 chipset = "hm77-hm76-hm75-hm70-um77-qm77-qs77"
 oem = "hp"
-sha256 = "97a4d3fffd1c56f4d20bd6010066b52c33eef900dcc91a307a2d73fdb144a069"
+sha256 = "3baf5740447f7150cfb9cd551b6738b16744508e4bc891d19aaeef5abab1f5ac"
 
 [[config]]
 name = "Laptop/HM77 - HM76 - HM75 - HM70 - UM77 - QM77 - QS77/HP/002 - Laptop - Sandy Bridge UEFI BIOS"
@@ -1192,186 +1192,186 @@ platform = "laptop"
 cpu = "sandy-bridge-uefi-bios"
 chipset = "hm77-hm76-hm75-hm70-um77-qm77-qs77"
 oem = "hp"
-sha256 = "883136372364e2bc1db99dbc292e0eb973641ee5145827d09e908d085912d5eb"
+sha256 = "5275341235804befaa3830669d7b39e21f55fdebab87fc1184340c9573821ce3"
 
 [[config]]
 name = "Laptop/HP/001 - Laptop - Clarksfield ve Arrandale Legacy BIOS"
 platform = "laptop"
 cpu = "clarksfield-arrandale-legacy-bios"
 oem = "hp"
-sha256 = "22c958015187485ef2797e49c01a84fe081287599b12d101c50ae39747f680f0"
+sha256 = "cf3d54e050ed2337e36c937c88f1eaa304152481b4875ce56fb9eb247ea95e94"
 
 [[config]]
 name = "Laptop/HP/002 - Laptop - Clarksfield ve Arrandale UEFI BIOS"
 platform = "laptop"
 cpu = "clarksfield-arrandale-uefi-bios"
 oem = "hp"
-sha256 = "989ae02d5adbea9efcb4c584eeb3dd9670ee747d291f512f6f54064d8bed446c"
+sha256 = "9ae60d6f730936ffe63e1f585216a1ee8852b2f318831b605e74e0ff8df833f0"
 
 [[config]]
 name = "Laptop/HP/003 - Laptop - Sandy Bridge Legacy BIOS"
 platform = "laptop"
 cpu = "sandy-bridge-legacy-bios"
 oem = "hp"
-sha256 = "354bd594f6741a2a076697dabbf1e807a0be6a31f463ea1b20ee118b741f47c4"
+sha256 = "e5ab5c5bd5081a25dec39e9378b6cbc3351f7e1a765567594242e6c554ee83bd"
 
 [[config]]
 name = "Laptop/HP/004 - Laptop - Sandy Bridge UEFI BIOS"
 platform = "laptop"
 cpu = "sandy-bridge-uefi-bios"
 oem = "hp"
-sha256 = "2a385582e0868fab1d64fad987a38757a1cb8be9185568a8a12ff9b6761bfa5c"
+sha256 = "c62d1eae462ffe5b8a738655b3c27ffe7d7487f28fd0108710b500c2acaa358c"
 
 [[config]]
 name = "Laptop/HP/005 - Laptop - Ivy Bridge"
 platform = "laptop"
 cpu = "ivy-bridge"
 oem = "hp"
-sha256 = "6696f44dd368ab0fac7ab4651022c8925c867ceac69d3163b94e4a39df06dec1"
+sha256 = "ca3347bed1b65a791d8c0ef4cc0402e5f186ed764ba3077b639f8574c1f9693c"
 
 [[config]]
 name = "Laptop/HP/006 - Laptop - Haswell"
 platform = "laptop"
 cpu = "haswell"
 oem = "hp"
-sha256 = "b103a834e40aed88a9f07013cb1811d3d9149c378d56be1e93ac2d3de45360f2"
+sha256 = "5fa6f00155ec92521f15b1c6da852f18eca472caf59d9223b85030312e67b663"
 
 [[config]]
 name = "Laptop/HP/007 - Laptop - Broadwell"
 platform = "laptop"
 cpu = "broadwell"
 oem = "hp"
-sha256 = "564889166c5f3095cba3dc22dc19dca2e133e0010bdf838f9ee5cf06cdcf8fc1"
+sha256 = "c20ebfc3e9ed3cd7509b2485d1f8b38751b476a3bc89a2d23531582afc2dafec"
 
 [[config]]
 name = "Laptop/HP/008 - Laptop - Sky Lake"
 platform = "laptop"
 cpu = "sky-lake"
 oem = "hp"
-sha256 = "e5ff3d4d5929fd92d8fe4ff61d909d5086cd381163ae62024914dbdf004f1d1e"
+sha256 = "5eb58b9dba8d321e2e7623ae936ae459351db3dc94aed1bf4ac834900b2eae6d"
 
 [[config]]
 name = "Laptop/HP/009 - Laptop - Kaby Lake"
 platform = "laptop"
 cpu = "kaby-lake"
 oem = "hp"
-sha256 = "4fefeedcd662dd9db90e2a68f18c28119613aa0d22b87e7627189129097ce21d"
+sha256 = "ebff79f442d50f794af8c61e5e3cfeb1410d84cb280f43d9ee809badcf2ab190"
 
 [[config]]
 name = "Laptop/HP/010 - Laptop - Coffee Lake ve Whiskey Lake"
 platform = "laptop"
 cpu = "coffee-lake-whiskey-lake"
 oem = "hp"
-sha256 = "c4b1d10dd2b4b3f733086944a527108bce37cde966899f786cfd82fc38738ecd"
+sha256 = "435dffb3266524dcb65b25e1c890f2297a4a32ea517c997277f2f32a07d7e313"
 
 [[config]]
 name = "Laptop/HP/011 - Laptop - Coffe Lake Plus"
 platform = "laptop"
 cpu = "coffe-lake-plus"
 oem = "hp"
-sha256 = "a44f2585969a904bb1a2a788aced5ed54a277496dbd2715b75d43347f9bbe6a9"
+sha256 = "4d1da0b385969e7262164f6bf75f728747363598b27f46a0900f06765f0c10e4"
 
 [[config]]
 name = "Laptop/HP/012 - Laptop - Comet Lake"
 platform = "laptop"
 cpu = "comet-lake"
 oem = "hp"
-sha256 = "96511d42ea31dde0c34473b9934fe17502a2099a22c91f930d0344cc61e74f1c"
+sha256 = "f748ed508c09b6ab35165b856aec0ca125bbd8504f90430cfc6f49975c7d05d7"
 
 [[config]]
 name = "Laptop/HP/013 - Laptop - Ice Lake"
 platform = "laptop"
 cpu = "ice-lake"
 oem = "hp"
-sha256 = "100bb4ec42a8eb4f9263dce8abd47fbfa674f52c763661fcc20dabf1a548bb8b"
+sha256 = "95d5db40e752152bdf4d54505398b572518078f1430f1bd0bbc6777fa83558e0"
 
 [[config]]
 name = "Laptop/SONY/001 - Laptop - Clarksfield ve Arrandale Legacy BIOS"
 platform = "laptop"
 cpu = "clarksfield-arrandale-legacy-bios"
 oem = "sony"
-sha256 = "2ac3dc28975519bd0d6a524d664607c57c16b10728670dc48183069e0d7adf03"
+sha256 = "5e5b89ecb7dd6bdb72d7a57b4865e05848c2124ff9872e5f67b78d598f5ee666"
 
 [[config]]
 name = "Laptop/SONY/002 - Laptop - Clarksfield ve Arrandale UEFI BIOS"
 platform = "laptop"
 cpu = "clarksfield-arrandale-uefi-bios"
 oem = "sony"
-sha256 = "d2712c4cae2693054492115baf772a985303517c90b09110b2445f84378b3c4f"
+sha256 = "ee843389c1a380b0b059e8a7f1d9ab237cb6c6c1c34bc7e183a368403c677d81"
 
 [[config]]
 name = "Laptop/SONY/003 - Laptop - Sandy Bridge Legacy BIOS"
 platform = "laptop"
 cpu = "sandy-bridge-legacy-bios"
 oem = "sony"
-sha256 = "bba8ff62abdd92c143dfce397fbc53c497089dfb229e75fd91af06e860f1a21e"
+sha256 = "b1cce469a67ec7aefe809bc9b9f429dcc8f95eabb0716ae9d8aed415c019522d"
 
 [[config]]
 name = "Laptop/SONY/004 - Laptop - Sandy Bridge UEFI BIOS"
 platform = "laptop"
 cpu = "sandy-bridge-uefi-bios"
 oem = "sony"
-sha256 = "344326e60b8215184dc521994f1047e55f4d512ed9801b81e0461a9e5b08724a"
+sha256 = "24bb6adf56f3e6d382b1437a1ce276672bfc6a3deb8cd23d7ef38d7a2b458243"
 
 [[config]]
 name = "Laptop/SONY/005 - Laptop - Ivy Bridge"
 platform = "laptop"
 cpu = "ivy-bridge"
 oem = "sony"
-sha256 = "0d19a1747e5e7afba4a242f9f8f072197cc10211d8ae6852cfbf99d107a0f429"
+sha256 = "24550684e908edd8b67ed19e6a813651007b95c3ad4492542ef6e5a07ed872c8"
 
 [[config]]
 name = "Laptop/SONY/006 - Laptop - Haswell"
 platform = "laptop"
 cpu = "haswell"
 oem = "sony"
-sha256 = "5e8ee97b318e8d5d0768e797f3c914d163b7a76e286e90a105694fd06c6f572e"
+sha256 = "053e2f6d74ca8aa3ab6aa57afa77a86d7793fdbec18237622d97b9d7761cbae1"
 
 [[config]]
 name = "Laptop/SONY/007 - Laptop - Broadwell"
 platform = "laptop"
 cpu = "broadwell"
 oem = "sony"
-sha256 = "c2f0e32f98a3b6c568d7dd8834e69e6afa56cd39e634062091a6bb0355399e2a"
+sha256 = "875d71b3d7249c78456170daf49eb809681dc8d2b2ad7e9439e964463aabbb5a"
 
 [[config]]
 name = "Laptop/SONY/008 - Laptop - Sky Lake"
 platform = "laptop"
 cpu = "sky-lake"
 oem = "sony"
-sha256 = "1041a2cd20e7ce5e6fd7744e7335ba9863efd4fd7a7b429cbcfed0eb3ea58c45"
+sha256 = "18bb1a838c8f3a65dc0cad3db5b05a2a577c0f0c8882cf485e08e7130d1c0c2b"
 
 [[config]]
 name = "Laptop/SONY/009 - Laptop - Kaby Lake"
 platform = "laptop"
 cpu = "kaby-lake"
 oem = "sony"
-sha256 = "c15ee64715a15bbe3bbc662947530347d3098f962538f7b408db61bda28324de"
+sha256 = "00887c6f1f55e57faa4ff5e0ee2e3009807f3c7819afeb8b0ef3849662e5b8de"
 
 [[config]]
 name = "Laptop/SONY/010 - Laptop - Coffee Lake ve Whiskey Lake"
 platform = "laptop"
 cpu = "coffee-lake-whiskey-lake"
 oem = "sony"
-sha256 = "36cbfef6bde099e4abdf73df703e524169c73da198ee06e4f34094bd9427b8c0"
+sha256 = "2774f4907de110876bf99736c1c827d93765e1d1d5ca1f7d97e829995fba71ed"
 
 [[config]]
 name = "Laptop/SONY/011 - Laptop - Coffe Lake Plus"
 platform = "laptop"
 cpu = "coffe-lake-plus"
 oem = "sony"
-sha256 = "249bb7528b58724256efd9a2e494c9da9f732e344bc87cd2fba20ae0a104c0ed"
+sha256 = "0b2147c93e4a3bdefb2adec68dbe4c2a54fd529657c765803273cb52a7c2949b"
 
 [[config]]
 name = "Laptop/SONY/012 - Laptop - Comet Lake"
 platform = "laptop"
 cpu = "comet-lake"
 oem = "sony"
-sha256 = "ecad620fbc992faa6d5d36e904beda7b343a1c5c730c53c7760cb9ca11209421"
+sha256 = "de789b40f76f3a7ac4bda5bfd004256a04bc7549d599e5d9d00b975dd04be1c4"
 
 [[config]]
 name = "Laptop/SONY/013 - Laptop - Ice Lake"
 platform = "laptop"
 cpu = "ice-lake"
 oem = "sony"
-sha256 = "4eeebc018cfdd9374e87c2bf27a097cdf24e3243b30b6af92e1190575aef0d84"
+sha256 = "b442af9b920711f74910377971e41c1119fc435484acd6730cb58a7aaeb2fc2c"

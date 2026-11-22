@@ -6,8 +6,8 @@ ocvalidate that checks the result. Updating any of them separately is how a
 config drifts from the OpenCore it will run under, so this does all of it at
 once and refuses to do half.
 
-    python3 tools/opencore.py 1.0.7          # what would change
-    python3 tools/opencore.py 1.0.7 --write  # change it
+    python3 tools/opencore.py 1.0.9          # what would change
+    python3 tools/opencore.py 1.0.9 --write  # change it
 
 What it touches:
 
@@ -245,7 +245,9 @@ def main(argv=None):
         print('\nNothing was changed. Pass --write to do it, then read the diff.')
         print('  The catalogue is rehashed afterwards. Whether any hash moves')
         print('  depends on the new Sample.plist: 1.0.5 to 1.0.7 moved none of')
-        print('  them, because nothing the profiles layer onto changed.')
+        print('  them, because nothing the profiles layer onto changed. A hash')
+        print('  that stays put is not the same as valid: --write ends by running')
+        print("  every profile through the new release's ocvalidate.")
         return 0
 
     apply(tag, release, changes)
@@ -257,6 +259,17 @@ def main(argv=None):
     if done.returncode:
         sys.stderr.write(done.stderr[-2000:])
         sys.exit('the configs did not regenerate; nothing else was done')
+    # A hash that did not move proves the configs are what they were, not that
+    # the new ocvalidate accepts them. 1.0.8 made HideVerbose a required key on
+    # every driver entry: 0 of 179 hashes moved and every config failed. So the
+    # new release's own validator gets the last word before anybody reads on.
+    checked = subprocess.run([sys.executable, 'tools/matrix.py', a.version],
+                             capture_output=True, text=True)
+    tail = (checked.stdout.strip().splitlines() or ['matrix printed nothing'])[-1]
+    print(f'\nagainst {a.version}\'s own ocvalidate: {tail.strip()}')
+    if checked.returncode or 'FAIL' in checked.stdout:
+        print('  Some profiles do not validate. Read tools/matrix.py\'s table,')
+        print('  fix the profiles, then python3 tools/verify.py --rehash.')
     print('\nNow: python3 tools/selftest.py, then read the diff.')
     return 0
 

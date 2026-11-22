@@ -603,8 +603,9 @@ def main(argv=None):
               f"newest, not\n  the image Apple hands back: asked for the 12.7.6 "
               f"board it served a 12.6\n  BaseSystem. Recovery downloads the rest "
               f"during the install.{RESET}")
+        ask_by = "version, by name,\n  or 'latest'" if find('latest') else 'version or by name'
         print(f"{DIM}  Read from macrecovery's own boards.json. Ask for one by "
-              f"version, by name,\n  or 'latest'.{RESET}")
+              f"{ask_by}.{RESET}")
         _say_network(a.machine)
         return 0
 

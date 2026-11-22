@@ -11,8 +11,8 @@ drivers, the tools, the `Sample.plist` every config is layered onto, and the
 config drifts from the OpenCore it will run under, so one tool does all of it:
 
 ```
-python3 tools/opencore.py 1.0.8            # what would change
-python3 tools/opencore.py 1.0.8 --write    # change it
+python3 tools/opencore.py 1.0.9            # what would change
+python3 tools/opencore.py 1.0.9 --write    # change it
 ```
 
 The dry run prints every binary it would replace with the before and after
@@ -21,7 +21,7 @@ time: it is acidanthera's OcBinaryData and ships on its own schedule, so an
 OpenCore bump has nothing to say about it.
 
 `--write` replaces the binaries, vendors the new `Sample.plist`, the two
-Utilities and `macrecovery` under `vendor/opencore/1.0.8/`, removes the version
+Utilities and `macrecovery` under `vendor/opencore/<version>/`, removes the version
 before it — one vendored version, so nobody has to know which sorts last — and
 rehashes `profiles/catalogue.toml`.
 
@@ -33,6 +33,15 @@ appears or disappears from the Recovery tab after an update, this is why.
 Whether any hash moves depends on the new sample. Going from 1.0.5 to 1.0.7
 moved none of the 179, because nothing the profiles layer onto had changed. If
 some do move, that is the diff to read: it is every published config changing.
+
+A new *required* key is the case the rehash cannot see. 1.0.8 added
+`UEFI -> Drivers[] -> HideVerbose`: the profiles had no such key, so every hash
+stayed put while every config failed the new `ocvalidate` with "Missing key
+HideVerbose". The build step below is what catches it. The fix was the key at
+its failsafe (`false`, so nothing behaves differently) in every driver entry,
+and that did move all 179 hashes. It also means a config from here no longer
+validates on 1.0.7, whose `ocvalidate` has no schema for the key -
+`profiles/support.toml` records that, measured.
 
 ### Then check it
 
@@ -56,7 +65,7 @@ All three exist because this happened.
 the tested list:
 
 ```
-OC_CACHE=.oc-cache python3 tools/matrix.py 1.0.7 1.0.8
+OC_CACHE=.oc-cache python3 tools/matrix.py 1.0.8 1.0.9
 ```
 
 It validates every profile against each version named and rewrites the range.
@@ -66,8 +75,8 @@ Nothing here decides that a version works; the run does.
 
 ### What the version number is
 
-**The tag follows OpenCore, not this repository.** `v1.0.7` means the EFI it
-builds is OpenCore 1.0.7. It is not a count of features, and it does not go up
+**The tag follows OpenCore, not this repository.** `v1.0.8` means the EFI it
+builds is OpenCore 1.0.8. It is not a count of features, and it does not go up
 because something here got better: the number tells somebody which OpenCore
 they are about to boot, which is the only thing about it they cannot see from
 the outside.
@@ -84,9 +93,9 @@ the release, move the tag, and run the workflow by hand from the Actions tab
 with the tag as input:
 
 ```
-gh release delete v1.0.7 --yes
-git tag -f v1.0.7 && git push -f origin v1.0.7
-gh workflow run release.yml -f tag=v1.0.7
+gh release delete v1.0.8 --yes
+git tag -f v1.0.8 && git push -f origin v1.0.8
+gh workflow run release.yml -f tag=v1.0.8
 ```
 
 Nothing is lost by it: the assets are rebuilt from the commit the tag now
@@ -95,7 +104,7 @@ points at, and the release notes are written by the workflow.
 ### Tag it, and the workflow does the rest
 
 ```
-git tag v1.0.8 && git push origin v1.0.8
+git tag v1.0.9 && git push origin v1.0.9
 ```
 
 `release.yml` then:

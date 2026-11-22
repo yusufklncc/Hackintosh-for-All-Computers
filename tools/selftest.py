@@ -82,6 +82,18 @@ def graphics_advice():
           gpu.report([{'name': 'RX 6600', 'id': '1002:73ff'}], None)[1] == ['agdpmod=pikera'])
 
 
+def _boards_say_latest():
+    """Whether macrecovery's board list still has a board on `latest`.
+
+    Until OpenCore 1.0.8 the Macs Apple kept current were `latest`; from 1.0.8
+    every Intel board has a number, because macOS 27 left Intel behind and
+    Tahoe is the last release any of them gets. The tests hold either way."""
+    import glob
+    import json as _json
+    found = sorted(glob.glob('vendor/opencore/*/Utilities/macrecovery/boards.json'))
+    return bool(found) and 'latest' in _json.loads(Path(found[-1]).read_text()).values()
+
+
 def audio_advice():
     lines, alcid, steps = audio.report(['10ec:0255'], 'lenovo')
     check('the brand a contributor named decides where to start', alcid == 28, alcid)
@@ -1804,8 +1816,15 @@ def genuine_macs():
           'from' not in made, made)
     made = summary.genuine_mac({'system': 'Darwin',
                                 'board_id': 'Mac-E1008331FDC96864'})
-    check('a Mac Apple keeps current has no ceiling either',
-          made['current'] and made['to'] is None, made)
+    if made['current']:
+        check('a Mac Apple keeps current has no ceiling either',
+              made['to'] is None, made)
+    else:
+        # macrecovery's list since OpenCore 1.0.8: this board, like every Intel
+        # Mac, is pinned to 26.7 rather than `latest`, so it now has a last
+        # release, and that is Tahoe
+        check('an Intel Mac Apple stopped at Tahoe is told so',
+              made['to'] and made['to']['name'] == 'Tahoe', made)
     check('and its served lines are a separate fact', made['serving'], made)
     check('a machine with no board is not a Mac',
           summary.genuine_mac({}) is None)
@@ -2447,8 +2466,20 @@ def the_recovery_it_can_fetch():
     # is newest today. Dropping them meant the newest release could not be
     # fetched at all, which is what it looked like from the window.
     current = [c for c in offered if not c['version'][0].isdigit()]
-    check('the macOS Apple is serving now can be asked for', len(current) == 1,
-          [c['version'] for c in current])
+    if any(v == 'latest' for v in boards.values()):
+        check('the macOS Apple is serving now can be asked for', len(current) == 1,
+              [c['version'] for c in current])
+    else:
+        # OpenCore 1.0.8's list stopped saying `latest` for any board: macOS 27
+        # left Intel behind, so every Intel Mac now has a last release, and
+        # Tahoe is recorded by its number. Nothing is "whatever is newest".
+        def _v(c):
+            return tuple(int(x) for x in c['version'].split('.'))
+        check('with no board on "latest", the newest is offered first by its number',
+              not current and offered[0] is max(offered, key=_v),
+              [c['version'] for c in offered[:2]])
+        check('  and "latest" asks for nothing rather than for a guess',
+              recovery.find('latest') is None)
     if current:
         check('and it comes first', offered[0] is current[0])
         # This used to assert the label carried no number, "since nothing
@@ -2478,7 +2509,8 @@ def the_recovery_it_can_fetch():
               choice['label'] == choice['name'], choice['label'])
         check(f"{choice['version']} says what the number is",
               choice['version'] in choice['note'], choice['note'])
-        check('and it can be asked for by that word',
+    if current:
+        check('and the newest can be asked for by that word',
               recovery.find('latest') == current[0])
     check('every row can be asked for by its own version',
           all(recovery.find(c['version']) == c for c in offered))
@@ -3542,10 +3574,21 @@ def a_mark_for_every_macos():
     unheard = recovery.mark('Something Nobody Has Typed Here')
     # the row the board table refuses to name, named without a connection
     top = recovery.choices()[0]
-    check('the unnamed row is the newest one', top['version'] == 'latest', top['version'])
     said = recovery.recorded()
-    check('and the repository already records what that is', said, said)
-    if said:
+    if not _boards_say_latest():
+        # every row has a number now, so the newest is an ordinary row: named,
+        # drawn, and asked for by its name
+        check('the newest row is an ordinary one, named', top['name'] and
+              top['version'][0].isdigit(), top)
+        check('  and it is the release the repository records Apple serving',
+              said and said['name'] == top['name'], (said, top['name']))
+        check('  and asking for it by name reaches it',
+              (recovery.find(top['name']) or {}).get('version') == top['version'])
+    else:
+        check('the unnamed row is the newest one', top['version'] == 'latest',
+              top['version'])
+        check('and the repository already records what that is', said, said)
+    if said and _boards_say_latest():
         check('so the row opens with a name rather than a question',
               said['name'] and said['name'] in top['label'], top['label'])
         check('and with the release to draw an icon for',
@@ -3640,8 +3683,12 @@ def the_mac_a_config_pretends_to_be():
     fits, _ = smbios.reaches('MacBookPro14,1', '13')
     check('and Ventura is not', fits is True)
     version, _ = smbios.reach('MacBookPro16,1')
-    check('an identity Apple keeps current says so rather than a number',
-          version == 'latest', version)
+    if _boards_say_latest():
+        check('an identity Apple keeps current says so rather than a number',
+              version == 'latest', version)
+    else:
+        check('the last Intel identities stop at Tahoe, by number',
+              version.startswith('26.'), version)
     check('and it reaches whatever was asked for',
           smbios.reaches('MacBookPro16,1', '26')[0] is True)
     check('an identity nothing knows is not guessed at',
@@ -3701,8 +3748,13 @@ def the_mac_a_config_pretends_to_be():
     # a real Mac is judged by the same list, not by Apple\'s per-line one
     facts = summary.genuine_mac({'system': 'Darwin',
                                  'board_id': 'Mac-E1008331FDC96864'})
-    check('a Mac Apple keeps current has no ceiling to name',
-          facts['to'] is None and facts['current'], facts)
+    if _boards_say_latest():
+        check('a Mac Apple keeps current has no ceiling to name',
+              facts['to'] is None and facts['current'], facts)
+    else:
+        check('a Mac whose last release is Tahoe is told so',
+              facts['to'] and facts['to']['name'] == 'Tahoe'
+              and not facts['current'], facts)
     facts = summary.genuine_mac({'system': 'Darwin',
                                  'board_id': 'Mac-B4831CEBD52A0C4C'})
     check('and one that stopped says where',
