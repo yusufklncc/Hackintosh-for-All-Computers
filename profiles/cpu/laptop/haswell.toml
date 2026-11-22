@@ -25,8 +25,15 @@ Path = "SSDT-XOSI.aml"
 [ACPI.Quirks]
 ResetLogoStatus = false
 
+# Dortania, config-laptop.plist/haswell.md: "In addition to the
+# AAPL,ig-platform-id, you'll want to add the cursor byte size patch from 6MB
+# (00006000) to 9MB because of some glitches" - framebuffer-patch-enable
+# 01000000, framebuffer-cursormem 00009000. Issue #106 is a Haswell laptop
+# with horizontal lines in the installer.
 [DeviceProperties.Add."PciRoot(0x0)/Pci(0x2,0x0)"]
 "AAPL,ig-platform-id" = "hex:12345678"
+framebuffer-patch-enable = "hex:01000000"
+framebuffer-cursormem = "hex:00009000"
 
 [[Kernel.Add]]
 Arch = "x86_64"

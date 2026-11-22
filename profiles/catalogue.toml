@@ -990,7 +990,7 @@ sha256 = "a6bc84a6658c89d1d7bfe52abc77b156c8be7d52ed0538466b062d3effeb63d1"
 name = "Laptop/006 - Laptop - Haswell"
 platform = "laptop"
 cpu = "haswell"
-sha256 = "00bb4e98f77b7e61f2260eb3a2b39204c0cba751cf2eccc649764ce9c52d07e8"
+sha256 = "cebfb09f1a36091cf85729b0b3b5aac047101cddb1b388409d1f59eb8844a4fa"
 
 [[config]]
 name = "Laptop/007 - Laptop - Broadwell"
@@ -1074,7 +1074,7 @@ name = "Laptop/DELL/006 - Laptop - Haswell"
 platform = "laptop"
 cpu = "haswell"
 oem = "dell"
-sha256 = "d510399cf04f14af9f7e50d7044bd48565064520ca0f4bf8bce09bbe559cf432"
+sha256 = "5e8ee97b318e8d5d0768e797f3c914d163b7a76e286e90a105694fd06c6f572e"
 
 [[config]]
 name = "Laptop/DELL/007 - Laptop - Broadwell"
@@ -1234,7 +1234,7 @@ name = "Laptop/HP/006 - Laptop - Haswell"
 platform = "laptop"
 cpu = "haswell"
 oem = "hp"
-sha256 = "fbd59d304b53e11fefeeb006c025e26dab1ae75b5a504bcd563f6d549a4f8c38"
+sha256 = "b103a834e40aed88a9f07013cb1811d3d9149c378d56be1e93ac2d3de45360f2"
 
 [[config]]
 name = "Laptop/HP/007 - Laptop - Broadwell"
@@ -1325,7 +1325,7 @@ name = "Laptop/SONY/006 - Laptop - Haswell"
 platform = "laptop"
 cpu = "haswell"
 oem = "sony"
-sha256 = "d510399cf04f14af9f7e50d7044bd48565064520ca0f4bf8bce09bbe559cf432"
+sha256 = "5e8ee97b318e8d5d0768e797f3c914d163b7a76e286e90a105694fd06c6f572e"
 
 [[config]]
 name = "Laptop/SONY/007 - Laptop - Broadwell"

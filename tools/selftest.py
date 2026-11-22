@@ -2714,6 +2714,20 @@ def the_stick_it_writes_to():
           'ListSticks' in pass_ and 'usb-prepare' not in pass_)
 
 
+def haswell_cursor_patch():
+    """Dortania's Haswell laptop page adds a 9 MB cursor "because of some glitches".
+
+    The profiles carried only the placeholder framebuffer id; issue #106 is a
+    Haswell laptop with horizontal lines in the installer."""
+    igpu = ocgen.read_toml('profiles/cpu/laptop/haswell.toml')['DeviceProperties']['Add'][
+        'PciRoot(0x0)/Pci(0x2,0x0)']
+    check('Haswell laptops get the cursor patch Dortania gives',
+          igpu.get('framebuffer-patch-enable') == 'hex:01000000'
+          and igpu.get('framebuffer-cursormem') == 'hex:00009000', igpu)
+    check('  and keep the framebuffer id the builder fills in',
+          'AAPL,ig-platform-id' in igpu)
+
+
 def en0_and_iservices():
     """built-in on en0 only when macOS says it is not, and only on the right device.
 
@@ -4102,6 +4116,7 @@ if __name__ == '__main__':
                     what_it_says_about_amd_integrated,
                     cards_somebody_else_drives,
                     en0_and_iservices,
+                    haswell_cursor_patch,
                     what_the_download_shows,
                     building_an_installer_image,
                     a_kext_that_stops_below_the_target,
