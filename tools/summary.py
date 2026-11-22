@@ -667,7 +667,8 @@ def graphics_advice(hw):
 
         card unsupported, iGPU works      run on the iGPU
         card unsupported, iGPU does not   replace the card, nothing covers for it
-        card unsupported, no iGPU at all  replace the card, there is no fallback
+        card unsupported, no iGPU seen    it may be off in the firmware; what it
+                                          would be worth is the generation's answer
         card unknown                      say so, and say it is not a verdict
     """
     devices = hw.get('gpu_devices') or []
@@ -680,7 +681,7 @@ def graphics_advice(hw):
         verdict = gpu.classify(device, generation)[0]
         name = device.get('name') or 'graphics'
         (integrated if gpu.looks_integrated(name) else discrete).append(
-            {'name': name, 'verdict': verdict})
+            {'name': name, 'verdict': verdict, 'device': device})
 
     # a field report about this exact processor outranks the generation rule
     field = gpu.field_igpu(hw.get('cpu'))
@@ -700,23 +701,47 @@ def graphics_advice(hw):
         return None
 
     named = ', '.join(d['name'] for d in bad)
+    # a community driver that claims the card is said beside Apple's answer,
+    # never instead of it: the Graphics row names it, and a warning that the
+    # card "has to be replaced" with no word of it contradicted the row above
+    others = []
+    for d in bad:
+        got = gpu.third_party(d['device'])
+        if got:
+            others.append(f'{got[0]["name"]}, a community driver, claims {d["name"]} '
+                          f'({got[0]["stage"]}; nothing for it goes in this EFI).')
+    aside = (' ' + ' '.join(others)) if others else ''
     usable = [d for d in integrated if d['verdict'] in ('works', 'works-spoofed')]
     if usable:
         return {'tone': UNSUPPORTED,
                 'text': f'{named} is not supported. macOS would run on '
                         f'{usable[0]["name"]} instead, so the range above still '
                         'holds - but the card gives you nothing and the display '
-                        'has to come off the integrated one.'}
+                        'has to come off the integrated one.' + aside}
     if integrated:
         return {'tone': UNSUPPORTED,
                 'text': f'{named} is not supported, and neither is '
                         f'{integrated[0]["name"]}. The card has to be replaced '
                         'with one macOS drives; the integrated graphics cannot '
-                        'cover for it.'}
-    return {'tone': UNSUPPORTED,
-            'text': f'{named} is not supported and there is no integrated graphics '
-                    'to fall back on. The card has to be replaced with one macOS '
-                    'drives, or this machine has no display under macOS.'}
+                        'cover for it.' + aside}
+    # None seen is not none there: a K processor has one, and a board with a
+    # card in it often switches it off in the firmware. What it would be worth
+    # turned on is the generation's answer.
+    seen = (f'{named} is not supported, and no integrated graphics was seen on this '
+            'machine - the processor may have none, or it may be switched off in the '
+            'firmware.')
+    igpu, models = gpu.igpu_verdict(generation)
+    if igpu == 'works':
+        then = (' Turned on, macOS could run on it instead. Otherwise the card has to '
+                'be replaced with one macOS drives.')
+    elif igpu == 'unsupported':
+        then = (f' On a {generation.replace("-", " ").title()} processor it would not help: macOS has no driver '
+                'for that integrated graphics either. The card has to be replaced with '
+                'one macOS drives, or this machine has no display under macOS.')
+    else:
+        then = (' The card has to be replaced with one macOS drives, or there is '
+                'no display under macOS.')
+    return {'tone': UNSUPPORTED, 'text': seen + then + aside}
 
 
 def macos_range(hw):

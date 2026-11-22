@@ -1989,9 +1989,18 @@ def graphics_and_the_range():
 
     alone = summary.graphics_advice({'generation': 'comet-lake',
                                      'gpu_devices': [arc]})
-    check('an unsupported card with no iGPU says there is no fallback',
-          'no integrated graphics to fall back on' in alone['text'], alone)
+    check('an unsupported card with no iGPU seen says none was seen, not none exists',
+          'no integrated graphics was seen' in alone['text']
+          and 'switched off in the firmware' in alone['text'], alone)
+    check('  on a generation whose iGPU works, that turning it on is the way out',
+          'Turned on, macOS could run on it' in alone['text'], alone)
     check('and that it has to be replaced', 'replaced' in alone['text'])
+    b580 = {'id': '8086:e20b', 'name': 'Intel(R) Arc(TM) B580 Graphics'}
+    z790 = summary.graphics_advice({'generation': 'raptor-lake', 'gpu_devices': [b580]})
+    check('a Raptor Lake machine is told its iGPU would not help either',
+          'would not help' in z790['text'], z790)
+    check('  and the community driver the Graphics row names is named here too',
+          'intel-gpu-macos-driver, a community driver, claims' in z790['text'], z790)
 
     # the field report about this processor says its iGPU does not accelerate,
     # so the iGPU cannot be offered as the way out
