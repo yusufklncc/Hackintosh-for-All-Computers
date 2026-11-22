@@ -1,0 +1,293 @@
+# Drivers and add-ons this repository does not write, and knows about.
+#
+# One registry for everything community-made: a GPU driver Apple never wrote,
+# a Wi-Fi kext for a card macOS has no driver for, an AirDrop or Handoff add-on,
+# a CPU tweak. Each one is somebody else's project, recorded so that a person
+# with that hardware is told it exists - never so that it is claimed to work.
+#
+# PROVENANCE, per field:
+#   ids        read from the kext's own Info.plist in the release named
+#              (ids_from = "kext"), or quoted from the project's own table
+#              (ids_from = "quoted"), or its rule file ("rules"), or its stated
+#              chip families ("chips")
+#   licence    as GitHub reads the project's LICENSE
+#   sha256     of the release asset named, as downloaded
+#   macos, quote, covers
+#              the project's own sentences, at the commit recorded
+#
+# stage: watching      known, not shown
+#        experimental  shown beside Apple's verdict; offered, never added unasked
+#        recommended   somebody named has run it (data/field.toml)
+#        vendored      ships in EFI/OC/Kexts like the other kexts
+#
+# install: efi     it goes in the EFI as a kext
+#          system  it is installed on macOS by its own installer, after boot
+#
+# tools/community.py --refresh re-reads every derived field and reports a
+# changed quote for a person; tools/community.py --discover lists projects
+# that are not here yet. Neither adds a project: that is a decision.
+[[project]]
+name = "intel-gpu-macos-driver"
+repo = "yusufklncc/intel-gpu-macos-driver"
+kind = "device"
+role = "graphics"
+stage = "experimental"
+install = "system"
+licence = "MIT"
+macos = "26 Tahoe, tested; 15 Sequoia, built but not re-tested"
+min_darwin = 24
+how = "IntelXe Manager installs it and makes the EFI changes it needs"
+source = "release/templates/efi-rules.json"
+commit = "990b650315b1727f825ab37186be9d1142c97bf7"
+ids_from = "rules"
+
+[[project.card]]
+id = "8086:e20b"
+name = "Arc B580"
+tested = true
+said = "the development and measurement device (docs/devices/b580.md)"
+
+[[project.card]]
+id = "8086:e20c"
+name = "Arc B570"
+tested = false
+said = "matched since 0.1.4, not run on hardware (docs/PLATFORMS.md)"
+
+[[project.card]]
+id = "8086:e211"
+name = "Arc Pro B60"
+tested = false
+said = "matched since 2026-11-13, not run on hardware (docs/PLATFORMS.md)"
+
+[[project.card]]
+id = "8086:e212"
+name = "Arc Pro B50"
+tested = false
+said = "matched since 2026-11-13, not run on hardware (docs/PLATFORMS.md)"
+
+[[project]]
+name = "NullMoth NVIDIA driver"
+repo = "nullmoth/nvidia-macos-driver"
+kind = "device"
+role = "graphics"
+stage = "experimental"
+install = "system"
+licence = "PolyForm-Noncommercial-1.0.0"
+macos = "15.5 Sequoia or later, or 26 Tahoe, x86_64"
+min_darwin = 24
+how = "installed with its own 1401 app, after macOS boots"
+source = "README.md"
+commit = "87e524ab36f12d17c04626d6cf7fc3bde1cc63e4"
+quote = "Supported cards are Turing and newer: GTX 16, RTX 20, 30, 40 and 50, TITAN RTX, Quadro RTX and the T-series."
+caveat = "Most testing is done on an RTX 5060, so other cards may have problems that haven't been found yet."
+chips = ["TU", "GA", "AD", "GB"]
+ids_from = "chips"
+
+[[project]]
+name = "AppleIGC"
+repo = "SongXiaoXi/AppleIGC"
+kind = "device"
+role = "ethernet"
+stage = "watching"
+install = "efi"
+licence = "none stated"
+archived = false
+covers = "Intel I225 and I226 2.5G Ethernet, which IntelMausi does not claim"
+release = "v1.9"
+ids_from = "kext"
+ids = ["8086:125b", "8086:125c", "8086:125d", "8086:15f2", "8086:15f3", "8086:15f8", "8086:3102"]
+
+[[project]]
+name = "AppleIGB"
+repo = "Shaneee/AppleIGB"
+kind = "device"
+role = "ethernet"
+stage = "watching"
+install = "efi"
+licence = "none stated"
+archived = true
+covers = "Intel I211 and I350 server NICs, which IntelMausi does not claim"
+release = ""
+ids_from = "kext"
+ids = []
+unreleased = true
+
+[[project]]
+name = "RealtekRTL8100"
+repo = "Mieze/RealtekRTL8100"
+kind = "device"
+role = "ethernet"
+stage = "watching"
+install = "efi"
+licence = "none stated"
+archived = true
+covers = "Realtek Fast Ethernet, the 810x parts RealtekRTL8111 does not claim"
+release = ""
+ids_from = "kext"
+ids = []
+unreleased = true
+
+[[project]]
+name = "RealtekCardReader"
+repo = "0xFireWolf/RealtekCardReader"
+kind = "device"
+role = "card reader"
+stage = "watching"
+install = "efi"
+licence = "BSD-3-Clause"
+archived = false
+covers = "Realtek SD card readers; its device table is already read into data/cardreader.toml"
+release = "v0.9.7"
+ids_from = "kext"
+ids = ["0bda:0129", "0bda:0139", "0bda:0140", "10ec:5209", "10ec:5227", "10ec:5229", "10ec:522a", "10ec:5249", "10ec:524a", "10ec:525a", "10ec:5260", "10ec:5286", "10ec:5287", "10ec:5289"]
+
+[[project]]
+name = "AirPort_RTW89"
+repo = "FranciumOS-org/AirPort_RTW89"
+kind = "device"
+role = "wifi"
+stage = "experimental"
+install = "efi"
+licence = "GPL-2.0"
+release = "v0.7.0-BETA"
+asset = "AirPort_RTW89-0.7.0.zip"
+sha256 = "dde4e5a9e2b36784cc0e2d62eb3cf60b561dd6964f0edd3ae86ef3ce128f70af"
+commit = "607a97b86ad6d5cdd10e4566a3afe0cafde46404"
+source = "README.md"
+ids_from = "kext"
+ids = ["10ec:882d", "10ec:8852", "10ec:8922", "10ec:892b", "10ec:892d", "10ec:895d", "10ec:a85a", "10ec:b520", "10ec:b851", "10ec:b852", "10ec:b85b", "10ec:c852"]
+macos = "Tested on macOS Sequoia 15 and Tahoe 26."
+min_darwin = 24
+quote = "USB versions of these cards are not supported."
+covers = "Realtek RTL8852BE/AE/CE/BTE, RTL8851BE, RTL8922AE/DE Wi-Fi"
+conflicts = ["AirportItlwm.kext", "RTLAirLink"]
+needs = "the old Wi-Fi stack (IOSkywalkFamily, IO80211FamilyLegacy, AMFIPass from OpenCore Legacy Patcher), SecureBootModel Disabled, a Kernel -> Block for IOSkywalkFamily, and -amfipassbeta on Tahoe"
+how = "its own Kext Installer edits the EFI; by hand, the README lists every step"
+
+[[project]]
+name = "RTLAirLink"
+repo = "xnpty/RTLAirLink"
+kind = "device"
+role = "wifi"
+stage = "experimental"
+install = "efi"
+licence = "GPL-2.0"
+release = "v0.2.0"
+asset = "RTLAirLink-v0.2.0-x86_64.zip"
+sha256 = "c565bb78a0f7694b8f17d1866b38c2dbb8a7488fec17706c3b64660ee4134757"
+commit = "2c31216c3fba303e43f018a12cc53ef75d8724ad"
+source = "README.md"
+ids_from = "kext"
+ids = ["10ec:882d", "10ec:8852", "10ec:8922", "10ec:892b", "10ec:892d", "10ec:895d", "10ec:a85a", "10ec:b520", "10ec:b851", "10ec:b852", "10ec:b85b", "10ec:c852"]
+macos = "Intel macOS Tahoe 26, a Realtek RTL8852BE, and a working OpenCore EFI."
+min_darwin = 25
+quote = "The First-ever native AWDL/AirDrop for Realtek RTL8852BE on Intel macOS Tahoe."
+covers = "AirDrop and AWDL on a Realtek RTL8852BE, with its own Wi-Fi driver"
+conflicts = ["AirportItlwm.kext", "AirPort_RTW89"]
+how = "its install script edits the EFI"
+
+[[project]]
+name = "BroadTek"
+repo = "FranciumOS-org/BroadTek"
+kind = "feature"
+role = "bluetooth"
+stage = "experimental"
+install = "efi"
+licence = "MIT"
+release = "v0.3.0"
+asset = "BroadTek-0.3.0.zip"
+sha256 = "598c64925c27a3ae3aba40a9df4c22966034c8327c3f6d84649d64c5eeae1a0c"
+commit = "d0cd50b9844d08c021988662a21d1d328abd9414"
+source = "README.md"
+macos = "macOS Tahoe 26.7"
+min_darwin = 25
+max_darwin = 25
+quote = "Broadcom features on Realtek and Intel Bluetooth."
+covers = "AirDrop and Handoff adverts, and Apple Watch unlock, on Realtek and Intel Bluetooth"
+requires_role = "bluetooth"
+requires_vendor = ["10ec", "8087", "0bda"]
+how = "ships inside AirPort_RTW89; also on its own as a Lilu plugin"
+
+[[project]]
+name = "IntelSpeedShiftEPP"
+repo = "xnpty/IntelSpeedShiftEPP"
+kind = "feature"
+role = "cpu"
+stage = "experimental"
+install = "efi"
+licence = "none stated"
+release = "v1.0.0"
+asset = "IntelSpeedShiftEPP-1.0.0.zip"
+sha256 = "a177aee69cc90791412e0131e5690d35d19791176290d183cc67f64f55849e73"
+commit = "d1d5427daca5ef404568de72c1820535ccc18443"
+source = "README.md"
+macos = "macOS Tahoe 26.7.1 (25G241)"
+min_darwin = 25
+quote = "The driver targets the Intel Core i5-12450HX configuration verified on macOS Tahoe 26.7.1 (25G241) with OpenCore 1.0.9."
+covers = "Speed Shift energy-performance preference on P-cores, on AC power"
+requires_cpu = ["alder-lake", "raptor-lake"]
+how = "copied into EFI/OC/Kexts and added to Kernel -> Add"
+
+[[project]]
+name = "IntelHybridCores"
+repo = "rodgod-rr/IntelHybridCores"
+kind = "feature"
+role = "cpu"
+stage = "watching"
+install = "efi"
+licence = "MIT"
+release = ""
+unreleased = true
+commit = "360863e15eae468f57eab7f6420b3be1ee40bf5d"
+source = "README.en.md"
+macos = "**macOS 26.7.2 (25G332)** and **26.7.3 (25G342)**"
+min_darwin = 25
+max_darwin = 25
+quote = "Real P-cores and E-cores on Intel macOS (Alder Lake / Raptor Lake)"
+covers = "P-core and E-core scheduling on hybrid Intel CPUs"
+requires_cpu = ["alder-lake", "raptor-lake"]
+conflicts = ["CpuTopologyRebuild.kext"]
+how = "a reference binary in the repository, no release yet"
+
+[[project]]
+name = "MeowXE3"
+repo = "cuadra8998/MeowXE3"
+kind = "device"
+role = "graphics"
+stage = "experimental"
+install = "system"
+licence = "PolyForm-Noncommercial-1.0.0"
+release = "v1.0.12"
+asset = "MeowXE3-1.0.12.zip"
+sha256 = "f94e9b2e94d0b0e79dde3c6d0d53584fccd7c638acc1f27877c77e57b7ee327d"
+commit = "fdb56f4f31e447d0990d7675807b97eac7ba22dd"
+source = "README.md"
+ids_from = "quoted"
+ids = ["8086:fd80"]
+macos = "Intel Wildcat Lake `8086:FD80`, macOS Tahoe 26.7, OpenCore 1.0.8."
+min_darwin = 25
+quote = "This kext is not guaranteed to always work and is in **ALPHA** stages."
+covers = "Intel Xe3 graphics, Panther Lake and Wildcat Lake"
+how = "its own installer, after macOS boots, plus a boot kext and boot-arg in the EFI"
+
+[[project]]
+name = "AMDRadeonRDNA4"
+repo = "RX4Darwin/AMDRadeonRDNA4.kext"
+kind = "device"
+role = "graphics"
+stage = "experimental"
+install = "efi"
+licence = "BSD-3-Clause"
+release = "v0.3.3"
+asset = "AMDRadeonRDNA4-0.3.3-RELEASE.zip"
+sha256 = "38d1eee5da08dc4522ac0ac78ddd5a1689a4cbbd047561d380088418ef416808"
+commit = "5ffdaf64b51df2c910ac7ce597892e6817d7d883"
+source = "README.md"
+ids_from = "quoted"
+ids = ["1002:7550", "1002:7551"]
+macos = "| **Tahoe 26.6.2** | **Tested**: the main test system."
+min_darwin = 24
+quote = "| Radeon RX 9070 XT | Navi 48 (gfx1201) | `1002:7550` (`0xC0`) | **Supported.** The card everything is developed and tested on. |"
+covers = "AMD Radeon RX 9070 XT, RX 9070, RX 9070 GRE and AI PRO R9700"
+requires_kext = "Lilu 1.7.1 or newer on macOS 26"
+how = "a Lilu plugin, injected by OpenCore"

@@ -53,7 +53,7 @@ or opens a report, which is how a machine is carried to another computer.
 **EFI** asks the questions and writes the EFI folder - and answers none of them
 for you. **USB stick** puts macOS and the EFI on a stick three ways - recovery,
 the whole installer with no network needed, or an installer image on a Mac -
-and marks the one the machine's network makes sensible. **Compatible Hardware** lists 772 devices across 8
+and marks the one the machine's network makes sensible. **Compatible Hardware** lists 787 devices across 8
 categories, **Kexts** the 42 that ship inside, and **About** says where every
 answer came from.
 

@@ -4,7 +4,7 @@ title: Uyumluluğu kontrol edin
 
 # Uyumluluğu kontrol edin
 
-**Compatible Hardware** paneli 8 kategoride 772 aygıtı listeler — bu deponun
+**Compatible Hardware** paneli 8 kategoride 787 aygıtı listeler — bu deponun
 bildiği her şeyi — ada, kimliğe ya da kext'e göre aranabilir şekilde. **Machine**
 paneli aynı soruyu, başında oturduğunuz bilgisayar için yanıtlar.
 
@@ -58,6 +58,27 @@ derleyici bunları bildirir:
     bildiriyor ve hiçbir ağ listelemiyor. Recovery'de root patch'lerin hiçbiri
     olmadığı için bu beklenen davranış.*
 
-Realtek tabanlı Wi-Fi kartlarının macOS sürücüsü hiç yok. Dizüstünüzde o varsa,
-kurulum sırasında Ethernet kablosu kullanmak yolun etrafından dolaşmanın yoludur
-— bkz. [USB belleği hazırlayın](usb.md).
+Realtek tabanlı Wi-Fi kartlarının bu EFI'de sürücüsü yok. Yenileri için topluluk
+sürücüleri var (aşağıda), ama deneysel; kurulumun kendisi için yine Ethernet
+kablosu yolun etrafından dolaşmanın yoludur — bkz.
+[USB belleği hazırlayın](usb.md).
+
+## Başkalarının yazdığı sürücüler
+
+r/hackintosh'ta neredeyse her hafta yeni sürücüler ve eklentiler çıkıyor:
+Realtek Wi-Fi (AirPort_RTW89), Realtek ve Intel Bluetooth'ta AirDrop ve Handoff
+(BroadTek, RTLAirLink), RX 9070 grafik (AMDRadeonRDNA4), Intel Xe3 grafik
+(MeowXE3), Intel Arc, NVIDIA Turing ve sonrası, hibrit Intel işlemciler için
+P-çekirdek ayarları.
+
+Program bunları tek bir kayıtta tutar: `data/community.toml`. Her biri için
+projenin kendisi hakkında söylediğini kendi kelimeleriyle, sürümünü ve kext'inin
+bildirdiği aygıt kimliklerini kaydeder — elle yazılmış değil, kext'ten okunmuş.
+Makinenizde bunlardan birinin sürdüğü bir aygıt varsa, Machine paneli bunu
+kehribar renkte, Apple'ın cevabının yanında ve asla onun yerine söyler;
+Compatible Hardware da onları *third-party* olarak listeler.
+
+Siz seçmedikçe hiçbiri EFI'nize girmez ve makinenizin macOS aralığı hiçbirine
+dayanmaz. Depo her hafta her projenin yeni sürümünü kontrol eder ve henüz kayıtlı
+olmayan yeni projeleri bir kişinin bakması için listeler; kayda makine tarafından
+hiçbir şey eklenmez.

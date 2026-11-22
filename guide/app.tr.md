@@ -111,7 +111,7 @@ yazmanızı ister.
 
 ### Compatible Hardware
 
-8 kategoride 772 aygıtı listeler — bu deponun bildiği her şeyi — ada, kimliğe ya
+8 kategoride 787 aygıtı listeler — bu deponun bildiği her şeyi — ada, kimliğe ya
 da kext'e göre aranabilir, kategoriye, üreticiye ve destek durumuna göre
 süzülebilir. Bir derlemenin okuduğu tabloların aynısından okunur, yani
 derleyicinin yapacağı şeyden ayrı düşemez.

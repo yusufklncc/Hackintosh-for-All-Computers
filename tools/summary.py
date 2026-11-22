@@ -25,6 +25,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import advise
 import audio
 import detect
+import community
 import gpu
 import coverage
 import inputdev
@@ -265,6 +266,13 @@ def _driver_sets():
     return {s['match'] for s in netkexts.sets() + netkexts.variant_sets()}
 
 
+def _community(role, hw):
+    """[(project, card, id)] for this machine's devices a shown community
+    driver of this role declares."""
+    ids = list(hw.get('pci_ids') or []) + list(hw.get('usb_ids') or [])
+    return [(p, c, i) for p, c, i in community.devices_for(ids) if p.get('role') == role]
+
+
 def network_rows(hw):
     index = advise.load_table()
     names = hw.get('device_names') or {}
@@ -310,6 +318,13 @@ def network_rows(hw):
                                ids=[device_id], driver=driver,
                                note='' if driver else 'the machine says what it '
                                     'is; nothing here drives it'))
+        elif _community(role, hw):
+            # nothing this EFI ships claims it, and a community driver does -
+            # said beside the absence of a kext here, never instead of it
+            for p, card, ident in _community(role, hw):
+                out.append(row(label, names.get(ident) or p.get('covers') or ident,
+                               THIRD_PARTY, community.line(p, card), ids=[ident],
+                               note=f"{p['name']}, {p['stage']}"))
         elif hw.get('system') == 'Darwin':
             # the registry named every device it has, and none of them is this
             out.append(row(label, 'none', ABSENT, 'this Mac has no such device'))
@@ -453,7 +468,18 @@ def rows(hw):
     """Every row, in the order they are worth reading."""
     out = [cpu_row(hw)] + graphics_rows(hw) + [audio_row(hw)]
     out += network_rows(hw) + [storage_row(hw), input_row(hw)]
-    return [r for r in out + peripheral_rows(hw) if r]
+    return [r for r in out + peripheral_rows(hw) + addon_rows(hw) if r]
+
+
+def addon_rows(hw):
+    """Community add-ons whose stated requirement this machine meets.
+
+    Not devices: AirDrop on a Realtek card, a P-core tweak for a hybrid CPU.
+    Each one says what it needs, and this only lists the ones whose need is
+    met here - experimental, never added unasked."""
+    return [row('Add-on', p['name'], THIRD_PARTY, community.line(p),
+                note=f"{p['name']}, {p['stage']}")
+            for p in community.features_for(hw)]
 
 
 FRAMEBUFFERS = Path('data/framebuffer.toml')

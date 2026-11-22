@@ -130,16 +130,27 @@ def devices():
                               vendor=vendor, kext=driver['kext']))
 
     graphics = ocgen.read_toml(Path('data/gpu.toml'))
-    drivers = (ocgen.read_toml(Path('data/gpudriver.toml')).get('driver', [])
-               if Path('data/gpudriver.toml').exists() else [])
+    import community
+    drivers = community.graphics()
     # cards no Apple driver runs and somebody else's does, by the id the
-    # driver itself names - the Arc rows, which the guide's table never had
+    # driver itself names - the Arc rows, which the guide's table never had -
+    # and every other device a shown community driver declares
     for d in drivers:
         for card in d.get('card', []):
             _, vendor = called(card['id'])
             out.append(_entry('Graphics', card['id'], card['name'],
-                              f"{d['name']}, {d['status']}"
+                              f"{d['name']}, {d['stage']}"
                               + ('' if card.get('tested') else ', not yet run on it'),
+                              vendor=vendor, status='third-party'))
+    category = {'graphics': 'Graphics', 'wifi': 'Wi-Fi', 'bluetooth': 'Bluetooth',
+                'ethernet': 'Ethernet'}
+    for d in community.shown():
+        if d.get('kind') != 'device' or d.get('card'):
+            continue
+        for ident in d.get('ids', []):
+            name, vendor = called(ident)
+            out.append(_entry(category.get(d['role'], d['role'].title()), ident,
+                              name or ident, f"{d['name']}, {d['stage']}",
                               vendor=vendor, status='third-party'))
     for card in graphics.get('card', []):
         # the guide's own model name, not the upstream one: nine cards share
@@ -186,7 +197,7 @@ def devices():
         status, note = family['status'], short
         if other and family['status'] != 'works':
             status = 'third-party'
-            note = f"{short}; {other['name']}, {other['status']}, {other['macos']}"
+            note = f"{short}; {other['name']}, {other['stage']}, {other['macos']}"
         for card in family['cards']:
             out.append(_entry('Graphics', ', '.join(family['chips']), card, note,
                               vendor='NVIDIA Corporation', macos=macos,

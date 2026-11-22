@@ -251,7 +251,7 @@ def nvidia_family(device):
     return None
 
 
-DRIVERS = Path('data/gpudriver.toml')
+# third-party drivers now live in the community registry, data/community.toml
 NVIDIA_PREFIX = re.compile(r'\b(G[FKMPVAB]|TU|AD|GH)\d{3}\b')
 
 
@@ -262,14 +262,14 @@ def third_party(device):
     names ids, or None when it names chip families. Nothing here is added to a
     build: the answer sits beside Apple's verdict, never in its place, because
     every one of these is experimental by its own project's account."""
+    import community
     ident = (device.get('id') or '').lower()
-    if not ident or not DRIVERS.exists():
+    if not ident:
         return None
-    rows = ocgen.read_toml(DRIVERS).get('driver', [])
-    for d in rows:
-        for card in d.get('card', []):
-            if card['id'].lower() == ident:
-                return d, card
+    rows = community.graphics()
+    got = community.by_device(ident)
+    if got and got[0].get('role') == 'graphics':
+        return got
     if ident.startswith('10de:'):
         _, name = deviceids.describe(ident)
         found = NVIDIA_PREFIX.search(name or '')
@@ -290,7 +290,7 @@ def third_party_line(device):
     tested = ''
     if card is not None:
         tested = ', tested on this card' if card.get('tested') else ', not yet run on this card'
-    return (f"{d['name']} drives it ({d['status']}{tested}) - {d['macos']}. "
+    return (f"{d['name']} drives it ({d['stage']}{tested}) - {d['macos']}. "
             f"Nothing for it goes in this EFI")
 
 
@@ -398,12 +398,14 @@ def report(devices, generation=None, cpu_name=None):
             if got:
                 d, card = got
                 lines.append(f'      but a third-party driver runs it: {d["name"]} '
-                             f'({d["status"]})')
-                lines.append(f'      {d["macos"]}; {d["url"]}')
-                if card is not None:
+                             f'({d["stage"]})')
+                lines.append(f'      {d["macos"]}; https://github.com/{d["repo"]}')
+                if card is not None and card.get('said'):
                     lines.append(f'      {card["name"]}: {card["said"]}')
                 elif d.get('caveat'):
                     lines.append(f'      "{d["caveat"]}"')
+                elif d.get('quote'):
+                    lines.append(f'      "{d["quote"]}"')
                 lines.append(f'      nothing for it goes in this EFI - {d["how"]}')
 
         # `unknown` on a card nothing here claims used to be the whole answer,

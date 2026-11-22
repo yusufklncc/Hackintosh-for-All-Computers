@@ -85,10 +85,10 @@ def _oc_range():
         return 'not measured'
 
 
-def _gpu_drivers():
+def _community():
     try:
-        import ocgen
-        return len(ocgen.read_toml(Path('data/gpudriver.toml')).get('driver', []))
+        import community
+        return len(community.projects())
     except Exception:
         return 0
 
@@ -293,13 +293,6 @@ def catalogue():
                     'nothing',
              gap='Five projects state no licence at all. The report makes that '
                  'visible; it does not resolve it.'),
-        dict(area='Drivers not shipped', kind=DERIVED, file='data/candidates.toml',
-             source='each project checked to exist, ids read from its own release',
-             tool='tools/thirdparty.py --fetch',
-             count=f'{rows_in("data/candidates.toml", "candidate")} candidates',
-             covers='what vendoring each one would add, counted from the kext',
-             gap='Not a recommendation. Two are archived with no release, and '
-                 'three state no licence.'),
         dict(area='Camera', kind=NONE, file='-',
              source='none', tool='-',
              count='bus only',
@@ -355,17 +348,20 @@ def catalogue():
         # because an area with no rows in it reports nothing, and claiming a
         # kind of evidence that produced no answers is the sort of thing this
         # page exists to prevent.
-        dict(area='Third-party GPU drivers', kind=QUOTED,
-             file='data/gpudriver.toml', source="each driver's own repository, "
-                                                 "at the commit recorded",
-             tool='tools/gpudrivers.py',
-             count=f'{_gpu_drivers()} drivers',
-             covers='cards Apple ships no driver for that somebody else runs: '
-                    'Arc on intel-gpu-macos-driver, Turing and newer on NullMoth',
-             gap='Every one is experimental by its own account, and none is '
-                 'added to an EFI here. A card the driver matches but has not '
-                 'run is said to be so; the macOS range of a machine does not '
-                 'lean on any of them.'),
+        dict(area='Community drivers', kind=QUOTED,
+             file='data/community.toml',
+             source="each project's own repository: ids from its kexts' Info.plist "
+                    "or its own table, licence as GitHub reads it, sentences at "
+                    "the commit recorded",
+             tool='tools/community.py',
+             count=f'{_community()} projects',
+             covers='drivers and add-ons Apple and this repository do not ship: '
+                    'Arc, NVIDIA Turing and newer, RDNA 4, Xe3, Realtek Wi-Fi, '
+                    'AirDrop and Handoff add-ons, CPU tweaks',
+             gap='Every one is experimental by its own account, and none is in '
+                 'an EFI unless somebody picks it. A machine\'s macOS range never '
+                 'leans on any of them. New projects are found by a weekly scan '
+                 'and recorded by a person.'),
         dict(area='The offline stick', kind=QUOTED,
              file='data/unplugged.toml',
              source="corpnewt/UnPlugged's README, at the commit recorded",

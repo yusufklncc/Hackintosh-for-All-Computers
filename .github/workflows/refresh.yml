@@ -16,6 +16,7 @@ on:
 permissions:
   contents: write
   pull-requests: write
+  issues: write
 
 jobs:
   # The Recovery tab depends on somebody else's server still behaving. Apple
@@ -59,8 +60,11 @@ jobs:
           # measured against it
           python3 tools/smbios.py --refresh
           python3 tools/thirdparty.py --refresh
-          python3 tools/thirdparty.py --fetch
-          python3 tools/gpudrivers.py --refresh || true
+          # the community registry: new releases, their hashes and the ids their
+          # kexts declare. A changed sentence is reported and left for a person.
+          python3 tools/community.py --refresh | tee /tmp/community.log || true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Anything moved?
         id: diff
@@ -71,6 +75,12 @@ jobs:
             echo
             echo '```'
             git diff --stat -- data
+            echo '```'
+            echo
+            echo "### Community drivers"
+            echo
+            echo '```'
+            cat /tmp/community.log 2>/dev/null || echo "nothing read"
             echo '```'
             echo
             echo "### Kexts against their upstream tags"
@@ -107,3 +117,31 @@ jobs:
           body-path: pr-body.md
           add-paths: data
           delete-branch: true
+
+  # Community drivers appear on r/hackintosh and GitHub faster than anybody can
+  # follow. Once a week this lists the projects the registry does not have yet,
+  # in one issue, as a checklist. It adds nothing: whether a project belongs in
+  # data/community.toml is a decision, made by adding it there.
+  discover:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: What is new, and not recorded
+        run: python3 tools/community.py --discover --digest digest.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # optional: Reddit refuses anonymous reads, so r/hackintosh is only
+          # scanned when a Reddit "script" app's id and secret are set
+          REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
+          REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
+      - name: Into the one review issue
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          title="Community drivers to review"
+          open=$(gh issue list --state open --search "\"$title\" in:title" --json number -q '.[0].number')
+          if [ -n "$open" ]; then
+            gh issue edit "$open" --body-file digest.md
+          else
+            gh issue create --title "$title" --body-file digest.md
+          fi

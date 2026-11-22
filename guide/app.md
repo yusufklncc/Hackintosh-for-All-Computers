@@ -109,7 +109,7 @@ before it starts.
 
 ### Compatible Hardware
 
-Lists 772 devices across 8 categories - everything this repository knows -
+Lists 787 devices across 8 categories - everything this repository knows -
 searchable by name, id or kext, and filterable by category, vendor and support.
 It is read out of the same tables a build reads, so it cannot drift from what
 the builder would do.

@@ -2037,8 +2037,16 @@ def the_device_catalogue():
     # what the tables hold has to survive the trip
     ids_in_table = {i.lower() for d in ocgen.read_toml(Path('data/hardware.toml'))['driver']
                     for i in d['ids'] if d['role'] in inventory.ROLE_CATEGORY}
+    # the community registry's devices come from its own kexts' Info.plist,
+    # not from a kext this EFI ships, and are listed as third-party
+    import community
+    ids_in_community = {i.lower() for p in community.shown() for i in p.get('ids', [])}
     ids_in_catalogue = {r['id'].lower() for r in rows
-                        if r['id'] and r['category'] in inventory.ROLE_CATEGORY.values()}
+                        if r['id'] and r['category'] in inventory.ROLE_CATEGORY.values()
+                        and r['status'] != 'third-party'}
+    check('the third-party rows are the community registry\'s own ids',
+          {r['id'].lower() for r in rows if r['status'] == 'third-party'
+           and r['category'] in inventory.ROLE_CATEGORY.values()} <= ids_in_community)
     check('no device the kexts claim is missing from the catalogue',
           not (ids_in_table - ids_in_catalogue),
           sorted(ids_in_table - ids_in_catalogue)[:5])
@@ -3117,6 +3125,106 @@ def a_stick_that_needs_no_network():
           all(f in pane for f in ('"--usb-offline"', '"--offline-layout"', 'Inventory.Offline')))
 
 
+def the_community_registry():
+    """Drivers and add-ons nobody here wrote: one registry, read from source.
+
+    A device's ids come from its kext's own Info.plist where the kext names
+    them, or from the project's own table where it does not; every sentence is
+    the project's, at a recorded commit; nothing in it is in an EFI unasked."""
+    import community
+    import summary
+
+    rows = community.projects()
+    by = {p['name']: p for p in rows}
+    check('the seven projects from the forum are recorded',
+          {'AirPort_RTW89', 'RTLAirLink', 'BroadTek', 'IntelSpeedShiftEPP',
+           'IntelHybridCores', 'MeowXE3', 'AMDRadeonRDNA4'} <= set(by), sorted(by))
+    check('  and the old GPU drivers and Ethernet candidates moved in with them',
+          {'intel-gpu-macos-driver', 'NullMoth NVIDIA driver', 'AppleIGC'} <= set(by)
+          and not Path('data/gpudriver.toml').exists()
+          and not Path('data/candidates.toml').exists())
+    for p in rows:
+        check(f"{p['name']} has a stage it can be in",
+              p.get('stage') in ('watching', 'experimental', 'recommended', 'vendored'))
+        if p.get('sha256'):
+            check(f"  its release is pinned by hash", re.fullmatch(r'[0-9a-f]{64}', p['sha256']))
+        if p.get('ids'):
+            check(f"  and every id it names is vendor:device",
+                  all(re.fullmatch(r'[0-9a-f]{4}:[0-9a-f]{4}', i) for i in p['ids']))
+    check('no experimental project ships in the EFI',
+          not any(p['stage'] == 'experimental' and Path('EFI/OC/Kexts', p['name'] + '.kext').exists()
+                  for p in rows))
+    check('a project with no release is only watched',
+          by['IntelHybridCores']['stage'] == 'watching')
+
+    # matching: a Realtek card finds both its drivers, an add-on its requirement
+    found = community.devices_for(['10ec:b852'])
+    check('an RTL8852BE finds AirPort_RTW89 and RTLAirLink, both',
+          {p['name'] for p, _, _ in found} == {'AirPort_RTW89', 'RTLAirLink'}, found)
+    check('a card nothing names finds nothing', community.devices_for(['10ec:8168']) == [])
+    hybrid = community.features_for({'generation': 'alder-lake'})
+    check('an Alder Lake machine is told about the CPU add-on that names it',
+          'IntelSpeedShiftEPP' in [p['name'] for p in hybrid]
+          and 'IntelHybridCores' not in [p['name'] for p in hybrid])
+    check('  and a Kaby Lake one is not', community.features_for({'generation': 'kaby-lake'}) == [])
+    check('Realtek Bluetooth finds BroadTek',
+          'BroadTek' in [p['name'] for p in community.features_for({'usb_ids': ['0bda:4853']})])
+
+    # the Machine pane: beside the absence of a kext here, never instead of it
+    import detect
+    e570, _ = detect.read_report('tools/fixtures/thinkpad-e570.json')
+    realtek = dict(e570, pci_ids=[i for i in e570['pci_ids'] if i != '14e4:43a3'] + ['10ec:b852'])
+    wifi = [r for r in summary.network_rows(realtek) if r['part'] == 'Wi-Fi']
+    check('a Realtek Wi-Fi card reads as a third-party driver, twice over',
+          [r['verdict'] for r in wifi] == [summary.THIRD_PARTY] * 2, wifi)
+    check('  and says it is offered, never added unasked',
+          all('never added unasked' in r['detail'] for r in wifi))
+    check("  and the macOS range does not lean on it",
+          summary.macos_range(realtek) == summary.macos_range(dict(realtek, pci_ids=[
+              i for i in realtek['pci_ids'] if i != '10ec:b852'])))
+
+    # keeping it current: only derived fields are written, a sentence never
+    import json as _json
+    p = dict(by['AMDRadeonRDNA4'])
+    def get(url, accept=None):
+        if url.endswith('/commits/HEAD'):
+            return _json.dumps({'sha': 'a' * 40}).encode()
+        if 'releases' in url:
+            return _json.dumps([{'tag_name': 'v0.4.0', 'assets': []}]).encode()
+        if 'api.github.com' in url:
+            return _json.dumps({'license': {'spdx_id': 'BSD-3-Clause'}}).encode()
+        return p['quote'].encode() + b' ' + p['macos'].encode()
+    rows2, changed, left = community.refresh([p], get=get, say=lambda *_: None)
+    check('a new release is recorded', rows2[0]['release'] == 'v0.4.0' and not left, left)
+    def moved(url, accept=None):
+        return b'something else' if 'raw.githubusercontent' in url else get(url)
+    rows3, changed, left = community.refresh([dict(by['AMDRadeonRDNA4'])], get=moved,
+                                             say=lambda *_: None)
+    check('  and a changed sentence holds everything back for a person',
+          left and rows3[0]['release'] == by['AMDRadeonRDNA4']['release'], left)
+    check('a vendor-wide mask is not read as an id list',
+          community.kext_ids.__doc__ and 'ffff' in Path('tools/community.py').read_text())
+
+    # discovery lists, and decides nothing
+    def search(url, accept=None):
+        return _json.dumps({'items': [
+            {'full_name': 'someone/NewWiFi', 'name': 'NewWiFi', 'fork': False,
+             'description': 'MediaTek Wi-Fi kext for macOS'},
+            {'full_name': 'someone/Laptop-EFI', 'name': 'Laptop-EFI', 'fork': False,
+             'description': 'OpenCore EFI for a ThinkPad'},
+            {'full_name': 'FranciumOS-org/AirPort_RTW89', 'name': 'AirPort_RTW89',
+             'fork': False, 'description': 'RTW89 Realtek WiFi Card support kext'}]}).encode()
+    found = community.discover(get=search)
+    check('discovery finds a new driver', [r for r, _, _ in found] == ['someone/NewWiFi'], found)
+    check('  and skips EFI folders and what is already recorded', len(found) == 1)
+    body = community.digest(found)
+    check('  into a checklist a person ticks', '- [ ] [someone/NewWiFi]' in body)
+    flow = Path('.github/workflows/refresh.yml').read_text(encoding='utf-8')
+    check('the weekly job writes one review issue and adds nothing',
+          'community.py --discover --digest' in flow and 'Community drivers to review' in flow
+          and 'git commit' not in flow.split('discover:')[1])
+
+
 def cards_somebody_else_drives():
     """An Arc or a Turing-and-newer GeForce: no Apple driver, but a real one.
 
@@ -3126,20 +3234,20 @@ def cards_somebody_else_drives():
     of those is this repository's own author's project: the two were telling
     the same person opposite things about the same card.
 
-    Quoted, per driver, at a recorded commit; tools/gpudrivers.py notices when
-    either side moves."""
+    Quoted, per driver, at a recorded commit, in data/community.toml now;
+    tools/community.py notices when either side moves."""
     import gpu
     import summary
 
-    table = ocgen.read_toml('data/gpudriver.toml')
-    drivers = {d['name']: d for d in table['driver']}
-    check('both drivers are recorded', set(drivers) == {
-        'intel-gpu-macos-driver', 'NullMoth NVIDIA driver'}, sorted(drivers))
-    for d in table['driver']:
+    import community
+    drivers = {d['name']: d for d in community.graphics()}
+    check('both drivers are recorded', {
+        'intel-gpu-macos-driver', 'NullMoth NVIDIA driver'} <= set(drivers), sorted(drivers))
+    for d in (drivers['intel-gpu-macos-driver'], drivers['NullMoth NVIDIA driver']):
         check(f"{d['name']} is pinned to a commit",
               re.fullmatch(r'[0-9a-f]{40}', d['commit']), d['commit'])
         check(f"  and called experimental, as it calls itself",
-              d['status'] == 'experimental')
+              d['stage'] == 'experimental')
         check(f"  and says how it is installed, since this EFI does not",
               d.get('how'))
 
@@ -3193,7 +3301,7 @@ def cards_somebody_else_drives():
     import inventory
     listed = [r for r in inventory.devices()['devices'] if r['status'] == 'third-party']
     check('the four Arc cards are listed now', sum(1 for r in listed
-          if r['id'].startswith('8086:')) == 4)
+          if r['id'] in ('8086:e20b', '8086:e20c', '8086:e211', '8086:e212')) == 4)
     check('and Turing-and-newer GeForce rows are not just "unsupported"',
           any(r['name'] == 'RTX 4090' for r in listed))
 
@@ -3205,23 +3313,26 @@ def cards_somebody_else_drives():
           summary.macos_range(with_arc) == summary.macos_range(e570))
 
     # drift is caught, and a card is never written by machine
-    import gpudrivers
     import json as _json
-    def fetch(url):
+    arc_row = drivers['intel-gpu-macos-driver']
+    def get(url, accept=None):
+        if url.endswith('/commits/HEAD'):
+            return _json.dumps({'sha': 'f' * 40}).encode()
         if 'efi-rules' in url:
             return _json.dumps({'cards': {'vendor_id': '8086', 'device_ids':
-                                          ['e20b', 'e20c', 'e211', 'e212', 'e223']}})
-        return 'Supported cards are some of them.'
-    drift = gpudrivers.check(fetch=fetch, newest=lambda _r: 'f' * 40)
-    said = [w for _, w, _, _ in drift]
+                                          ['e20b', 'e20c', 'e211', 'e212', 'e223']}}).encode()
+        if 'api.github.com' in url:
+            return _json.dumps({'license': {'spdx_id': 'MIT'}}).encode()
+        return b'Supported cards are some of them.'
+    said = [w for w, _ in community.check(arc_row, get=get)]
     check('a newly matched Arc id is noticed', 'now matches 8086:e223' in said, said)
+    nm_said = [w for w, u in community.check(drivers['NullMoth NVIDIA driver'], get=get)]
     check('and so is a sentence that changed upstream',
-          any('quoted sentence' in w for w in said), said)
-    refresher = Path('tools/gpudrivers.py').read_text(encoding='utf-8')
-    check('neither is written by machine', 'left for a person' in refresher
-          and '[[driver.card]]\\nid' not in refresher)
+          any('quote sentence' in w for w in nm_said), nm_said)
+    rows, changed, left = community.refresh([dict(arc_row)], get=get, say=lambda *_: None)
+    check('neither is written by machine', left and rows[0]['card'] == arc_row['card'], left)
     flow = Path('.github/workflows/refresh.yml').read_text(encoding='utf-8')
-    check('and the weekly refresh runs it', 'tools/gpudrivers.py' in flow)
+    check('and the weekly refresh runs it', 'tools/community.py --refresh' in flow)
 
 
 def what_it_says_about_amd_integrated():
@@ -4469,6 +4580,7 @@ if __name__ == '__main__':
                     whether_recovery_can_land, a_mark_for_every_macos,
                     what_it_says_about_amd_integrated,
                     cards_somebody_else_drives,
+                    the_community_registry,
                     en0_and_iservices,
                     haswell_cursor_patch,
                     a_stick_that_needs_no_network,

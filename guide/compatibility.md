@@ -4,7 +4,7 @@ title: Check compatibility
 
 # Check compatibility
 
-The **Compatible Hardware** pane lists 772 devices across 8 categories -
+The **Compatible Hardware** pane lists 787 devices across 8 categories -
 everything this repository knows - searchable by name, id or kext. The
 **Machine** pane answers the same question about the computer you are sitting
 at.
@@ -58,6 +58,26 @@ reports them:
     being connected, and lists no networks. A recovery has none of the root
     patches, so this is expected.*
 
-Realtek-based Wi-Fi cards have no macOS driver at all. If that is what your
-laptop has, an Ethernet cable during the install is the way around it - see
+Realtek-based Wi-Fi cards have no driver in this EFI. Community drivers for
+the newer ones exist (below), but they are experimental; for the install itself
+an Ethernet cable is still the way around it - see
 [Make the USB stick](usb.md).
+
+## Drivers somebody else is writing
+
+New drivers and add-ons appear on r/hackintosh almost every week: Realtek Wi-Fi
+(AirPort_RTW89), AirDrop and Handoff on Realtek and Intel Bluetooth (BroadTek,
+RTLAirLink), RX 9070 graphics (AMDRadeonRDNA4), Intel Xe3 graphics (MeowXE3),
+Intel Arc, NVIDIA Turing and newer, P-core tweaks for hybrid Intel CPUs.
+
+The program keeps them in one registry, `data/community.toml`. For each one it
+records what the project says about itself, in its own words, the release, and
+the device ids its kext declares - read from the kext, not typed in. When your
+machine has a device one of them drives, the Machine pane says so in amber,
+beside Apple's answer and never instead of it, and Compatible Hardware lists
+them as *third-party*.
+
+None of them goes into your EFI unless you pick it, and your machine's macOS
+range never leans on one. Once a week the repository checks each project for
+new releases, and lists new projects it has not recorded yet for a person to
+look at; nothing is added to the registry by machine.

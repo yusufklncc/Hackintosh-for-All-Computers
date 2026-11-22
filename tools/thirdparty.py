@@ -9,7 +9,7 @@ nothing about a binary somebody else compiled. `--refresh` reads each project's
 own licence from GitHub into vendor/licences.toml, so the answer is recorded
 rather than assumed.
 
-**What we do not ship.** data/candidates.toml lists driver projects for hardware
+**What we do not ship.** data/community.toml lists driver projects for hardware
 this repository has no answer for, each one checked to exist and each with the
 licence that would decide whether it could be vendored. `--fetch` downloads each
 one's latest release and counts the devices it would add, using the same reader
@@ -22,25 +22,20 @@ estimate.
     python3 tools/thirdparty.py --fetch         # count what a candidate adds (network)
 """
 import argparse
-import io
 import json
 import os
 import sys
-import tempfile
 import urllib.request
-import zipfile
 from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import advise
 import detect
-import hwtable
 import ocgen
 import ui
 
 LOCK = Path('vendor/kexts.lock')
 LICENCES = Path('vendor/licences.toml')
-CANDIDATES = Path('data/candidates.toml')
 
 BOLD, DIM, GREEN, YELLOW, RED, RESET = ui.colours('bold', 'dim', 'green', 'yellow', 'red', 'reset')
 
@@ -104,66 +99,15 @@ def refresh():
 
 
 def candidates():
-    if not CANDIDATES.exists():
-        return []
-    return ocgen.read_toml(CANDIDATES).get('candidate', [])
-
-
-def fetch_ids(repo):
-    """Device ids in a project's latest release, read from the kext itself."""
-    with urllib.request.urlopen(
-            f'https://api.github.com/repos/{repo}/releases/latest', timeout=30) as r:
-        release = json.load(r)
-    assets = [a for a in release['assets'] if a['name'].lower().endswith('.zip')]
-    prefer = [a for a in assets if 'debug' not in a['name'].lower()] or assets
-    if not prefer:
-        return release.get('tag_name', ''), set()
-    with urllib.request.urlopen(prefer[0]['browser_download_url'], timeout=120) as r:
-        blob = r.read()
-    with tempfile.TemporaryDirectory() as tmp:
-        with zipfile.ZipFile(io.BytesIO(blob)) as z:
-            z.extractall(tmp)
-        ids = set()
-        for info in Path(tmp).rglob('Info.plist'):
-            kext = info.parent.parent
-            if not kext.name.endswith('.kext'):
-                continue
-            import plistlib
-            with open(info, 'rb') as fh:
-                plist = plistlib.load(fh)
-            for p in (plist.get('IOKitPersonalities') or {}).values():
-                ids |= hwtable.pci_ids(p.get('IOPCIPrimaryMatch', ''))
-                ids |= hwtable.pci_ids(p.get('IOPCIMatch', ''))
-                ids |= hwtable.name_ids(p.get('IONameMatch'))
-                v, d = p.get('idVendor'), p.get('idProduct')
-                if isinstance(v, int) and isinstance(d, int):
-                    ids.add(f'{v:04x}:{d:04x}')
-    return release.get('tag_name', ''), ids
+    """Driver projects recorded and not shipped - from the community registry."""
+    import community
+    return community.candidates()
 
 
 def fetch_candidates():
-    rows = candidates()
-    for c in rows:
-        try:
-            tag, ids = fetch_ids(c['repo'])
-        except urllib.error.HTTPError as exc:
-            if exc.code != 404:
-                raise
-            # an archived project often has source and no release. Recording
-            # that is more use than an empty row that looks like a fetch nobody
-            # ran: it says the kext would have to be built to be vendored.
-            c['release'] = ''
-            c['ids'] = []
-            c['unreleased'] = True
-            print(f'  {c["name"]:24s} no release published')
-            continue
-        c['release'] = tag
-        c['ids'] = sorted(ids)
-        c.pop('unreleased', None)
-        print(f'  {c["name"]:24s} {tag:12s} {len(ids)} device ids')
-    ocgen.write_toml(CANDIDATES, {'candidate': rows},
-                     Path(CANDIDATES).read_text().split('[[candidate]]')[0].rstrip('\n'))
-    return 0
+    """Re-read every recorded project from upstream. The registry's own job now."""
+    import community
+    return community.main(['--refresh'])
 
 
 def vendored_tools():

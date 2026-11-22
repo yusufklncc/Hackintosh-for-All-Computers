@@ -22,7 +22,7 @@ a = Analysis(
     hiddenimports=['acpi', 'advise', 'audio', 'build', 'detect', 'gpu', 'igpu',
                    'coverage', 'deviceids', 'inputdev', 'inventory', 'itlwm', 'mactable', 'netkexts', 'ocgen', 'oclptable', 'provenance',
                    'recovery', 'summary', 'thirdparty', 'ui', 'usbmap',
-                   'fullinstaller', 'offline', 'unplugged', 'stick']
+                   'fullinstaller', 'offline', 'unplugged', 'stick', 'community']
                   # SSDTTime, macrecovery and gibMacOS are loaded at runtime with
                   # importlib, out of the vendored tree. PyInstaller never sees
                   # those imports, so the standard library they use has to be
