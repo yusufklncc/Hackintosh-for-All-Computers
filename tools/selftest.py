@@ -1847,6 +1847,18 @@ def genuine_macs():
         check('an Intel Mac Apple stopped at Tahoe is told so',
               made['to'] and made['to']['name'] == 'Tahoe', made)
     check('and its served lines are a separate fact', made['serving'], made)
+    shown = summary.audio_row({'hda_ids': ['8086:281e']})
+    check('an Intel codec alone is the display outputs\' audio, not unsupported sound',
+          'HDMI' in str(shown) and summary.UNSUPPORTED not in shown.values(), shown)
+    shown = summary.audio_row({'hda_ids': ['8086:281e', '10ec:0897']})
+    check('  and beside a Realtek one, the Realtek one is the machine\'s audio',
+          'ALC897' in str(shown), shown)
+    made = summary.genuine_mac({'system': 'Darwin', 'board_id': 'J314sAP'})
+    check('an Apple silicon Mac, in no recovery list, has no ceiling rather than one named None',
+          made['listed'] and made['to'] is None and not made['current'] and made['serving'], made)
+    view = Path('gui/Views/MachineView.axaml.cs').read_text(encoding='utf-8')
+    check('  and the Machine pane says it is not read, rather than "Up to" nothing',
+          'var unread = !m.Mac.Current && last is null;' in view and '"Not read here"' in view)
     check('a machine with no board is not a Mac',
           summary.genuine_mac({}) is None)
     check('and neither is a PC that happens to name its baseboard',

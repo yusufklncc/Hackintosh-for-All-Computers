@@ -95,10 +95,13 @@
           <ItemsControl Name="Bounds">
             <ItemsControl.ItemTemplate>
               <DataTemplate x:DataType="v:BoundView">
-                <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,6">
+                <!-- the value wraps on the right rather than running into the
+                     label: a list of five macOS lines is wider than a range -->
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="14" Margin="0,0,0,6">
                   <TextBlock Grid.Column="0" Text="{Binding What}" FontSize="13"
                              Foreground="{DynamicResource Ink}" />
-                  <TextBlock Grid.Column="1" Classes="mono" Text="{Binding Span}" />
+                  <TextBlock Grid.Column="1" Classes="mono" Text="{Binding Span}"
+                             TextWrapping="Wrap" TextAlignment="Right" />
                 </Grid>
               </DataTemplate>
             </ItemsControl.ItemTemplate>

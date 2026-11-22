@@ -174,6 +174,19 @@ def audio_row(hw):
                    driver='macOS audio')
     if not ids:
         return row('Audio', 'no codec readable', UNKNOWN, '')
+    # An HD audio codec from Intel is the sound of the graphics outputs, HDMI
+    # and DisplayPort - Intel makes no other. It is not the speakers or the
+    # headphone jack, and AppleALC has nothing for it, so "no layout names
+    # this codec" in red read as "this machine has no sound" on a Z790 whose
+    # board audio is a different device altogether.
+    display = [i for i in ids if i.lower().startswith('8086:')]
+    ids = [i for i in ids if i not in display] or ids
+    if display and ids == display:
+        return row('Audio', 'Intel HDMI / DisplayPort audio', UNKNOWN,
+                   'the sound of the graphics outputs, not the speakers or the '
+                   'headphone jack; no other HD audio codec was seen, and on some '
+                   'boards that audio is a USB device instead',
+                   ids=display)
     found = audio.find(ids)
     if not found:
         return row('Audio', ', '.join(ids), UNSUPPORTED,
@@ -815,7 +828,9 @@ def genuine_mac(hw):
     if offered and offered != 'latest':
         ceiling = (offered.rsplit('.', 1)[0] if offered.startswith('10.')
                    else offered.split('.')[0])
-    return {'board': board, 'to': _by_version(ceiling), 'listed': True,
+    # no ceiling is None, not a release named "None": an Apple silicon board is
+    # in Apple's update metadata and never in the recovery board list
+    return {'board': board, 'to': _by_version(ceiling) if ceiling else None, 'listed': True,
             'current': offered == 'latest', 'serving': lines}
 
 

@@ -21,7 +21,7 @@ public partial class MainWindow : Window
         };
         _ = Standing();
         UpdateNote.Click += async (_, _) => { ToAbout.IsChecked = true; await Swap(); };
-        AboutPane.UpdateFound += () => UpdateNote.IsVisible = true;
+        AboutPane.UpdateFound += found => UpdateNote.IsVisible = found;
         // once, at the start, unless switched off or drawing a screenshot: a
         // render pass asking GitHub would make every build depend on it
         if (Program.RenderTo is null && Updater.Settings.CheckAtStart)

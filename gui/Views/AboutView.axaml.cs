@@ -79,8 +79,9 @@ public partial class AboutView : UserControl
 
     UpdateInfo? _newer;
 
-    /// <summary>Raised when a newer build is found, for the sidebar.</summary>
-    public event Action? UpdateFound;
+    /// <summary>Raised after every check, true when a newer build is out, so
+    /// the sidebar shows what the last check said and nothing older.</summary>
+    public event Action<bool>? UpdateFound;
 
     /// <summary>Ask the release whether it has a newer build. Quiet is the
     /// check at start: it says nothing unless there is something to say.</summary>
@@ -93,7 +94,7 @@ public partial class AboutView : UserControl
         if (newer is not null || !quiet) UpdateSaid.Text = newer is null ? said
             : $"{said} What changed:\n" + string.Join("\n", newer.Summary.Take(8).Select(s => "  " + s));
         InstallUpdate.IsVisible = newer is not null && Updater.Plan().asset is not null;
-        if (newer is not null) UpdateFound?.Invoke();
+        UpdateFound?.Invoke(newer is not null);
     }
 
     async Task Install()

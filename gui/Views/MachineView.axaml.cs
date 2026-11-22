@@ -160,17 +160,24 @@ public partial class MachineView : UserControl
         if (m.Mac is { Listed: true })
         {
             var last = m.Mac.To;
+            // the board list recovery images are fetched by names Intel Macs
+            // only, so an Apple silicon Mac has no ceiling here at all - only
+            // Apple's update metadata, which is a different fact
+            var unread = !m.Mac.Current && last is null;
             Window.Text = m.Mac.Current ? "Whatever Apple is serving now"
-                                        : $"Up to {last}";
+                        : unread ? "Not read here"
+                        : $"Up to {last}";
             WindowWhy.Text = m.Mac.Current
                 ? $"{m.Mac.Board} is one of the boards Apple keeps current, so "
                 + "this Mac is offered the newest macOS there is."
+                : unread
+                ? $"{m.Mac.Board} is not in the board list recovery images are fetched "
+                + "by, which names Intel Macs only, so how far it goes is not read here."
                 : $"{m.Mac.Board} is offered up to {last}. There is no floor "
                 + "here: nothing this reads knows the oldest macOS a Mac runs.";
-            var bounds = new List<BoundView>
-            {
-                new(new Bound { What = "Apple, for " + m.Mac.Board, To = m.Mac.To }),
-            };
+            var bounds = new List<BoundView>();
+            if (!unread)
+                bounds.Add(new(new Bound { What = "Apple, for " + m.Mac.Board, To = m.Mac.To }));
             // a different fact, and it used to be read as the one above:
             // which lines Apple still publishes for it is about updates
             if (m.Mac.Serving.Count > 0)
