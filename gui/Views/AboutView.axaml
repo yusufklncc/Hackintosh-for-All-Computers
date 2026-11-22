@@ -16,6 +16,27 @@
                    Foreground="{DynamicResource Faint}" />
       </StackPanel>
 
+      <!-- Updates: what this build is, and whether the release has a newer one -->
+      <Border Classes="panel" MaxWidth="740" HorizontalAlignment="Left">
+        <StackPanel Spacing="10">
+          <TextBlock Classes="eyebrow" Text="UPDATES" />
+          <TextBlock Name="BuildLine" FontSize="13" TextWrapping="Wrap"
+                     Foreground="{DynamicResource Ink}" />
+          <CheckBox Name="CheckAtStart" Content="Check for a newer build when the program opens" />
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <Button Name="CheckNow" Content="Check now" />
+            <Button Name="InstallUpdate" Content="Install it" Classes="accent" IsVisible="False" />
+            <Button Name="OpenReleases" Content="Release page" />
+          </StackPanel>
+          <v:Busy Name="UpdateBusy" IsVisible="False" />
+          <TextBlock Name="UpdateSaid" FontSize="12.5" TextWrapping="Wrap"
+                     Foreground="{DynamicResource Muted}" />
+          <ProgressBar Name="UpdateBar" Height="6" CornerRadius="3" IsVisible="False"
+                       Minimum="0" Maximum="100" Background="{DynamicResource Chrome}"
+                       Foreground="{DynamicResource Accent}" />
+        </StackPanel>
+      </Border>
+
       <ItemsControl Name="Counts">
         <ItemsControl.ItemsPanel>
           <ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate>

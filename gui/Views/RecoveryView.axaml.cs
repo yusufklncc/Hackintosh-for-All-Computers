@@ -29,7 +29,7 @@ public partial class RecoveryView : UserControl
         new(@"(\d+(?:\.\d+)?)\s*/\s*(\d+(?:\.\d+)?)\s*MB",
             System.Text.RegularExpressions.RegexOptions.Compiled);
 
-    string _to = AppContext.BaseDirectory;
+    string _to = Places.Work;
     string _folder = "com.apple.recovery.boot";
     Task? _read;
 

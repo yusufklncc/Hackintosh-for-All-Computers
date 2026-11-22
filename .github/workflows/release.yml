@@ -78,6 +78,15 @@ jobs:
             || { echo "::error::docs/releases/$tag.md is missing"; exit 1; }
           cat "docs/releases/$tag.md" docs/releases/downloads.md > notes.md
 
+      # For the window's updater: which commit these were built from, when,
+      # and the hash of every file. It installs nothing that is not listed.
+      - name: What the updater reads
+        run: >
+          python3 tools/updateinfo.py
+          --tag "${{ github.event.inputs.tag || github.ref_name }}"
+          --commit "${{ github.sha }}" --dist dist
+          --notes "docs/releases/${{ github.event.inputs.tag || github.ref_name }}.md"
+
       - name: Publish
         uses: softprops/action-gh-release@v3
         with:
@@ -86,4 +95,5 @@ jobs:
             dist/*.zip
             dist/*.AppImage
             dist/HackintoshEFIBuilder-console-win-x64.zip
+            dist/update.json
           body_path: notes.md

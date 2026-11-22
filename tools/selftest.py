@@ -3407,6 +3407,56 @@ def community_drivers_into_an_efi():
           "[('no', 'No, leave it out'), ('yes'" in src)
 
 
+def the_window_updates_itself():
+    """A newer build of the release, found, checked and swapped in.
+
+    The release keeps its number while its packages are rebuilt, so the window
+    compares commits, and installs nothing whose SHA-256 update.json does not
+    list. The whole loop was run against a local server on a real .app; here
+    is what keeps it honest without one."""
+    import hashlib
+    import updateinfo
+    with tempfile.TemporaryDirectory() as tmp:
+        dist = Path(tmp)
+        (dist / 'HackintoshEFIBuilder-win-x64.zip').write_bytes(b'zip')
+        (dist / 'update.json').write_text('{}')
+        notes = dist / 'notes.md'
+        notes.write_text('### A\n- **First** thing. More about it.\n- A [link](http://x) here.\n')
+        doc = updateinfo.build('v1.0.8', 'a' * 40, dist, notes)
+        check('update.json names the commit and every file, by hash',
+              doc['commit'] == 'a' * 40
+              and [a['name'] for a in doc['assets']] == ['HackintoshEFIBuilder-win-x64.zip', 'notes.md']
+              and doc['assets'][0]['sha256'] == hashlib.sha256(b'zip').hexdigest())
+        check('  and says what changed in plain words',
+              doc['summary'] == ['First thing.', 'A link here.'], doc['summary'])
+    flow = Path('.github/workflows/release.yml').read_text(encoding='utf-8')
+    check('every release carries it', 'tools/updateinfo.py' in flow and 'dist/update.json' in flow)
+    gui = Path('.github/workflows/gui.yml').read_text(encoding='utf-8')
+    check('and CI proves each package knows the commit it was built from',
+          '--build-info' in gui and 'commit ${{ github.sha }}' in gui)
+
+    up = Path('gui/Engine/Updater.cs').read_text(encoding='utf-8')
+    check('a different commit alone is not newer: a later build is never offered an older one',
+          'released > built.Value' in up)
+    check('nothing is installed unless its hash is the one listed',
+          'SHA256.HashDataAsync' in up and 'nothing was changed' in up)
+    check('only the two programs are replaced, never what a person made beside them',
+          'Remove-Item "$target\\EFIBuilderEngine"' in up and '/MIR' not in up
+          and 'rm -rf "{target}/EFIBuilderEngine"' in up)
+    check('a bundle is unpacked with ditto, which keeps its links and signature',
+          '"ditto", new[] { "-x", "-k"' in up)
+    check('somewhere it cannot write, it sends the person to the release page instead',
+          'Writable(target)' in up)
+    win = Path('gui/Views/MainWindow.axaml.cs').read_text(encoding='utf-8')
+    check('the check at start can be switched off, and a screenshot pass never makes it',
+          'Updater.Settings.CheckAtStart' in win and 'Program.RenderTo is null' in win)
+    places = Path('gui/Engine/Places.cs').read_text(encoding='utf-8')
+    views = ''.join(Path(f'gui/Views/{v}.axaml.cs').read_text(encoding='utf-8')
+                    for v in ('BuilderView', 'RecoveryView', 'StickView', 'ReportView'))
+    check('an EFI is never written inside the .app an update replaces',
+          '"Hackintosh EFI Builder"' in places and 'AppContext.BaseDirectory' not in views)
+
+
 def cards_somebody_else_drives():
     """An Arc or a Turing-and-newer GeForce: no Apple driver, but a real one.
 
@@ -4766,6 +4816,7 @@ if __name__ == '__main__':
                     cards_somebody_else_drives,
                     the_community_registry,
                     community_drivers_into_an_efi,
+                    the_window_updates_itself,
                     en0_and_iservices,
                     haswell_cursor_patch,
                     a_stick_that_needs_no_network,

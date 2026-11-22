@@ -35,6 +35,11 @@
         </StackPanel>
 
         <StackPanel DockPanel.Dock="Bottom" Margin="10,12,10,2">
+          <!-- only when a newer build of the release is out; it opens the
+               About pane, where installing it is one button -->
+          <Button Name="UpdateNote" IsVisible="False" Classes="accent"
+                  HorizontalAlignment="Stretch" Margin="0,0,0,10"
+                  Content="Update available" />
           <Border Height="1" Background="{DynamicResource Line}" Margin="0,0,0,10" />
           <TextBlock Name="StandingFacts" FontSize="11" LineHeight="17"
                      FontFamily="{DynamicResource Mono}"

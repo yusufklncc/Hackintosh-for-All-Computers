@@ -23,8 +23,8 @@ public partial class StickView : UserControl
     // copying 900 MB to a slow stick is not a hang
     static readonly TimeSpan Bound = TimeSpan.FromMinutes(30);
 
-    string _efi = Path.Combine(AppContext.BaseDirectory, "EFI");
-    string _recovery = AppContext.BaseDirectory;
+    string _efi = Path.Combine(Places.Work, "EFI");
+    string _recovery = Places.Work;
     string _folder = "com.apple.recovery.boot";
     bool _erasable;
     Task? _loaded;

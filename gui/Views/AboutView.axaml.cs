@@ -60,7 +60,73 @@ public partial class AboutView : UserControl
 {
     Task? _loaded;
 
-    public AboutView() => InitializeComponent();
+    public AboutView()
+    {
+        InitializeComponent();
+        BuildLine.Text = Updater.Describe();
+        CheckAtStart.IsChecked = Updater.Settings.CheckAtStart;
+        CheckAtStart.IsCheckedChanged += (_, _) =>
+            Updater.Settings = new UpdateSettings { CheckAtStart = CheckAtStart.IsChecked == true };
+        CheckNow.Click += async (_, _) => await CheckForUpdate(quiet: false);
+        InstallUpdate.Click += async (_, _) => await Install();
+        OpenReleases.Click += async (_, _) =>
+        {
+            if (Avalonia.Controls.TopLevel.GetTopLevel(this) is { } top)
+                try { await top.Launcher.LaunchUriAsync(new Uri(Updater.ReleasePage)); }
+                catch (Exception) { }
+        };
+    }
+
+    UpdateInfo? _newer;
+
+    /// <summary>Raised when a newer build is found, for the sidebar.</summary>
+    public event Action? UpdateFound;
+
+    /// <summary>Ask the release whether it has a newer build. Quiet is the
+    /// check at start: it says nothing unless there is something to say.</summary>
+    public async Task CheckForUpdate(bool quiet)
+    {
+        if (!quiet) UpdateBusy.Say("Asking GitHub for the newest build…");
+        var (newer, said) = await Updater.Check();
+        UpdateBusy.Say(null);
+        _newer = newer;
+        if (newer is not null || !quiet) UpdateSaid.Text = newer is null ? said
+            : $"{said} What changed:\n" + string.Join("\n", newer.Summary.Take(8).Select(s => "  " + s));
+        InstallUpdate.IsVisible = newer is not null && Updater.Plan().asset is not null;
+        if (newer is not null) UpdateFound?.Invoke();
+    }
+
+    async Task Install()
+    {
+        if (_newer is null) return;
+        InstallUpdate.IsEnabled = CheckNow.IsEnabled = false;
+        UpdateBar.IsVisible = true;
+        UpdateBusy.Say($"Downloading {_newer.Tag}…");
+        var (script, complaint) = await Updater.Stage(_newer, (done, total) =>
+            Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+            {
+                UpdateBar.Value = total > 0 ? done * 100.0 / total : 0;
+                UpdateSaid.Text = $"{done / 1e6:0.0} of {total / 1e6:0.0} MB";
+            }));
+        UpdateBusy.Say(null);
+        UpdateBar.IsVisible = false;
+        InstallUpdate.IsEnabled = CheckNow.IsEnabled = true;
+        if (script is null)
+        {
+            UpdateSaid.Text = complaint;
+            return;
+        }
+        UpdateSaid.Text = "Checked against the release. The program closes, swaps itself and opens again.";
+        if (!Updater.Launch(script))
+        {
+            UpdateSaid.Text = "The swap could not be started. The release page has the new package.";
+            return;
+        }
+        await Task.Delay(600);
+        if (Avalonia.Application.Current?.ApplicationLifetime is
+            Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime desktop)
+            desktop.Shutdown();
+    }
 
     // One read, and everybody waits for the same one. A bool guard let the
     // second caller past while the first was still awaiting: the nav's own

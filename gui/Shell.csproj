@@ -28,6 +28,12 @@
          line that needs to draw anything. -->
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
   </PropertyGroup>
+  <!-- When this build was made, for the updater: a release built later than
+       this is newer even when the two commits cannot be ordered from here.
+       The commit itself goes in InformationalVersion as SourceRevisionId. -->
+  <ItemGroup>
+    <AssemblyMetadata Include="BuildTime" Value="$([System.DateTime]::UtcNow.ToString('o'))" />
+  </ItemGroup>
   <ItemGroup>
     <AvaloniaResource Include="Assets/Fonts/*.ttf" />
     <AvaloniaResource Include="Assets/Icon/png/*.png" />

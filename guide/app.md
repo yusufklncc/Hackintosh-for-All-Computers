@@ -136,4 +136,18 @@ Names where every answer comes from: which tool fetched each table, whether it
 was derived, measured, quoted or reported - and the areas with no source at all,
 said plainly instead of guessed.
 
+It is also where the program keeps itself current. When it opens it asks the
+release once whether a newer build is out - a release keeps its number while
+its packages are rebuilt, so it compares the commit each was built from - and
+if one is, an **Update available** button appears in the sidebar. **Install
+it** downloads the package for your system, refuses it unless its SHA-256 is the
+one the release lists, closes the program, swaps in the new one and opens it
+again. Only the program is replaced: an EFI, a report or a recovery you made
+beside it stays. Because the program downloads it itself, Windows and macOS do
+not ask to allow it again. The check at start can be switched off there, and
+**Check now** asks on demand.
+
+On a Mac the program keeps what it makes in `Documents/Hackintosh EFI Builder`
+rather than inside the app, which an update replaces whole.
+
 ![The About pane](https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/App/about.png)

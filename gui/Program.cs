@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Avalonia;
 
 namespace Shell;
@@ -22,6 +23,29 @@ static class Program
     [STAThread]
     public static int Main(string[] args)
     {
+        // what this build is and what an update would replace, for CI to read
+        // without opening a window
+        if (args.Contains("--build-info"))
+        {
+            var (asset, target, why) = Shell.Engine.Updater.Plan();
+            Console.WriteLine($"commit {Shell.Engine.Updater.Commit ?? "unknown"}");
+            Console.WriteLine($"built {Shell.Engine.Updater.Built?.ToString("o") ?? "unknown"}");
+            Console.WriteLine($"asset {asset ?? "none"}  target {target ?? why}");
+            return 0;
+        }
+        // the whole update without a window: check, download, verify, swap.
+        // What the About pane's button does, for testing it end to end.
+        if (args.Contains("--update-now"))
+        {
+            var (newer, said) = Shell.Engine.Updater.Check().GetAwaiter().GetResult();
+            Console.WriteLine(said);
+            if (newer is null) return 1;
+            var (script, complaint) = Shell.Engine.Updater.Stage(newer, (_, _) => { })
+                .GetAwaiter().GetResult();
+            if (script is null) { Console.WriteLine(complaint); return 1; }
+            Console.WriteLine(Shell.Engine.Updater.Launch(script) ? $"swapping: {script}" : "could not start the swap");
+            return 0;
+        }
         for (var i = 0; i < args.Length - 1; i++)
         {
             if (args[i] == "--render") RenderTo = args[i + 1];

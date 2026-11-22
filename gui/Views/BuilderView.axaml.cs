@@ -137,7 +137,7 @@ public partial class BuilderView : UserControl
 
     /// <summary>Beside the program, which is where somebody who double-clicked it is.</summary>
     static string DefaultFolder() =>
-        Path.Combine(AppContext.BaseDirectory, "EFI");
+        Path.Combine(Places.Work, "EFI");
 
     async Task Pick()
     {

@@ -261,6 +261,16 @@ jobs:
 
       # A package holds two programs and nothing else. Exercising it here used
       # to write an EFI, a report and a NEXT-STEPS beside them, and all of that
+      # The updater tells a newer build from this one by commit. A window that
+      # does not know its own would be offered nothing, or offered itself.
+      - name: The window knows which commit it is
+        shell: bash
+        run: |
+          said=$("package/${{ matrix.shell_exe }}" --build-info)
+          echo "$said"
+          echo "$said" | grep -q "commit ${{ github.sha }}" \
+            || { echo 'the window does not carry the commit it was built from'; exit 1; }
+
       # shipped: somebody unzipped the release and found notes about a machine
       # that was not theirs. The runs happen in a scratch directory now, so
       # this is a check rather than a cleaner - anything it has to remove is a

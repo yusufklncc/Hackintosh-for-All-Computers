@@ -138,4 +138,18 @@ Her cevabın nereden geldiğini söyler: hangi tabloyu hangi araç getirdi, tür
 mi, ölçüldü mü, alıntılandı mı, bildirildi mi — ve hiçbir kaynağı olmayan
 alanlar, tahmin edilmek yerine açıkça söylenir.
 
+Programın kendini güncel tuttuğu yer de burası. Açılırken yayına bir kez daha
+yeni bir derleme olup olmadığını sorar — bir yayın paketleri yeniden derlenirken
+numarasını korur, bu yüzden her birinin derlendiği commit'i karşılaştırır — ve
+varsa kenar çubuğunda bir **Update available** düğmesi çıkar. **Install it**
+sisteminizin paketini indirir, SHA-256'sı yayının listelediğiyle aynı değilse
+reddeder, programı kapatır, yenisini yerine koyar ve yeniden açar. Yalnızca
+program değiştirilir: yanında yaptığınız EFI, rapor ya da recovery yerinde kalır.
+Programı kendisi indirdiği için Windows ve macOS ona yeniden izin vermenizi
+istemez. Açılıştaki kontrol oradan kapatılabilir; **Check now** istediğiniz an
+sorar.
+
+Mac'te program yaptıklarını uygulamanın içine değil, `Documents/Hackintosh EFI
+Builder` klasörüne koyar; çünkü bir güncelleme uygulamayı bütünüyle değiştirir.
+
 ![About paneli](https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/App/about.png)

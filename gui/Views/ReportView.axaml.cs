@@ -14,7 +14,7 @@ namespace Shell.Views;
 
 public partial class ReportView : UserControl
 {
-    string _to = Path.Combine(AppContext.BaseDirectory, "machine.json");
+    string _to = Path.Combine(Places.Work, "machine.json");
 
     public ReportView()
     {
