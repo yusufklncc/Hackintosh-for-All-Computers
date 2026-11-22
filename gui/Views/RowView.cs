@@ -46,6 +46,9 @@ public sealed partial class RowView
             "driven by macOS" => ("driven by macOS", true, false, false),
             "not supported" => ("not supported", false, true, false),
             "unknown" => ("unknown", false, false, true),
+            // Apple has no driver and this EFI adds none, but somebody else's
+            // runs the card: amber, because it is neither of the other two
+            "third-party driver" => ("third-party driver", false, false, true),
             "-" => ("not present", false, false, false),
             _ => (row.Verdict, false, false, false),
         };

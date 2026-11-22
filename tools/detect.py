@@ -25,6 +25,8 @@ import re
 import subprocess
 import sys
 from pathlib import Path
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import sysenv  # noqa: F401,E402  ioreg and system_profiler are in /usr/sbin
 
 
 def _run(cmd, shell=False):

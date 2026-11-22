@@ -117,8 +117,18 @@ def quiet_screen(ssdt):
     the output is a pipe.
 
     On Unix the tool already guards this with $TERM, which is why it only ever
-    happened on Windows."""
+    happened on Windows.
+
+    And stop it opening Finder. After every table it writes, the tool calls
+    reveal(), which on macOS asks Finder over osascript to show the file. A
+    recent macOS answers that by asking the person whether this program may
+    control Finder - and until somebody clicks, the build waits on a dialog it
+    cannot see. It hung the window's SSDT step and the selftest the same way.
+    The builder lists what was written itself; a Finder window per table was
+    never wanted."""
     ssdt.u.cls = lambda *_args, **_kw: None
+    if getattr(ssdt, 're', None) is not None:
+        ssdt.re.reveal = lambda *_args, **_kw: None
     return ssdt
 
 

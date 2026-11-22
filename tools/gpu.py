@@ -251,6 +251,49 @@ def nvidia_family(device):
     return None
 
 
+DRIVERS = Path('data/gpudriver.toml')
+NVIDIA_PREFIX = re.compile(r'\b(G[FKMPVAB]|TU|AD|GH)\d{3}\b')
+
+
+def third_party(device):
+    """A driver from outside Apple and outside this EFI that runs this card.
+
+    Returned as (driver, card) where card is the per-id row when the driver
+    names ids, or None when it names chip families. Nothing here is added to a
+    build: the answer sits beside Apple's verdict, never in its place, because
+    every one of these is experimental by its own project's account."""
+    ident = (device.get('id') or '').lower()
+    if not ident or not DRIVERS.exists():
+        return None
+    rows = ocgen.read_toml(DRIVERS).get('driver', [])
+    for d in rows:
+        for card in d.get('card', []):
+            if card['id'].lower() == ident:
+                return d, card
+    if ident.startswith('10de:'):
+        _, name = deviceids.describe(ident)
+        found = NVIDIA_PREFIX.search(name or '')
+        if found:
+            prefix = found.group(1)
+            for d in rows:
+                if prefix in d.get('chips', []):
+                    return d, None
+    return None
+
+
+def third_party_line(device):
+    """One sentence for a front end: who drives it, how far, how tested."""
+    got = third_party(device)
+    if not got:
+        return None
+    d, card = got
+    tested = ''
+    if card is not None:
+        tested = ', tested on this card' if card.get('tested') else ', not yet run on this card'
+    return (f"{d['name']} drives it ({d['status']}{tested}) - {d['macos']}. "
+            f"Nothing for it goes in this EFI")
+
+
 def classify(device, generation=None):
     """(verdict, detail) for one detected graphics device."""
     cards, families, _, _ = load()
@@ -347,11 +390,28 @@ def report(devices, generation=None, cpu_name=None):
         if entry and entry.get('quote'):
             lines.append(f'      "{entry["quote"]}"')
 
+        # Apple's answer stays the answer about the EFI. What it left out is
+        # that a driver exists elsewhere, and saying "not supported" about a
+        # card somebody runs Metal on is less than the truth.
+        if verdict in ('unsupported', 'unknown'):
+            got = third_party(device)
+            if got:
+                d, card = got
+                lines.append(f'      but a third-party driver runs it: {d["name"]} '
+                             f'({d["status"]})')
+                lines.append(f'      {d["macos"]}; {d["url"]}')
+                if card is not None:
+                    lines.append(f'      {card["name"]}: {card["said"]}')
+                elif d.get('caveat'):
+                    lines.append(f'      "{d["caveat"]}"')
+                lines.append(f'      nothing for it goes in this EFI - {d["how"]}')
+
         # `unknown` on a card nothing here claims used to be the whole answer,
         # which reads as "no idea" when what is meant is "no table here has
         # heard of this one". Say that, and name the document that would know.
         if (verdict == 'unknown' and not looks_amd_integrated(device)
-                and not looks_integrated(device.get('name'))):
+                and not looks_integrated(device.get('name'))
+                and not third_party(device)):
             lines.append('      no table here claims this card, so nothing is '
                          'added for it')
             guide = guide_for(device.get('id'))

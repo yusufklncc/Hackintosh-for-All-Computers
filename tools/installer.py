@@ -36,6 +36,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import sysenv  # noqa: F401  diskutil and ioreg are in /usr/sbin
 import ui
 
 BOLD, DIM, GREEN, YELLOW, RED, RESET = ui.colours(

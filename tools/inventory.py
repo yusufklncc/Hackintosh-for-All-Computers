@@ -130,6 +130,17 @@ def devices():
                               vendor=vendor, kext=driver['kext']))
 
     graphics = ocgen.read_toml(Path('data/gpu.toml'))
+    drivers = (ocgen.read_toml(Path('data/gpudriver.toml')).get('driver', [])
+               if Path('data/gpudriver.toml').exists() else [])
+    # cards no Apple driver runs and somebody else's does, by the id the
+    # driver itself names - the Arc rows, which the guide's table never had
+    for d in drivers:
+        for card in d.get('card', []):
+            _, vendor = called(card['id'])
+            out.append(_entry('Graphics', card['id'], card['name'],
+                              f"{d['name']}, {d['status']}"
+                              + ('' if card.get('tested') else ', not yet run on it'),
+                              vendor=vendor, status='third-party'))
     for card in graphics.get('card', []):
         # the guide's own model name, not the upstream one: nine cards share
         # the id 1002:67df and the upstream list calls all nine "Ellesmere
@@ -168,10 +179,18 @@ def devices():
                  {'from': family['lowest_version'], 'to': family['highest_version'],
                   'oclp': patched['from'] if patched else None,
                   'oclp_to': top[1] if (patched and top) else None})
+        # Turing and newer: no Apple driver, but NullMoth's runs them. The row
+        # says so rather than leaving "unsupported" as the whole story.
+        other = next((d for d in drivers
+                      if set(d.get('chips', [])) & set(family['chips'])), None)
+        status, note = family['status'], short
+        if other and family['status'] != 'works':
+            status = 'third-party'
+            note = f"{short}; {other['name']}, {other['status']}, {other['macos']}"
         for card in family['cards']:
-            out.append(_entry('Graphics', ', '.join(family['chips']), card, short,
+            out.append(_entry('Graphics', ', '.join(family['chips']), card, note,
                               vendor='NVIDIA Corporation', macos=macos,
-                              status=family['status']))
+                              status=status))
         if not family['cards']:
             out.append(_entry('Graphics', ', '.join(family['chips']),
                               family['name'], short, vendor='NVIDIA Corporation',

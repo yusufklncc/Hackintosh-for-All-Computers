@@ -42,12 +42,16 @@ SUPPORTED, UNSUPPORTED, UNKNOWN, ABSENT = 'supported', 'not supported', 'unknown
 # a kext here claim it" but "is macOS driving it", asked of a machine that is
 # running macOS at the time.
 DRIVEN = 'driven by macOS'
+# Apple ships no driver and this EFI adds none, but somebody else's runs it:
+# an Arc on intel-gpu-macos-driver, a Turing-or-newer GeForce on NullMoth's.
+# Neither "supported" (nothing here does it) nor "not supported" (it runs).
+THIRD_PARTY = 'third-party driver'
 
 BOLD, DIM, GREEN, YELLOW, RED, RESET = ui.colours('bold', 'dim', 'green', 'yellow', 'red', 'reset')
 
 DETAIL = 52
 
-COLOUR = {SUPPORTED: GREEN, DRIVEN: GREEN, UNSUPPORTED: RED,
+COLOUR = {SUPPORTED: GREEN, DRIVEN: GREEN, UNSUPPORTED: RED, THIRD_PARTY: YELLOW,
           UNKNOWN: YELLOW, ABSENT: DIM}
 
 AMD_GENERATIONS = ('ryzen-threadripper', 'bulldozer-jaguar')
@@ -140,6 +144,10 @@ def graphics_rows(hw):
                  'unsupported': UNSUPPORTED}.get(verdict, UNKNOWN)
         if verdict == 'works-spoofed':
             detail = (detail + ', with a spoof') if detail else 'with a spoof'
+        if state in (UNSUPPORTED, UNKNOWN):
+            told = gpu.third_party_line(device)
+            if told:
+                state, detail = THIRD_PARTY, told
         if state is UNKNOWN and not detail:
             detail = 'not in the card table or the iGPU list'
         name = device.get('name') or 'graphics'

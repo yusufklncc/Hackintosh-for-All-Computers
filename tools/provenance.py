@@ -72,6 +72,14 @@ def _recoveries():
     return len(recovery.choices())
 
 
+def _gpu_drivers():
+    try:
+        import ocgen
+        return len(ocgen.read_toml(Path('data/gpudriver.toml')).get('driver', []))
+    except Exception:
+        return 0
+
+
 def _amd_igpu():
     """How many AMD APUs anybody has recorded. Zero is the honest answer today."""
     try:
@@ -334,6 +342,17 @@ def catalogue():
         # because an area with no rows in it reports nothing, and claiming a
         # kind of evidence that produced no answers is the sort of thing this
         # page exists to prevent.
+        dict(area='Third-party GPU drivers', kind=QUOTED,
+             file='data/gpudriver.toml', source="each driver's own repository, "
+                                                 "at the commit recorded",
+             tool='tools/gpudrivers.py',
+             count=f'{_gpu_drivers()} drivers',
+             covers='cards Apple ships no driver for that somebody else runs: '
+                    'Arc on intel-gpu-macos-driver, Turing and newer on NullMoth',
+             gap='Every one is experimental by its own account, and none is '
+                 'added to an EFI here. A card the driver matches but has not '
+                 'run is said to be so; the macOS range of a machine does not '
+                 'lean on any of them.'),
         dict(area='AMD integrated graphics',
              kind=REPORTED if _amd_igpu() else NONE,
              file='data/amdigpu.toml', source='machines somebody has run',

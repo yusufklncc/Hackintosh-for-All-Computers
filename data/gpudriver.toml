@@ -1,0 +1,76 @@
+# Graphics cards Apple ships no driver for, and that somebody else's does drive.
+#
+# PROVENANCE: quoted, from each driver's own repository, at the commit named.
+#
+# Dortania's guide answers "does macOS drive this card", and for an Arc or a
+# Turing-and-newer GeForce the answer is no - which is still true, and is still
+# what this repository's build does: nothing below is added to any EFI. What it
+# left out is that a third-party driver exists, and a person reading "not
+# supported" about a card a working driver runs on is told less than the truth.
+#
+# Every row is experimental by its own project's account. The builder reports
+# it beside Apple's verdict and never in place of it, and the macOS range a
+# machine is given does not lean on any of it.
+#
+# tools/gpudrivers.py --refresh re-reads the Arc ids from the driver's own rule
+# file and checks that the NullMoth sentence below is still on its page; a
+# change in either is a change in what people are told, and the diff is it.
+
+[[driver]]
+name = "intel-gpu-macos-driver"
+url = "https://github.com/yusufklncc/intel-gpu-macos-driver"
+licence = "MIT"
+status = "experimental"
+# README: "Today it runs on the Arc B580 on macOS 26 Tahoe (x86_64 ...)";
+# and its macOS row: "26 Tahoe (tested on 26.7.1 ...); 15 Sequoia (built from
+# the same sources, not re-tested since the move to Tahoe)"
+macos = "26 Tahoe, tested; 15 Sequoia, built but not re-tested"
+min_darwin = 24
+# release/templates/efi-rules.json, cards.device_ids - the ids its EFI tool and
+# its kext act on, read from the file rather than retyped
+source = "release/templates/efi-rules.json"
+commit = "990b650315b1727f825ab37186be9d1142c97bf7"
+how = "IntelXe Manager installs it and makes the EFI changes it needs"
+
+[[driver.card]]
+id = "8086:e20b"
+name = "Arc B580"
+tested = true
+said = "the development and measurement device (docs/devices/b580.md)"
+
+[[driver.card]]
+id = "8086:e20c"
+name = "Arc B570"
+tested = false
+said = "matched since 0.1.4, not run on hardware (docs/PLATFORMS.md)"
+
+[[driver.card]]
+id = "8086:e211"
+name = "Arc Pro B60"
+tested = false
+said = "matched since 2026-11-13, not run on hardware (docs/PLATFORMS.md)"
+
+[[driver.card]]
+id = "8086:e212"
+name = "Arc Pro B50"
+tested = false
+said = "matched since 2026-11-13, not run on hardware (docs/PLATFORMS.md)"
+
+[[driver]]
+name = "NullMoth NVIDIA driver"
+url = "https://github.com/nullmoth/nvidia-macos-driver"
+licence = "PolyForm-Noncommercial-1.0.0"
+status = "experimental"
+macos = "15.5 Sequoia or later, or 26 Tahoe, x86_64"
+min_darwin = 24
+# Matched by chip family rather than by id, because that is how the project
+# states it: "Supported cards are Turing and newer: GTX 16, RTX 20, 30, 40 and
+# 50, TITAN RTX, Quadro RTX and the T-series." Turing and newer is TU, GA, AD
+# and GB in the chip names the PCI ID Project gives. Hopper (GH) is a
+# data-centre part the sentence does not name, so it is not here.
+quote = "Supported cards are Turing and newer: GTX 16, RTX 20, 30, 40 and 50, TITAN RTX, Quadro RTX and the T-series."
+caveat = "Most testing is done on an RTX 5060, so other cards may have problems that haven't been found yet."
+source = "README.md"
+commit = "87e524ab36f12d17c04626d6cf7fc3bde1cc63e4"
+chips = ["TU", "GA", "AD", "GB"]
+how = "installed with its own 1401 app, after macOS boots"

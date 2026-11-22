@@ -60,6 +60,7 @@ jobs:
           python3 tools/smbios.py --refresh
           python3 tools/thirdparty.py --refresh
           python3 tools/thirdparty.py --fetch
+          python3 tools/gpudrivers.py --refresh || true
 
       - name: Anything moved?
         id: diff

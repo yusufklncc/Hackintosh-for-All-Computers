@@ -22,7 +22,7 @@ public sealed class TallyView
         Text = $"{count} {label}";
         IsOk = verdict == "supported";
         IsBad = verdict == "not supported";
-        IsUnknown = verdict == "unknown";
+        IsUnknown = verdict is "unknown" or "third-party driver";
     }
 
     public string Text { get; }
@@ -141,6 +141,7 @@ public partial class MachineView : UserControl
         var counts = new[] { ("supported", "supported"),
                              ("driven by macOS", "driven by macOS"),
                              ("not supported", "not supported"),
+                             ("third-party driver", "third-party driver"),
                              ("unknown", "unknown"), ("-", "not present") };
         Tally.ItemsSource = counts
             .Select(c => (verdict: c.Item1, label: c.Item2,

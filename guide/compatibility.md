@@ -4,7 +4,7 @@ title: Check compatibility
 
 # Check compatibility
 
-The **Compatible Hardware** pane lists 766 devices across 8 categories -
+The **Compatible Hardware** pane lists 770 devices across 8 categories -
 everything this repository knows - searchable by name, id or kext. The
 **Machine** pane answers the same question about the computer you are sitting
 at.

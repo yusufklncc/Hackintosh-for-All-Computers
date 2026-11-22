@@ -27,7 +27,7 @@ public sealed class DeviceItem
         Status = row.Status;
         IsOk = row.Status == "supported";
         IsBad = row.Status == "unsupported";
-        IsUnclear = row.Status is "untested" or "spoofed" or "dropped";
+        IsUnclear = row.Status is "untested" or "spoofed" or "dropped" or "third-party";
         // a range on each line: what macOS drove it, and where OCLP takes it
         var native = row.Macos is { From: { } from }
             ? from + (row.Macos.To is { } to ? $" – {to}" : " +") : "";

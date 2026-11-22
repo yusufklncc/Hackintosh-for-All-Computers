@@ -321,7 +321,10 @@ def hardware_summary():
     desktop = dict(toshiba, laptop=False, ps2=False, peripherals=[],
                    cpu='Intel(R) Core(TM) i9-14900K', generation='raptor-lake',
                    hda_ids=['ffff:ffff'],
-                   gpu_devices=[{'id': '8086:e20b', 'name': 'Intel Arc B580'},
+                   # an Alchemist A770, not a B580: a B580 runs on
+                   # intel-gpu-macos-driver now and is reported as such, so it
+                   # is no longer an example of a card nothing drives
+                   gpu_devices=[{'id': '8086:56a0', 'name': 'Intel Arc A770'},
                                 {'id': '8086:a780', 'name': 'Intel UHD Graphics 770'}])
     parts = [r['part'] for r in summary.rows(desktop)]
     verdicts = {(r['part'], r['what']): r['verdict'] for r in summary.rows(desktop)}
@@ -725,6 +728,21 @@ def unattended_ssdts():
         except acpi._Unattended:
             check(f'a real question is refused: {prompt!r}', True)
 
+    # SSDTTime shows every table it writes in Finder, through osascript. A
+    # recent macOS asks whether this program may control Finder and the build
+    # waits on that dialog for ever - this section hung on it before anything
+    # failed. The tool's reveal has to be gone before it is run.
+    class _Tool:
+        class u: pass
+        class re:
+            @staticmethod
+            def reveal(*_a, **_k): raise RuntimeError('reveal was called')
+    quiet = acpi.quiet_screen(_Tool())
+    try:
+        quiet.re.reveal('/nowhere', True)
+        check('the tool is stopped from opening Finder', True)
+    except RuntimeError:
+        check('the tool is stopped from opening Finder', False, 'reveal still runs')
     if not acpi.available():
         return
     import contextlib
@@ -2696,6 +2714,113 @@ def the_stick_it_writes_to():
           'ListSticks' in pass_ and 'usb-prepare' not in pass_)
 
 
+def cards_somebody_else_drives():
+    """An Arc or a Turing-and-newer GeForce: no Apple driver, but a real one.
+
+    Dortania says no for both, and that stays the answer about the EFI - nothing
+    here adds either driver. What "not supported" left out is that the card
+    runs Metal on intel-gpu-macos-driver or on NullMoth's driver, and the first
+    of those is this repository's own author's project: the two were telling
+    the same person opposite things about the same card.
+
+    Quoted, per driver, at a recorded commit; tools/gpudrivers.py notices when
+    either side moves."""
+    import gpu
+    import summary
+
+    table = ocgen.read_toml('data/gpudriver.toml')
+    drivers = {d['name']: d for d in table['driver']}
+    check('both drivers are recorded', set(drivers) == {
+        'intel-gpu-macos-driver', 'NullMoth NVIDIA driver'}, sorted(drivers))
+    for d in table['driver']:
+        check(f"{d['name']} is pinned to a commit",
+              re.fullmatch(r'[0-9a-f]{40}', d['commit']), d['commit'])
+        check(f"  and called experimental, as it calls itself",
+              d['status'] == 'experimental')
+        check(f"  and says how it is installed, since this EFI does not",
+              d.get('how'))
+
+    # the Arc ids are the driver's own, and only the B580 has run
+    arc = {c['id']: c for c in drivers['intel-gpu-macos-driver']['card']}
+    check('the Arc ids are the ones its rule file names',
+          sorted(arc) == ['8086:e20b', '8086:e20c', '8086:e211', '8086:e212'],
+          sorted(arc))
+    check('and only the B580 is marked as run on hardware',
+          [i for i, c in arc.items() if c['tested']] == ['8086:e20b'])
+    # NullMoth by family, from its sentence: Turing and newer, not Hopper
+    nm = drivers['NullMoth NVIDIA driver']
+    check('NullMoth is matched by the families its sentence names',
+          nm['chips'] == ['TU', 'GA', 'AD', 'GB'], nm['chips'])
+    check('and the sentence is kept, word for word',
+          nm['quote'].startswith('Supported cards are Turing and newer'))
+
+    b580 = {'name': 'Intel(R) Arc(TM) B580 Graphics', 'id': '8086:e20b'}
+    b570 = {'name': 'Intel(R) Arc(TM) B570 Graphics', 'id': '8086:e20c'}
+    rtx40 = {'name': 'NVIDIA GeForce RTX 4090', 'id': '10de:2684'}
+    rtx50 = {'name': 'NVIDIA GeForce RTX 5060', 'id': '10de:2d05'}
+    gtx10 = {'name': 'NVIDIA GeForce GTX 1080', 'id': '10de:1b80'}
+    for card in (b580, rtx40, rtx50):
+        check(f"{card['name']} finds its driver", gpu.third_party(card))
+    check('a Pascal card does not: Apple drove those', not gpu.third_party(gtx10))
+    check('an AMD card does not', not gpu.third_party({'id': '1002:73ff'}))
+
+    # Apple's answer is not overwritten, only added to
+    said = ' '.join(gpu.report([b580], 'raptor-lake')[0])
+    check("the console keeps Dortania's answer", 'not supported' in said, said)
+    check('and adds the driver beside it', 'intel-gpu-macos-driver' in said)
+    check('and says nothing goes in this EFI', 'nothing for it goes in this EFI' in said)
+    check("a card the driver matches but has not run says so",
+          'not yet run on this card' in gpu.third_party_line(b570))
+    check('an RTX 50 is not also called a card no table claims',
+          'no table here claims' not in ' '.join(gpu.report([rtx50], 'raptor-lake')[0]))
+
+    rows = summary.graphics_rows({'gpu_devices': [b580, rtx40, gtx10],
+                                  'generation': 'raptor-lake'})
+    states = [r['verdict'] for r in rows]
+    check('the Machine pane gives them a state of their own',
+          states == [summary.THIRD_PARTY, summary.THIRD_PARTY, summary.SUPPORTED],
+          states)
+
+    # the window colours it, rather than drawing a bare label
+    row = Path('gui/Views/RowView.cs').read_text(encoding='utf-8')
+    devices = Path('gui/Views/DevicesView.axaml.cs').read_text(encoding='utf-8')
+    check('the Machine pane draws it amber', '"third-party driver" =>' in row)
+    check('and so does Compatible Hardware', '"third-party"' in devices)
+
+    import inventory
+    listed = [r for r in inventory.devices()['devices'] if r['status'] == 'third-party']
+    check('the four Arc cards are listed now', sum(1 for r in listed
+          if r['id'].startswith('8086:')) == 4)
+    check('and Turing-and-newer GeForce rows are not just "unsupported"',
+          any(r['name'] == 'RTX 4090' for r in listed))
+
+    # and the macOS range does not lean on an experimental driver
+    import detect
+    e570, _ = detect.read_report('tools/fixtures/thinkpad-e570.json')
+    with_arc = dict(e570, gpu_devices=list(e570.get('gpu_devices') or []) + [b580])
+    check("an Arc does not move a machine's macOS range",
+          summary.macos_range(with_arc) == summary.macos_range(e570))
+
+    # drift is caught, and a card is never written by machine
+    import gpudrivers
+    import json as _json
+    def fetch(url):
+        if 'efi-rules' in url:
+            return _json.dumps({'cards': {'vendor_id': '8086', 'device_ids':
+                                          ['e20b', 'e20c', 'e211', 'e212', 'e223']}})
+        return 'Supported cards are some of them.'
+    drift = gpudrivers.check(fetch=fetch, newest=lambda _r: 'f' * 40)
+    said = [w for _, w, _, _ in drift]
+    check('a newly matched Arc id is noticed', 'now matches 8086:e223' in said, said)
+    check('and so is a sentence that changed upstream',
+          any('quoted sentence' in w for w in said), said)
+    refresher = Path('tools/gpudrivers.py').read_text(encoding='utf-8')
+    check('neither is written by machine', 'left for a person' in refresher
+          and '[[driver.card]]\\nid' not in refresher)
+    flow = Path('.github/workflows/refresh.yml').read_text(encoding='utf-8')
+    check('and the weekly refresh runs it', 'tools/gpudrivers.py' in flow)
+
+
 def what_it_says_about_amd_integrated():
     """An AMD APU used to read as `unknown`, which means "no idea" to a reader.
 
@@ -3877,6 +4002,7 @@ if __name__ == '__main__':
                     the_mac_a_config_pretends_to_be,
                     whether_recovery_can_land, a_mark_for_every_macos,
                     what_it_says_about_amd_integrated,
+                    cards_somebody_else_drives,
                     what_the_download_shows,
                     building_an_installer_image,
                     a_kext_that_stops_below_the_target,

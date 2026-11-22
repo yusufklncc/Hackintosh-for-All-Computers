@@ -4,7 +4,7 @@ title: Uyumluluğu kontrol edin
 
 # Uyumluluğu kontrol edin
 
-**Compatible Hardware** paneli 8 kategoride 766 aygıtı listeler — bu deponun
+**Compatible Hardware** paneli 8 kategoride 770 aygıtı listeler — bu deponun
 bildiği her şeyi — ada, kimliğe ya da kext'e göre aranabilir şekilde. **Machine**
 paneli aynı soruyu, başında oturduğunuz bilgisayar için yanıtlar.
 
