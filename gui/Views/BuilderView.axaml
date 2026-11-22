@@ -46,7 +46,15 @@
           <TextBlock Name="Hint" FontSize="12.5" Foreground="{DynamicResource Muted}"
                      TextWrapping="Wrap" IsVisible="False" />
         </StackPanel>
-        <StackPanel Name="Options" Spacing="2" />
+        <!-- A question can have thirty answers - an Ice Lake framebuffer has.
+             Unbounded, the list took the whole window, pushed Continue off the
+             bottom and left the transcript no height at all (issue #104). It
+             scrolls inside a share of the window instead; the share is set
+             from the pane's height in code. -->
+        <ScrollViewer Name="OptionsScroll" MaxHeight="320"
+                      VerticalScrollBarVisibility="Auto">
+          <StackPanel Name="Options" Spacing="2" Margin="0,0,12,0" />
+        </ScrollViewer>
         <TextBox Name="FreeText" Watermark="a path, or leave empty to decline"
                  IsVisible="False" FontFamily="{DynamicResource Mono}" />
         <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">

@@ -125,6 +125,9 @@ public partial class BuilderView : UserControl
     {
         InitializeComponent();
         OutFolder.Text = _out;
+        // the answers may use up to two fifths of the pane and scroll past
+        // that, so the transcript and the buttons always keep their room
+        SizeChanged += (_, e) => OptionsScroll.MaxHeight = Math.Max(160, e.NewSize.Height * 0.4);
         Begin.Click += async (_, _) => await Run();
         Choose.Click += async (_, _) => await Pick();
         Continue.Click += (_, _) => Send();
@@ -247,6 +250,7 @@ public partial class BuilderView : UserControl
         Hint.IsVisible = false;
 
         Options.Children.Clear();
+        OptionsScroll.Offset = default;
         FreeText.IsVisible = question.FreeText;
         if (question.FreeText)
         {
@@ -287,6 +291,9 @@ public partial class BuilderView : UserControl
         // answer, it is only the first row
         if (!question.Options.Any(o => o.Detected) && Options.Children.Count > 0)
             ((RadioButton)Options.Children[0]).IsChecked = false;
+        // a detected answer far down the list is no use behind the fold
+        if (Options.Children.OfType<RadioButton>().FirstOrDefault(r => r.IsChecked == true) is { } picked)
+            Dispatcher.UIThread.Post(() => picked.BringIntoView(), DispatcherPriority.Loaded);
     }
 
     Control Pill(string text)

@@ -3796,6 +3796,12 @@ def what_it_looks_like_when_it_arrives():
           'Name="Transcript" Spacing="1" Margin="0,0,0,28"' in shape)
     check('and the viewer itself pads nothing at the bottom',
           'Padding="16,12,16,0"' in shape)
+    # issue #104: thirty framebuffer ids took the window, and Continue with it
+    check('a long list of answers scrolls inside the question',
+          re.search(r'<ScrollViewer Name="OptionsScroll" MaxHeight="\d+"[^>]*>\s*'
+                    r'<StackPanel Name="Options"', shape))
+    check('  and its share follows the pane, not a number fixed for one screen',
+          'OptionsScroll.MaxHeight = Math.Max(' in drawn)
 
     made = Path('.github/workflows/gui.yml').read_text()
     check('macOS packages as a .app', 'appbundle.py' in made)
