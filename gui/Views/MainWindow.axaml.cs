@@ -22,6 +22,13 @@ public partial class MainWindow : Window
         _ = Standing();
         UpdateNote.Click += async (_, _) => { ToAbout.IsChecked = true; await Swap(); };
         AboutPane.UpdateFound += found => UpdateNote.IsVisible = found;
+        // the way through: each pane hands on to the next, and the sidebar
+        // ticks what has been done
+        MachineInfo.BuildRequested += async () => { ToBuilder.IsChecked = true; await Swap(); };
+        BuilderPane.StickRequested += async () => { ToStick.IsChecked = true; await Swap(); };
+        MachineInfo.Read += () => MachineDone.IsVisible = true;
+        BuilderPane.Built += () => EfiDone.IsVisible = true;
+        StickPane.StickMade += () => StickDone.IsVisible = true;
         // once, at the start, unless switched off or drawing a screenshot: a
         // render pass asking GitHub would make every build depend on it
         if (Program.RenderTo is null && Updater.Settings.CheckAtStart)

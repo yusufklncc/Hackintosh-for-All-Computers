@@ -193,11 +193,14 @@
       <Setter Property="Template">
         <ControlTemplate>
           <Border Name="skin" Background="Transparent" CornerRadius="6" Padding="10,8">
-            <ContentPresenter Content="{TemplateBinding Content}" />
+            <ContentPresenter Content="{TemplateBinding Content}"
+                              HorizontalContentAlignment="Stretch" />
           </Border>
         </ControlTemplate>
       </Setter>
       <Setter Property="Foreground" Value="{DynamicResource Muted}" />
+      <!-- the width of the sidebar, so a tick can sit at its right edge -->
+      <Setter Property="HorizontalAlignment" Value="Stretch" />
       <Setter Property="FontSize" Value="14" />
       <Setter Property="FontWeight" Value="Medium" />
     </Style>

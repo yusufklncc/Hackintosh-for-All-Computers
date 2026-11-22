@@ -87,6 +87,10 @@
             </DataTemplate>
           </ItemsControl.ItemTemplate>
         </ItemsControl>
+        <!-- the next step, from the place a person reads the machine: the EFI
+             pane builds for whatever this pane is showing -->
+        <Button Name="BuildForIt" Classes="accent" Margin="0,14,0,0" IsVisible="False"
+                HorizontalAlignment="Left" Content="Build an EFI for this machine  →" />
       </StackPanel>
     </Grid>
 

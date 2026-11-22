@@ -134,6 +134,7 @@ public partial class BuilderView : UserControl
         Continue.Click += (_, _) => Send();
         Stop.Click += (_, _) => Halt();
         Open.Click += (_, _) => Reveal.Show(_built ?? _out);
+        ToStick.Click += (_, _) => StickRequested?.Invoke();
     }
 
     /// <summary>Beside the program, which is where somebody who double-clicked it is.</summary>
@@ -171,6 +172,8 @@ public partial class BuilderView : UserControl
         }
 
         Transcript.Children.Clear();
+        ToStick.IsVisible = false;
+        Begin.Classes.Set("accent", true);
         Trail.Children.Clear();
         Trail.IsVisible = false;
         Standby.IsVisible = false;
@@ -428,6 +431,12 @@ public partial class BuilderView : UserControl
         _session.Answer(id, answer);
     }
 
+    /// <summary>Raised by the button that goes on to the USB stick pane.</summary>
+    public event Action? StickRequested;
+
+    /// <summary>Raised when a build wrote an EFI, for the sidebar's tick.</summary>
+    public event Action? Built;
+
     void Done(int code, string? built)
     {
         Waiting.Say(null);
@@ -441,6 +450,11 @@ public partial class BuilderView : UserControl
         Begin.Content = "Build again";
         _built = built;
         Open.IsVisible = code == 0 && built is not null;
+        // one filled button: the next step when there is one, starting again
+        // when there is not
+        ToStick.IsVisible = Open.IsVisible;
+        Begin.Classes.Set("accent", !ToStick.IsVisible);
+        if (ToStick.IsVisible) Built?.Invoke();
         if (code == 0 && built is not null)
         {
             StandbyTitle.Text = "Written";

@@ -52,12 +52,30 @@
              of putting macOS on a stick are one pane that asks which. -->
         <StackPanel Spacing="2">
           <TextBlock Classes="eyebrow" Text="THIS MACHINE" Margin="12,0,0,4" />
-          <RadioButton Name="ToMachine" Classes="nav" GroupName="pane" IsChecked="True"
-                       Content="Machine" />
+          <!-- the three steps of the work, each ticked once it has been done
+               in this session: read, built, written to a stick -->
+          <RadioButton Name="ToMachine" Classes="nav" GroupName="pane" IsChecked="True">
+            <DockPanel>
+              <TextBlock Name="MachineDone" DockPanel.Dock="Right" Text="✓" IsVisible="False"
+                         Foreground="{DynamicResource Ok}" FontWeight="Bold" />
+              <TextBlock Text="Machine" />
+            </DockPanel>
+          </RadioButton>
           <TextBlock Classes="eyebrow" Text="MAKE" Margin="12,14,0,4" />
-          <RadioButton Name="ToBuilder" Classes="nav" GroupName="pane" Content="EFI" />
-          <RadioButton Name="ToStick" Classes="nav" GroupName="pane"
-                       Content="USB stick" />
+          <RadioButton Name="ToBuilder" Classes="nav" GroupName="pane">
+            <DockPanel>
+              <TextBlock Name="EfiDone" DockPanel.Dock="Right" Text="✓" IsVisible="False"
+                         Foreground="{DynamicResource Ok}" FontWeight="Bold" />
+              <TextBlock Text="EFI" />
+            </DockPanel>
+          </RadioButton>
+          <RadioButton Name="ToStick" Classes="nav" GroupName="pane">
+            <DockPanel>
+              <TextBlock Name="StickDone" DockPanel.Dock="Right" Text="✓" IsVisible="False"
+                         Foreground="{DynamicResource Ok}" FontWeight="Bold" />
+              <TextBlock Text="USB stick" />
+            </DockPanel>
+          </RadioButton>
           <Border Height="1" Background="{DynamicResource Line}" Margin="10,14,10,10" />
           <RadioButton Name="ToDevices" Classes="nav" GroupName="pane"
                        Content="Compatible Hardware" />

@@ -33,6 +33,12 @@ public sealed class TallyView
 
 public partial class MachineView : UserControl
 {
+    /// <summary>Raised by the button that goes on to the EFI pane.</summary>
+    public event Action? BuildRequested;
+
+    /// <summary>Raised when a machine has been read and drawn.</summary>
+    public event Action? Read;
+
     public MachineView()
     {
         // InitializeComponent, not AvaloniaXamlLoader.Load: the generated
@@ -40,6 +46,7 @@ public partial class MachineView : UserControl
         // loader on its own leaves every one of them null, and the first line
         // that touches one is where it shows.
         InitializeComponent();
+        BuildForIt.Click += (_, _) => BuildRequested?.Invoke();
         // An exception in an async event handler goes nowhere: the pane stays
         // empty, the program keeps running, and there is nothing to read. That
         // is how this failed on a real machine.
@@ -238,6 +245,10 @@ public partial class MachineView : UserControl
             GraphicsWarning.IsVisible = false;
         }
 
+        // a Mac read as itself needs no EFI; anything else, a report of one
+        // included, is something the EFI pane can build for
+        BuildForIt.IsVisible = m.Mac is null;
+        Read?.Invoke();
         if (m.Mac is null)
             Bounds.ItemsSource = m.Macos.Parts.Select(b => new BoundView(b)).ToList();
         // an empty panel read as one that had not loaded

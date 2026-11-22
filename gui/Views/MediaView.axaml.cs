@@ -65,6 +65,9 @@ public partial class MediaView : UserControl
         Go.Click += async (_, _) => await Run();
     }
 
+    /// <summary>Raised when a stick was made, for the sidebar's tick.</summary>
+    public event Action? StickMade;
+
     string Chosen => (Ways.SelectedItem as Way)?.Key ?? "recovery";
 
     public Task Load()
@@ -208,6 +211,7 @@ public partial class MediaView : UserControl
         // the recovery pane draws its own progress; it is visible above
         if (!await Recovery.FetchTo(stick.Where)) return;
         if (!await Stick.PlaceEfi()) return;
+        StickMade?.Invoke();
         Stick.Say($"{stick.Name} is ready",
                   $"{Recovery.Selected!.Titled} and the EFI are on {stick.Where}.",
                   "Boot the machine from it and pick the recovery entry. The rest of "
@@ -236,6 +240,7 @@ public partial class MediaView : UserControl
                       "Press the button again: what was downloaded is kept and it carries on.");
             return;
         }
+        StickMade?.Invoke();
         Stick.Say($"{stick.Name} installs {choice.Name} with no network",
                   string.Join("\n", said.TakeLast(6)),
                   string.Join("\n", choice.Steps.Select((s, i) => $"{i + 1}. {s}")));
