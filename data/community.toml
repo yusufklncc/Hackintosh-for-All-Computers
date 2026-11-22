@@ -52,6 +52,8 @@ release = "v0.1.7"
 quote_source = "README.md"
 quote = "**A Metal driver that runs Intel Arc graphics cards on macOS.**"
 covers = "Intel Arc B-series graphics: B580, B570, Pro B60 and Pro B50"
+uploader = "yusufklncc"
+attested = false
 
 [[project.card]]
 id = "8086:e20b"
@@ -99,6 +101,8 @@ ai_commits = [0, 100]
 ai_tools = []
 release = "v3.0"
 covers = "NVIDIA GeForce Turing and newer: GTX 16, RTX 20, 30, 40 and 50"
+uploader = "nullmoth"
+attested = false
 
 [[project]]
 name = "AppleIGC"
@@ -116,6 +120,8 @@ ids = ["8086:125b", "8086:125c", "8086:125d", "8086:15f2", "8086:15f3", "8086:15
 ai_files = []
 ai_commits = [0, 27]
 ai_tools = []
+uploader = "SongXiaoXi"
+attested = false
 
 [[project]]
 name = "AppleIGB"
@@ -171,6 +177,8 @@ sha256 = "46c8bccdb1fad730b3dfd06ac1b0b986df04c3b0b5a83bd9505d7c8c927026e1"
 ai_files = []
 ai_commits = [9, 100]
 ai_tools = ["Claude"]
+uploader = "0xFireWolf"
+attested = false
 
 [[project]]
 name = "AirPort_RTW89"
@@ -198,6 +206,8 @@ how = "its own Kext Installer edits the EFI; by hand, the README lists every ste
 ai_files = []
 ai_commits = [0, 100]
 ai_tools = []
+uploader = "FranciumOS-org"
+attested = false
 
 [project.recipe]
 from = "README.md"
@@ -259,6 +269,8 @@ how = "its install script edits the EFI"
 ai_files = []
 ai_commits = [0, 27]
 ai_tools = []
+uploader = "xnpty"
+attested = true
 
 [[project]]
 name = "BroadTek"
@@ -285,6 +297,8 @@ how = "ships inside AirPort_RTW89; also on its own as a Lilu plugin"
 ai_files = []
 ai_commits = [0, 3]
 ai_tools = []
+uploader = "FranciumOS-org"
+attested = false
 
 [project.recipe]
 from = "README.md"
@@ -316,6 +330,8 @@ ai_commits = [0, 1]
 ai_tools = []
 requires_cpu_name = ["i5-12450HX"]
 requires_cpu_said = "the Intel Core i5-12450HX it was verified on"
+uploader = "xnpty"
+attested = false
 
 [project.recipe]
 from = "README.md"
@@ -373,6 +389,8 @@ how = "its own installer, after macOS boots, plus a boot kext and boot-arg in th
 ai_files = []
 ai_commits = [12, 19]
 ai_tools = ["Claude"]
+uploader = "cuadra8998"
+attested = false
 
 [[project]]
 name = "AMDRadeonRDNA4"
@@ -399,6 +417,8 @@ how = "a Lilu plugin, injected by OpenCore"
 ai_files = []
 ai_commits = [0, 100]
 ai_tools = []
+uploader = "somestupidgirl"
+attested = false
 
 [project.recipe]
 from = "README.md"
@@ -429,6 +449,8 @@ ids = ["1002:164d", "1002:1681"]
 ai_files = ["CLAUDE.md"]
 ai_commits = [85, 100]
 ai_tools = ["Claude"]
+uploader = "FranciumOS-org"
+attested = false
 
 [[project]]
 repo = "OscarrWu/780m-hackintosh"
@@ -495,6 +517,8 @@ how = "a Lilu plugin beside the Broadcom stack OpenCore injects"
 ai_files = []
 ai_commits = [4, 4]
 ai_tools = ["Claude"]
+uploader = "hamedafra"
+attested = false
 
 [[project]]
 repo = "jacksproject/MT7902-WiFi-Kext"
@@ -543,6 +567,8 @@ ids = ["14c3:0717", "14c3:0738", "14c3:6639", "14c3:7925", "14c3:7927"]
 ai_files = []
 ai_commits = [0, 61]
 ai_tools = []
+uploader = "watchthelight"
+attested = false
 
 [[project]]
 repo = "lems-hardware/lhl-be211-wireless"
@@ -593,6 +619,8 @@ ids = ["8086:0060", "8086:0064", "8086:0082", "8086:0083", "8086:0084", "8086:00
 ai_files = []
 ai_commits = [0, 100]
 ai_tools = []
+uploader = "github-actions[bot]"
+attested = false
 
 [[project]]
 repo = "retropineaple/ForbiddenItlwm"
@@ -622,6 +650,8 @@ ids = ["8086:0060", "8086:0064", "8086:0082", "8086:0083", "8086:0084", "8086:00
 ai_files = []
 ai_commits = [80, 100]
 ai_tools = ["Claude"]
+uploader = "retropineaple"
+attested = false
 
 [[project]]
 repo = "labrouss/S0ixStandby"
@@ -644,6 +674,8 @@ how = "a kext with per-machine SSDTs"
 ai_files = []
 ai_commits = [0, 54]
 ai_tools = []
+uploader = "github-actions[bot]"
+attested = false
 
 [[project]]
 repo = "watchthelight-labs/WTLLegionCpuPower"
@@ -668,6 +700,8 @@ ai_commits = [0, 12]
 ai_tools = []
 requires_cpu_name = ["Ultra \\d+ 2\\d\\dHX"]
 requires_cpu_said = "an Intel Core Ultra 200HX (Arrow Lake-HX)"
+uploader = "watchthelight"
+attested = false
 
 [[project]]
 repo = "GeLith/AlienFanSuite"
@@ -690,3 +724,5 @@ how = "a kext and a FanControl app"
 ai_files = []
 ai_commits = [0, 18]
 ai_tools = []
+uploader = "GeLith"
+attested = false

@@ -101,6 +101,42 @@ gösterilebildiği yerde, neye dayandığıyla birlikte söyler:
   gelmez.
 
 Etiket bir projenin nasıl yapıldığıyla ilgili, çalışıp çalışmadığıyla değil:
-deneysel olan her iki durumda da deneyseldir. Depo her hafta her projenin yeni sürümünü kontrol eder ve henüz kayıtlı
+deneysel olan her iki durumda da deneyseldir. EFI bölmesi birini eklemek
+isteyip istemediğinizi sorarken de aynı etiket gösterilir.
+
+Her kart, sürüm dosyasını GitHub'a kimin koyduğunu da söyler: bir GitHub Actions
+iş akışı ya da dosyanın gönderildiği hesap. GitHub'ın tam o dosya için bir derleme
+onayı (attestation) tuttuğu yerde — dosyanın adı belli bir iş akışı çalışmasından
+çıktığına dair imzalı beyanı — kart bunu da söyler. İndirileni kaynağa bağlayan
+yalnızca bu onaydır; diğer ikisi dosyanın nereden geldiğini söyler, içinde ne
+olduğunu değil.
+
+### Geri çıkarmak
+
+Topluluk sürücüsü eklenmiş bir EFI, `OC` klasöründe iki şey daha tutar:
+
+- `config-without-community.plist` — config'in, hiçbiri eklenmeden önce
+  derlendiği hâli. Bu program olmadan geri dönmek için `config.plist`'in adını
+  başka bir şey, bu dosyanınkini `config.plist` yapın. Ekledikleri kext'ler
+  `Kexts` içinde kalabilir: OpenCore config'inde yazmayan hiçbir şeyi yüklemez.
+- `Community/record.json` — hangi sürücüler, hangi sürüm, her indirmenin
+  SHA-256'sı. Bir sürücü derlemenin kendi kext'lerinden birinin yerini aldıysa
+  asıl kext `Community/replaced` içinde saklanır ve oradaki `README.txt` onunla
+  ne yapılacağını söyler.
+
+Derleme bitince **EFI** bölmesi bunları listeler; her birinin yanında **Take
+out** vardır. O sürücünün değiştirdiği her şeyi geri koyar, diğerlerini olduğu
+gibi bırakır.
+
+### Nasıl çalıştığını bildirmek
+
+Karttaki **Report how it ran**, bu depoda bir GitHub issue'su açar: sürücü,
+sürümü, işlemciniz ve makinenizde eşleştiği aygıt kimlikleri doldurulmuş olarak
+gelir — makine hakkında başka hiçbir şey değil — ve çalışıp çalışmadığını, hangi
+macOS'ta denendiğini sorar. Göndermeden önce okursunuz. Haftalık inceleme
+issue'su bu raporları sürücü sürücü tablolar; bir sürücü experimental'dan
+recommended'a bunlara bakılarak geçer.
+
+Depo her hafta her projenin yeni sürümünü kontrol eder ve henüz kayıtlı
 olmayan yeni projeleri bir kişinin bakması için listeler; kayda makine tarafından
 hiçbir şey eklenmez.

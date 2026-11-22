@@ -103,6 +103,11 @@ public sealed class CommunityItem
         AiBadge = p.AiLevel switch { "written" => "AI-written", "assisted" => "AI-assisted", _ => "" };
         HasAi = AiBadge.Length > 0;
         AiWhy = HasAi ? $"{AiBadge}: {p.AiWhy}." : "";
+        Uploaded = p.Uploaded.Length > 0
+            ? $"Release file {p.Uploaded}." : "";
+        HasUploaded = Uploaded.Length > 0;
+        Report = p.Report;
+        HasReport = Report.Length > 0;
         // what it matches, in the terms it matches by
         var matches = p.Devices > 0 ? $"{p.Devices} device id{(p.Devices == 1 ? "" : "s")}"
                     : p.Chips.Count > 0 ? $"chip families {string.Join(", ", p.Chips)}"
@@ -147,6 +152,10 @@ public sealed class CommunityItem
     public bool HasAi { get; }
     public string AiBadge { get; }
     public string AiWhy { get; }
+    public string Uploaded { get; }
+    public bool HasUploaded { get; }
+    public string Report { get; }
+    public bool HasReport { get; }
     public string Facts { get; }
     public string Macos { get; }
     public string Where { get; }
@@ -307,7 +316,9 @@ public partial class DevicesView : UserControl
             + "never instead of it. AI-written means the project says its code was written "
             + "with an AI, or at least half its recent commits credit one as co-author; "
             + "AI-assisted means some do, or the repository carries an AI tool's "
-            + "instructions. No label means nothing says either way.";
+            + "instructions. No label means nothing says either way. "
+            + "If you run one, Report how it ran: what moves a driver from "
+            + "experimental to recommended is people saying it worked.";
     }
 
     void Draw()

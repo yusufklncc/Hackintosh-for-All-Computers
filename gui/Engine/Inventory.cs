@@ -10,6 +10,7 @@ using Avalonia;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
+using System.IO;
 using System.Threading.Tasks;
 
 namespace Shell.Engine;
@@ -298,9 +299,27 @@ public sealed class CommunityProject
     // written, assisted or empty, and the evidence it rests on
     [JsonPropertyName("ai_level")] public string AiLevel { get; set; } = "";
     [JsonPropertyName("ai_why")] public string AiWhy { get; set; } = "";
+    // who put the release file there, and whether GitHub attests its build
+    [JsonPropertyName("uploaded")] public string Uploaded { get; set; } = "";
+    // an issue form filled in with this machine, for saying whether it worked
+    [JsonPropertyName("report")] public string Report { get; set; } = "";
     [JsonPropertyName("recipe")] public bool Recipe { get; set; }
     [JsonPropertyName("matches")] public bool Matches { get; set; }
     [JsonPropertyName("requires")] public string Requires { get; set; } = "";
+}
+
+/// <summary>One community driver an EFI carries, as OC/Community/record.json says.</summary>
+public sealed class AddedDriver
+{
+    [JsonPropertyName("name")] public string Name { get; set; } = "";
+    [JsonPropertyName("release")] public string Release { get; set; } = "";
+    [JsonPropertyName("ai_level")] public string AiLevel { get; set; } = "";
+    [JsonPropertyName("sha256")] public string Sha256 { get; set; } = "";
+}
+
+public sealed class AddedRecord
+{
+    [JsonPropertyName("added")] public List<AddedDriver> Added { get; set; } = new();
 }
 
 public sealed class CommunityList
@@ -309,6 +328,7 @@ public sealed class CommunityList
 }
 
 [JsonSerializable(typeof(CommunityList))]
+[JsonSerializable(typeof(AddedRecord))]
 [JsonSerializable(typeof(OfflineList))]
 [JsonSerializable(typeof(InstallerPlan))]
 [JsonSerializable(typeof(Newest))]
@@ -470,6 +490,26 @@ public static class Inventory
             return (JsonSerializer.Deserialize(output, Carried.Default.About), "");
         }
         catch (JsonException e) { return (null, e.Message); }
+    }
+
+    /// <summary>The community drivers in a built EFI; empty when it has none
+    /// or its record cannot be read. Read from the folder, not asked of the
+    /// engine: it is one small file the engine wrote.</summary>
+    public static List<AddedDriver> Added(string efi)
+    {
+        try
+        {
+            var text = File.ReadAllText(Path.Combine(efi, "OC", "Community", "record.json"));
+            return JsonSerializer.Deserialize(text, Carried.Default.AddedRecord)?.Added ?? new();
+        }
+        catch (Exception) { return new(); }
+    }
+
+    /// <summary>Take community drivers out of a built EFI.</summary>
+    public static async Task<(string said, int code)> TakeOut(Located engine, string efi, string name)
+    {
+        var (output, error, code) = await Builder.Run(engine, "--community-remove", name, "--out", efi);
+        return (code == 0 ? output : Said(error, code), code);
     }
 
     static string Said(string error, int code) =>

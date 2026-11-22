@@ -367,6 +367,47 @@ public partial class BuilderView : UserControl
             StandbyTitle.Text = "Stopped with an error";
             StandbyText.Text = $"The engine exited {code}. The transcript says why.";
         }
+        ShowAdded(code == 0 ? built : null);
         _ended?.TrySetResult($"rc={code} {StandbyTitle.Text}: {built ?? "nothing written"}");
+    }
+
+    /// <summary>The community drivers the EFI carries, each with a way out.</summary>
+    void ShowAdded(string? efi)
+    {
+        AddedRows.Children.Clear();
+        var added = efi is null ? new List<AddedDriver>() : Inventory.Added(efi);
+        Added.IsVisible = added.Count > 0;
+        if (efi is null || added.Count == 0) return;
+        AddedNote.Text = "Experimental, and somebody else's. Taking one out puts back "
+                       + "what it changed. Without this program: in OC, rename "
+                       + "config-without-community.plist to config.plist.";
+        foreach (var d in added)
+        {
+            var ai = d.AiLevel switch { "written" => "  ·  AI-written", "assisted" => "  ·  AI-assisted", _ => "" };
+            var row = new Grid { ColumnDefinitions = new ColumnDefinitions("*,Auto"), ColumnSpacing = 10 };
+            row.Children.Add(new TextBlock
+            {
+                Text = $"{d.Name}  {d.Release}{ai}", FontSize = 13,
+                VerticalAlignment = VerticalAlignment.Center,
+            });
+            var take = new Button { Content = "Take out", Tag = d.Name };
+            Grid.SetColumn(take, 1);
+            take.Click += async (_, _) => await TakeOut(efi, d.Name, take);
+            row.Children.Add(take);
+            AddedRows.Children.Add(row);
+        }
+    }
+
+    async Task TakeOut(string efi, string name, Button button)
+    {
+        var engine = Builder.Find(out var missing);
+        if (engine is null) { AddedNote.Text = missing; return; }
+        button.IsEnabled = false;
+        var (said, code) = await Inventory.TakeOut(engine, efi, name);
+        foreach (var line in said.Split('\n', StringSplitOptions.RemoveEmptyEntries))
+            Say(new[] { new TextSpan(code == 0 ? "dim" : "warn", line.TrimEnd()) });
+        StickToEnd();
+        ShowAdded(efi);
+        if (code != 0) AddedNote.Text = said.Trim();
     }
 }

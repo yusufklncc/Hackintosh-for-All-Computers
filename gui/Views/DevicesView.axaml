@@ -178,9 +178,20 @@
                                Foreground="{DynamicResource Muted}" IsVisible="{Binding HasNeeds}" />
                     <TextBlock Text="{Binding AiWhy}" FontSize="12" TextWrapping="Wrap"
                                Foreground="{DynamicResource Faint}" IsVisible="{Binding HasAi}" />
+                    <TextBlock Text="{Binding Uploaded}" FontSize="12" TextWrapping="Wrap"
+                               Foreground="{DynamicResource Faint}" IsVisible="{Binding HasUploaded}" />
                   </StackPanel>
-                  <Button Grid.Column="1" Content="Open on GitHub" VerticalAlignment="Top"
-                          Tag="{Binding Url}" Click="OpenProject" />
+                  <StackPanel Grid.Column="1" Spacing="6" VerticalAlignment="Top">
+                    <Button Content="Open on GitHub" HorizontalAlignment="Stretch"
+                            Tag="{Binding Url}" Click="OpenProject" />
+                    <!-- an issue form with this machine filled in: what moves a
+                         driver from experimental to recommended is people
+                         saying it ran -->
+                    <Button Content="Report how it ran" HorizontalAlignment="Stretch"
+                            Tag="{Binding Report}" Click="OpenProject"
+                            IsVisible="{Binding HasReport}"
+                            ToolTip.Tip="Opens a GitHub issue with this machine's processor and matching device ids filled in. You read it before sending." />
+                  </StackPanel>
                 </Grid>
               </Border>
             </DataTemplate>

@@ -99,6 +99,40 @@ where that can be shown, with what it rests on:
   hand.
 
 The label is about how a project was made, not whether it works: experimental
-is experimental either way. Once a week the repository checks each project for
+is experimental either way. The same label is shown when the EFI pane asks
+whether to add one.
+
+Each card also says who put the release file on GitHub: a GitHub Actions
+workflow, or the account it was sent from. Where GitHub holds a build
+attestation for that exact file - its signed statement that the file came out
+of a named workflow run - the card says that too. Only the attestation ties the
+download to the source; the other two say where it came from, not what is in it.
+
+### Taking one out again
+
+An EFI that has community drivers keeps two more things in its `OC` folder:
+
+- `config-without-community.plist` - the config as it was built, before any of
+  them. To go back without this program, rename `config.plist` to anything
+  else and this file to `config.plist`. The kexts they added can stay in
+  `Kexts`: OpenCore loads nothing its config does not list.
+- `Community/record.json` - which drivers, which release, the SHA-256 of each
+  download. If a driver replaced one of the build's own kexts, the original is
+  kept in `Community/replaced`, and a `README.txt` there says what to do with it.
+
+When the build finishes, the **EFI** pane lists them, each with **Take out**,
+which puts back everything that driver changed and leaves the others as they
+were.
+
+### Saying how it ran
+
+**Report how it ran** on a card opens a GitHub issue in this repository with the
+driver, its release, your processor and the device ids it matched on your
+machine filled in - nothing else about the machine - and asks whether it worked
+and on which macOS. You read it before sending it. The weekly review issue
+tables these reports per driver, and a driver moves from experimental to
+recommended on what they say.
+
+Once a week the repository checks each project for
 new releases, and lists new projects it has not recorded yet for a person to
 look at; nothing is added to the registry by machine.

@@ -3285,6 +3285,55 @@ def the_community_registry():
     check('  and skips EFI folders and what is already recorded', len(found) == 1)
     body = community.digest(found)
     check('  into a checklist a person ticks', '- [ ] [someone/NewWiFi]' in body)
+
+    # who put a release file there, read off GitHub, and what that is called
+    def rel(url, accept=None):
+        if url.endswith('/releases/tags/v1'):
+            return json.dumps({'assets': [
+                {'name': 'Driver-src.tar.gz', 'uploader': {'login': 'x'}},
+                {'name': 'Driver.zip', 'digest': 'sha256:' + 'a' * 64,
+                 'uploader': {'login': 'github-actions[bot]'}}]}).encode()
+        if url.endswith('/attestations/sha256:' + 'a' * 64):
+            return json.dumps({'attestations': [{'bundle': {}}]}).encode()
+        raise AssertionError(url)
+    seen = community.provenance('o/r', 'v1', 'Driver.zip', get=rel)
+    check('a release file uploaded by a workflow, and attested, is read as both',
+          seen == {'uploader': 'github-actions[bot]', 'attested': True}, seen)
+    check('  and said as it is',
+          community.uploaded(seen) == 'uploaded by a GitHub Actions workflow, build attested by GitHub')
+    check('  one sent from an account says whose, and claims nothing more',
+          community.uploaded({'uploader': 'someone', 'attested': False})
+          == 'uploaded from the someone account')
+    shown = [p for p in community.projects() if p.get('release')]
+    check('every project with a release says who uploaded its file',
+          all(p.get('uploader') for p in shown), [p['name'] for p in shown if not p.get('uploader')])
+
+    # a report of how one ran: a form filled in with what matching used, and
+    # the weekly issue counting them
+    import urllib.parse as _up
+    rtw = next(p for p in community.projects() if p['name'] == 'AirPort_RTW89')
+    url = community.report_url(rtw, {'cpu': 'Intel Core i5-7200U', 'serial': 'C02XXXX',
+                                     'pci_ids': ['10ec:b852', '8086:5916']})
+    q = dict(_up.parse_qsl(_up.urlsplit(url).query))
+    check('a report form is filled in with the processor and the ids that matched',
+          q['project'] == 'AirPort_RTW89' and 'i5-7200U' in q['machine']
+          and '10ec:b852' in q['machine'] and '8086:5916' not in q['machine'], q)
+    check('  and nothing that identifies the machine', 'C02XXXX' not in url)
+    form = Path('.github/ISSUE_TEMPLATE/community-report.yml').read_text(encoding='utf-8')
+    check('  into a form that has every field it fills, and the label the digest reads',
+          all(f'id: {k}' in form for k in ('project', 'release', 'machine'))
+          and 'community-report' in form and q['template'] == 'community-report.yml')
+    issue = ('### Driver\n\nAirPort_RTW89\n\n### Release\n\n_No response_\n\n'
+             '### Did it work?\n\nIt worked\n\n### macOS version\n\n15.7')
+    said = community.reports(get=lambda u, a=None: json.dumps(
+        [{'number': 7, 'body': issue}, {'number': 8, 'body': 'not a form'}]).encode())
+    check('the report issues are read back by the answers in them',
+          said == {'AirPort_RTW89': {'It worked': [7]}}, said)
+    check('  and every answer the form offers is one the digest counts',
+          all(f'- {r}' in form for r in community.RESULTS))
+    body = community.digest([], said)
+    check('  the weekly issue tables them',
+          '| AirPort_RTW89 | #7 | - | - | - |' in body and 'Nothing new this week' in body, body)
     flow = Path('.github/workflows/refresh.yml').read_text(encoding='utf-8')
     check('the weekly job writes one review issue and adds nothing',
           'community.py --discover --digest' in flow and 'Community drivers to review' in flow
@@ -3379,6 +3428,15 @@ def community_drivers_into_an_efi():
                              'MaxKernel', 'MinKernel', 'PlistPath'} for e in cfg['Kernel']['Add']))
         status = community.validate(efi)
         check('  and ocvalidate passes it', status in ('clean', 'skipped'), status)
+        oc = efi / 'OC'
+        check('  the config as built is kept beside it, byte for byte',
+              (oc / community.BEFORE).read_bytes() == before)
+        rec = community.added(efi)
+        check('  and the EFI records what went in, at which hash',
+              [(e['name'], e['sha256'], 'AirPort_RTW89.kext' in e['kexts']) for e in rec]
+              == [('AirPort_RTW89', fake['sha256'], True)], [e.get('kexts') for e in rec])
+        check('  with a note saying how to go back without this program',
+              'config-without-community.plist' in (oc / 'Community/README.txt').read_text())
 
     with tempfile.TemporaryDirectory() as tmp:
         efi = Path(tmp) / 'EFI'
@@ -3392,6 +3450,47 @@ def community_drivers_into_an_efi():
         weg = [e for e in cfg['Kernel']['Add'] if e['BundlePath'] == 'WhateverGreen.kext']
         check('RDNA 4 turns WhateverGreen off, as its step 3 says',
               weg and not weg[0]['Enabled'])
+
+        # taken out again, one at a time: the rest stays as it was put in, and
+        # with none left the EFI is the one that was built
+        built = (efi / 'OC' / community.BEFORE).read_bytes()
+        weg_bin = (efi / 'OC/Kexts/WhateverGreen.kext/Contents/MacOS/WhateverGreen').read_bytes()
+        swap = zipped('WhateverGreen.kext')
+        other = dict(p, name='Replacer', conflicts=[], sha256=_h.sha256(swap).hexdigest(),
+                     recipe={'add': ['WhateverGreen.kext'], 'steps': []})
+        why = community.apply(efi, [other], darwin=24, say=lambda *_: None,
+                              get=lambda u, a=None: swap, cache=Path(tmp) / 'cache2')
+        check('a second driver goes in beside the first', why is None
+              and [e['name'] for e in community.added(efi)] == ['AMDRadeonRDNA4', 'Replacer'], why)
+        check('  the kext it replaces is set aside, not deleted',
+              (efi / 'OC/Community/replaced/WhateverGreen.kext').is_dir())
+        why = community.remove(efi, ['amdradeonrdna4'], say=lambda *_: None)
+        cfg = _pl.loads((efi / 'OC' / 'config.plist').read_bytes())
+        paths = [e['BundlePath'] for e in cfg['Kernel']['Add']]
+        check('taking one out leaves the other', why is None
+              and 'AMDRadeonRDNA4.kext' not in paths and 'WhateverGreen.kext' in paths
+              and not (efi / 'OC/Kexts/AMDRadeonRDNA4.kext').exists()
+              and [e['name'] for e in community.added(efi)] == ['Replacer'], why)
+        check('  and what it had turned off is on again',
+              all(e['Enabled'] for e in cfg['Kernel']['Add'] if e['BundlePath'] == 'WhateverGreen.kext'))
+        check('a name that is not in the EFI is refused, and says what is',
+              'Replacer' in (community.remove(efi, ['nothing'], say=lambda *_: None) or ''))
+        why = community.remove(efi, ['Replacer'], say=lambda *_: None)
+        check('taking the last one out gives back the EFI as built', why is None
+              and (efi / 'OC' / 'config.plist').read_bytes() == built
+              and not (efi / 'OC' / community.BEFORE).exists()
+              and not (efi / 'OC' / 'Community').exists(), why)
+        check('  with the kext that was set aside back where it was',
+              (efi / 'OC/Kexts/WhateverGreen.kext/Contents/MacOS/WhateverGreen').read_bytes() == weg_bin)
+        r = run([sys.executable, 'tools/setup.py', '--community-remove', 'x', '--out', str(efi)])
+        check('the engine says so when there is nothing to take out',
+              r.returncode == 1 and 'no community driver' in r.stderr, r.stderr[-200:])
+    pane = Path('gui/Views/BuilderView.axaml.cs').read_text(encoding='utf-8')
+    inv = Path('gui/Engine/Inventory.cs').read_text(encoding='utf-8')
+    check('the EFI pane lists what the build added, each with a way out',
+          'Inventory.Added(efi)' in pane and '"Take out"' in pane
+          and '"--community-remove", name, "--out", efi' in inv
+          and '"OC", "Community", "record.json"' in inv)
 
     # offered to the right machine, and a scripted run adds only what it names
     import detect

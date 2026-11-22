@@ -554,6 +554,9 @@ def main():
                     help='community drivers to add without asking, comma separated, '
                          'when this machine matches them; a scripted run adds none '
                          'it is not told to')
+    ap.add_argument('--community-remove', metavar='NAMES',
+                    help='take those community drivers out of the EFI at --out, '
+                         'comma separated, and put back what they changed')
     ap.add_argument('--offline-layout', action='store_true',
                     help='with --usb-prepare: FAT32 for OpenCore and ExFAT for '
                          'the full installer, for an install with no network')
@@ -623,6 +626,16 @@ def main():
 
     if a.check_tools:
         return check_tools()
+
+    if a.community_remove:
+        import community
+        names = a.community_remove.split(',')
+        complaint = community.remove(Path(a.out), names, say=print)
+        if complaint:
+            print(f'{YELLOW}{complaint}{RESET}', file=sys.stderr)
+            return 1
+        print(f'      ocvalidate   {community.validate(Path(a.out))}')
+        return 0
 
     if a.usb_list:
         import json as _json
@@ -1467,6 +1480,8 @@ def community_step(hw, darwin, a):
         badge = {'written': 'AI-written', 'assisted': 'AI-assisted'}.get(level, '')
         print(f'      {YELLOW}{badge}: {why}{RESET}' if badge else
               f'      {DIM}AI: not stated, which is not the same as written by hand{RESET}')
+        if community.uploaded(p):
+            print(f'      {DIM}release file {community.uploaded(p)}{RESET}')
         r = p['recipe']
         if r.get('extra'):
             print(f'      {DIM}also fetches {", ".join(e["name"] for e in r["extra"])}{RESET}')

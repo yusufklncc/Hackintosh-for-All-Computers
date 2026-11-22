@@ -155,6 +155,32 @@ def for_machine(hw):
     return devices, features_for(hw, [p['name'] for p, _, _ in devices])
 
 
+REPORTS = 'https://github.com/yusufklncc/Hackintosh-for-All-Computers/issues/new'
+
+
+def report_url(p, hw=None):
+    """The address of an issue form, filled in with what this machine shows.
+
+    Only what matching uses: the processor's model and the ids the driver
+    claims that this machine has. No serial, no board identity, nothing the
+    person cannot read before they press submit."""
+    from urllib.parse import urlencode
+    machine = []
+    if hw:
+        if hw.get('cpu'):
+            machine.append(f"CPU: {hw['cpu']}")
+        ids = {i.lower() for i in list(hw.get('pci_ids', [])) + list(hw.get('usb_ids', []))}
+        ids |= {d['id'].lower() for d in hw.get('gpu_devices', []) or [] if d.get('id')}
+        claims = {c['id'].lower() for c in p.get('card', [])} | {i.lower() for i in p.get('ids', [])}
+        hit = sorted(ids & claims)
+        if hit:
+            machine.append(f"Matched: {', '.join(hit)}")
+    return REPORTS + '?' + urlencode({
+        'template': 'community-report.yml', 'title': f"[community] {p['name']}: ",
+        'project': p['name'], 'release': p.get('release') or '',
+        'machine': '\n'.join(machine)})
+
+
 ROLE = {'graphics': 'Graphics', 'wifi': 'Wi-Fi', 'bluetooth': 'Bluetooth',
         'ethernet': 'Ethernet', 'cpu': 'CPU', 'card reader': 'Card reader'}
 
@@ -188,6 +214,8 @@ def document(hw=None):
             'ai_files': p.get('ai_files', []),
             'ai_commits': p.get('ai_commits', [0, 0]),
             'ai_tools': p.get('ai_tools', []),
+            'uploaded': uploaded(p),
+            'report': report_url(p, hw),
             'recipe': bool(p.get('recipe')),
             'matches': p['name'] in mine,
             'chips': p.get('chips', []),
@@ -313,6 +341,13 @@ def check(p, get=_get):
                 if p.get('ids_from') == 'kext':
                     update['ids'] = kext_ids(blob)
             out.append((f'released {tag}', update))
+    release = dict(p, **next((u for _, u in out if u and 'release' in u), {}))
+    if release.get('release'):
+        seen = provenance(repo, release['release'], release.get('asset'),
+                          release.get('sha256'), get=get)
+        if seen and any(p.get(k) != v for k, v in seen.items()):
+            out.append((f'its release was uploaded by {seen["uploader"]}'
+                        f'{", with a build attestation" if seen["attested"] else ""}', seen))
     seen_ai = ai_evidence(repo, head, get=get)
     now = {'ai_files': seen_ai['files'], 'ai_commits': seen_ai['commits'],
            'ai_tools': seen_ai['tools']}
@@ -321,6 +356,48 @@ def check(p, get=_get):
     if not out and head != p.get('commit') and p.get('commit'):
         out.append((f'moved to {head[:12]}, nothing recorded here changed', {'commit': head}))
     return out
+
+
+def provenance(repo, tag, asset=None, sha256=None, get=_get):
+    """{'uploader': login, 'attested': bool} for a release's file, or None.
+
+    Who put the file on the release, as GitHub records it: github-actions[bot]
+    when a workflow uploaded it with its own token, a login when it was sent
+    with that account's credentials - by hand, or by a workflow holding them,
+    which GitHub does not tell apart. Neither says the file is good. A workflow upload is a file whose
+    making can be read in the open; an attestation is GitHub signing that this
+    exact file came out of a named workflow run, which is the only one of the
+    three that ties the binary to the source."""
+    try:
+        rel = json.loads(get(API.format(repo=repo) + f'/releases/tags/{tag}'))
+    except urllib.error.HTTPError:
+        return None
+    if not isinstance(rel, dict):
+        return None
+    files = rel.get('assets') or []
+    pick = next((a for a in files if asset and a['name'] == asset), None) or \
+        next((a for a in files if a['name'].lower().endswith(('.zip', '.dmg', '.pkg'))), None)
+    if not pick:
+        return None
+    digest = (pick.get('digest') or '').removeprefix('sha256:') or sha256 or ''
+    attested = False
+    if digest:
+        try:
+            found = json.loads(get(API.format(repo=repo) + f'/attestations/sha256:{digest}'))
+            attested = bool(found.get('attestations'))
+        except urllib.error.HTTPError:
+            attested = False
+    return {'uploader': (pick.get('uploader') or {}).get('login', ''), 'attested': attested}
+
+
+def uploaded(p):
+    """One line on who put the release file there, or ''."""
+    who = p.get('uploader')
+    if not who:
+        return ''
+    said = ('uploaded by a GitHub Actions workflow' if who == 'github-actions[bot]'
+            else f'uploaded from the {who} account')
+    return said + (', build attested by GitHub' if p.get('attested') else '')
 
 
 def refresh(rows, get=_get, say=print):
@@ -425,82 +502,227 @@ def _executable(kext):
     return f'Contents/MacOS/{name}' if name and (kext / 'Contents' / 'MacOS' / name).exists() else ''
 
 
+BEFORE = 'config-without-community.plist'   # beside config.plist, in OC
+KEPT = 'Community'                          # in OC: the record, and what was set aside
+UNDO = """Community drivers were added to this EFI. They are somebody else's work,
+experimental by their own account.
+
+record.json says which, at which release, and the SHA-256 of each download.
+
+To go back to the EFI as it was built, without any of them: in the OC folder,
+rename config.plist to anything else and config-without-community.plist to
+config.plist. The kexts they added stay in Kexts, and OpenCore loads nothing
+its config does not list. If there is a folder named replaced beside this file,
+put what is in it back into OC/Kexts: those are the build's own kexts that a
+community driver took the place of.
+
+Hackintosh EFI Builder can take them out one by one, from the EFI pane.
+"""
+
+
+def added(efi):
+    """The community drivers this EFI carries, as its record says; [] when none."""
+    try:
+        doc = json.loads((Path(efi) / 'OC' / KEPT / 'record.json').read_text(encoding='utf-8'))
+        return list(doc['added'])
+    except (OSError, ValueError, KeyError, TypeError):
+        return []
+
+
+def _configure(config, p, kexts_dir, darwin, say):
+    """What a recipe does to a config, and only that: no files are touched."""
+    r = p['recipe']
+    add = config['Kernel']['Add']
+    note = f"{p['name']} {p.get('release', '')}, community, experimental"
+    for bundle in r['add']:
+        entry = {'Arch': 'x86_64', 'BundlePath': bundle, 'Comment': note,
+                 'Enabled': True, 'ExecutablePath': _executable(kexts_dir / bundle),
+                 'MaxKernel': r.get('max_kernel', ''),
+                 'MinKernel': r.get('min_kernel', ''),
+                 'PlistPath': 'Contents/Info.plist'}
+        add[:] = [e for e in add if e.get('BundlePath') != bundle] + [entry]
+    for name in r.get('disable', []) + [c for c in p.get('conflicts', [])
+                                        if c.endswith('.kext')]:
+        for e in add:
+            if e.get('BundlePath') == name and e.get('Enabled'):
+                e['Enabled'] = False
+                say(f'      {name} turned off: {p["name"]} says so')
+    for b in r.get('block', []):
+        blocks = config['Kernel'].setdefault('Block', [])
+        blocks[:] = [x for x in blocks if x.get('Identifier') != b['identifier']]
+        blocks.append({'Arch': 'x86_64', 'Comment': note, 'Enabled': True,
+                       'Identifier': b['identifier'], 'MaxKernel': '',
+                       'MinKernel': b.get('min_kernel', ''),
+                       'Strategy': b.get('strategy', 'Exclude')})
+    if r.get('secure_boot_model'):
+        config['Misc']['Security']['SecureBootModel'] = r['secure_boot_model']
+    nv = config['NVRAM']['Add'].setdefault(BOOT_GUID, {})
+    for b in r.get('boot_args', []):
+        if darwin is not None and darwin < b.get('from_darwin', 0):
+            continue
+        args = (nv.get('boot-args') or '').split()
+        if b['arg'] not in args:
+            nv['boot-args'] = ' '.join(args + [b['arg']])
+
+
+def _tops(p):
+    return sorted({a.split('/')[0] for a in p['recipe']['add']})
+
+
+def _write(efi, config, record):
+    """The config, then the record that explains it."""
+    oc = Path(efi) / 'OC'
+    with open(oc / 'config.plist', 'wb') as fh:
+        plistlib.dump(config, fh, sort_keys=False)
+    (oc / KEPT).mkdir(exist_ok=True)
+    (oc / KEPT / 'record.json').write_text(
+        json.dumps({'added': record}, indent=1, ensure_ascii=False, default=str) + '\n',
+        encoding='utf-8')
+    (oc / KEPT / 'README.txt').write_text(UNDO, encoding='utf-8')
+
+
 def apply(efi, picks, darwin=None, say=print, get=_get, cache=None):
     """Apply each picked recipe to a built EFI folder. Returns a complaint or None.
 
     The config is read, changed as the recipes say, and written once, after
     every download has checked out - a recipe that fails halfway leaves the
-    EFI as it was built."""
+    EFI as it was built.
+
+    The config as it was before any of them is kept beside it, untouched, as
+    config-without-community.plist: one rename takes the EFI back, with no
+    program needed. Every change is made from that one, again, for every
+    driver the record holds, so taking one out later is the same operation as
+    putting the others in. A kext a driver replaces is set aside, not deleted."""
+    import datetime
     import shutil
     efi = Path(efi)
-    cfg_path = efi / 'OC' / 'config.plist'
-    with open(cfg_path, 'rb') as fh:
-        config = plistlib.load(fh)
-    kexts_dir = efi / 'OC' / 'Kexts'
+    oc = efi / 'OC'
+    cfg_path, before = oc / 'config.plist', oc / BEFORE
+    kexts_dir = oc / 'Kexts'
     names = {p['name'] for p in picks}
+    held = {e['name']: e for e in added(efi)}
+    kept = [e for n, e in held.items() if n not in names]
     staged = []
     for p in picks:
-        clash = [c for c in p.get('conflicts', []) if c in names]
+        clash = [c for c in p.get('conflicts', []) if c in names | {e['name'] for e in kept}]
         if clash:
             return f'{p["name"]} cannot go in beside {", ".join(clash)}: pick one'
+        stray = [rel for rel in p['recipe'].get('remove', [])
+                 if rel.split('/')[0] not in _tops(p)]
+        if stray:
+            return f'{p["name"]}: its recipe deletes {", ".join(stray)}, outside what it adds'
         got, complaint = fetch(p, cache=cache, get=get)
         if complaint:
             return complaint
         staged.append((p, got))
 
-    add = config['Kernel']['Add']
+    if not before.exists():
+        shutil.copy2(cfg_path, before)
+    with open(before, 'rb') as fh:
+        config = plistlib.load(fh)
+
     # what to say is kept until the config is written: a line that cannot be
     # printed must not be the thing that leaves an EFI half changed
     told = []
-    say, tell = told.append, say
+    quiet = lambda _: None  # noqa: E731
+    for e in kept:
+        _configure(config, e['project'], kexts_dir, e.get('darwin'), quiet)
+    ours = {t for e in kept for t in e.get('kexts', [])}
+    record = list(kept)
+    aside = oc / KEPT / 'replaced'
     for p, got in staged:
-        r = p['recipe']
-        note = f"{p['name']} {p.get('release', '')}, community, experimental"
-        for top in sorted({a.split('/')[0] for a in r['add']}):
+        old = held.get(p['name'], {})
+        replaced = list(old.get('replaced', []))
+        for top in _tops(p):
             target = kexts_dir / top
             if target.exists():
-                shutil.rmtree(target)
+                if top in ours or top in old.get('kexts', []):
+                    shutil.rmtree(target)
+                else:
+                    # the build's own: set aside, to come back when this goes
+                    aside.mkdir(parents=True, exist_ok=True)
+                    if (aside / top).exists():
+                        shutil.rmtree(aside / top)
+                    shutil.move(str(target), str(aside / top))
+                    replaced.append(top)
             shutil.copytree(got[top], target)
-        for rel in r.get('remove', []):
+            ours.add(top)
+        for rel in p['recipe'].get('remove', []):
             if (kexts_dir / rel).exists():
                 shutil.rmtree(kexts_dir / rel)
-        for bundle in r['add']:
-            entry = {'Arch': 'x86_64', 'BundlePath': bundle, 'Comment': note,
-                     'Enabled': True, 'ExecutablePath': _executable(kexts_dir / bundle),
-                     'MaxKernel': r.get('max_kernel', ''),
-                     'MinKernel': r.get('min_kernel', ''),
-                     'PlistPath': 'Contents/Info.plist'}
-            add[:] = [e for e in add if e.get('BundlePath') != bundle] + [entry]
-        for name in r.get('disable', []) + [c for c in p.get('conflicts', [])
-                                            if c.endswith('.kext')]:
-            for e in add:
-                if e.get('BundlePath') == name and e.get('Enabled'):
-                    e['Enabled'] = False
-                    say(f'      {name} turned off: {p["name"]} says so')
-        for b in r.get('block', []):
-            blocks = config['Kernel'].setdefault('Block', [])
-            blocks[:] = [x for x in blocks if x.get('Identifier') != b['identifier']]
-            blocks.append({'Arch': 'x86_64', 'Comment': note, 'Enabled': True,
-                           'Identifier': b['identifier'], 'MaxKernel': '',
-                           'MinKernel': b.get('min_kernel', ''),
-                           'Strategy': b.get('strategy', 'Exclude')})
-        if r.get('secure_boot_model'):
-            config['Misc']['Security']['SecureBootModel'] = r['secure_boot_model']
-        nv = config['NVRAM']['Add'].setdefault(BOOT_GUID, {})
-        for b in r.get('boot_args', []):
-            if darwin is not None and darwin < b.get('from_darwin', 0):
-                continue
-            args = (nv.get('boot-args') or '').split()
-            if b['arg'] not in args:
-                nv['boot-args'] = ' '.join(args + [b['arg']])
-        say(f'      {p["name"]} {p.get("release", "")} added, as its README says:')
-        for step in r.get('steps', []):
-            say(f'        "{step}"')
+        _configure(config, p, kexts_dir, darwin, told.append)
+        told.append(f'      {p["name"]} {p.get("release", "")} added, as its README says:')
+        for step in p['recipe'].get('steps', []):
+            told.append(f'        "{step}"')
+        record.append({
+            'name': p['name'], 'repo': p.get('repo', ''), 'release': p.get('release', ''),
+            'asset': p.get('asset', ''), 'sha256': p.get('sha256', ''),
+            'ai_level': ai_level(p)[0], 'kexts': _tops(p), 'replaced': sorted(set(replaced)),
+            'darwin': darwin,
+            'added': datetime.datetime.now(datetime.timezone.utc).isoformat(timespec='seconds'),
+            'project': p})
 
-    with open(cfg_path, 'wb') as fh:
-        plistlib.dump(config, fh, sort_keys=False)
+    _write(efi, config, record)
     for line in told:
-        tell(line)
+        say(line)
+    say(f'      the EFI as built, without them: OC/{BEFORE}')
+    return None
+
+
+def remove(efi, names, say=print):
+    """Take community drivers out of an EFI. Returns a complaint or None.
+
+    The config is made again from the one kept from before any were added,
+    with the ones that stay applied to it as they were; the kexts the others
+    brought are deleted, and what they had replaced comes back. With none
+    left, the config is the kept one byte for byte and the record is gone."""
+    import shutil
+    efi = Path(efi)
+    oc = efi / 'OC'
+    cfg_path, before = oc / 'config.plist', oc / BEFORE
+    kexts_dir = oc / 'Kexts'
+    held = added(efi)
+    want = {n.strip().lower() for n in names if n.strip()}
+    drop = [e for e in held if e['name'].lower() in want]
+    keep = [e for e in held if e['name'].lower() not in want]
+    if not held:
+        return 'no community driver was added to this EFI'
+    if not drop:
+        return (f'{", ".join(sorted(want))}: not in this EFI, which has '
+                f'{", ".join(e["name"] for e in held)}')
+    if not before.exists():
+        return f'OC/{BEFORE} is missing, so the EFI as built cannot be made again'
+
+    in_use = {t for e in keep for t in e.get('kexts', [])}
+    aside = oc / KEPT / 'replaced'
+    if keep:
+        with open(before, 'rb') as fh:
+            config = plistlib.load(fh)
+        for e in keep:
+            _configure(config, e['project'], kexts_dir, e.get('darwin'), lambda _: None)
+        for e in drop:
+            # what it replaced and a kept one still uses stays the kept one's
+            moved = [t for t in e.get('replaced', []) if t in in_use]
+            if moved:
+                owner = next(k for k in keep if set(moved) & set(k.get('kexts', [])))
+                owner['replaced'] = sorted(set(owner.get('replaced', [])) | set(moved))
+        _write(efi, config, keep)
+    else:
+        shutil.copy2(before, cfg_path)
+
+    for e in drop:
+        for top in e.get('kexts', []):
+            if top in in_use or not top.endswith('.kext') or '/' in top or '..' in top:
+                continue
+            if (kexts_dir / top).exists():
+                shutil.rmtree(kexts_dir / top)
+            if (aside / top).exists() and top not in in_use:
+                shutil.move(str(aside / top), str(kexts_dir / top))
+        say(f'      {e["name"]} {e.get("release", "")} taken out')
+    if not keep:
+        before.unlink()
+        shutil.rmtree(oc / KEPT, ignore_errors=True)
+        say('      the EFI is as it was built')
     return None
 
 
@@ -687,13 +909,49 @@ def discover(get=_get, known=None):
     return sorted((repo, where, title) for repo, (where, title) in seen.items())
 
 
-def digest(found):
-    """The body of the weekly issue: a checklist, newest sightings first."""
+RESULTS = ('It worked', 'Partly', 'It did not work', 'It stopped the machine from booting')
+
+
+def _field(body, label):
+    """One answer from an issue form's body, which GitHub writes as
+    '### Label' followed by the answer."""
+    m = re.search(rf'^### {re.escape(label)}\s*\n+(.*?)(?=\n### |\Z)', body or '', re.M | re.S)
+    value = (m.group(1).strip() if m else '')
+    return '' if value == '_No response_' else value
+
+
+def reports(get=_get):
+    """{project name: {result: [issue numbers]}} from the report issues."""
+    out = {}
+    url = (API.format(repo=REPORTS.split('github.com/')[1].rsplit('/issues', 1)[0])
+           + '/issues?labels=community-report&state=all&per_page=100')
+    for issue in json.loads(get(url)):
+        name, result = _field(issue.get('body'), 'Driver'), _field(issue.get('body'), 'Did it work?')
+        if name and result:
+            out.setdefault(name, {}).setdefault(result, []).append(issue['number'])
+    return out
+
+
+def digest(found, said=None):
+    """The body of the weekly issue: what people reported, then a checklist of
+    projects not recorded yet, newest sightings first."""
+    lines = []
+    if said:
+        lines += ['What people reported from running them, by the report issues. '
+                  'Moving one from experimental to recommended is a decision made in '
+                  'data/community.toml; these are what it rests on.', '',
+                  '| Driver | ' + ' | '.join(RESULTS) + ' |',
+                  '|---|' + '---|' * len(RESULTS)]
+        for name in sorted(said, key=str.lower):
+            cells = [', '.join(f'#{n}' for n in said[name].get(r, [])) or '-' for r in RESULTS]
+            lines.append(f'| {name} | ' + ' | '.join(cells) + ' |')
+        lines.append('')
     if not found:
-        return 'Nothing new this week: every project seen is already in data/community.toml.'
-    lines = ['Projects seen this week that data/community.toml does not have. '
-             'Nothing is added automatically; tick one off by adding it to the '
-             'registry, or leave it.', '']
+        lines.append('Nothing new this week: every project seen is already in data/community.toml.')
+        return '\n'.join(lines)
+    lines += ['Projects seen this week that data/community.toml does not have. '
+              'Nothing is added automatically; tick one off by adding it to the '
+              'registry, or leave it.', '']
     if not os.environ.get('REDDIT_CLIENT_ID'):
         lines += ['_r/hackintosh was not read: set the REDDIT_CLIENT_ID and '
                   'REDDIT_CLIENT_SECRET secrets to include it._', '']
@@ -719,7 +977,12 @@ def main(argv=None):
         for repo, where, title in found:
             print(f'  {repo:45} {where}  {title[:60]}')
         if a.digest:
-            Path(a.digest).write_text(digest(found), encoding='utf-8')
+            try:
+                said = reports()
+            except (urllib.error.URLError, OSError, ValueError) as exc:
+                print(f'  the report issues could not be read ({exc})')
+                said = None
+            Path(a.digest).write_text(digest(found, said), encoding='utf-8')
         return 0
     if a.check or a.refresh:
         rows = projects()

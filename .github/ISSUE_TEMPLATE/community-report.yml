@@ -1,0 +1,49 @@
+name: A community driver, run on my machine
+description: Whether a community driver from the Compatible Hardware pane worked for you. These reports are what moves one from experimental to recommended.
+title: "[community] "
+labels: ["community-report"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        The window fills in what it knows. Nothing here identifies you or your machine beyond its model of processor and its device ids; check before you send.
+  - type: input
+    id: project
+    attributes:
+      label: Driver
+      description: As the card names it
+    validations:
+      required: true
+  - type: input
+    id: release
+    attributes:
+      label: Release
+  - type: dropdown
+    id: result
+    attributes:
+      label: Did it work?
+      options:
+        - It worked
+        - Partly
+        - It did not work
+        - It stopped the machine from booting
+    validations:
+      required: true
+  - type: input
+    id: macos
+    attributes:
+      label: macOS version
+      placeholder: "e.g. 15.7.2"
+    validations:
+      required: true
+  - type: textarea
+    id: machine
+    attributes:
+      label: The machine
+      description: The processor, and the device ids the driver matched on it
+      render: text
+  - type: textarea
+    id: notes
+    attributes:
+      label: What happened
+      description: What worked and what did not; for a panic, the first lines of it
