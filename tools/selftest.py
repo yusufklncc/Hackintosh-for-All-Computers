@@ -2290,7 +2290,9 @@ def what_the_readme_shows():
     devices = inventory.devices()
     kexts = inventory.kexts()['kexts']
     claimed = sum(k['devices'] for k in kexts if k.get('devices'))
-    for count, what in ((len(devices['devices']), 'devices'),
+    # the In this EFI tab: somebody else's drivers are a tab of their own
+    shipped = [d for d in devices['devices'] if d['status'] != 'third-party']
+    for count, what in ((len(shipped), 'devices'),
                         (len(devices['categories']), 'categories'),
                         (len(kexts), 'kexts'),
                         (claimed, 'device ids')):
@@ -3204,6 +3206,17 @@ def the_community_registry():
           left and rows3[0]['release'] == by['AMDRadeonRDNA4']['release'], left)
     check('a vendor-wide mask is not read as an id list',
           community.kext_ids.__doc__ and 'ffff' in Path('tools/community.py').read_text())
+
+    # the Compatible Hardware pane: somebody else's drivers in a tab of their own
+    doc = community.document()['projects']
+    check('the pane gets one card per project, the shown ones first',
+          len(doc) == len(rows) and doc[0]['stage'] != 'watching')
+    check('  "built with AI" only where a project says so itself',
+          [d['name'] for d in doc if d['ai']] == [p['name'] for p in rows if p.get('ai')]
+          and all(p.get('ai_source') for p in rows if p.get('ai')))
+    pane = Path('gui/Views/DevicesView.axaml.cs').read_text(encoding='utf-8')
+    check('  and the In this EFI tab no longer mixes them in',
+          'Where(d => d.Status != "third-party")' in pane and 'Inventory.Community' in pane)
 
     # discovery lists, and decides nothing
     def search(url, accept=None):

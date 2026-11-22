@@ -143,6 +143,37 @@ def for_machine(hw):
     return devices, features_for(hw, [p['name'] for p, _, _ in devices])
 
 
+ROLE = {'graphics': 'Graphics', 'wifi': 'Wi-Fi', 'bluetooth': 'Bluetooth',
+        'ethernet': 'Ethernet', 'cpu': 'CPU', 'card reader': 'Card reader'}
+
+
+def document():
+    """The registry as the Compatible Hardware pane draws it: one card each."""
+    out = []
+    for p in projects():
+        ids = [c['id'] for c in p.get('card', [])] or list(p.get('ids', []))
+        out.append({
+            'name': p['name'], 'repo': p['repo'], 'url': f"https://github.com/{p['repo']}",
+            'role': ROLE.get(p.get('role'), (p.get('role') or '').title()),
+            'kind': p.get('kind', ''), 'stage': p.get('stage', ''),
+            'install': p.get('install', ''), 'licence': p.get('licence', ''),
+            'release': p.get('release') or '', 'macos': p.get('macos', ''),
+            'said': p.get('quote') or p.get('caveat') or '',
+            'covers': p.get('covers', ''), 'how': p.get('how', ''),
+            'needs': p.get('needs', ''), 'conflicts': p.get('conflicts', []),
+            'devices': len(ids), 'ids': ids[:8],
+            'tested': [c['name'] for c in p.get('card', []) if c.get('tested')],
+            'ai': p.get('ai', ''),
+            'chips': p.get('chips', []),
+            'requires': (', '.join(p.get('requires_cpu', [])) if p.get('requires_cpu')
+                         else 'a Realtek or Intel Bluetooth controller'
+                         if p.get('requires_role') == 'bluetooth' else ''),
+        })
+    order = {'recommended': 0, 'experimental': 1, 'vendored': 2, 'watching': 3}
+    out.sort(key=lambda r: (order.get(r['stage'], 9), r['role'], r['name'].lower()))
+    return {'projects': out}
+
+
 # --- upstream ----------------------------------------------------------------
 
 def _get(url, accept=None):
@@ -207,6 +238,10 @@ def check(p, get=_get):
         for key in p.get('quoted', ['quote']):
             if p.get(key) and p[key] not in page:
                 out.append((f'the {key} sentence is no longer on {p["source"]}', None))
+    if p.get('ai') and p.get('ai_source'):
+        page = _flat(get(RAW.format(repo=repo, sha=head, path=p['ai_source'])).decode('utf-8', 'replace'))
+        if p['ai'] not in page:
+            out.append((f'the ai sentence is no longer on {p["ai_source"]}', None))
     if p.get('ids_from') == 'rules' and p.get('card'):
         # the driver's own rule file: the ids its EFI tool and kext act on
         rules = json.loads(get(RAW.format(repo=repo, sha=head, path=p['source'])))

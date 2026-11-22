@@ -61,8 +61,8 @@ public partial class App : Application
                 {
                     Console.WriteLine("drive: " + await window.DriveBuilder());
                     foreach (var pane in new[] { "report", "recovery", "installer",
-                                                 "stick", "devices", "kexts",
-                                                 "about" })
+                                                 "stick", "devices", "community",
+                                                 "kexts", "about" })
                     {
                         await window.Show(pane);
                         // the report pane's whole job is behind a button, so

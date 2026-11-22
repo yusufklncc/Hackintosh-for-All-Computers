@@ -4,7 +4,7 @@ title: Check compatibility
 
 # Check compatibility
 
-The **Compatible Hardware** pane lists 787 devices across 8 categories -
+The **Compatible Hardware** pane lists 738 devices across 8 categories -
 everything this repository knows - searchable by name, id or kext. The
 **Machine** pane answers the same question about the computer you are sitting
 at.
@@ -75,7 +75,7 @@ records what the project says about itself, in its own words, the release, and
 the device ids its kext declares - read from the kext, not typed in. When your
 machine has a device one of them drives, the Machine pane says so in amber,
 beside Apple's answer and never instead of it, and Compatible Hardware lists
-them as *third-party*.
+them in its **Community** tab, one card per project.
 
 None of them goes into your EFI unless you pick it, and your machine's macOS
 range never leans on one. Once a week the repository checks each project for

@@ -271,6 +271,39 @@ public sealed class OfflineList
     [JsonPropertyName("complaint")] public string Complaint { get; set; } = "";
 }
 
+/// <summary>One project in the community registry, as the Compatible Hardware
+/// pane draws it. Every sentence in it is the project's own.</summary>
+public sealed class CommunityProject
+{
+    [JsonPropertyName("name")] public string Name { get; set; } = "";
+    [JsonPropertyName("repo")] public string Repo { get; set; } = "";
+    [JsonPropertyName("url")] public string Url { get; set; } = "";
+    [JsonPropertyName("role")] public string Role { get; set; } = "";
+    [JsonPropertyName("kind")] public string Kind { get; set; } = "";
+    [JsonPropertyName("stage")] public string Stage { get; set; } = "";
+    [JsonPropertyName("install")] public string Install { get; set; } = "";
+    [JsonPropertyName("licence")] public string Licence { get; set; } = "";
+    [JsonPropertyName("release")] public string Release { get; set; } = "";
+    [JsonPropertyName("macos")] public string Macos { get; set; } = "";
+    [JsonPropertyName("said")] public string Said { get; set; } = "";
+    [JsonPropertyName("covers")] public string Covers { get; set; } = "";
+    [JsonPropertyName("how")] public string How { get; set; } = "";
+    [JsonPropertyName("needs")] public string Needs { get; set; } = "";
+    [JsonPropertyName("conflicts")] public List<string> Conflicts { get; set; } = new();
+    [JsonPropertyName("devices")] public int Devices { get; set; }
+    [JsonPropertyName("ids")] public List<string> Ids { get; set; } = new();
+    [JsonPropertyName("tested")] public List<string> Tested { get; set; } = new();
+    [JsonPropertyName("chips")] public List<string> Chips { get; set; } = new();
+    [JsonPropertyName("ai")] public string Ai { get; set; } = "";
+    [JsonPropertyName("requires")] public string Requires { get; set; } = "";
+}
+
+public sealed class CommunityList
+{
+    [JsonPropertyName("projects")] public List<CommunityProject> Projects { get; set; } = new();
+}
+
+[JsonSerializable(typeof(CommunityList))]
 [JsonSerializable(typeof(OfflineList))]
 [JsonSerializable(typeof(InstallerPlan))]
 [JsonSerializable(typeof(Newest))]
@@ -369,6 +402,17 @@ public static class Inventory
         try
         {
             return (JsonSerializer.Deserialize(output, Carried.Default.DeviceList), "");
+        }
+        catch (JsonException e) { return (null, e.Message); }
+    }
+
+    public static async Task<(CommunityList? list, string complaint)> Community(Located engine)
+    {
+        var (output, error, code) = await Builder.Run(engine, "--inventory", "community");
+        if (code != 0) return (null, Said(error, code));
+        try
+        {
+            return (JsonSerializer.Deserialize(output, Carried.Default.CommunityList), "");
         }
         catch (JsonException e) { return (null, e.Message); }
     }

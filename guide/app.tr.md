@@ -111,10 +111,16 @@ yazmanızı ister.
 
 ### Compatible Hardware
 
-8 kategoride 787 aygıtı listeler — bu deponun bildiği her şeyi — ada, kimliğe ya
+8 kategoride 738 aygıtı listeler — bu deponun bildiği her şeyi — ada, kimliğe ya
 da kext'e göre aranabilir, kategoriye, üreticiye ve destek durumuna göre
 süzülebilir. Bir derlemenin okuduğu tabloların aynısından okunur, yani
 derleyicinin yapacağı şeyden ayrı düşemez.
+
+**Community** sekmesi öbür yarısıdır: buradan kimsenin yazmadığı sürücüler ve
+eklentiler, her biri bir kart — projenin neyi kapsadığı ve kendisi hakkında ne
+söylediği, sürümü ve lisansı, neye ihtiyaç duyduğu ve neyle yan yana duramayacağı,
+ve bağlantısı. *Built with AI* yalnızca proje bunu kendisi söylüyorsa gösterilir.
+Bkz. [Başkalarının yazdığı sürücüler](compatibility.md#başkalarının-yazdığı-sürücüler).
 
 ![Compatible Hardware paneli](https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/App/hardware.png)
 

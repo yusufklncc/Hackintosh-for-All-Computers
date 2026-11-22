@@ -3,15 +3,51 @@
              xmlns:v="clr-namespace:Shell.Views"
              x:Class="Shell.Views.DevicesView"
              x:DataType="v:DevicesView">
-  <Grid RowDefinitions="Auto,Auto,*" Margin="28,24">
-    <StackPanel Grid.Row="0" Spacing="8" Margin="0,0,0,14">
+  <UserControl.Styles>
+    <!-- two tabs drawn as words with a line under the one that is open, not
+         as radio circles: they say which list is showing, they pick nothing -->
+    <Style Selector="RadioButton.tab">
+      <Setter Property="Foreground" Value="{DynamicResource Muted}" />
+      <Setter Property="FontSize" Value="14" />
+      <Setter Property="Cursor" Value="Hand" />
+      <Setter Property="Template">
+        <ControlTemplate>
+          <Border Name="Under" Padding="2,6,2,7" BorderThickness="0,0,0,2"
+                  BorderBrush="Transparent" Background="Transparent">
+            <ContentPresenter Content="{TemplateBinding Content}" />
+          </Border>
+        </ControlTemplate>
+      </Setter>
+    </Style>
+    <Style Selector="RadioButton.tab:checked">
+      <Setter Property="Foreground" Value="{DynamicResource Ink}" />
+    </Style>
+    <Style Selector="RadioButton.tab:checked /template/ Border#Under">
+      <Setter Property="BorderBrush" Value="{DynamicResource Accent}" />
+    </Style>
+    <Style Selector="RadioButton.tab:pointerover">
+      <Setter Property="Foreground" Value="{DynamicResource Ink}" />
+    </Style>
+  </UserControl.Styles>
+
+  <Grid RowDefinitions="Auto,Auto,Auto,*" Margin="28,24">
+    <StackPanel Grid.Row="0" Spacing="8" Margin="0,0,0,10">
       <TextBlock Classes="eyebrow" Text="EVERY DEVICE THIS PROGRAM KNOWS" />
       <v:Busy Name="Reading" IsVisible="False" />
       <TextBlock Name="Blurb" FontSize="13.5" TextWrapping="Wrap" MaxWidth="760"
                  HorizontalAlignment="Left" Foreground="{DynamicResource Muted}" />
     </StackPanel>
 
-    <Grid Grid.Row="1" ColumnDefinitions="*,Auto,Auto,Auto" ColumnSpacing="10"
+    <!-- What this EFI drives, and what somebody else's driver does. They are
+         different promises, and one list with a status column made them read
+         as the same kind of answer. -->
+    <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="22" Margin="0,0,0,14">
+      <RadioButton Name="ToShipped" Classes="tab" GroupName="devices" IsChecked="True"
+                   Content="In this EFI" />
+      <RadioButton Name="ToCommunity" Classes="tab" GroupName="devices" />
+    </StackPanel>
+
+    <Grid Grid.Row="2" Name="Filters" ColumnDefinitions="*,Auto,Auto,Auto" ColumnSpacing="10"
           Margin="0,0,0,14">
       <TextBox Grid.Column="0" Name="Search" Watermark="Search a name, an id or a kext"
                MaxWidth="360" HorizontalAlignment="Left" Padding="10,6,14,6" />
@@ -20,7 +56,7 @@
       <ComboBox Grid.Column="3" Name="Vendor" MinWidth="170" />
     </Grid>
 
-    <Border Grid.Row="2" BorderBrush="{DynamicResource Line}" BorderThickness="1"
+    <Border Grid.Row="3" Name="Table" BorderBrush="{DynamicResource Line}" BorderThickness="1"
             CornerRadius="8" ClipToBounds="True">
       <DockPanel>
         <Border DockPanel.Dock="Top" Background="{DynamicResource Surface2}"
@@ -82,5 +118,77 @@
         </ListBox>
       </DockPanel>
     </Border>
+
+    <!-- The community registry, one card per project, in its own words -->
+    <ScrollViewer Grid.Row="2" Grid.RowSpan="2" Name="Community" IsVisible="False">
+      <StackPanel Spacing="14" MaxWidth="900" HorizontalAlignment="Left" Margin="0,0,0,24">
+        <TextBlock Name="CommunityBlurb" FontSize="13" TextWrapping="Wrap"
+                   Foreground="{DynamicResource Muted}" />
+        <TextBlock Classes="eyebrow" Text="SHOWN ON THE MACHINE PANE" />
+        <ItemsControl Name="Shown">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate><StackPanel Spacing="10" /></ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="v:CommunityItem">
+              <Border Classes="panel" Padding="16,14">
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
+                  <StackPanel Grid.Column="0" Spacing="5">
+                    <WrapPanel Orientation="Horizontal">
+                      <TextBlock Text="{Binding Name}" FontSize="15" FontWeight="SemiBold"
+                                 Foreground="{DynamicResource Ink}" Margin="0,0,10,4"
+                                 VerticalAlignment="Center" />
+                      <Border Classes="pill" Margin="0,0,6,4" VerticalAlignment="Center">
+                        <TextBlock Text="{Binding Role}" />
+                      </Border>
+                      <Border Classes="pill warn" Margin="0,0,6,4" VerticalAlignment="Center">
+                        <TextBlock Text="{Binding Stage}" />
+                      </Border>
+                      <Border Classes="pill" Margin="0,0,6,4" VerticalAlignment="Center"
+                              IsVisible="{Binding HasAi}">
+                        <TextBlock Text="built with AI, by its own account" />
+                      </Border>
+                    </WrapPanel>
+                    <TextBlock Text="{Binding Covers}" FontSize="13.5" TextWrapping="Wrap"
+                               Foreground="{DynamicResource Ink}" />
+                    <TextBlock Text="{Binding Said}" FontSize="12.5" FontStyle="Italic"
+                               TextWrapping="Wrap" Foreground="{DynamicResource Muted}"
+                               IsVisible="{Binding HasSaid}" />
+                    <TextBlock Text="{Binding Facts}" Classes="mono" FontSize="12"
+                               TextWrapping="Wrap" Foreground="{DynamicResource Faint}" />
+                    <TextBlock Text="{Binding Macos}" FontSize="12.5" TextWrapping="Wrap"
+                               Foreground="{DynamicResource Muted}" />
+                    <TextBlock Text="{Binding Where}" FontSize="12.5" TextWrapping="Wrap"
+                               Foreground="{DynamicResource Muted}" />
+                    <TextBlock Text="{Binding Needs}" FontSize="12.5" TextWrapping="Wrap"
+                               Foreground="{DynamicResource Muted}" IsVisible="{Binding HasNeeds}" />
+                  </StackPanel>
+                  <Button Grid.Column="1" Content="Open on GitHub" VerticalAlignment="Top"
+                          Tag="{Binding Url}" Click="OpenProject" />
+                </Grid>
+              </Border>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+        <TextBlock Classes="eyebrow" Text="WATCHED, NOT SHOWN YET" Margin="0,10,0,0" />
+        <TextBlock FontSize="12.5" TextWrapping="Wrap" Foreground="{DynamicResource Muted}"
+                   Text="Recorded, and kept up to date, but not offered: no release to read, no licence, or archived. A person moves one up when that changes." />
+        <ItemsControl Name="Watched">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="v:CommunityItem">
+              <Grid ColumnDefinitions="200,110,*,Auto" ColumnSpacing="10" Margin="0,6">
+                <TextBlock Grid.Column="0" Text="{Binding Name}" FontSize="13"
+                           Foreground="{DynamicResource Ink}" />
+                <TextBlock Grid.Column="1" Text="{Binding Role}" FontSize="12.5"
+                           Foreground="{DynamicResource Muted}" />
+                <TextBlock Grid.Column="2" Text="{Binding Covers}" FontSize="12.5"
+                           TextWrapping="Wrap" Foreground="{DynamicResource Muted}" />
+                <Button Grid.Column="3" Content="GitHub" Tag="{Binding Url}" Click="OpenProject" />
+              </Grid>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </StackPanel>
+    </ScrollViewer>
   </Grid>
 </UserControl>

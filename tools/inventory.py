@@ -22,7 +22,7 @@ import thirdparty
 
 # One list, named once. It was written twice - the argument parser's and the
 # dispatch table's - and they drifted the first time a document was added.
-WHAT = ('kexts', 'about', 'devices', 'recovery')
+WHAT = ('kexts', 'about', 'devices', 'recovery', 'community')
 
 LOCK = Path('vendor/kexts.lock')
 CATALOGUE = Path('profiles/catalogue.toml')
@@ -340,8 +340,13 @@ def recoveries(hw=None):
 
 # the same names WHAT lists, so a document cannot be offered and then not
 # exist - which is how --inventory devices came to be rejected by the parser
+def community():
+    import community as _community
+    return _community.document()
+
+
 DOCUMENTS = {'kexts': kexts, 'about': about, 'devices': devices,
-             'recovery': recoveries}
+             'recovery': recoveries, 'community': community}
 
 
 def main(argv=None):

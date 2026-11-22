@@ -81,11 +81,13 @@ public partial class MainWindow : Window
             // the parts that were panes of their own are shown where they live now
             "report" => ToMachine,
             "recovery" or "installer" or "stick" => ToStick,
-            "devices" => ToDevices, "kexts" => ToKexts,
+            "devices" or "community" => ToDevices, "kexts" => ToKexts,
             "about" => ToAbout,
             "builder" => ToBuilder, _ => ToMachine,
         };
         nav.IsChecked = true;
         await Swap();
+        // the community registry is a tab of Compatible Hardware, not a pane
+        if (pane is "devices" or "community") DevicesPane.ShowCommunity(pane == "community");
     }
 }

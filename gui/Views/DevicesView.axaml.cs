@@ -80,6 +80,60 @@ public sealed class DeviceItem
     public string Haystack { get; }
 }
 
+/// <summary>One community project as a card: its own words, and what it takes.</summary>
+public sealed class CommunityItem
+{
+    public CommunityItem(CommunityProject p)
+    {
+        Name = p.Name;
+        Role = p.Role;
+        Stage = p.Stage;
+        Url = p.Url;
+        Covers = p.Covers;
+        Said = p.Said.Length > 0 ? $"\u201c{p.Said.Replace("**", "").Trim()}\u201d" : "";
+        HasSaid = Said.Length > 0;
+        HasAi = p.Ai.Length > 0;
+        // what it matches, in the terms it matches by
+        var matches = p.Devices > 0 ? $"{p.Devices} device id{(p.Devices == 1 ? "" : "s")}"
+                    : p.Chips.Count > 0 ? $"chip families {string.Join(", ", p.Chips)}"
+                    : p.Requires.Length > 0 ? $"needs {p.Requires}"
+                    : "";
+        Facts = string.Join("  ·  ", new[]
+        {
+            p.Release.Length > 0 ? p.Release : "no release",
+            p.Licence, matches,
+            p.Tested.Count > 0 ? $"run on {string.Join(", ", p.Tested)}" : "",
+        }.Where(s => s.Length > 0));
+        var said = p.Macos.Replace("**", "").Replace("| ", "").Trim('|', ' ');
+        Macos = said.Length == 0 ? ""
+              : said.StartsWith("macOS", StringComparison.Ordinal) ? said : $"macOS: {said}";
+        var how = p.How.Length > 0 ? char.ToUpperInvariant(p.How[0]) + p.How[1..] : "";
+        Where = p.Install == "system"
+            ? $"Installed on macOS after it boots: {p.How}."
+            : $"A kext for the EFI, offered in the EFI pane and never added unasked. {how}.";
+        Needs = string.Join("  ", new[]
+        {
+            p.Needs.Length > 0 ? $"Needs {p.Needs}." : "",
+            p.Conflicts.Count > 0 ? $"Not with {string.Join(" or ", p.Conflicts)}." : "",
+        }.Where(s => s.Length > 0));
+        HasNeeds = Needs.Length > 0;
+    }
+
+    public string Name { get; }
+    public string Role { get; }
+    public string Stage { get; }
+    public string Url { get; }
+    public string Covers { get; }
+    public string Said { get; }
+    public bool HasSaid { get; }
+    public bool HasAi { get; }
+    public string Facts { get; }
+    public string Macos { get; }
+    public string Where { get; }
+    public string Needs { get; }
+    public bool HasNeeds { get; }
+}
+
 public partial class DevicesView : UserControl
 {
     const string Everything = "All";
@@ -99,6 +153,33 @@ public partial class DevicesView : UserControl
         Status.SelectionChanged += (_, _) => Draw();
         SortCategory.Click += (_, _) => SortOn("category");
         SortName.Click += (_, _) => SortOn("name");
+        ToShipped.IsCheckedChanged += (_, _) => ShowTab();
+        ToCommunity.IsCheckedChanged += (_, _) => ShowTab();
+        ToCommunity.Content = "Community";
+    }
+
+    /// <summary>For the screenshot pass: open one tab or the other.</summary>
+    public void ShowCommunity(bool on)
+    {
+        ToCommunity.IsChecked = on;
+        ToShipped.IsChecked = !on;
+        ShowTab();
+    }
+
+    void ShowTab()
+    {
+        var community = ToCommunity.IsChecked == true;
+        Community.IsVisible = community;
+        Filters.IsVisible = Table.IsVisible = !community;
+    }
+
+    /// <summary>Open a project's page in the browser.</summary>
+    async void OpenProject(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+    {
+        if (sender is not Button { Tag: string url } || TopLevel.GetTopLevel(this) is not { } top)
+            return;
+        try { await top.Launcher.LaunchUriAsync(new Uri(url)); }
+        catch (Exception) { /* no browser: the address is on the card's button */ }
     }
 
     /// <summary>Order by this column, or turn it round if it already is.</summary>
@@ -132,20 +213,44 @@ public partial class DevicesView : UserControl
         Reading.Say(null);
         if (list is null) { Blurb.Text = complaint; return; }
 
-        _all = list.Devices.Select(d => new DeviceItem(d)).ToList();
+        // somebody else's drivers are their own tab now: a status column made
+        // "this EFI drives it" and "a project somewhere does" read alike
+        _all = list.Devices.Where(d => d.Status != "third-party")
+                           .Select(d => new DeviceItem(d)).ToList();
         Blurb.Text = $"{_all.Count} devices across {list.Categories.Count} categories, "
                    + "read out of the same tables a build reads. A device being here "
                    + "means something in this repository claims it - not that every "
                    + "machine it sits in will work.";
+        await FillCommunity(engine);
         Category.ItemsSource = new[] { Everything }.Concat(list.Categories).ToList();
         Vendor.ItemsSource = new[] { Everything }
             .Concat(list.Vendors.Select(DeviceItem.ShortName).Distinct().OrderBy(v => v))
             .ToList();
-        Status.ItemsSource = new[] { Everything }.Concat(list.Statuses).ToList();
+        Status.ItemsSource = new[] { Everything }
+            .Concat(list.Statuses.Where(s => s != "third-party")).ToList();
         Category.SelectedIndex = 0;
         Vendor.SelectedIndex = 0;
         Status.SelectedIndex = 0;
         Draw();
+    }
+
+    async Task FillCommunity(Located engine)
+    {
+        var (list, complaint) = await Inventory.Community(engine);
+        if (list is null) { CommunityBlurb.Text = complaint; return; }
+        var shown = list.Projects.Where(p => p.Stage != "watching")
+                                 .Select(p => new CommunityItem(p)).ToList();
+        var watched = list.Projects.Where(p => p.Stage == "watching")
+                                   .Select(p => new CommunityItem(p)).ToList();
+        Shown.ItemsSource = shown;
+        Watched.ItemsSource = watched;
+        CommunityBlurb.Text =
+            "Drivers and add-ons nobody here wrote, for hardware this EFI has no answer "
+            + "for or for things macOS never did on a PC. Each one is experimental by its "
+            + "own account; every sentence on a card is the project's own, at the commit "
+            + "recorded, and the device ids are read from its kext. A machine that has one "
+            + "of these devices is told so on the Machine pane, beside Apple's answer and "
+            + "never instead of it. Built with AI is shown only where a project says so.";
     }
 
     void Draw()

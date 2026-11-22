@@ -109,10 +109,16 @@ before it starts.
 
 ### Compatible Hardware
 
-Lists 787 devices across 8 categories - everything this repository knows -
+Lists 738 devices across 8 categories - everything this repository knows -
 searchable by name, id or kext, and filterable by category, vendor and support.
 It is read out of the same tables a build reads, so it cannot drift from what
 the builder would do.
+
+Its **Community** tab is the other half: drivers and add-ons nobody here wrote,
+one card each - what the project covers and says about itself, its release and
+licence, what it needs and what it cannot sit beside, and a link to it. *Built
+with AI* is shown only where a project says so itself. See
+[Drivers somebody else is writing](compatibility.md#drivers-somebody-else-is-writing).
 
 ![The Compatible Hardware pane](https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/App/hardware.png)
 

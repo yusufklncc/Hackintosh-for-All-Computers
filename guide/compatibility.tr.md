@@ -4,7 +4,7 @@ title: Uyumluluğu kontrol edin
 
 # Uyumluluğu kontrol edin
 
-**Compatible Hardware** paneli 8 kategoride 787 aygıtı listeler — bu deponun
+**Compatible Hardware** paneli 8 kategoride 738 aygıtı listeler — bu deponun
 bildiği her şeyi — ada, kimliğe ya da kext'e göre aranabilir şekilde. **Machine**
 paneli aynı soruyu, başında oturduğunuz bilgisayar için yanıtlar.
 
@@ -76,7 +76,7 @@ projenin kendisi hakkında söylediğini kendi kelimeleriyle, sürümünü ve ke
 bildirdiği aygıt kimliklerini kaydeder — elle yazılmış değil, kext'ten okunmuş.
 Makinenizde bunlardan birinin sürdüğü bir aygıt varsa, Machine paneli bunu
 kehribar renkte, Apple'ın cevabının yanında ve asla onun yerine söyler;
-Compatible Hardware da onları *third-party* olarak listeler.
+Compatible Hardware da onları **Community** sekmesinde, her proje için bir kartla listeler.
 
 Siz seçmedikçe hiçbiri EFI'nize girmez ve makinenizin macOS aralığı hiçbirine
 dayanmaz. Depo her hafta her projenin yeni sürümünü kontrol eder ve henüz kayıtlı

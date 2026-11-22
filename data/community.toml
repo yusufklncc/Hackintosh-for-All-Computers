@@ -12,6 +12,8 @@
 #              chip families ("chips")
 #   licence    as GitHub reads the project's LICENSE
 #   sha256     of the release asset named, as downloaded
+#   ai         only where the project itself says it was written with AI,
+#              quoted from ai_source; absent means it does not say, not no
 #   quote, and whatever else `quoted` names
 #              the project's own sentences, at the commit recorded; checked
 #              word for word against its page every week
@@ -29,6 +31,10 @@
 # that are not here yet. Neither adds a project: that is a decision.
 [[project]]
 name = "intel-gpu-macos-driver"
+# its own README, in a note at the top: the only project here that says how
+# it was written. Nothing is assumed about the others either way.
+ai = "**Built with AI.** This project is developed with AI assistance."
+ai_source = "README.md"
 repo = "yusufklncc/intel-gpu-macos-driver"
 kind = "device"
 role = "graphics"
@@ -295,7 +301,7 @@ ids_from = "quoted"
 ids = ["1002:7550", "1002:7551"]
 macos = "| **Tahoe 26.6.2** | **Tested**: the main test system."
 min_darwin = 24
-quote = "| Radeon RX 9070 XT | Navi 48 (gfx1201) | `1002:7550` (`0xC0`) | **Supported.** The card everything is developed and tested on. |"
+quote = "A macOS driver for AMD Radeon **RDNA 4** graphics cards (Navi 48: RX 9070 XT, RX 9070, RX 9070 GRE) on x86_64 Hackintosh."
 covers = "AMD Radeon RX 9070 XT, RX 9070, RX 9070 GRE and AI PRO R9700"
 requires_kext = "Lilu 1.7.1 or newer on macOS 26"
 how = "a Lilu plugin, injected by OpenCore"
