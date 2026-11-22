@@ -48,6 +48,10 @@ ids_from = "rules"
 ai_files = []
 ai_commits = [96, 100]
 ai_tools = ["Claude"]
+release = "v0.1.7"
+quote_source = "README.md"
+quote = "**A Metal driver that runs Intel Arc graphics cards on macOS.**"
+covers = "Intel Arc B-series graphics: B580, B570, Pro B60 and Pro B50"
 
 [[project.card]]
 id = "8086:e20b"
@@ -93,6 +97,8 @@ ids_from = "chips"
 ai_files = ["AGENTS.md"]
 ai_commits = [0, 100]
 ai_tools = []
+release = "v3.0"
+covers = "NVIDIA GeForce Turing and newer: GTX 16, RTX 20, 30, 40 and 50"
 
 [[project]]
 name = "AppleIGC"

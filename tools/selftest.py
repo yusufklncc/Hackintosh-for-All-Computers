@@ -3215,7 +3215,16 @@ def the_community_registry():
     check('  "built with AI" only where a project says so itself',
           [d['name'] for d in doc if d['ai']] == [p['name'] for p in rows if p.get('ai')]
           and all(p.get('ai_source') for p in rows if p.get('ai')))
+    matched = community.document({'pci_ids': ['10ec:b852']})['projects']
+    check('a card says whether the machine shown fits it',
+          sorted(d['name'] for d in matched if d['matches']) == ['AirPort_RTW89', 'RTLAirLink'])
+    check('  and with no machine, none claims to', not any(d['matches'] for d in doc))
+    check('every project has words of its own on its card, the carried-over ones too',
+          all(d['covers'] and (d['said'] or d['stage'] == 'watching') for d in doc),
+          [d['name'] for d in doc if not d['covers'] or not (d['said'] or d['stage'] == 'watching')])
     pane = Path('gui/Views/DevicesView.axaml.cs').read_text(encoding='utf-8')
+    check('the Community tab filters by category, way in, authorship and this machine',
+          all(f in pane for f in ('"All categories"', '"Any way in"', '"Any authorship"', 'c.Matches')))
     check('  and the In this EFI tab no longer mixes them in',
           'Where(d => d.Status != "third-party")' in pane and 'Inventory.Community' in pane)
 

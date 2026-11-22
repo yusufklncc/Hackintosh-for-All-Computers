@@ -153,8 +153,15 @@ ROLE = {'graphics': 'Graphics', 'wifi': 'Wi-Fi', 'bluetooth': 'Bluetooth',
         'ethernet': 'Ethernet', 'cpu': 'CPU', 'card reader': 'Card reader'}
 
 
-def document():
-    """The registry as the Compatible Hardware pane draws it: one card each."""
+def document(hw=None):
+    """The registry as the Compatible Hardware pane draws it: one card each.
+
+    With a machine, each card also says whether that machine matches it - by a
+    device id the project names, or by the requirement an add-on states."""
+    mine = set()
+    if hw:
+        devices, features = for_machine(hw)
+        mine = {p['name'] for p, _, _ in devices} | {p['name'] for p in features}
     out = []
     for p in projects():
         ids = [c['id'] for c in p.get('card', [])] or list(p.get('ids', []))
@@ -176,6 +183,7 @@ def document():
             'ai_commits': p.get('ai_commits', [0, 0]),
             'ai_tools': p.get('ai_tools', []),
             'recipe': bool(p.get('recipe')),
+            'matches': p['name'] in mine,
             'chips': p.get('chips', []),
             'requires': (', '.join(p.get('requires_cpu', [])) if p.get('requires_cpu')
                          else 'a Realtek or Intel Bluetooth controller'
@@ -247,14 +255,17 @@ def check(p, get=_get):
     if p.get('source') and (p.get('quote') or p.get('macos')):
         # a project with no README still describes itself in one line on
         # GitHub, and that line is as much its own words
-        page = (_flat(info.get('description') or '') if p['source'] == '@description' else
-                _flat(get(RAW.format(repo=repo, sha=head, path=p['source'])).decode('utf-8', 'replace')))
+        # the sentences may live in another file than the ids do: the Arc
+        # driver's ids are in its rule file and its own words in its README
+        where = p.get('quote_source') or p['source']
+        page = (_flat(info.get('description') or '') if where == '@description' else
+                _flat(get(RAW.format(repo=repo, sha=head, path=where)).decode('utf-8', 'replace')))
         # only what is recorded as the project's own words: the two GPU drivers
         # carried over keep a summary in `macos`, and a summary is never on
         # the page it summarises
         for key in p.get('quoted', ['quote']):
             if p.get(key) and p[key] not in page:
-                out.append((f'the {key} sentence is no longer on {p["source"]}', None))
+                out.append((f'the {key} sentence is no longer on {where}', None))
     if p.get('ai') and p.get('ai_source'):
         page = _flat(get(RAW.format(repo=repo, sha=head, path=p['ai_source'])).decode('utf-8', 'replace'))
         if p['ai'] not in page:
@@ -268,13 +279,21 @@ def check(p, get=_get):
             out.append((f'now matches {added}', None))
         for gone in sorted(have - ids):
             out.append((f'no longer matches {gone}', None))
+    if p.get('release') and p.get('ids_from') in ('rules', 'chips'):
+        # installed by its own app, so only the release it is on is followed
+        try:
+            rel = json.loads(get(API.format(repo=repo) + '/releases?per_page=1'))
+        except urllib.error.HTTPError:
+            rel = []
+        if isinstance(rel, list) and rel and rel[0].get('tag_name') != p['release']:
+            out.append((f'released {rel[0]["tag_name"]}', {'release': rel[0]['tag_name']}))
     if p.get('release') is not None and p.get('ids_from') in ('kext', 'quoted', None) \
             and not p.get('unreleased'):
         try:
             rel = json.loads(get(API.format(repo=repo) + '/releases?per_page=1'))
         except urllib.error.HTTPError:
             rel = []
-        if rel and rel[0].get('tag_name') != p.get('release'):
+        if isinstance(rel, list) and rel and rel[0].get('tag_name') != p.get('release'):
             tag = rel[0]['tag_name']
             update = {'release': tag}
             zips = [a for a in rel[0].get('assets', []) if a['name'].lower().endswith('.zip')

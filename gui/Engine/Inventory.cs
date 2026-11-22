@@ -299,6 +299,7 @@ public sealed class CommunityProject
     [JsonPropertyName("ai_level")] public string AiLevel { get; set; } = "";
     [JsonPropertyName("ai_why")] public string AiWhy { get; set; } = "";
     [JsonPropertyName("recipe")] public bool Recipe { get; set; }
+    [JsonPropertyName("matches")] public bool Matches { get; set; }
     [JsonPropertyName("requires")] public string Requires { get; set; } = "";
 }
 
@@ -412,7 +413,9 @@ public static class Inventory
 
     public static async Task<(CommunityList? list, string complaint)> Community(Located engine)
     {
-        var (output, error, code) = await Builder.Run(engine, "--inventory", "community");
+        var (output, error, code) = Program.MachineFile is { Length: > 0 } report
+            ? await Builder.Run(engine, "--inventory", "community", "--machine", report)
+            : await Builder.Run(engine, "--inventory", "community");
         if (code != 0) return (null, Said(error, code));
         try
         {

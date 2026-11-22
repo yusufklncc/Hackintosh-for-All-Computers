@@ -340,9 +340,9 @@ def recoveries(hw=None):
 
 # the same names WHAT lists, so a document cannot be offered and then not
 # exist - which is how --inventory devices came to be rejected by the parser
-def community():
+def community(hw=None):
     import community as _community
-    return _community.document()
+    return _community.document(hw)
 
 
 DOCUMENTS = {'kexts': kexts, 'about': about, 'devices': devices,

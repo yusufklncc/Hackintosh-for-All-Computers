@@ -86,8 +86,15 @@ public sealed class CommunityItem
     public CommunityItem(CommunityProject p)
     {
         Name = p.Name;
-        Role = p.Role;
+        Matches = p.Matches;
         Stage = p.Stage;
+        Install = p.Install == "system" ? "Installed on macOS"
+                : p.Recipe ? "Offered in the EFI pane" : "Kext, its own way in";
+        AiLabel = p.AiLevel switch { "written" => "AI-written", "assisted" => "AI-assisted", _ => "Not stated" };
+        Haystack = $"{p.Name} {p.Role} {p.Covers} {p.Said} {p.Macos} {p.Repo} "
+                 + string.Join(" ", p.Ids) + " " + string.Join(" ", p.Chips);
+        Haystack = Haystack.ToLowerInvariant();
+        Role = p.Role;
         Url = p.Url;
         Covers = p.Covers;
         Said = p.Said.Length > 0 ? $"\u201c{p.Said.Replace("**", "").Trim()}\u201d" : "";
@@ -127,6 +134,10 @@ public sealed class CommunityItem
     }
 
     public string Name { get; }
+    public bool Matches { get; }
+    public string Install { get; }
+    public string AiLabel { get; }
+    public string Haystack { get; }
     public string Role { get; }
     public string Stage { get; }
     public string Url { get; }
@@ -165,6 +176,38 @@ public partial class DevicesView : UserControl
         ToShipped.IsCheckedChanged += (_, _) => ShowTab();
         ToCommunity.IsCheckedChanged += (_, _) => ShowTab();
         ToCommunity.Content = "Community";
+        CommunitySearch.TextChanged += (_, _) => DrawCommunity();
+        CommunityRole.SelectionChanged += (_, _) => DrawCommunity();
+        CommunityInstall.SelectionChanged += (_, _) => DrawCommunity();
+        CommunityAi.SelectionChanged += (_, _) => DrawCommunity();
+        OnlyMine.IsCheckedChanged += (_, _) => DrawCommunity();
+    }
+
+    List<CommunityItem> _community = new();
+
+    void DrawCommunity()
+    {
+        var needle = (CommunitySearch.Text ?? "").Trim().ToLowerInvariant();
+        // each box says what it is about when nothing is picked in it, so the
+        // first entry of each is its own word for "any", not a shared "All"
+        string Pick(ComboBox box) => box.SelectedIndex > 0 ? box.SelectedItem as string ?? Everything
+                                                           : Everything;
+        var role = Pick(CommunityRole);
+        var install = Pick(CommunityInstall);
+        var ai = Pick(CommunityAi);
+        var mine = OnlyMine.IsChecked == true;
+        var kept = _community.Where(c =>
+            (role == Everything || c.Role == role) &&
+            (install == Everything || c.Install == install) &&
+            (ai == Everything || c.AiLabel == ai) &&
+            (!mine || c.Matches) &&
+            (needle.Length == 0 || c.Haystack.Contains(needle, StringComparison.Ordinal))).ToList();
+        Shown.ItemsSource = kept.Where(c => c.Stage != "watching").ToList();
+        Watched.ItemsSource = kept.Where(c => c.Stage == "watching").ToList();
+        CommunityCount.Text = kept.Count == _community.Count
+            ? $"{_community.Count} projects"
+            : $"{kept.Count} of {_community.Count} projects"
+              + (mine && kept.Count == 0 ? " - nothing in the registry fits this machine" : "");
     }
 
     /// <summary>For the screenshot pass: open one tab or the other.</summary>
@@ -247,12 +290,14 @@ public partial class DevicesView : UserControl
     {
         var (list, complaint) = await Inventory.Community(engine);
         if (list is null) { CommunityBlurb.Text = complaint; return; }
-        var shown = list.Projects.Where(p => p.Stage != "watching")
-                                 .Select(p => new CommunityItem(p)).ToList();
-        var watched = list.Projects.Where(p => p.Stage == "watching")
-                                   .Select(p => new CommunityItem(p)).ToList();
-        Shown.ItemsSource = shown;
-        Watched.ItemsSource = watched;
+        _community = list.Projects.Select(p => new CommunityItem(p)).ToList();
+        List<string> Choices(string any, IEnumerable<string> values) =>
+            new[] { any }.Concat(values.Distinct().OrderBy(v => v)).ToList();
+        CommunityRole.ItemsSource = Choices("All categories", _community.Select(c => c.Role));
+        CommunityInstall.ItemsSource = Choices("Any way in", _community.Select(c => c.Install));
+        CommunityAi.ItemsSource = new[] { "Any authorship", "AI-written", "AI-assisted", "Not stated" }.ToList();
+        CommunityRole.SelectedIndex = CommunityInstall.SelectedIndex = CommunityAi.SelectedIndex = 0;
+        DrawCommunity();
         CommunityBlurb.Text =
             "Drivers and add-ons nobody here wrote, for hardware this EFI has no answer "
             + "for or for things macOS never did on a PC. Each one is experimental by its "

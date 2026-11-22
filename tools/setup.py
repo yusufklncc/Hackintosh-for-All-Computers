@@ -705,6 +705,11 @@ def main():
             # did, which is when the tuple went in whole.
             carried = load_machine(a.machine)[0] if a.machine else None
             document = inventory.recoveries(carried)
+        elif a.inventory == 'community':
+            # which cards fit the machine the Machine pane is showing: a report
+            # when one is open, otherwise this machine, read the way it reads it
+            carried = load_machine(a.machine)[0] if a.machine else detect.probe()
+            document = inventory.community(carried)
         else:
             document = inventory.DOCUMENTS[a.inventory]()
         sys.stdout.write(_json.dumps(document, ensure_ascii=False) + '\n')

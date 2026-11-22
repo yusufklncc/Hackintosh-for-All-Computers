@@ -124,6 +124,20 @@
       <StackPanel Spacing="14" MaxWidth="900" HorizontalAlignment="Left" Margin="0,0,0,24">
         <TextBlock Name="CommunityBlurb" FontSize="13" TextWrapping="Wrap"
                    Foreground="{DynamicResource Muted}" />
+        <!-- the same kind of filters the other tab has, for the questions a
+             person brings to this list: my card, this category, how it goes in,
+             and how it was written -->
+        <WrapPanel Orientation="Horizontal">
+          <TextBox Name="CommunitySearch" Watermark="Search a name, a card or an id"
+                   Width="260" Padding="10,6,14,6" Margin="0,0,10,8" />
+          <ComboBox Name="CommunityRole" MinWidth="130" Margin="0,0,10,8" />
+          <ComboBox Name="CommunityInstall" MinWidth="200" Margin="0,0,10,8" />
+          <ComboBox Name="CommunityAi" MinWidth="150" Margin="0,0,10,8" />
+          <CheckBox Name="OnlyMine" Content="Only what fits this machine"
+                    Margin="0,0,10,8" VerticalAlignment="Center" />
+        </WrapPanel>
+        <TextBlock Name="CommunityCount" Classes="mono" FontSize="12"
+                   Foreground="{DynamicResource Faint}" />
         <TextBlock Classes="eyebrow" Text="EXPERIMENTAL, BY THEIR OWN ACCOUNT" />
         <ItemsControl Name="Shown">
           <ItemsControl.ItemsPanel>
