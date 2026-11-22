@@ -925,6 +925,24 @@ def the_windows_only_ways_this_broke():
     skipped it, then - once that was fixed - dumped a second set of tables on
     top of the first and refused them all. Three faults, none reachable from
     macOS or Linux, each found by somebody running it."""
+    # a pipe on Windows is cp1252, and BroadTek's README says `Kernel → Add`:
+    # the engine stopped with exit 1 while quoting it. Reproduced here by
+    # giving a pipe the same code page.
+    env = dict(os.environ, PYTHONIOENCODING='cp1252')
+    said = subprocess.run([sys.executable, '-c',
+                           "import sys; sys.path.insert(0, 'tools'); import ui; "
+                           "print('Kernel \u2192 Add, T\u00fcrk\u00e7e \u0131')"],
+                          capture_output=True, env=env)
+    check('a quote with an arrow in it does not stop the engine on a cp1252 pipe',
+          said.returncode == 0, said.stderr.decode(errors='replace')[-200:])
+    check('  and it arrives as the UTF-8 the window reads',
+          said.stdout.decode('utf-8', errors='strict').startswith('Kernel \u2192 Add, T\u00fcrk\u00e7e'))
+    import io as _io
+    import ui as _ui
+    out = _io.StringIO()
+    _ui.Protocol(out=out).emit(t='text', text='Kernel \u2192 Add')
+    check('  and the window\'s JSON channel is plain ASCII either way',
+          out.getvalue().isascii() and '\\u2192' in out.getvalue())
     import acpi as acpimod
     import shutil
 

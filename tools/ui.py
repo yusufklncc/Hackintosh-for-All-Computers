@@ -25,6 +25,29 @@ import os
 import re
 import sys
 
+
+def utf8_streams():
+    """Write UTF-8 to a pipe, whatever the system's code page is.
+
+    The window reads the engine's output as UTF-8. On Windows a pipe gets the
+    ANSI code page instead - cp1252 here - and that code page has no arrow:
+    BroadTek's README says `Kernel → Add`, the builder quoted it, and the
+    engine died on the quote with exit code 1 halfway through adding the
+    driver. The same mismatch turned every Turkish letter in a device name
+    into two wrong ones. A console keeps its own encoding and only learns to
+    replace what it cannot draw rather than stop on it."""
+    for stream in (sys.stdout, sys.stderr):
+        try:
+            if stream.isatty():
+                stream.reconfigure(errors='replace')
+            else:
+                stream.reconfigure(encoding='utf-8', errors='replace')
+        except (AttributeError, ValueError, OSError):
+            pass          # a StringIO under a test, or a stream already closed
+
+
+utf8_streams()
+
 CODES = {
     'bold': '\033[1m', 'dim': '\033[2m', 'green': '\033[32m',
     'yellow': '\033[33m', 'red': '\033[31m', 'reset': '\033[0m',
@@ -128,7 +151,9 @@ class Protocol:
         self._write(event)
 
     def _write(self, event):
-        self.out.write(json.dumps(event, ensure_ascii=False) + '\n')
+        # escaped, so the stream is ASCII whatever it was opened as: a quote
+        # with an arrow in it cannot stop the engine a second way
+        self.out.write(json.dumps(event, ensure_ascii=True) + '\n')
         self.out.flush()
 
     def line(self, text=''):

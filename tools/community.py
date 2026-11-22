@@ -442,6 +442,10 @@ def apply(efi, picks, darwin=None, say=print, get=_get, cache=None):
         staged.append((p, got))
 
     add = config['Kernel']['Add']
+    # what to say is kept until the config is written: a line that cannot be
+    # printed must not be the thing that leaves an EFI half changed
+    told = []
+    say, tell = told.append, say
     for p, got in staged:
         r = p['recipe']
         note = f"{p['name']} {p.get('release', '')}, community, experimental"
@@ -488,6 +492,8 @@ def apply(efi, picks, darwin=None, say=print, get=_get, cache=None):
 
     with open(cfg_path, 'wb') as fh:
         plistlib.dump(config, fh, sort_keys=False)
+    for line in told:
+        tell(line)
     return None
 
 
