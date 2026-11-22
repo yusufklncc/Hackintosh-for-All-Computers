@@ -12,8 +12,9 @@
 #              chip families ("chips")
 #   licence    as GitHub reads the project's LICENSE
 #   sha256     of the release asset named, as downloaded
-#   macos, quote, covers
-#              the project's own sentences, at the commit recorded
+#   quote, and whatever else `quoted` names
+#              the project's own sentences, at the commit recorded; checked
+#              word for word against its page every week
 #
 # stage: watching      known, not shown
 #        experimental  shown beside Apple's verdict; offered, never added unasked
@@ -143,6 +144,7 @@ ids = ["0bda:0129", "0bda:0139", "0bda:0140", "10ec:5209", "10ec:5227", "10ec:52
 
 [[project]]
 name = "AirPort_RTW89"
+quoted = ["quote", "macos"]
 repo = "FranciumOS-org/AirPort_RTW89"
 kind = "device"
 role = "wifi"
@@ -166,6 +168,7 @@ how = "its own Kext Installer edits the EFI; by hand, the README lists every ste
 
 [[project]]
 name = "RTLAirLink"
+quoted = ["quote", "macos"]
 repo = "xnpty/RTLAirLink"
 kind = "device"
 role = "wifi"
@@ -188,6 +191,7 @@ how = "its install script edits the EFI"
 
 [[project]]
 name = "BroadTek"
+quoted = ["quote", "macos"]
 repo = "FranciumOS-org/BroadTek"
 kind = "feature"
 role = "bluetooth"
@@ -210,6 +214,7 @@ how = "ships inside AirPort_RTW89; also on its own as a Lilu plugin"
 
 [[project]]
 name = "IntelSpeedShiftEPP"
+quoted = ["quote", "macos"]
 repo = "xnpty/IntelSpeedShiftEPP"
 kind = "feature"
 role = "cpu"
@@ -230,6 +235,7 @@ how = "copied into EFI/OC/Kexts and added to Kernel -> Add"
 
 [[project]]
 name = "IntelHybridCores"
+quoted = ["quote", "macos"]
 repo = "rodgod-rr/IntelHybridCores"
 kind = "feature"
 role = "cpu"
@@ -251,6 +257,7 @@ how = "a reference binary in the repository, no release yet"
 
 [[project]]
 name = "MeowXE3"
+quoted = ["quote", "macos"]
 repo = "cuadra8998/MeowXE3"
 kind = "device"
 role = "graphics"
@@ -272,6 +279,7 @@ how = "its own installer, after macOS boots, plus a boot kext and boot-arg in th
 
 [[project]]
 name = "AMDRadeonRDNA4"
+quoted = ["quote", "macos"]
 repo = "RX4Darwin/AMDRadeonRDNA4.kext"
 kind = "device"
 role = "graphics"

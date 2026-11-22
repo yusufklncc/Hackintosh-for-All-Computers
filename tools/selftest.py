@@ -3327,6 +3327,8 @@ def cards_somebody_else_drives():
     said = [w for w, _ in community.check(arc_row, get=get)]
     check('a newly matched Arc id is noticed', 'now matches 8086:e223' in said, said)
     nm_said = [w for w, u in community.check(drivers['NullMoth NVIDIA driver'], get=get)]
+    check('a summary of ours is not mistaken for a sentence that moved',
+          not any('macos sentence' in w for w in nm_said), nm_said)
     check('and so is a sentence that changed upstream',
           any('quote sentence' in w for w in nm_said), nm_said)
     rows, changed, left = community.refresh([dict(arc_row)], get=get, say=lambda *_: None)

@@ -201,7 +201,10 @@ def check(p, get=_get):
     head = json.loads(get(API.format(repo=repo) + '/commits/HEAD'))['sha']
     if p.get('source') and (p.get('quote') or p.get('macos')):
         page = _flat(get(RAW.format(repo=repo, sha=head, path=p['source'])).decode('utf-8', 'replace'))
-        for key in ('quote', 'macos'):
+        # only what is recorded as the project's own words: the two GPU drivers
+        # carried over keep a summary in `macos`, and a summary is never on
+        # the page it summarises
+        for key in p.get('quoted', ['quote']):
             if p.get(key) and p[key] not in page:
                 out.append((f'the {key} sentence is no longer on {p["source"]}', None))
     if p.get('ids_from') == 'rules' and p.get('card'):
