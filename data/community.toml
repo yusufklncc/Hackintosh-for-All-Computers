@@ -138,9 +138,11 @@ install = "efi"
 licence = "BSD-3-Clause"
 archived = false
 covers = "Realtek SD card readers; its device table is already read into data/cardreader.toml"
-release = "v0.9.7"
+release = "v0.9.8"
 ids_from = "kext"
 ids = ["0bda:0129", "0bda:0139", "0bda:0140", "10ec:5209", "10ec:5227", "10ec:5229", "10ec:522a", "10ec:5249", "10ec:524a", "10ec:525a", "10ec:5260", "10ec:5286", "10ec:5287", "10ec:5289"]
+asset = "RealtekCardReader_0.9.8_380819f_RELEASE.zip"
+sha256 = "46c8bccdb1fad730b3dfd06ac1b0b986df04c3b0b5a83bd9505d7c8c927026e1"
 
 [[project]]
 name = "AirPort_RTW89"
