@@ -295,6 +295,9 @@ public sealed class CommunityProject
     [JsonPropertyName("tested")] public List<string> Tested { get; set; } = new();
     [JsonPropertyName("chips")] public List<string> Chips { get; set; } = new();
     [JsonPropertyName("ai")] public string Ai { get; set; } = "";
+    // written, assisted or empty, and the evidence it rests on
+    [JsonPropertyName("ai_level")] public string AiLevel { get; set; } = "";
+    [JsonPropertyName("ai_why")] public string AiWhy { get; set; } = "";
     [JsonPropertyName("recipe")] public bool Recipe { get; set; }
     [JsonPropertyName("requires")] public string Requires { get; set; } = "";
 }

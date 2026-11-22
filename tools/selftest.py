@@ -3219,6 +3219,27 @@ def the_community_registry():
     check('  and the In this EFI tab no longer mixes them in',
           'Where(d => d.Status != "third-party")' in pane and 'Inventory.Community' in pane)
 
+    # how it was written: shown where it can be, and labelled for what it is
+    level = {p['name']: community.ai_level(p)[0] for p in rows}
+    check('a project that says its code was written with AI is AI-written',
+          level['ForbiddenItlwm'] == 'written' and level['intel-gpu-macos-driver'] == 'written')
+    check('  and so is one where most recent commits credit an AI',
+          level['Radeonized'] == 'written', community.ai_level(by['Radeonized']))
+    check('a few credited commits, or only an AI tool\'s files, is AI-assisted',
+          level['RealtekCardReader'] == 'assisted' and level['NullMoth NVIDIA driver'] == 'assisted')
+    check('  and nothing shown is no label at all, not "by hand"',
+          level['AMDRadeonRDNA4'] == '' and community.ai_level({})[0] == '')
+    made = community.ai_level({'ai_commits': [3, 10], 'ai_tools': ['Claude']})
+    check('  the line says what it rests on',
+          made == ('assisted', '3 of its last 10 commits credit Claude as co-author'), made)
+    check('  and the half-way line is a majority, not a guess',
+          community.ai_level({'ai_commits': [5, 10]})[0] == 'written')
+    check('the issue #107 projects are in, experimental and linked, with no recipe',
+          all(by[n]['stage'] == 'experimental' and not by[n].get('recipe') for n in
+              ('Radeonized', 'WTLWireless', 'ForbiddenItlwm', 'S0ixStandby', 'MT7902-WiFi-Kext')))
+    check('  a MediaTek MT7925 machine is told about WTLWireless',
+          [p['name'] for p, _, _ in community.devices_for(['14c3:7925'])] == ['WTLWireless'])
+
     # discovery lists, and decides nothing
     def search(url, accept=None):
         return _json.dumps({'items': [

@@ -87,6 +87,20 @@ uygulanır: AirPort_RTW89 için bu, OpenCore Legacy Patcher'dan eski Wi-Fi yığ
 bir `Kernel -> Block` girdisi, `Disabled` yapılan `SecureBootModel` ve Tahoe'da
 `-amfipassbeta` demektir. Sonuç `ocvalidate` ile kontrol edilir. README'si yalnızca
 kendi yükleyicisini çalıştırmanızı söyleyen projeler — RTLAirLink, MeowXE3 —
-eklenmez, bağlantısı verilir. Depo her hafta her projenin yeni sürümünü kontrol eder ve henüz kayıtlı
+eklenmez, bağlantısı verilir.
+
+Bu projelerin çoğu yapay zekâ kodlama araçlarıyla yazılıyor ve her kart bunu,
+gösterilebildiği yerde, neye dayandığıyla birlikte söyler:
+
+- **AI-written** — proje kodunun bir yapay zekâyla yazıldığını söylüyor, ya da son
+  commit'lerinin en az yarısı birini ortak yazar olarak anıyor.
+- **AI-assisted** — bazı commit'ler birini anıyor, ya da depoda yalnızca bir
+  yapay zekâ kodlama aracına talimat vermek için var olan dosyalar duruyor
+  (`CLAUDE.md`, `AGENTS.md`...).
+- **Etiket yok** — hiçbir şey ne biri ne öteki diyor. Bu, elle yazıldığı anlamına
+  gelmez.
+
+Etiket bir projenin nasıl yapıldığıyla ilgili, çalışıp çalışmadığıyla değil:
+deneysel olan her iki durumda da deneyseldir. Depo her hafta her projenin yeni sürümünü kontrol eder ve henüz kayıtlı
 olmayan yeni projeleri bir kişinin bakması için listeler; kayda makine tarafından
 hiçbir şey eklenmez.

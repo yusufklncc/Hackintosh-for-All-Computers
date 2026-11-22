@@ -92,7 +92,10 @@ public sealed class CommunityItem
         Covers = p.Covers;
         Said = p.Said.Length > 0 ? $"\u201c{p.Said.Replace("**", "").Trim()}\u201d" : "";
         HasSaid = Said.Length > 0;
-        HasAi = p.Ai.Length > 0;
+        // what can be shown about how it was written, labelled for what it is
+        AiBadge = p.AiLevel switch { "written" => "AI-written", "assisted" => "AI-assisted", _ => "" };
+        HasAi = AiBadge.Length > 0;
+        AiWhy = HasAi ? $"{AiBadge}: {p.AiWhy}." : "";
         // what it matches, in the terms it matches by
         var matches = p.Devices > 0 ? $"{p.Devices} device id{(p.Devices == 1 ? "" : "s")}"
                     : p.Chips.Count > 0 ? $"chip families {string.Join(", ", p.Chips)}"
@@ -131,6 +134,8 @@ public sealed class CommunityItem
     public string Said { get; }
     public bool HasSaid { get; }
     public bool HasAi { get; }
+    public string AiBadge { get; }
+    public string AiWhy { get; }
     public string Facts { get; }
     public string Macos { get; }
     public string Where { get; }
@@ -254,7 +259,10 @@ public partial class DevicesView : UserControl
             + "own account; every sentence on a card is the project's own, at the commit "
             + "recorded, and the device ids are read from its kext. A machine that has one "
             + "of these devices is told so on the Machine pane, beside Apple's answer and "
-            + "never instead of it. Built with AI is shown only where a project says so.";
+            + "never instead of it. AI-written means the project says its code was written "
+            + "with an AI, or at least half its recent commits credit one as co-author; "
+            + "AI-assisted means some do, or the repository carries an AI tool's "
+            + "instructions. No label means nothing says either way.";
     }
 
     void Draw()

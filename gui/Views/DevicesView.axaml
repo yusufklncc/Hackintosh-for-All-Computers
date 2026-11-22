@@ -124,7 +124,7 @@
       <StackPanel Spacing="14" MaxWidth="900" HorizontalAlignment="Left" Margin="0,0,0,24">
         <TextBlock Name="CommunityBlurb" FontSize="13" TextWrapping="Wrap"
                    Foreground="{DynamicResource Muted}" />
-        <TextBlock Classes="eyebrow" Text="SHOWN ON THE MACHINE PANE" />
+        <TextBlock Classes="eyebrow" Text="EXPERIMENTAL, BY THEIR OWN ACCOUNT" />
         <ItemsControl Name="Shown">
           <ItemsControl.ItemsPanel>
             <ItemsPanelTemplate><StackPanel Spacing="10" /></ItemsPanelTemplate>
@@ -146,7 +146,7 @@
                       </Border>
                       <Border Classes="pill" Margin="0,0,6,4" VerticalAlignment="Center"
                               IsVisible="{Binding HasAi}">
-                        <TextBlock Text="built with AI, by its own account" />
+                        <TextBlock Text="{Binding AiBadge}" />
                       </Border>
                     </WrapPanel>
                     <TextBlock Text="{Binding Covers}" FontSize="13.5" TextWrapping="Wrap"
@@ -162,6 +162,8 @@
                                Foreground="{DynamicResource Muted}" />
                     <TextBlock Text="{Binding Needs}" FontSize="12.5" TextWrapping="Wrap"
                                Foreground="{DynamicResource Muted}" IsVisible="{Binding HasNeeds}" />
+                    <TextBlock Text="{Binding AiWhy}" FontSize="12" TextWrapping="Wrap"
+                               Foreground="{DynamicResource Faint}" IsVisible="{Binding HasAi}" />
                   </StackPanel>
                   <Button Grid.Column="1" Content="Open on GitHub" VerticalAlignment="Top"
                           Tag="{Binding Url}" Click="OpenProject" />

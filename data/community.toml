@@ -45,6 +45,9 @@ how = "IntelXe Manager installs it and makes the EFI changes it needs"
 source = "release/templates/efi-rules.json"
 commit = "990b650315b1727f825ab37186be9d1142c97bf7"
 ids_from = "rules"
+ai_files = []
+ai_commits = [96, 100]
+ai_tools = ["Claude"]
 
 [[project.card]]
 id = "8086:e20b"
@@ -87,6 +90,9 @@ quote = "Supported cards are Turing and newer: GTX 16, RTX 20, 30, 40 and 50, TI
 caveat = "Most testing is done on an RTX 5060, so other cards may have problems that haven't been found yet."
 chips = ["TU", "GA", "AD", "GB"]
 ids_from = "chips"
+ai_files = ["AGENTS.md"]
+ai_commits = [0, 100]
+ai_tools = []
 
 [[project]]
 name = "AppleIGC"
@@ -101,6 +107,9 @@ covers = "Intel I225 and I226 2.5G Ethernet, which IntelMausi does not claim"
 release = "v1.9"
 ids_from = "kext"
 ids = ["8086:125b", "8086:125c", "8086:125d", "8086:15f2", "8086:15f3", "8086:15f8", "8086:3102"]
+ai_files = []
+ai_commits = [0, 27]
+ai_tools = []
 
 [[project]]
 name = "AppleIGB"
@@ -116,6 +125,9 @@ release = ""
 ids_from = "kext"
 ids = []
 unreleased = true
+ai_files = []
+ai_commits = [0, 25]
+ai_tools = []
 
 [[project]]
 name = "RealtekRTL8100"
@@ -131,6 +143,9 @@ release = ""
 ids_from = "kext"
 ids = []
 unreleased = true
+ai_files = []
+ai_commits = [0, 8]
+ai_tools = []
 
 [[project]]
 name = "RealtekCardReader"
@@ -147,6 +162,9 @@ ids_from = "kext"
 ids = ["0bda:0129", "0bda:0139", "0bda:0140", "10ec:5209", "10ec:5227", "10ec:5229", "10ec:522a", "10ec:5249", "10ec:524a", "10ec:525a", "10ec:5260", "10ec:5286", "10ec:5287", "10ec:5289"]
 asset = "RealtekCardReader_0.9.8_380819f_RELEASE.zip"
 sha256 = "46c8bccdb1fad730b3dfd06ac1b0b986df04c3b0b5a83bd9505d7c8c927026e1"
+ai_files = []
+ai_commits = [9, 100]
+ai_tools = ["Claude"]
 
 [[project]]
 name = "AirPort_RTW89"
@@ -171,6 +189,9 @@ covers = "Realtek RTL8852BE/AE/CE/BTE, RTL8851BE, RTL8922AE/DE Wi-Fi"
 conflicts = ["AirportItlwm.kext", "RTLAirLink"]
 needs = "the old Wi-Fi stack (IOSkywalkFamily, IO80211FamilyLegacy, AMFIPass from OpenCore Legacy Patcher), SecureBootModel Disabled, a Kernel -> Block for IOSkywalkFamily, and -amfipassbeta on Tahoe"
 how = "its own Kext Installer edits the EFI; by hand, the README lists every step"
+ai_files = []
+ai_commits = [0, 100]
+ai_tools = []
 
 [project.recipe]
 from = "README.md"
@@ -229,6 +250,9 @@ quote = "The First-ever native AWDL/AirDrop for Realtek RTL8852BE on Intel macOS
 covers = "AirDrop and AWDL on a Realtek RTL8852BE, with its own Wi-Fi driver"
 conflicts = ["AirportItlwm.kext", "AirPort_RTW89"]
 how = "its install script edits the EFI"
+ai_files = []
+ai_commits = [0, 27]
+ai_tools = []
 
 [[project]]
 name = "BroadTek"
@@ -252,6 +276,9 @@ covers = "AirDrop and Handoff adverts, and Apple Watch unlock, on Realtek and In
 requires_role = "bluetooth"
 requires_vendor = ["10ec", "8087", "0bda"]
 how = "ships inside AirPort_RTW89; also on its own as a Lilu plugin"
+ai_files = []
+ai_commits = [0, 3]
+ai_tools = []
 
 [project.recipe]
 from = "README.md"
@@ -279,6 +306,9 @@ quote = "The driver targets the Intel Core i5-12450HX configuration verified on 
 covers = "Speed Shift energy-performance preference on P-cores, on AC power"
 requires_cpu = ["alder-lake", "raptor-lake"]
 how = "copied into EFI/OC/Kexts and added to Kernel -> Add"
+ai_files = []
+ai_commits = [0, 1]
+ai_tools = []
 
 [project.recipe]
 from = "README.md"
@@ -308,6 +338,9 @@ covers = "P-core and E-core scheduling on hybrid Intel CPUs"
 requires_cpu = ["alder-lake", "raptor-lake"]
 conflicts = ["CpuTopologyRebuild.kext"]
 how = "a reference binary in the repository, no release yet"
+ai_files = []
+ai_commits = [7, 10]
+ai_tools = ["Claude"]
 
 [[project]]
 name = "MeowXE3"
@@ -330,6 +363,9 @@ min_darwin = 25
 quote = "This kext is not guaranteed to always work and is in **ALPHA** stages."
 covers = "Intel Xe3 graphics, Panther Lake and Wildcat Lake"
 how = "its own installer, after macOS boots, plus a boot kext and boot-arg in the EFI"
+ai_files = []
+ai_commits = [12, 19]
+ai_tools = ["Claude"]
 
 [[project]]
 name = "AMDRadeonRDNA4"
@@ -353,9 +389,296 @@ quote = "A macOS driver for AMD Radeon **RDNA 4** graphics cards (Navi 48: RX 90
 covers = "AMD Radeon RX 9070 XT, RX 9070, RX 9070 GRE and AI PRO R9700; RX 9060 XT and RX 9060 not yet run"
 requires_kext = "Lilu 1.7.1 or newer on macOS 26"
 how = "a Lilu plugin, injected by OpenCore"
+ai_files = []
+ai_commits = [0, 100]
+ai_tools = []
 
 [project.recipe]
 from = "README.md"
 steps = ["Use **Lilu 1.7.1 or newer**.", "Turn off other GPU kexts (WhateverGreen) so that nothing else claims the card."]
 add = ["AMDRadeonRDNA4.kext"]
 disable = ["WhateverGreen.kext"]
+
+[[project]]
+repo = "FranciumOS-org/Radeonized"
+stage = "experimental"
+commit = "2b4f72558693c8338042ae289939ca621727fdb1"
+source = "README.md"
+quoted = ["quote", "macos"]
+release = "v0.1.1"
+asset = "Radeonized-0.1.1.zip"
+sha256 = "48207e0494cb88730f7ef0cf4c73afb6e2305edc9d432f6ae9be45b885efec06"
+name = "Radeonized"
+kind = "device"
+role = "graphics"
+install = "efi"
+licence = "MIT"
+ids_from = "kext"
+quote = "A kernel extension, a Lilu plugin and a framebuffer for Rembrandt APUs, booted through OpenCore."
+macos = "Measured on a Ryzen 7 7735HS laptop running macOS Tahoe 26.7"
+covers = "AMD Radeon 680M and 660M (Rembrandt) integrated graphics"
+how = "a kext, a Lilu plugin and a framebuffer, per its README"
+ids = ["1002:164d", "1002:1681"]
+ai_files = ["CLAUDE.md"]
+ai_commits = [85, 100]
+ai_tools = ["Claude"]
+
+[[project]]
+repo = "OscarrWu/780m-hackintosh"
+stage = "experimental"
+commit = "965d83f7ee66f4d5f76688b1624e067d37e0a15a"
+source = "README.md"
+quoted = ["quote"]
+release = ""
+unreleased = true
+name = "780m-hackintosh"
+kind = "device"
+role = "graphics"
+install = "efi"
+licence = "MIT"
+ids_from = "none"
+quote = "This project provides a native driver for RDNA3 iGPUs on macOS."
+covers = "AMD Radeon 780M and other RDNA 3 integrated graphics"
+how = "no release yet; built from source"
+ai_files = []
+ai_commits = [0, 40]
+ai_tools = []
+
+[[project]]
+repo = "ghuylo20266/MeteorLake-Metal"
+stage = "experimental"
+commit = "a48e1112be1fef7b58c11fb73f636930b193117d"
+source = "@description"
+quoted = ["quote"]
+release = ""
+unreleased = true
+name = "MeteorLake-Metal"
+kind = "device"
+role = "graphics"
+install = "efi"
+licence = "none stated"
+ids_from = "none"
+quote = "Experimental Intel Arc (Xe-LPG) Metal driver and Kext for running macOS on Meteor Lake devices"
+covers = "Intel Arc (Xe-LPG) graphics on Meteor Lake"
+how = "no release and no README yet; its repository description is all it says"
+ai_files = []
+ai_commits = [0, 14]
+ai_tools = []
+
+[[project]]
+repo = "hamedafra/WiFiTahoeBridge"
+stage = "experimental"
+commit = "ccb45a05653fec5599d325b7c5c00704787955db"
+source = "README.md"
+quoted = ["quote", "macos"]
+release = "v0.3.0"
+asset = "WiFiTahoeBridge-0.3.0-RELEASE.zip"
+sha256 = "21c6c3f6fef38969342890985f39fc884405a32052555cca4d171a295470e92a"
+name = "WiFiTahoeBridge"
+kind = "feature"
+role = "wifi"
+install = "efi"
+licence = "BSD-3-Clause"
+requires_role = "wifi"
+requires_ids = ["14e4:43a0"]
+quote = "**Broadcom Wi-Fi (BCM4360 class) and AirDrop on macOS 26 Tahoe, without OpenCore Legacy Patcher root patches.**"
+macos = "| Tested on | macOS 26.7.3 (25G342), one PC, BCM4360 Wi-Fi + BCM20702 Bluetooth (ASUS BT400) |"
+covers = "Broadcom BCM4360-class Wi-Fi and AirDrop on Tahoe, without root patches"
+how = "a Lilu plugin beside the Broadcom stack OpenCore injects"
+ai_files = []
+ai_commits = [4, 4]
+ai_tools = ["Claude"]
+
+[[project]]
+repo = "jacksproject/MT7902-WiFi-Kext"
+stage = "experimental"
+commit = "171b9a3884232825d3a547f2e88905a5ed5a0643"
+source = "README.md"
+quoted = ["quote", "ids_said"]
+release = ""
+unreleased = true
+name = "MT7902-WiFi-Kext"
+kind = "device"
+role = "wifi"
+install = "efi"
+licence = "none stated"
+ids_from = "quoted"
+ids = ["14c3:7902", "14c3:7922", "14c3:0616", "14c3:7961", "14c3:0608"]
+quote = "Native macOS Wi-Fi 6 kernel extension for the **MediaTek MT7902** wireless card on **AMD Ryzen 7** Hackintosh builds, supporting **macOS Tahoe (26)** and **macOS Sequoia (15)** via OpenCore."
+ids_said = "MediaTek MT7902 (`14c3:7902`) — also matches `14c3:7922`, `14c3:0616`, `14c3:7961`, and `14c3:0608`"
+macos = "macOS Tahoe (26) and macOS Sequoia (15)"
+covers = "MediaTek MT7902 Wi-Fi 6"
+how = "no release yet; built from source"
+ai_files = []
+ai_commits = [0, 3]
+ai_tools = []
+
+[[project]]
+repo = "watchthelight-labs/WTLWireless"
+stage = "experimental"
+commit = "31fb015bc58da79c1d497815d1623e2b6455bedc"
+source = "README.md"
+quoted = ["quote", "macos"]
+release = "0.15.0"
+asset = "WTLWireless-0.15.0-RELEASE.zip"
+sha256 = "63fdbb7cd8d269e0cc8394abdd3c01a42e7ca8f5ed3b86ab55e6fcf87c34431c"
+name = "WTLWireless"
+kind = "device"
+role = "wifi"
+install = "efi"
+licence = "ISC"
+ids_from = "kext"
+quote = "Wi-Fi and Bluetooth for the MediaTek MT7925 (Filogic 360, Wi-Fi 7, PCI `14C3:7925`, also the AMD RZ717 `14C3:0717`) on a Hackintosh, for OpenCore on macOS Sequoia 15 and Tahoe 26."
+macos = "for OpenCore on macOS Sequoia 15 and Tahoe 26"
+covers = "MediaTek MT7925 and AMD RZ717 Wi-Fi 7 and Bluetooth"
+how = "one kext for OpenCore"
+ids = ["14c3:0717", "14c3:0738", "14c3:6639", "14c3:7925", "14c3:7927"]
+ai_files = []
+ai_commits = [0, 61]
+ai_tools = []
+
+[[project]]
+repo = "lems-hardware/lhl-be211-wireless"
+stage = "experimental"
+commit = "5822623a26aa9a932375c7c1e34f8529724b210d"
+source = "README.md"
+quoted = ["quote", "macos", "ids_said"]
+release = ""
+unreleased = true
+name = "lhl-be211-wireless"
+kind = "device"
+role = "wifi"
+install = "efi"
+licence = "GPL-2.0"
+ids_from = "quoted"
+ids = ["8086:e440"]
+quote = "This repository documents my experimental Intel BE211 Wi-Fi bring-up on a **Framework Laptop 13 Pro** running macOS Sequoia."
+ids_said = "Intel BE211 Wi-Fi 7 (CNVio3), PCI `8086:e440`"
+macos = "macOS Sequoia 15.8.3, build `24H241`"
+covers = "Intel BE211 Wi-Fi 7 (CNVio3), open networks on 2.4 GHz so far"
+how = "a developer preview"
+ai_files = []
+ai_commits = [0, 8]
+ai_tools = []
+
+[[project]]
+repo = "minhnhan-tran/AirportItlwm"
+stage = "experimental"
+commit = "a70855499a4b8def8db9fa384c2c08dfd1d64b88"
+source = "README.md"
+quoted = ["quote", "macos"]
+release = "v2.7.88-alpha"
+asset = "AirportItlwm-Sequoia-v2.7.88-RELEASE-alpha-a708554.zip"
+sha256 = "be5053a98f7ea9aa87de33b4ad249d68f33da8ced8a46af20802ed398324c942"
+name = "AirportItlwm (Tahoe fork)"
+kind = "device"
+role = "wifi"
+install = "efi"
+licence = "GPL-2.0"
+ids_from = "kext"
+asset_match = "AirportItlwm"
+quote = "This fork supports macOS Tahoe 26.x (x86_64) through the native Wi-Fi interface, including scanning, connecting, network switching, and private Wi-Fi addresses."
+macos = "This fork supports macOS Tahoe 26.x (x86_64)"
+covers = "Intel Wi-Fi on Tahoe through the native Wi-Fi menu, with Universal Clipboard and Handoff"
+conflicts = ["AirportItlwm.kext", "ForbiddenItlwm"]
+how = "a fork of the AirportItlwm this EFI ships"
+ids = ["8086:0060", "8086:0064", "8086:0082", "8086:0083", "8086:0084", "8086:0085", "8086:0087", "8086:0089", "8086:008a", "8086:008b", "8086:0090", "8086:0091", "8086:00a0", "8086:00a4", "8086:0260", "8086:0264", "8086:02a0", "8086:02f0", "8086:06f0", "8086:0887", "8086:0888", "8086:088e", "8086:088f", "8086:0890", "8086:0891", "8086:0892", "8086:0893", "8086:0894", "8086:0895", "8086:0896", "8086:0897", "8086:08ae", "8086:08af", "8086:08b1", "8086:08b2", "8086:08b3", "8086:08b4", "8086:095a", "8086:095b", "8086:24f3", "8086:24f4", "8086:24f5", "8086:24f6", "8086:24fb", "8086:24fd", "8086:2526", "8086:271b", "8086:271c", "8086:2720", "8086:2723", "8086:2725", "8086:2726", "8086:2729", "8086:30dc", "8086:3165", "8086:3166", "8086:31dc", "8086:34f0", "8086:3df0", "8086:40a4", "8086:4229", "8086:422b", "8086:422c", "8086:4230", "8086:4232", "8086:4235", "8086:4236", "8086:4237", "8086:4238", "8086:4239", "8086:423a", "8086:423b", "8086:423c", "8086:423d", "8086:42a4", "8086:43f0", "8086:4df0", "8086:51f0", "8086:51f1", "8086:54f0", "8086:7a70", "8086:7af0", "8086:7e40", "8086:7f70", "8086:9df0", "8086:a0f0", "8086:a370"]
+ai_files = []
+ai_commits = [0, 100]
+ai_tools = []
+
+[[project]]
+repo = "retropineaple/ForbiddenItlwm"
+stage = "experimental"
+commit = "938a8d9cdf5e74b70c2a4194d3b3f8d37b82454d"
+source = "README.md"
+quoted = ["quote", "macos"]
+release = "v0.6.0-beta.4"
+asset = "ForbiddenItlwm-0.6.0-beta.4-Sequoia.zip"
+sha256 = "1f72688046e894ac6528b21e0540f060f02eb87f72694fc3e6bdbd7024f95d56"
+name = "ForbiddenItlwm"
+kind = "device"
+role = "wifi"
+install = "efi"
+licence = "GPL-2.0"
+ids_from = "kext"
+asset_match = "ForbiddenItlwm-"
+quote = "ForbiddenItlwm is a fork of AirportItlwm that adds AWDL, the peer-to-peer Wi-Fi link AirDrop runs on."
+macos = "Works on macOS Tahoe 26.7.x and Sequoia 15.8.x, with a Sonoma 14.8.9 test build."
+caveat = "**Use it at your own risk.** ForbiddenItlwm is experimental beta software that runs inside the macOS kernel."
+covers = "AirDrop on Intel Wi-Fi cards, as a fork of AirportItlwm"
+conflicts = ["AirportItlwm.kext", "AirportItlwm (Tahoe fork)"]
+how = "one kext per macOS version, replacing AirportItlwm"
+ai = "Most of the driver code, the reverse-engineering and the test tools were written with the help of AI (Claude)."
+ai_source = "README.md"
+ids = ["8086:0060", "8086:0064", "8086:0082", "8086:0083", "8086:0084", "8086:0085", "8086:0087", "8086:0089", "8086:008a", "8086:008b", "8086:0090", "8086:0091", "8086:00a0", "8086:00a4", "8086:0260", "8086:0264", "8086:02a0", "8086:02f0", "8086:06f0", "8086:0887", "8086:0888", "8086:088e", "8086:088f", "8086:0890", "8086:0891", "8086:0892", "8086:0893", "8086:0894", "8086:0895", "8086:0896", "8086:0897", "8086:08ae", "8086:08af", "8086:08b1", "8086:08b2", "8086:08b3", "8086:08b4", "8086:095a", "8086:095b", "8086:24f3", "8086:24f4", "8086:24f5", "8086:24f6", "8086:24fb", "8086:24fd", "8086:2526", "8086:271b", "8086:271c", "8086:2720", "8086:2723", "8086:2725", "8086:2726", "8086:2729", "8086:30dc", "8086:3165", "8086:3166", "8086:31dc", "8086:34f0", "8086:3df0", "8086:40a4", "8086:4229", "8086:422b", "8086:422c", "8086:4230", "8086:4232", "8086:4235", "8086:4236", "8086:4237", "8086:4238", "8086:4239", "8086:423a", "8086:423b", "8086:423c", "8086:423d", "8086:42a4", "8086:43f0", "8086:4df0", "8086:51f0", "8086:51f1", "8086:54f0", "8086:7a70", "8086:7af0", "8086:7e40", "8086:7f70", "8086:9df0", "8086:a0f0", "8086:a370"]
+ai_files = []
+ai_commits = [80, 100]
+ai_tools = ["Claude"]
+
+[[project]]
+repo = "labrouss/S0ixStandby"
+stage = "experimental"
+commit = "f1f8604c78c8e7339b5c0a9394bcb15c035f4ffe"
+source = "README.md"
+quoted = ["quote", "macos"]
+release = "v0.5.8"
+asset = "S0ixStandby-0.5.8-v0.5.7-1-g6c39519-Release.zip"
+sha256 = "f925e780829191dd836f16e991a889f7d50b3b98217cc4ef42ccf9f7c2c2279d"
+name = "S0ixStandby"
+kind = "feature"
+role = "power"
+install = "efi"
+licence = "BSD-3-Clause"
+quote = "Real sleep for macOS on laptops whose ACPI S3 is broken or missing"
+macos = "HP EliteBook 840 G8 (Tiger Lake), macOS Tahoe 26.7.1, OpenCore 1.0.8."
+covers = "Sleep on laptops with no working S3, through Modern Standby (S0ix)"
+how = "a kext with per-machine SSDTs"
+ai_files = []
+ai_commits = [0, 54]
+ai_tools = []
+
+[[project]]
+repo = "watchthelight-labs/WTLLegionCpuPower"
+stage = "experimental"
+commit = "a4802d2f22bc7d563d1c10d3b4b1fdf29a7e97cf"
+source = "README.md"
+quoted = ["quote", "macos"]
+release = "0.4.1"
+asset = "LegionCpuPower-0.4.1.zip"
+sha256 = "d3dde21ad93c1aed2f280a7432773cb219b7316d2fbf2c31a1ab398d7fae73cf"
+name = "WTLLegionCpuPower"
+kind = "feature"
+role = "cpu"
+install = "efi"
+licence = "ISC"
+requires_cpu = ["arrow-lake"]
+quote = "A Lilu plugin that lets an Intel Core Ultra 200HX (Arrow Lake-HX) run at its real clocks and power under macOS Tahoe."
+macos = "Lenovo Legion 5 15IAX10 (Core Ultra 9 275HX), macOS 26.7.1 (25G241)"
+covers = "Real clocks and power limits on Intel Core Ultra 200HX"
+how = "a Lilu plugin"
+ai_files = []
+ai_commits = [0, 12]
+ai_tools = []
+
+[[project]]
+repo = "GeLith/AlienFanSuite"
+stage = "experimental"
+commit = "eed1e07986114d16e85270beda5bef41e070498d"
+source = "README.md"
+quoted = ["quote", "macos"]
+release = "v1.3.2"
+asset = "AlienFanSuite-v1.3.2.zip"
+sha256 = "7c6389792636f60c50563a3ed91b4314af5ab2f05ed87e03ce1b838aeecb3e1b"
+name = "AlienFanSuite"
+kind = "feature"
+role = "sensors"
+install = "system"
+licence = "MIT"
+quote = "Fan control for Dell / Alienware on macOS"
+macos = "| OS | macOS 11+ (x86_64); Command Line Tools required to build |"
+covers = "Fan control on Dell and Alienware laptops with AWCC"
+how = "a kext and a FanControl app"
+ai_files = []
+ai_commits = [0, 18]
+ai_tools = []

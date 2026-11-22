@@ -119,6 +119,9 @@ def features_for(hw, matched=()):
                 i.split(':')[0] in p.get('requires_vendor', []) for i in usb):
             # a Bluetooth controller is a USB device; its vendor is the claim
             out.append(p)
+        elif p.get('requires_role') == 'wifi' and any(
+                i in p.get('requires_ids', []) for i in pci):
+            out.append(p)
     return out
 
 
@@ -132,7 +135,8 @@ def line(p, card=None):
              if p.get('recipe') else
              f"Its own installer edits the EFI ({p.get('how', '')}); nothing here adds it")
     said = (p.get('macos') or '').strip().rstrip('.')
-    return f"{p['name']} ({p['stage']}{tested}) - {said}. {where}. {p['repo']}"
+    level = {'written': ', AI-written', 'assisted': ', AI-assisted'}.get(ai_level(p)[0], '')
+    return f"{p['name']} ({p['stage']}{tested}{level}) - {said}. {where}. {p['repo']}"
 
 
 def for_machine(hw):
@@ -166,11 +170,18 @@ def document():
             'devices': len(ids), 'ids': ids[:8],
             'tested': [c['name'] for c in p.get('card', []) if c.get('tested')],
             'ai': p.get('ai', ''),
+            'ai_level': ai_level(p)[0],
+            'ai_why': ai_level(p)[1],
+            'ai_files': p.get('ai_files', []),
+            'ai_commits': p.get('ai_commits', [0, 0]),
+            'ai_tools': p.get('ai_tools', []),
             'recipe': bool(p.get('recipe')),
             'chips': p.get('chips', []),
             'requires': (', '.join(p.get('requires_cpu', [])) if p.get('requires_cpu')
                          else 'a Realtek or Intel Bluetooth controller'
-                         if p.get('requires_role') == 'bluetooth' else ''),
+                         if p.get('requires_role') == 'bluetooth'
+                         else 'a Broadcom BCM4360-class Wi-Fi card'
+                         if p.get('requires_role') == 'wifi' else ''),
         })
     order = {'recommended': 0, 'experimental': 1, 'vendored': 2, 'watching': 3}
     out.sort(key=lambda r: (order.get(r['stage'], 9), r['role'], r['name'].lower()))
@@ -234,7 +245,10 @@ def check(p, get=_get):
         out.append((f'licence reads {lic} now', {'licence': lic}))
     head = json.loads(get(API.format(repo=repo) + '/commits/HEAD'))['sha']
     if p.get('source') and (p.get('quote') or p.get('macos')):
-        page = _flat(get(RAW.format(repo=repo, sha=head, path=p['source'])).decode('utf-8', 'replace'))
+        # a project with no README still describes itself in one line on
+        # GitHub, and that line is as much its own words
+        page = (_flat(info.get('description') or '') if p['source'] == '@description' else
+                _flat(get(RAW.format(repo=repo, sha=head, path=p['source'])).decode('utf-8', 'replace')))
         # only what is recorded as the project's own words: the two GPU drivers
         # carried over keep a summary in `macos`, and a summary is never on
         # the page it summarises
@@ -265,13 +279,19 @@ def check(p, get=_get):
             update = {'release': tag}
             zips = [a for a in rel[0].get('assets', []) if a['name'].lower().endswith('.zip')
                     and 'debug' not in a['name'].lower() and 'source' not in a['name'].lower()
-                    and 'tools' not in a['name'].lower()]
+                    and 'tools' not in a['name'].lower()
+                    and (p.get('asset_match') or '').lower() in a['name'].lower()]
             if zips:
                 blob = get(zips[0]['browser_download_url'])
                 update.update(asset=zips[0]['name'], sha256=hashlib.sha256(blob).hexdigest())
                 if p.get('ids_from') == 'kext':
                     update['ids'] = kext_ids(blob)
             out.append((f'released {tag}', update))
+    seen_ai = ai_evidence(repo, head, get=get)
+    now = {'ai_files': seen_ai['files'], 'ai_commits': seen_ai['commits'],
+           'ai_tools': seen_ai['tools']}
+    if any(p.get(k) != v for k, v in now.items()):
+        out.append(('what its repository shows about AI tools changed', now))
     if not out and head != p.get('commit') and p.get('commit'):
         out.append((f'moved to {head[:12]}, nothing recorded here changed', {'commit': head}))
     return out
@@ -464,6 +484,90 @@ def validate(efi):
         return 'clean'
     return 'ISSUES: ' + ' '.join(line.strip() for line in r.stdout.splitlines()
                                  if 'OCS:' in line or 'OCK:' in line or 'Kernel' in line)[:400]
+
+
+# --- how it was written, where that can be shown ------------------------------
+#
+# Whether a project was written with an AI is not something this can know from
+# the outside. Three things can be shown, and each is labelled for what it is:
+# the project saying so (a sentence, quoted); files in the repository that only
+# exist to instruct an AI coding tool; and commits whose message credits one as
+# a co-author. Absence of all three is "not stated", never "written by hand".
+
+AI_SAYS = re.compile(r'([^.\n]*\b(built with ai|ai[- ]assist\w*|written (with|by) (an? )?(ai|llm)|'
+                     r'claude|chatgpt|openai codex|github copilot|gemini|cursor ai|'
+                     r'large language model|llm)\b[^.\n]*[.\n])', re.I)
+AI_NOT = re.compile(r'radeon ai|ai pro|ai max|\bai\b engine|npu', re.I)
+AI_FILES = ('CLAUDE.md', 'AGENTS.md', 'GEMINI.md', '.cursorrules', '.windsurfrules',
+            '.github/copilot-instructions.md')
+AI_DIRS = ('.claude/', '.cursor/', '.codex/', '.gemini/', '.kiro/')
+AI_COAUTHOR = re.compile(r'co-authored-by:\s*(claude|copilot|chatgpt|codex|gemini|cursor|'
+                         r'openhands|devin|aider)', re.I)
+
+
+WRITTEN_SAYS = re.compile(r'\b(most|all|the code|code in this repository|written by|'
+                          r'developed with ai)\b', re.I)
+
+
+def ai_level(p):
+    """('written' | 'assisted' | '', why) - from what can be shown, never guessed.
+
+    written   the project says its code was written with or by an AI, or at
+              least half of its recent commits credit an AI as co-author
+    assisted  some commits credit one, or the repository carries files that
+              only exist to instruct an AI coding tool
+    ''        none of that: not stated, which is not the same as "by hand"
+    """
+    credited, seen = (p.get('ai_commits') or [0, 0])[:2]
+    tools = ', '.join(p.get('ai_tools') or []) or 'an AI'
+    parts = []
+    if p.get('ai'):
+        parts.append(f'it says so: "{p["ai"].replace("**", "").strip()}"')
+    if credited:
+        parts.append(f'{credited} of its last {seen} commits credit {tools} as co-author')
+    if p.get('ai_files'):
+        parts.append(f'{", ".join(p["ai_files"])} in the repository')
+    why = '; '.join(parts)
+    if (p.get('ai') and WRITTEN_SAYS.search(p['ai'])) or (seen and credited * 2 >= seen):
+        return 'written', why
+    if parts:
+        return 'assisted', why
+    return '', ''
+
+
+def ai_evidence(repo, head, get=_get):
+    """{'said': sentence or '', 'files': [...], 'commits': (n of m)} for one repo."""
+    said = ''
+    try:
+        readme = json.loads(get(API.format(repo=repo) + '/readme'))
+        import base64
+        text = base64.b64decode(readme.get('content', '')).decode('utf-8', 'replace')
+        for m in AI_SAYS.finditer(text):
+            sentence = _flat(m.group(1)).strip(' >*-#')
+            if not AI_NOT.search(sentence):
+                said = sentence[:240]
+                break
+    except Exception:                                   # noqa: BLE001
+        pass
+    files = []
+    try:
+        tree = json.loads(get(API.format(repo=repo) + f'/git/trees/{head}?recursive=1'))
+        paths = [x['path'] for x in tree.get('tree', [])]
+        files = sorted({f for f in AI_FILES if f in paths}
+                       | {d.rstrip('/') for d in AI_DIRS
+                          if any(x == d.rstrip('/') or x.startswith(d) for x in paths)})
+    except Exception:                                   # noqa: BLE001
+        pass
+    credited, seen, tools = 0, 0, []
+    try:
+        commits = json.loads(get(API.format(repo=repo) + '/commits?per_page=100'))
+        seen = len(commits)
+        named = [AI_COAUTHOR.search(c.get('commit', {}).get('message', '')) for c in commits]
+        credited = sum(1 for m in named if m)
+        tools = sorted({m.group(1).title() for m in named if m})
+    except Exception:                                   # noqa: BLE001
+        tools = []
+    return {'said': said, 'files': files, 'commits': [credited, seen], 'tools': tools}
 
 
 # --- discovery ---------------------------------------------------------------

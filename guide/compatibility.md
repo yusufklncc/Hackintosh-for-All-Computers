@@ -86,6 +86,19 @@ quoting each one as it goes: for AirPort_RTW89 that is the old Wi-Fi stack from
 OpenCore Legacy Patcher, a `Kernel -> Block` entry, `SecureBootModel` set to
 `Disabled` and `-amfipassbeta` on Tahoe. The result is checked with `ocvalidate`.
 Projects whose README only says to run their own installer - RTLAirLink,
-MeowXE3 - are linked, not added. Once a week the repository checks each project for
+MeowXE3 - are linked, not added.
+
+Many of these projects are written with AI coding tools, and each card says so
+where that can be shown, with what it rests on:
+
+- **AI-written** - the project says its code was written with an AI, or at least
+  half of its recent commits credit one as co-author.
+- **AI-assisted** - some commits credit one, or the repository carries files
+  that only exist to instruct an AI coding tool (`CLAUDE.md`, `AGENTS.md`...).
+- **No label** - nothing says either way. That is not the same as written by
+  hand.
+
+The label is about how a project was made, not whether it works: experimental
+is experimental either way. Once a week the repository checks each project for
 new releases, and lists new projects it has not recorded yet for a person to
 look at; nothing is added to the registry by machine.
