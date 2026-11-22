@@ -31,8 +31,6 @@
 # that are not here yet. Neither adds a project: that is a decision.
 [[project]]
 name = "intel-gpu-macos-driver"
-# its own README, in a note at the top: the only project here that says how
-# it was written. Nothing is assumed about the others either way.
 ai = "**Built with AI.** This project is developed with AI assistance."
 ai_source = "README.md"
 repo = "yusufklncc/intel-gpu-macos-driver"
@@ -172,6 +170,41 @@ conflicts = ["AirportItlwm.kext", "RTLAirLink"]
 needs = "the old Wi-Fi stack (IOSkywalkFamily, IO80211FamilyLegacy, AMFIPass from OpenCore Legacy Patcher), SecureBootModel Disabled, a Kernel -> Block for IOSkywalkFamily, and -amfipassbeta on Tahoe"
 how = "its own Kext Installer edits the EFI; by hand, the README lists every step"
 
+[project.recipe]
+from = "README.md"
+steps = ["Copy `AirPort_RTW89.kext` and the three kexts into `EFI/OC/Kexts`.", "Delete `IO80211FamilyLegacy.kext/Contents/PlugIns/AirPortBrcmNIC.kext` (it is for Broadcom cards).", "It must be: Lilu, IOSkywalkFamily, IO80211FamilyLegacy, AMFIPass, AirPort_RTW89, then its plugin `AirPort_RTW89.kext/Contents/PlugIns/AirPortRTW89Front.kext`.", "Add to `Kernel -> Block`: `Identifier` `com.apple.iokit.IOSkywalkFamily`, `Strategy` `Exclude`, `Arch` `x86_64`, `MinKernel` `23.0.0`, `Enabled` true.", "Set `Misc -> Security -> SecureBootModel` to `Disabled`.", "On macOS Tahoe, add `-amfipassbeta` to `boot-args`.", "If the same EFI also boots Ventura or older, give the four kexts `MinKernel` `23.0.0`."]
+add = ["IOSkywalkFamily.kext", "IO80211FamilyLegacy.kext", "AMFIPass.kext", "AirPort_RTW89.kext", "AirPort_RTW89.kext/Contents/PlugIns/AirPortRTW89Front.kext"]
+min_kernel = "23.0.0"
+remove = ["IO80211FamilyLegacy.kext/Contents/PlugIns/AirPortBrcmNIC.kext"]
+secure_boot_model = "Disabled"
+
+[[project.recipe.block]]
+identifier = "com.apple.iokit.IOSkywalkFamily"
+strategy = "Exclude"
+min_kernel = "23.0.0"
+
+[[project.recipe.boot_args]]
+arg = "-amfipassbeta"
+from_darwin = 25
+
+[[project.recipe.extra]]
+name = "IOSkywalkFamily.kext"
+url = "https://github.com/dortania/OpenCore-Legacy-Patcher/raw/d9604c36a432eaf243ea18659ff4d208187452d7/payloads/Kexts/Wifi/IOSkywalkFamily-v1.2.0.zip"
+sha256 = "1e12b7ef42f55b39ea54ada97b46331220668b2c48a28656e9875c5145fe2479"
+from = "OpenCore Legacy Patcher, which the README links at this commit"
+
+[[project.recipe.extra]]
+name = "IO80211FamilyLegacy.kext"
+url = "https://github.com/dortania/OpenCore-Legacy-Patcher/raw/d9604c36a432eaf243ea18659ff4d208187452d7/payloads/Kexts/Wifi/IO80211FamilyLegacy-v1.0.0.zip"
+sha256 = "e681dcc76a2cd2cea4b0ad5f27a3c816055fde3cdccd890dd10a3e2c84e96d93"
+from = "OpenCore Legacy Patcher, which the README links at this commit"
+
+[[project.recipe.extra]]
+name = "AMFIPass.kext"
+url = "https://github.com/dortania/OpenCore-Legacy-Patcher/raw/d9604c36a432eaf243ea18659ff4d208187452d7/payloads/Kexts/Acidanthera/AMFIPass-v1.4.1-RELEASE.zip"
+sha256 = "07b266145906db41f4b13a7938fbb173ea28888cc1fa65f84417f8820adc961e"
+from = "OpenCore Legacy Patcher, which the README links at this commit"
+
 [[project]]
 name = "RTLAirLink"
 quoted = ["quote", "macos"]
@@ -218,6 +251,12 @@ requires_role = "bluetooth"
 requires_vendor = ["10ec", "8087", "0bda"]
 how = "ships inside AirPort_RTW89; also on its own as a Lilu plugin"
 
+[project.recipe]
+from = "README.md"
+steps = ["copy `BroadTek.kext` to `EFI/OC/Kexts` and add it to `Kernel → Add` right after Lilu.", "On Intel, `efi/install.sh` switches BTLEAdvFixup off if it finds it (the two patch the same thing)"]
+add = ["BroadTek.kext"]
+disable = ["BTLEAdvFixup.kext"]
+
 [[project]]
 name = "IntelSpeedShiftEPP"
 quoted = ["quote", "macos"]
@@ -238,6 +277,13 @@ quote = "The driver targets the Intel Core i5-12450HX configuration verified on 
 covers = "Speed Shift energy-performance preference on P-cores, on AC power"
 requires_cpu = ["alder-lake", "raptor-lake"]
 how = "copied into EFI/OC/Kexts and added to Kernel -> Add"
+
+[project.recipe]
+from = "README.md"
+steps = ["copy `IntelSpeedShiftEPP.kext` into `EFI/OC/Kexts`.", "| `MinKernel` | `25.0.0` |", "| `MaxKernel` | `25.99.99` |"]
+add = ["IntelSpeedShiftEPP.kext"]
+min_kernel = "25.0.0"
+max_kernel = "25.99.99"
 
 [[project]]
 name = "IntelHybridCores"
@@ -305,3 +351,9 @@ quote = "A macOS driver for AMD Radeon **RDNA 4** graphics cards (Navi 48: RX 90
 covers = "AMD Radeon RX 9070 XT, RX 9070, RX 9070 GRE and AI PRO R9700"
 requires_kext = "Lilu 1.7.1 or newer on macOS 26"
 how = "a Lilu plugin, injected by OpenCore"
+
+[project.recipe]
+from = "README.md"
+steps = ["Use **Lilu 1.7.1 or newer**.", "Turn off other GPU kexts (WhateverGreen) so that nothing else claims the card."]
+add = ["AMDRadeonRDNA4.kext"]
+disable = ["WhateverGreen.kext"]

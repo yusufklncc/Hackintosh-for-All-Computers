@@ -128,7 +128,9 @@ def line(p, card=None):
     if card is not None and 'tested' in card:
         tested = ', run on this card' if card['tested'] else ', not yet run on this card'
     where = ('Installed after macOS boots' if p.get('install') == 'system'
-             else 'A kext for the EFI, offered and never added unasked')
+             else 'A kext for the EFI, offered when the EFI is built and never added unasked'
+             if p.get('recipe') else
+             f"Its own installer edits the EFI ({p.get('how', '')}); nothing here adds it")
     said = (p.get('macos') or '').strip().rstrip('.')
     return f"{p['name']} ({p['stage']}{tested}) - {said}. {where}. {p['repo']}"
 
@@ -164,6 +166,7 @@ def document():
             'devices': len(ids), 'ids': ids[:8],
             'tested': [c['name'] for c in p.get('card', []) if c.get('tested')],
             'ai': p.get('ai', ''),
+            'recipe': bool(p.get('recipe')),
             'chips': p.get('chips', []),
             'requires': (', '.join(p.get('requires_cpu', [])) if p.get('requires_cpu')
                          else 'a Realtek or Intel Bluetooth controller'
@@ -294,6 +297,173 @@ def refresh(rows, get=_get, say=print):
         if quotes_moved:
             say(f'  {p["name"]}: left for a person - what it says has changed')
     return rows, changed, left
+
+
+# --- into an EFI, when somebody picks one -------------------------------------
+#
+# Each recipe is the project's own manual steps, quoted in data/community.toml
+# and applied here as they read. Nothing is shipped: the project's release and
+# any kext it says to fetch from elsewhere are downloaded at the moment they
+# are picked, from the address recorded, and refused unless the hash matches.
+
+CACHE = Path(os.environ.get('COMMUNITY_CACHE', '.community-cache'))
+BOOT_GUID = '7C436110-AB2A-4BBB-A880-FE41995C9F82'
+
+
+def offered(hw):
+    """The shown projects with a recipe for the EFI that this machine matches."""
+    devices, features = for_machine(hw)
+    out, seen = [], set()
+    for p in [d for d, _, _ in devices] + features:
+        if p['name'] in seen or not p.get('recipe') or p.get('install') != 'efi':
+            continue
+        seen.add(p['name'])
+        out.append(p)
+    return out
+
+
+def _unzip_kexts(blob, into):
+    """Extract a zip and return {bundle name: path} for its top-level kexts."""
+    import shutil
+    if into.exists():
+        shutil.rmtree(into)
+    into.mkdir(parents=True)
+    with zipfile.ZipFile(io.BytesIO(blob)) as z:
+        for member in z.namelist():
+            # nothing outside the folder it is being unpacked into
+            if member.startswith('/') or '..' in Path(member).parts:
+                raise ValueError(f'{member}: a path outside the archive')
+        z.extractall(into)
+    found = {}
+    for kext in sorted(into.rglob('*.kext')):
+        if '__MACOSX' in kext.parts or '.kext' in str(kext.parent):
+            continue
+        found.setdefault(kext.name, kext)
+    return found
+
+
+def fetch(p, cache=None, get=_get):
+    """({bundle name: local path}, complaint) for everything a recipe adds."""
+    cache = Path(cache or CACHE) / re.sub(r'[^\w.-]', '_', p['name'])
+    url = f"https://github.com/{p['repo']}/releases/download/{p['release']}/{p['asset']}"
+    sources = [(url, p['sha256'], 'release')]
+    sources += [(e['url'], e['sha256'], e['name']) for e in p['recipe'].get('extra', [])]
+    found = {}
+    for i, (address, want, what) in enumerate(sources):
+        try:
+            blob = get(address)
+        except (urllib.error.URLError, OSError) as exc:
+            return {}, f'{p["name"]}: {what} could not be downloaded ({exc})'
+        got = hashlib.sha256(blob).hexdigest()
+        if got != want:
+            return {}, (f'{p["name"]}: {what} is not the file that was recorded '
+                        f'(expected {want[:12]}, got {got[:12]}); nothing was added')
+        try:
+            found.update(_unzip_kexts(blob, cache / str(i)))
+        except (zipfile.BadZipFile, ValueError) as exc:
+            return {}, f'{p["name"]}: {what} is not a zip this can read ({exc})'
+    tops = {a.split('/')[0] for a in p['recipe']['add']}
+    missing = sorted(tops - set(found))
+    if missing:
+        return {}, f'{p["name"]}: {", ".join(missing)} is not in what was downloaded'
+    return found, None
+
+
+def _executable(kext):
+    info = kext / 'Contents' / 'Info.plist'
+    try:
+        with open(info, 'rb') as fh:
+            name = plistlib.load(fh).get('CFBundleExecutable')
+    except (OSError, plistlib.InvalidFileException):
+        return ''
+    return f'Contents/MacOS/{name}' if name and (kext / 'Contents' / 'MacOS' / name).exists() else ''
+
+
+def apply(efi, picks, darwin=None, say=print, get=_get, cache=None):
+    """Apply each picked recipe to a built EFI folder. Returns a complaint or None.
+
+    The config is read, changed as the recipes say, and written once, after
+    every download has checked out - a recipe that fails halfway leaves the
+    EFI as it was built."""
+    import shutil
+    efi = Path(efi)
+    cfg_path = efi / 'OC' / 'config.plist'
+    with open(cfg_path, 'rb') as fh:
+        config = plistlib.load(fh)
+    kexts_dir = efi / 'OC' / 'Kexts'
+    names = {p['name'] for p in picks}
+    staged = []
+    for p in picks:
+        clash = [c for c in p.get('conflicts', []) if c in names]
+        if clash:
+            return f'{p["name"]} cannot go in beside {", ".join(clash)}: pick one'
+        got, complaint = fetch(p, cache=cache, get=get)
+        if complaint:
+            return complaint
+        staged.append((p, got))
+
+    add = config['Kernel']['Add']
+    for p, got in staged:
+        r = p['recipe']
+        note = f"{p['name']} {p.get('release', '')}, community, experimental"
+        for top in sorted({a.split('/')[0] for a in r['add']}):
+            target = kexts_dir / top
+            if target.exists():
+                shutil.rmtree(target)
+            shutil.copytree(got[top], target)
+        for rel in r.get('remove', []):
+            if (kexts_dir / rel).exists():
+                shutil.rmtree(kexts_dir / rel)
+        for bundle in r['add']:
+            entry = {'Arch': 'x86_64', 'BundlePath': bundle, 'Comment': note,
+                     'Enabled': True, 'ExecutablePath': _executable(kexts_dir / bundle),
+                     'MaxKernel': r.get('max_kernel', ''),
+                     'MinKernel': r.get('min_kernel', ''),
+                     'PlistPath': 'Contents/Info.plist'}
+            add[:] = [e for e in add if e.get('BundlePath') != bundle] + [entry]
+        for name in r.get('disable', []) + [c for c in p.get('conflicts', [])
+                                            if c.endswith('.kext')]:
+            for e in add:
+                if e.get('BundlePath') == name and e.get('Enabled'):
+                    e['Enabled'] = False
+                    say(f'      {name} turned off: {p["name"]} says so')
+        for b in r.get('block', []):
+            blocks = config['Kernel'].setdefault('Block', [])
+            blocks[:] = [x for x in blocks if x.get('Identifier') != b['identifier']]
+            blocks.append({'Arch': 'x86_64', 'Comment': note, 'Enabled': True,
+                           'Identifier': b['identifier'], 'MaxKernel': '',
+                           'MinKernel': b.get('min_kernel', ''),
+                           'Strategy': b.get('strategy', 'Exclude')})
+        if r.get('secure_boot_model'):
+            config['Misc']['Security']['SecureBootModel'] = r['secure_boot_model']
+        nv = config['NVRAM']['Add'].setdefault(BOOT_GUID, {})
+        for b in r.get('boot_args', []):
+            if darwin is not None and darwin < b.get('from_darwin', 0):
+                continue
+            args = (nv.get('boot-args') or '').split()
+            if b['arg'] not in args:
+                nv['boot-args'] = ' '.join(args + [b['arg']])
+        say(f'      {p["name"]} {p.get("release", "")} added, as its README says:')
+        for step in r.get('steps', []):
+            say(f'        "{step}"')
+
+    with open(cfg_path, 'wb') as fh:
+        plistlib.dump(config, fh, sort_keys=False)
+    return None
+
+
+def validate(efi):
+    """'clean', 'ISSUES: ...' or 'skipped' - the vendored ocvalidate on the result."""
+    import subprocess
+    tool = ocgen.vendored_tool('ocvalidate')
+    if not tool:
+        return 'skipped'
+    r = subprocess.run([str(tool), str(Path(efi) / 'OC' / 'config.plist')],
+                       capture_output=True, text=True)
+    if 'No issues found' in r.stdout:
+        return 'clean'
+    return 'ISSUES: ' + ' '.join(line.strip() for line in r.stdout.splitlines()
+                                 if 'OCS:' in line or 'OCK:' in line or 'Kernel' in line)[:400]
 
 
 # --- discovery ---------------------------------------------------------------

@@ -79,6 +79,14 @@ kehribar renkte, Apple'ın cevabının yanında ve asla onun yerine söyler;
 Compatible Hardware da onları **Community** sekmesinde, her proje için bir kartla listeler.
 
 Siz seçmedikçe hiçbiri EFI'nize girmez ve makinenizin macOS aralığı hiçbirine
-dayanmaz. Depo her hafta her projenin yeni sürümünü kontrol eder ve henüz kayıtlı
+dayanmaz. Makineniz EFI'ye girebilen birine uyuyorsa, **EFI** paneli derleme
+bitince onu önerir — hazırdaki cevap *hayır*'dır. Evet derseniz projenin kendi
+sürümü GitHub'dan indirilir, kaydedilen dosyayla bayt bayt aynı değilse
+reddedilir, ve projenin kendi elle kurulum adımları her biri alıntılanarak
+uygulanır: AirPort_RTW89 için bu, OpenCore Legacy Patcher'dan eski Wi-Fi yığını,
+bir `Kernel -> Block` girdisi, `Disabled` yapılan `SecureBootModel` ve Tahoe'da
+`-amfipassbeta` demektir. Sonuç `ocvalidate` ile kontrol edilir. README'si yalnızca
+kendi yükleyicisini çalıştırmanızı söyleyen projeler — RTLAirLink, MeowXE3 —
+eklenmez, bağlantısı verilir. Depo her hafta her projenin yeni sürümünü kontrol eder ve henüz kayıtlı
 olmayan yeni projeleri bir kişinin bakması için listeler; kayda makine tarafından
 hiçbir şey eklenmez.

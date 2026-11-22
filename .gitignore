@@ -37,3 +37,4 @@ gui/bin/
 gui/obj/
 gui/dist-app/
 _site/
+.community-cache/

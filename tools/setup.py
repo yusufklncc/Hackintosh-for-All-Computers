@@ -550,6 +550,10 @@ def main():
     ap.add_argument('--usb-prepare', metavar='DEVICE',
                     help='ERASE that removable disk and format it FAT32 under '
                          'GPT; only ever a disk --usb-list offered')
+    ap.add_argument('--community', metavar='NAMES',
+                    help='community drivers to add without asking, comma separated, '
+                         'when this machine matches them; a scripted run adds none '
+                         'it is not told to')
     ap.add_argument('--offline-layout', action='store_true',
                     help='with --usb-prepare: FAT32 for OpenCore and ExFAT for '
                          'the full installer, for an install with no network')
@@ -1400,6 +1404,9 @@ def main():
         os.unlink(notes_file)
     if props_file:
         os.unlink(props_file)
+    complaint = community_step(hw, target, a)
+    if complaint:
+        print(f'      {YELLOW}{complaint}{RESET}')
     if not matched and (hw.get('pci_ids') or hw.get('usb_ids')):
         # nothing matched, so no kext question was asked: say what was seen
         print()
@@ -1414,6 +1421,65 @@ def main():
     # to read back out of the transcript
     UI.emit(t='built', out=str(Path(a.out).resolve()))
     return 0
+
+
+def community_step(hw, darwin, a):
+    """Offer the community drivers this machine matches, one by one.
+
+    After the build, because what is offered is an addition to an EFI that
+    already stands on its own: nothing here is needed for it to boot. Each one
+    is experimental by its own account, so the answer that is ready to press is
+    no, and a yes downloads the project's release from GitHub at the hash
+    recorded and applies its own manual steps, quoted as they are applied.
+
+    A scripted run asks nothing: --community names the ones to add, and a run
+    that names none adds none."""
+    import community
+    offers = community.offered(hw or {})
+    if not offers:
+        return None
+    print(f'\n{BOLD}Community drivers for this machine{RESET}')
+    print(f'      {DIM}Somebody else\'s, experimental by their own account. None of '
+          f'them is needed for this EFI to boot,\n      and none goes in unless you say '
+          f'yes. A yes downloads it from GitHub, at a recorded hash.{RESET}')
+    picks = []
+    named = {n.strip().lower() for n in (a.community or '').split(',') if n.strip()}
+    for p in offers:
+        if any(c in [q['name'] for q in picks] for c in p.get('conflicts', [])):
+            print(f'      {DIM}{p["name"]}: not offered beside '
+                  f'{", ".join(c for c in p["conflicts"] if c in [q["name"] for q in picks])}{RESET}')
+            continue
+        print(f'\n  {p["name"]}  {DIM}{p["stage"]}, {p.get("licence", "")}, '
+              f'{p.get("release", "")}{RESET}')
+        print(f'      {p.get("covers", "")}')
+        if p.get('quote'):
+            print(f'      {DIM}"{p["quote"]}"{RESET}')
+        if p.get('macos'):
+            print(f'      {DIM}{p["macos"]}{RESET}')
+        r = p['recipe']
+        if r.get('extra'):
+            print(f'      {DIM}also fetches {", ".join(e["name"] for e in r["extra"])}{RESET}')
+        if r.get('disable'):
+            print(f'      {YELLOW}turns off {", ".join(r["disable"])} if it is there{RESET}')
+        if r.get('secure_boot_model'):
+            print(f'      {YELLOW}sets SecureBootModel to {r["secure_boot_model"]}{RESET}')
+        if SCRIPTING or (not UI.protocol and not sys.stdin.isatty()):
+            if p['name'].lower() in named:
+                picks.append(p)
+            continue
+        if ask(0, 0, f'Add {p["name"]} to this EFI?',
+               [('no', 'No, leave it out'), ('yes', 'Yes, add it (experimental)')]) == 'yes':
+            picks.append(p)
+    if not picks:
+        return None
+    print(f'\n{BOLD}Adding them{RESET}')
+    complaint = community.apply(Path(a.out), picks, darwin=darwin,
+                                say=lambda s: print(f'{DIM}{s}{RESET}'))
+    if complaint:
+        return complaint + ' - the EFI is as it was built'
+    status = community.validate(Path(a.out))
+    print(f'      ocvalidate   {status}')
+    return None if status in ('clean', 'skipped') else 'ocvalidate found issues after adding them'
 
 
 def hold():

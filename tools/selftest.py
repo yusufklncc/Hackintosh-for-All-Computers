@@ -3179,8 +3179,9 @@ def the_community_registry():
     wifi = [r for r in summary.network_rows(realtek) if r['part'] == 'Wi-Fi']
     check('a Realtek Wi-Fi card reads as a third-party driver, twice over',
           [r['verdict'] for r in wifi] == [summary.THIRD_PARTY] * 2, wifi)
-    check('  and says it is offered, never added unasked',
-          all('never added unasked' in r['detail'] for r in wifi))
+    check('  and says it is offered and never added unasked, or that nothing here adds it',
+          ['never added unasked' in r['detail'] for r in wifi] == [True, False]
+          and 'nothing here adds it' in wifi[1]['detail'], [r['detail'] for r in wifi])
     check("  and the macOS range does not lean on it",
           summary.macos_range(realtek) == summary.macos_range(dict(realtek, pci_ids=[
               i for i in realtek['pci_ids'] if i != '10ec:b852'])))
@@ -3236,6 +3237,122 @@ def the_community_registry():
     check('the weekly job writes one review issue and adds nothing',
           'community.py --discover --digest' in flow and 'Community drivers to review' in flow
           and 'git commit' not in flow.split('discover:')[1])
+
+
+def community_drivers_into_an_efi():
+    """A picked community driver goes in as its own README says, and only then.
+
+    Applied to a real built config with stand-in downloads: the order of
+    Kernel -> Add, the Block entry, SecureBootModel, the boot-arg only on the
+    macOS it is for, the kext it says to turn off - and ocvalidate on the end
+    of it. A wrong hash or two drivers for one card change nothing."""
+    import io as _io
+    import plistlib as _pl
+    import zipfile as _zip
+    import community
+
+    by = {p['name']: p for p in community.projects()}
+    with_recipe = [p for p in community.projects() if p.get('recipe')]
+    check('four projects carry a recipe', sorted(p['name'] for p in with_recipe) ==
+          ['AMDRadeonRDNA4', 'AirPort_RTW89', 'BroadTek', 'IntelSpeedShiftEPP'],
+          [p['name'] for p in with_recipe])
+    for p in with_recipe:
+        r = p['recipe']
+        check(f"{p['name']}'s recipe quotes its own steps and pins every download",
+              r.get('steps') and r.get('from') and p.get('sha256')
+              and all(re.fullmatch(r'[0-9a-f]{64}', e['sha256']) for e in r.get('extra', [])))
+    check('RTLAirLink has none: its README only says to run its own script',
+          not by['RTLAirLink'].get('recipe'))
+
+    def kext(z, name, exe):
+        z.writestr(f'{name}/Contents/Info.plist',
+                   _pl.dumps({'CFBundleExecutable': exe, 'CFBundleIdentifier': f'x.{exe}'}))
+        z.writestr(f'{name}/Contents/MacOS/{exe}', b'binary')
+    def zipped(*kexts):
+        buf = _io.BytesIO()
+        with _zip.ZipFile(buf, 'w') as z:
+            for name in kexts:
+                stem = name.split('/')[-1].removesuffix('.kext')
+                kext(z, name, stem)
+        return buf.getvalue()
+    rtw = zipped('AirPort_RTW89.kext', 'AirPort_RTW89.kext/Contents/PlugIns/AirPortRTW89Front.kext')
+    extras = {e['name']: zipped(e['name']) for e in by['AirPort_RTW89']['recipe']['extra']}
+    extras['IO80211FamilyLegacy.kext'] = zipped(
+        'IO80211FamilyLegacy.kext', 'IO80211FamilyLegacy.kext/Contents/PlugIns/AirPortBrcmNIC.kext')
+    import hashlib as _h
+    fake = dict(by['AirPort_RTW89'], sha256=_h.sha256(rtw).hexdigest())
+    fake['recipe'] = dict(fake['recipe'], extra=[dict(e, sha256=_h.sha256(extras[e['name']]).hexdigest())
+                                                 for e in fake['recipe']['extra']])
+    def get(url, accept=None):
+        if url.endswith(fake['asset']):
+            return rtw
+        return next(extras[n] for n in extras if n.split('.')[0] in url)
+
+    with tempfile.TemporaryDirectory() as tmp:
+        efi = Path(tmp) / 'EFI'
+        r = run([sys.executable, 'tools/build.py', '--platform', 'laptop', '--cpu', 'kaby-lake',
+                 '--out', str(efi), '--no-validate'])
+        check('a config to add to builds', r.returncode == 0, r.stderr[-300:])
+        before = (efi / 'OC' / 'config.plist').read_bytes()
+        bad = dict(fake, sha256='0' * 64)
+        why = community.apply(efi, [bad], darwin=25, say=lambda *_: None, get=get,
+                              cache=Path(tmp) / 'cache')
+        check('a download that is not the recorded file adds nothing',
+              why and 'not the file that was recorded' in why
+              and (efi / 'OC' / 'config.plist').read_bytes() == before, why)
+        why = community.apply(efi, [fake, dict(by['RTLAirLink'], recipe={'add': []})], darwin=25,
+                              say=lambda *_: None, get=get, cache=Path(tmp) / 'cache')
+        check('two drivers for one card are refused, and nothing changes',
+              why and 'pick one' in why and (efi / 'OC' / 'config.plist').read_bytes() == before, why)
+        why = community.apply(efi, [fake], darwin=25, say=lambda *_: None, get=get,
+                              cache=Path(tmp) / 'cache')
+        check('the recipe applies', why is None, why)
+        cfg = _pl.loads((efi / 'OC' / 'config.plist').read_bytes())
+        tail = [e['BundlePath'] for e in cfg['Kernel']['Add'][-5:]]
+        check('  in the order its README gives',
+              tail == fake['recipe']['add'], tail)
+        check('  each with MinKernel 23.0.0 and its own executable',
+              all(e['MinKernel'] == '23.0.0' and e['ExecutablePath'].startswith('Contents/MacOS/')
+                  for e in cfg['Kernel']['Add'][-5:]))
+        check('  IOSkywalkFamily blocked from Sonoma on',
+              any(b['Identifier'] == 'com.apple.iokit.IOSkywalkFamily' and b['MinKernel'] == '23.0.0'
+                  for b in cfg['Kernel']['Block']))
+        check('  SecureBootModel Disabled, and -amfipassbeta on Tahoe',
+              cfg['Misc']['Security']['SecureBootModel'] == 'Disabled'
+              and '-amfipassbeta' in cfg['NVRAM']['Add'][community.BOOT_GUID]['boot-args'])
+        check('  the Broadcom plug-in it says to delete is gone',
+              not (efi / 'OC/Kexts/IO80211FamilyLegacy.kext/Contents/PlugIns/AirPortBrcmNIC.kext').exists())
+        check('  and every entry has the keys OpenCore wants',
+              all(set(e) == {'Arch', 'BundlePath', 'Comment', 'Enabled', 'ExecutablePath',
+                             'MaxKernel', 'MinKernel', 'PlistPath'} for e in cfg['Kernel']['Add']))
+        status = community.validate(efi)
+        check('  and ocvalidate passes it', status in ('clean', 'skipped'), status)
+
+    with tempfile.TemporaryDirectory() as tmp:
+        efi = Path(tmp) / 'EFI'
+        run([sys.executable, 'tools/build.py', '--platform', 'laptop', '--cpu', 'kaby-lake',
+             '--out', str(efi), '--no-validate'])
+        rdna = zipped('AMDRadeonRDNA4.kext')
+        p = dict(by['AMDRadeonRDNA4'], sha256=_h.sha256(rdna).hexdigest())
+        community.apply(efi, [p], darwin=24, say=lambda *_: None, get=lambda u, a=None: rdna,
+                        cache=Path(tmp) / 'cache')
+        cfg = _pl.loads((efi / 'OC' / 'config.plist').read_bytes())
+        weg = [e for e in cfg['Kernel']['Add'] if e['BundlePath'] == 'WhateverGreen.kext']
+        check('RDNA 4 turns WhateverGreen off, as its step 3 says',
+              weg and not weg[0]['Enabled'])
+
+    # offered to the right machine, and a scripted run adds only what it names
+    import detect
+    e570, _ = detect.read_report('tools/fixtures/thinkpad-e570.json')
+    realtek = dict(e570, pci_ids=[i for i in e570['pci_ids'] if i != '14e4:43a3'] + ['10ec:b852'])
+    check('a Realtek Wi-Fi machine is offered AirPort_RTW89, and not RTLAirLink',
+          [p['name'] for p in community.offered(realtek)] == ['AirPort_RTW89'])
+    check('the E570 itself is offered nothing', community.offered(e570) == [])
+    src = Path('tools/setup.py').read_text(encoding='utf-8')
+    check('a scripted run adds only what --community names',
+          "'--community'" in src and "if p['name'].lower() in named" in src)
+    check('the question offers no as the ready answer',
+          "[('no', 'No, leave it out'), ('yes'" in src)
 
 
 def cards_somebody_else_drives():
@@ -4596,6 +4713,7 @@ if __name__ == '__main__':
                     what_it_says_about_amd_integrated,
                     cards_somebody_else_drives,
                     the_community_registry,
+                    community_drivers_into_an_efi,
                     en0_and_iservices,
                     haswell_cursor_patch,
                     a_stick_that_needs_no_network,

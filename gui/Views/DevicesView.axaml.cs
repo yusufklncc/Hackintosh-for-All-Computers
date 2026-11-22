@@ -110,7 +110,11 @@ public sealed class CommunityItem
         var how = p.How.Length > 0 ? char.ToUpperInvariant(p.How[0]) + p.How[1..] : "";
         Where = p.Install == "system"
             ? $"Installed on macOS after it boots: {p.How}."
-            : $"A kext for the EFI, offered in the EFI pane and never added unasked. {how}.";
+            : p.Recipe
+            ? $"Offered at the end of the EFI pane when this machine matches, and never added "
+              + "unasked; its own manual steps are applied as written. "
+              + $"{how}."
+            : $"Its own installer edits the EFI ({p.How}); nothing here adds it.";
         Needs = string.Join("  ", new[]
         {
             p.Needs.Length > 0 ? $"Needs {p.Needs}." : "",

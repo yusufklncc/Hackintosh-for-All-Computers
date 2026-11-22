@@ -78,6 +78,14 @@ beside Apple's answer and never instead of it, and Compatible Hardware lists
 them in its **Community** tab, one card per project.
 
 None of them goes into your EFI unless you pick it, and your machine's macOS
-range never leans on one. Once a week the repository checks each project for
+range never leans on one. When your machine matches one that can go in an EFI,
+the **EFI** pane offers it once the build is done - *no* is the ready answer.
+A yes downloads the project's own release from GitHub, refuses it unless it is
+byte for byte the file recorded, and applies the project's own manual steps,
+quoting each one as it goes: for AirPort_RTW89 that is the old Wi-Fi stack from
+OpenCore Legacy Patcher, a `Kernel -> Block` entry, `SecureBootModel` set to
+`Disabled` and `-amfipassbeta` on Tahoe. The result is checked with `ocvalidate`.
+Projects whose README only says to run their own installer - RTLAirLink,
+MeowXE3 - are linked, not added. Once a week the repository checks each project for
 new releases, and lists new projects it has not recorded yet for a person to
 look at; nothing is added to the registry by machine.
