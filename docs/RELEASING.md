@@ -101,6 +101,14 @@ gh workflow run release.yml -f tag=v1.0.8
 Nothing is lost by it: the assets are rebuilt from the commit the tag now
 points at, and the release notes are written by the workflow.
 
+### Write what changed
+
+`docs/releases/v<version>.md` is the release page: what is different in this
+package since the last one - OpenCore, kexts, what the builder and the window
+do now. Not how to use it; that is the guide's job, and the workflow appends a
+short list of the files with a link to it. The workflow refuses to publish a
+tag that has no notes file. A republish edits the same file.
+
 ### Tag it, and the workflow does the rest
 
 ```
