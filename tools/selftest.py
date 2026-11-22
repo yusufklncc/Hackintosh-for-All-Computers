@@ -3182,10 +3182,14 @@ def the_community_registry():
     check('an RTL8852BE finds AirPort_RTW89 and RTLAirLink, both',
           {p['name'] for p, _, _ in found} == {'AirPort_RTW89', 'RTLAirLink'}, found)
     check('a card nothing names finds nothing', community.devices_for(['10ec:8168']) == [])
-    hybrid = community.features_for({'generation': 'alder-lake'})
-    check('an Alder Lake machine is told about the CPU add-on that names it',
-          'IntelSpeedShiftEPP' in [p['name'] for p in hybrid]
-          and 'IntelHybridCores' not in [p['name'] for p in hybrid])
+    named = community.features_for({'cpu': '12th Gen Intel(R) Core(TM) i5-12450HX',
+                                    'generation': 'alder-lake'})
+    check('the processor a CPU add-on names is told about it',
+          [p['name'] for p in named] == ['IntelSpeedShiftEPP'], [p['name'] for p in named])
+    other = community.features_for({'cpu': '13th Gen Intel(R) Core(TM) i7-13700K',
+                                    'generation': 'raptor-lake'})
+    check('  and another of the same generation is not: the project named one CPU',
+          other == [], [p['name'] for p in other])
     check('  and a Kaby Lake one is not', community.features_for({'generation': 'kaby-lake'}) == [])
     check('Realtek Bluetooth finds BroadTek',
           'BroadTek' in [p['name'] for p in community.features_for({'usb_ids': ['0bda:4853']})])

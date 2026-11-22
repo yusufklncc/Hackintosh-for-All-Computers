@@ -113,7 +113,13 @@ def features_for(hw, matched=()):
     for p in shown():
         if p.get('kind') != 'feature':
             continue
-        if p.get('requires_cpu') and gen in p['requires_cpu']:
+        if p.get('requires_cpu_name'):
+            # the processor the project names, not the generation it belongs
+            # to: "verified on an i5-12450HX" is not "for Alder Lake", and
+            # widening it was a claim the project never made
+            if any(re.search(pat, hw.get('cpu') or '', re.I) for pat in p['requires_cpu_name']):
+                out.append(p)
+        elif p.get('requires_cpu') and gen in p['requires_cpu']:
             out.append(p)
         elif p.get('requires_role') == 'bluetooth' and any(
                 i.split(':')[0] in p.get('requires_vendor', []) for i in usb):
@@ -185,7 +191,8 @@ def document(hw=None):
             'recipe': bool(p.get('recipe')),
             'matches': p['name'] in mine,
             'chips': p.get('chips', []),
-            'requires': (', '.join(p.get('requires_cpu', [])) if p.get('requires_cpu')
+            'requires': (p['requires_cpu_said'] if p.get('requires_cpu_said')
+                         else ', '.join(p.get('requires_cpu', [])) if p.get('requires_cpu')
                          else 'a Realtek or Intel Bluetooth controller'
                          if p.get('requires_role') == 'bluetooth'
                          else 'a Broadcom BCM4360-class Wi-Fi card'

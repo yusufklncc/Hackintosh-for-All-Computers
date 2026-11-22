@@ -310,11 +310,12 @@ macos = "macOS Tahoe 26.7.1 (25G241)"
 min_darwin = 25
 quote = "The driver targets the Intel Core i5-12450HX configuration verified on macOS Tahoe 26.7.1 (25G241) with OpenCore 1.0.9."
 covers = "Speed Shift energy-performance preference on P-cores, on AC power"
-requires_cpu = ["alder-lake", "raptor-lake"]
 how = "copied into EFI/OC/Kexts and added to Kernel -> Add"
 ai_files = []
 ai_commits = [0, 1]
 ai_tools = []
+requires_cpu_name = ["i5-12450HX"]
+requires_cpu_said = "the Intel Core i5-12450HX it was verified on"
 
 [project.recipe]
 from = "README.md"
@@ -658,7 +659,6 @@ kind = "feature"
 role = "cpu"
 install = "efi"
 licence = "ISC"
-requires_cpu = ["arrow-lake"]
 quote = "A Lilu plugin that lets an Intel Core Ultra 200HX (Arrow Lake-HX) run at its real clocks and power under macOS Tahoe."
 macos = "Lenovo Legion 5 15IAX10 (Core Ultra 9 275HX), macOS 26.7.1 (25G241)"
 covers = "Real clocks and power limits on Intel Core Ultra 200HX"
@@ -666,6 +666,8 @@ how = "a Lilu plugin"
 ai_files = []
 ai_commits = [0, 12]
 ai_tools = []
+requires_cpu_name = ["Ultra \\d+ 2\\d\\dHX"]
+requires_cpu_said = "an Intel Core Ultra 200HX (Arrow Lake-HX)"
 
 [[project]]
 repo = "GeLith/AlienFanSuite"
