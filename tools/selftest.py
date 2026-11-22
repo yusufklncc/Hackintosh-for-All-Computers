@@ -90,6 +90,13 @@ def audio_advice():
     check('every layout reaches the notes, not just the three shown',
           steps.count('alcid=') >= 27, steps.count('alcid='))
     check('an unknown codec picks nothing', audio.report(['8086:2809'], None)[1] is None)
+    # the table is read from an AppleALC release and the EFI carries a kext from
+    # one; when they differ, a layout can be offered that the kext does not have.
+    # They had drifted to 1.9.7 against 1.9.5 before anyone looked.
+    ref = ocgen.read_toml('data/audio.toml')['source']['ref']
+    kext = ocgen.read_toml('vendor/kexts.lock')['kext']['AppleALC.kext']['version']
+    check('the layout table is from the AppleALC release the EFI carries',
+          ref == kext, f'table {ref}, kext {kext}')
 
 
 def boot_args():

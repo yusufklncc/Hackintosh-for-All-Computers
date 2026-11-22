@@ -18,8 +18,8 @@ sha256 = "03460f6187462f9805b17c4ab47808a056a315645429b88765f7db36efdcd61e"
 upstream = "OpenIntelWireless/itlwm"
 
 [kext."AppleALC.kext"]
-version = "1.9.5"
-sha256 = "aa6675f2ae14e1325a37caac4a78770736110a37603f538db112d98e35cd7f9f"
+version = "1.9.8"
+sha256 = "edab084ed08c6d52010b6cf7b961404160820291e66a10c8102b53a54c0e2cde"
 upstream = "acidanthera/AppleALC"
 
 [kext."AppleMCEReporterDisabler.kext"]
