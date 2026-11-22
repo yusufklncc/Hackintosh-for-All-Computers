@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Documents;
 using Avalonia.Layout;
@@ -170,6 +171,8 @@ public partial class BuilderView : UserControl
         }
 
         Transcript.Children.Clear();
+        Trail.Children.Clear();
+        Trail.IsVisible = false;
         Standby.IsVisible = false;
         Waiting.Say(Program.MachineFile is null ? "Starting, and reading this machine…"
                                                 : "Starting, and reading the report…");
@@ -180,6 +183,7 @@ public partial class BuilderView : UserControl
         _session = session;
         session.Said += spans => Dispatcher.UIThread.Post(() => Say(spans));
         session.Asked += question => Dispatcher.UIThread.Post(() => Show(question));
+        session.Hardware += (source, rows) => Dispatcher.UIThread.Post(() => Table(source, rows));
         session.Finished += (code, built) => Dispatcher.UIThread.Post(() => Done(code, built));
         try
         {
@@ -227,14 +231,75 @@ public partial class BuilderView : UserControl
         foreach (var span in spans)
         {
             var run = new Run(span.Text);
-            if (this.TryFindResource(Tones.GetValueOrDefault(span.Tone, "Muted"), out var brush))
-                run.Foreground = (IBrush?)brush;
+            if (Brush(Tones.GetValueOrDefault(span.Tone, "Muted")) is { } brush)
+                run.Foreground = brush;
             if (span.Tone == "bold") run.FontWeight = FontWeight.SemiBold;
             line.Inlines!.Add(run);
         }
         Transcript.Children.Add(line);
         StickToEnd();
     }
+
+    /// <summary>The hardware summary as the Machine pane draws it: columns that
+    /// wrap, a verdict in colour, rather than text lined up in spaces.</summary>
+    void Table(string source, IReadOnlyList<HardwareRow> rows)
+    {
+        var box = new StackPanel { Spacing = 0, Margin = new Thickness(0, 6, 0, 8), MaxWidth = 860,
+                                   HorizontalAlignment = HorizontalAlignment.Left };
+        box.Children.Add(new TextBlock
+        {
+            Text = $"HARDWARE FOR MACOS  ·  FROM {source.ToUpperInvariant()}",
+            Classes = { "eyebrow" }, Margin = new Thickness(0, 0, 0, 6),
+        });
+        foreach (var r in rows)
+        {
+            var grid = new Grid
+            {
+                ColumnDefinitions = new ColumnDefinitions("100,*,150"),
+                ColumnSpacing = 12, Margin = new Thickness(0, 0, 0, 0),
+            };
+            grid.Children.Add(new TextBlock
+            {
+                Text = r.Part, FontSize = 12.5, FontWeight = FontWeight.SemiBold, Foreground = Brush("Ink"),
+            });
+            var what = new StackPanel { Spacing = 1 };
+            what.Children.Add(new TextBlock { Text = r.What, FontSize = 12.5, Foreground = Brush("Ink"),
+                                              TextWrapping = TextWrapping.Wrap });
+            if (r.Detail.Length > 0)
+                what.Children.Add(new TextBlock { Text = r.Detail, FontSize = 11.5, Foreground = Brush("Muted"),
+                                                  TextWrapping = TextWrapping.Wrap });
+            Grid.SetColumn(what, 1);
+            grid.Children.Add(what);
+            var tone = r.Verdict switch
+            {
+                "supported" or "driven by macOS" => "ok",
+                "unsupported" or "not supported" => "bad",
+                "third-party driver" or "unknown" => "warn",
+                _ => "",
+            };
+            var pill = new Border { Classes = { "pill" }, VerticalAlignment = VerticalAlignment.Top,
+                                    Child = new TextBlock { Text = r.Verdict == "-" ? "not present" : r.Verdict } };
+            if (tone.Length > 0) pill.Classes.Add(tone);
+            Grid.SetColumn(pill, 2);
+            grid.Children.Add(pill);
+            box.Children.Add(new Border
+            {
+                Child = grid, Padding = new Thickness(0, 6), BorderThickness = new Thickness(0, 0, 0, 1),
+                BorderBrush = Brush("Line"),
+            });
+        }
+        Transcript.Children.Add(box);
+        StickToEnd();
+    }
+
+    /// <summary>A colour of the current theme, from code.
+    ///
+    /// With the theme named. The colours live in the theme dictionaries, and a
+    /// lookup that does not say which theme finds nothing: the transcript's
+    /// tones had been falling back to the default all along, and a table built
+    /// this way drew its text in no colour at all.</summary>
+    IBrush? Brush(string key) =>
+        this.TryFindResource(key, ActualThemeVariant, out var b) ? b as IBrush : null;
 
     // ---- what it asked ---------------------------------------------------
 
@@ -299,6 +364,27 @@ public partial class BuilderView : UserControl
             Dispatcher.UIThread.Post(() => picked.BringIntoView(), DispatcherPriority.Loaded);
     }
 
+    void Answered(string question, string answer)
+    {
+        var n = Trail.Children.Count + 1;
+        var shown = answer.Length > 34 ? answer[..33] + "\u2026" : answer;
+        var chip = new Border
+        {
+            CornerRadius = new CornerRadius(11), Padding = new Thickness(9, 3, 10, 4),
+            Margin = new Thickness(0, 0, 6, 6), BorderThickness = new Thickness(1),
+            BorderBrush = Brush("Line"), Background = Brush("Surface2"),
+            Child = new TextBlock
+            {
+                FontSize = 11.5, Foreground = Brush("Muted"),
+                Inlines = { new Run($"{n}  ") { Foreground = Brush("Accent"), FontWeight = FontWeight.SemiBold },
+                            new Run(shown) { Foreground = Brush("Ink") } },
+            },
+        };
+        ToolTip.SetTip(chip, $"{question}\n{answer}");
+        Trail.Children.Add(chip);
+        Trail.IsVisible = true;
+    }
+
     Control Pill(string text)
     {
         var pill = new Border { Classes = { "pill", "ok" }, VerticalAlignment = VerticalAlignment.Center };
@@ -325,6 +411,10 @@ public partial class BuilderView : UserControl
                 return;
             }
             answer = chosen.Tag!.ToString()!;
+            // the answer joins the trail above, so what has been settled stays
+            // on screen after its question is gone
+            var said = _open.Options.FirstOrDefault(o => o.Number.ToString() == answer)?.Label ?? answer;
+            Answered(_open.Text, said);
         }
         var id = _open.Id;
         _open = null;
@@ -368,7 +458,70 @@ public partial class BuilderView : UserControl
             StandbyText.Text = $"The engine exited {code}. The transcript says why.";
         }
         ShowAdded(code == 0 ? built : null);
+        _ = ShowFacts(code == 0 ? built : null);
         _ended?.TrySetResult($"rc={code} {StandbyTitle.Text}: {built ?? "nothing written"}");
+    }
+
+    /// <summary>The written EFI in a few cards: identity, kexts, audio, security,
+    /// and what is left to do by hand.</summary>
+    async Task ShowFacts(string? efi)
+    {
+        Facts.Children.Clear();
+        LeftRows.Children.Clear();
+        Facts.IsVisible = LeftToDo.IsVisible = false;
+        if (efi is null || Builder.Find(out _) is not { } engine) return;
+        var (facts, _) = await Inventory.Efi(engine, efi);
+        if (facts is null) return;
+
+        void Card(string label, string value, string? detail = null)
+        {
+            var body = new StackPanel { Spacing = 2 };
+            body.Children.Add(new TextBlock { Text = label.ToUpperInvariant(), Classes = { "eyebrow" } });
+            body.Children.Add(new TextBlock
+            {
+                Text = value, FontSize = 15, FontWeight = FontWeight.SemiBold,
+                [!TextBlock.ForegroundProperty] = this.GetResourceObservable("Ink").ToBinding(),
+            });
+            if (detail is { Length: > 0 })
+                body.Children.Add(new TextBlock
+                {
+                    Text = detail, FontSize = 11.5, TextWrapping = TextWrapping.Wrap, MaxWidth = 200,
+                    [!TextBlock.ForegroundProperty] = this.GetResourceObservable("Muted").ToBinding(),
+                });
+            Facts.Children.Add(new Border
+            {
+                Child = body, Padding = new Avalonia.Thickness(12, 9), Margin = new Avalonia.Thickness(0, 0, 8, 8),
+                CornerRadius = new Avalonia.CornerRadius(8), BorderThickness = new Avalonia.Thickness(1),
+                MinWidth = 150,
+                [!Border.BorderBrushProperty] = this.GetResourceObservable("Line").ToBinding(),
+                [!Border.BackgroundProperty] = this.GetResourceObservable("Surface2").ToBinding(),
+            });
+        }
+
+        if (facts.Smbios.Length > 0) Card("Identity", facts.Smbios, "the Mac model it presents as");
+        Card("Kexts", facts.Kexts.Count.ToString(),
+             string.Join(", ", facts.Kexts.Take(4).Select(k => k.Replace(".kext", "")))
+             + (facts.Kexts.Count > 4 ? $" and {facts.Kexts.Count - 4} more" : ""));
+        if (facts.Alcid is { } alcid) Card("Audio", $"layout {alcid}", "alcid in boot-args; try the next one in NEXT-STEPS.txt if there is no sound");
+        if (facts.SecureBootModel is { } sbm) Card("Secure boot", sbm, "Misc → Security → SecureBootModel");
+        if (facts.Community.Count > 0) Card("Community", facts.Community.Count.ToString(),
+                                            string.Join(", ", facts.Community));
+        Facts.IsVisible = Facts.Children.Count > 0;
+
+        foreach (var step in facts.Next)
+            LeftRows.Children.Add(new TextBlock
+            {
+                Text = "\u2192  " + step, FontSize = 13,
+                [!TextBlock.ForegroundProperty] = this.GetResourceObservable("Ink").ToBinding(),
+            });
+        if (facts.NextFile.Length > 0)
+        {
+            var open = new Button { Content = "Open NEXT-STEPS.txt", Margin = new Avalonia.Thickness(0, 6, 0, 0) };
+            var file = facts.NextFile;
+            open.Click += (_, _) => Reveal.Show(file);
+            LeftRows.Children.Add(open);
+        }
+        LeftToDo.IsVisible = facts.Next.Count > 0;
     }
 
     /// <summary>The community drivers the EFI carries, each with a way out.</summary>

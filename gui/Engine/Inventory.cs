@@ -26,6 +26,9 @@ public sealed class KextRow
     [JsonPropertyName("roles")] public List<string> Roles { get; set; } = new();
     [JsonPropertyName("label")] public string? Label { get; set; }
     [JsonPropertyName("devices")] public int Devices { get; set; }
+    [JsonPropertyName("group")] public string Group { get; set; } = "Other";
+    [JsonPropertyName("said")] public string Said { get; set; } = "";
+    [JsonPropertyName("said_of_project")] public bool SaidOfProject { get; set; }
 }
 
 public sealed class KextList
@@ -317,6 +320,20 @@ public sealed class AddedDriver
     [JsonPropertyName("sha256")] public string Sha256 { get; set; } = "";
 }
 
+/// <summary>What a written EFI holds, read back from the folder.</summary>
+public sealed class EfiFacts
+{
+    [JsonPropertyName("complaint")] public string? Complaint { get; set; }
+    [JsonPropertyName("smbios")] public string Smbios { get; set; } = "";
+    [JsonPropertyName("kexts")] public List<string> Kexts { get; set; } = new();
+    [JsonPropertyName("boot_args")] public string BootArgs { get; set; } = "";
+    [JsonPropertyName("alcid")] public string? Alcid { get; set; }
+    [JsonPropertyName("secure_boot_model")] public string? SecureBootModel { get; set; }
+    [JsonPropertyName("community")] public List<string> Community { get; set; } = new();
+    [JsonPropertyName("next")] public List<string> Next { get; set; } = new();
+    [JsonPropertyName("next_file")] public string NextFile { get; set; } = "";
+}
+
 public sealed class AddedRecord
 {
     [JsonPropertyName("added")] public List<AddedDriver> Added { get; set; } = new();
@@ -329,6 +346,7 @@ public sealed class CommunityList
 
 [JsonSerializable(typeof(CommunityList))]
 [JsonSerializable(typeof(AddedRecord))]
+[JsonSerializable(typeof(EfiFacts))]
 [JsonSerializable(typeof(OfflineList))]
 [JsonSerializable(typeof(InstallerPlan))]
 [JsonSerializable(typeof(Newest))]
@@ -503,6 +521,19 @@ public static class Inventory
             return JsonSerializer.Deserialize(text, Carried.Default.AddedRecord)?.Added ?? new();
         }
         catch (Exception) { return new(); }
+    }
+
+    /// <summary>What a built EFI holds, as the engine reads it back.</summary>
+    public static async Task<(EfiFacts? facts, string complaint)> Efi(Located engine, string efi)
+    {
+        var (output, error, code) = await Builder.Run(engine, "--inventory", "efi", "--out", efi);
+        if (code != 0) return (null, Said(error, code));
+        try
+        {
+            var facts = JsonSerializer.Deserialize(output, Carried.Default.EfiFacts);
+            return facts is { Complaint.Length: > 0 } ? (null, facts.Complaint) : (facts, "");
+        }
+        catch (JsonException e) { return (null, e.Message); }
     }
 
     /// <summary>Take community drivers out of a built EFI.</summary>

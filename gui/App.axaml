@@ -119,6 +119,52 @@
       <Setter Property="TextBlock.Foreground" Value="{DynamicResource Faint}" />
     </Style>
 
+    <!-- Every other button: outlined, on the surface it sits on. Fluent's own
+         grey slab was the one control nobody here had chosen, and beside the
+         accent it read as unfinished. Hover borrows the accent for the
+         outline and the text only, so the one filled button on a pane is
+         still the one that starts something. -->
+    <Style Selector="Button:not(.accent):not(.sorter)">
+      <Setter Property="Foreground" Value="{DynamicResource Ink}" />
+      <Setter Property="FontWeight" Value="Medium" />
+      <Setter Property="Padding" Value="12,6" />
+      <Setter Property="CornerRadius" Value="6" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="Cursor" Value="Hand" />
+    </Style>
+    <Style Selector="Button:not(.accent):not(.sorter) /template/ ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource Surface}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource Line}" />
+      <Setter Property="CornerRadius" Value="6" />
+    </Style>
+    <Style Selector="Button:not(.accent):not(.sorter):pointerover /template/ ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource AccentSoft}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource Accent}" />
+      <Setter Property="TextBlock.Foreground" Value="{DynamicResource Accent}" />
+    </Style>
+    <Style Selector="Button:not(.accent):not(.sorter):pressed /template/ ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource Chrome}" />
+    </Style>
+    <Style Selector="Button:not(.accent):not(.sorter):disabled /template/ ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource Surface2}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource Line}" />
+      <Setter Property="TextBlock.Foreground" Value="{DynamicResource Faint}" />
+    </Style>
+
+    <!-- The same for the drop-downs, which sat beside these as grey slabs too -->
+    <Style Selector="ComboBox">
+      <Setter Property="CornerRadius" Value="6" />
+      <Setter Property="Cursor" Value="Hand" />
+    </Style>
+    <Style Selector="ComboBox /template/ Border#Background">
+      <Setter Property="Background" Value="{DynamicResource Surface}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource Line}" />
+    </Style>
+    <Style Selector="ComboBox:pointerover /template/ Border#Background">
+      <Setter Property="Background" Value="{DynamicResource Surface}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource Accent}" />
+    </Style>
+
     <!-- A grid of choices, not a list of rows: each tile is its own card and
          the selected one is outlined rather than filled, so the release mark
          on it stays the colour it is. -->

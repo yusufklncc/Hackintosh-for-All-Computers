@@ -35,6 +35,9 @@ public sealed class DeviceItem
             ? "OCLP " + oclp + (row.Macos.OclpTo is { } until ? $" – {until}" : "+")
             : "";
         Macos = string.Join("\n", new[] { native, patched }.Where(x => x.Length > 0));
+        // a dash rather than an empty cell: no range recorded is a fact about
+        // the row, and a blank column read as one that had failed to load
+        if (Macos.Length == 0) Macos = "\u2014";
         // one string to match against, lower-cased once rather than per
         // keystroke. The full vendor name goes in it even though the column
         // shows the short one, so searching "Advanced Micro" still finds them.
@@ -283,11 +286,11 @@ public partial class DevicesView : UserControl
                    + "means something in this repository claims it - not that every "
                    + "machine it sits in will work.";
         await FillCommunity(engine);
-        Category.ItemsSource = new[] { Everything }.Concat(list.Categories).ToList();
-        Vendor.ItemsSource = new[] { Everything }
+        Category.ItemsSource = new[] { "All categories" }.Concat(list.Categories).ToList();
+        Vendor.ItemsSource = new[] { "All vendors" }
             .Concat(list.Vendors.Select(DeviceItem.ShortName).Distinct().OrderBy(v => v))
             .ToList();
-        Status.ItemsSource = new[] { Everything }
+        Status.ItemsSource = new[] { "Any support" }
             .Concat(list.Statuses.Where(s => s != "third-party")).ToList();
         Category.SelectedIndex = 0;
         Vendor.SelectedIndex = 0;
@@ -324,9 +327,12 @@ public partial class DevicesView : UserControl
     void Draw()
     {
         var needle = (Search.Text ?? "").Trim().ToLowerInvariant();
-        var category = Category.SelectedItem as string ?? Everything;
-        var vendor = Vendor.SelectedItem as string ?? Everything;
-        var status = Status.SelectedItem as string ?? Everything;
+        // the first entry of each names its filter, and means everything
+        string Picked(ComboBox box) => box.SelectedIndex > 0 ? box.SelectedItem as string ?? Everything
+                                                             : Everything;
+        var category = Picked(Category);
+        var vendor = Picked(Vendor);
+        var status = Picked(Status);
 
         var matching = _all.Where(d =>
             (category == Everything || d.Category == category) &&

@@ -1,0 +1,229 @@
+# What each vendored kext is for, for the Kexts pane: a group to file it under,
+# and one sentence in its own project's words.
+#
+# The group is this repository's filing, nothing more. The sentence is quoted:
+# from the project's README at the commit named, with Markdown taken out, or
+# from the one-line description its GitHub page carries (`@description`). A
+# kext from a project that says nothing about it on its own gets the project's
+# line, marked as the project's; one with no upstream recorded gets none.
+#
+# Read 2026-11-23.
+
+[sources]
+"acidanthera/BrcmPatchRAM" = "65389020769837e92e9fb939bac34bd9a3e25bb2"
+"1Revenger1/ECEnabler" = "29dcde79b51a082ab9816184eb5ccdf3c5115a97"
+"acidanthera/NVMeFix" = "48622207fb2bd4e2132013eacfcea70b726189ba"
+"USBToolBox/kext" = "b9887b8dd86f3fdbb2300b2938a902ecbc436267"
+"OpenIntelWireless/IntelBluetoothFirmware" = "a414375505fa3b014be32f8fca31b5bbfdf9f10f"
+"VoodooSMBus/VoodooRMI" = "83868f0565d82379c408f05f8722171b5e314ffe"
+"trulyspinach/SMCAMDProcessor" = "029ef3a97d89c44c07c63a6345a7c87f69ba90f8"
+"VoodooI2C/VoodooI2C" = "927797d4fcf5aaf2f4ccddd3daafd93f53d3adbf"
+
+[kext."Lilu.kext"]
+group = "Core"
+said = "Arbitrary kext and process patching on macOS"
+from = "@description"
+
+[kext."VirtualSMC.kext"]
+group = "Core"
+said = "SMC emulator layer"
+from = "@description"
+
+[kext."AppleMCEReporterDisabler.kext"]
+group = "Core"
+
+[kext."telemetrap.kext"]
+group = "Core"
+
+[kext."WhateverGreen.kext"]
+group = "Graphics"
+said = "Various patches necessary for certain ATI/AMD/Intel/Nvidia GPUs"
+from = "@description"
+
+[kext."AppleALC.kext"]
+group = "Audio"
+said = "Native macOS HD audio for not officially supported codecs"
+from = "@description"
+
+[kext."NVMeFix.kext"]
+group = "Storage"
+said = "NVMeFix is a set of patches for the Apple NVMe storage driver, IONVMeFamily."
+from = "README.md"
+
+[kext."ECEnabler.kext"]
+group = "Sensors and power"
+said = "Allows reading Embedded Controller fields over 1 byte long, vastly reducing the amount of ACPI modification needed (if any) for working battery status."
+from = "README.md"
+
+[kext."SMCBatteryManager.kext"]
+group = "Sensors and power"
+said = "SMC emulator layer"
+from = "@description"
+project = true
+
+[kext."SMCDellSensors.kext"]
+group = "Sensors and power"
+said = "SMC emulator layer"
+from = "@description"
+project = true
+
+[kext."SMCProcessor.kext"]
+group = "Sensors and power"
+said = "SMC emulator layer"
+from = "@description"
+project = true
+
+[kext."SMCSuperIO.kext"]
+group = "Sensors and power"
+said = "SMC emulator layer"
+from = "@description"
+project = true
+
+[kext."AMDRyzenCPUPowerManagement.kext"]
+group = "Sensors and power"
+said = "AMDRyzenCPUPowerManagement.kext for all power management features."
+from = "README.md"
+
+[kext."SMCAMDProcessor.kext"]
+group = "Sensors and power"
+said = "SMCAMDProcessor.kext to publish readings to VirtualSMC, which enables macOS applications like iStat to display sensor data."
+from = "README.md"
+
+[kext."AirportBrcmFixup.kext"]
+group = "Network"
+said = "An open source kernel extension providing a set of patches required for non-native Airport Broadcom Wi-Fi cards."
+from = "@description"
+
+[kext."AirportItlwm.kext"]
+group = "Network"
+said = "Intel Wi-Fi Drivers for macOS"
+from = "@description"
+
+[kext."AtherosE2200Ethernet.kext"]
+group = "Network"
+said = "Qualcomm Atheros Killer E2200 driver for OS X"
+from = "@description"
+
+[kext."IntelMausi.kext"]
+group = "Network"
+said = "Intel Ethernet LAN driver for macOS"
+from = "@description"
+
+[kext."LucyRTL8125Ethernet.kext"]
+group = "Network"
+said = "macOS driver for Realtek RTL8125"
+from = "@description"
+
+[kext."RealtekRTL8111.kext"]
+group = "Network"
+said = "OS X open source driver for the Realtek RTL8111/8168 family"
+from = "@description"
+
+[kext."BrcmPatchRAM.kext"]
+group = "Bluetooth"
+said = "BrcmPatchRAM kext is a macOS driver which applies PatchRAM updates for Broadcom RAMUSB based devices."
+from = "README.md"
+
+[kext."BrcmPatchRAM2.kext"]
+group = "Bluetooth"
+said = "BrcmPatchRAM2.kext: for 10.11 - 10.14."
+from = "README.md"
+
+[kext."BrcmPatchRAM3.kext"]
+group = "Bluetooth"
+said = "BrcmPatchRAM3.kext: for 10.15 or later."
+from = "README.md"
+
+[kext."BrcmFirmwareData.kext"]
+group = "Bluetooth"
+said = "BrcmFirmwareStore (implemented by either BrcmFirmwareData.kext or BrcmFirmwareRepo.kext) is a shared resource which holds all the configured firmwares for different Broadcom Bluetooth USB devices."
+from = "README.md"
+
+[kext."BrcmBluetoothInjector.kext"]
+group = "Bluetooth"
+said = "The BrcmBluetoothInjector.kext is a codeless kernel extension which injects the BT hardware data using a plist; it does not contain a firmware uploader."
+from = "README.md"
+
+[kext."BlueToolFixup.kext"]
+group = "Bluetooth"
+said = "Required for macOS 12 or newer, as in macOS 12 Apple has changed parts of the Bluetooth stack from kernel-space to user-space"
+from = "README.md"
+
+[kext."IntelBluetoothFirmware.kext"]
+group = "Bluetooth"
+said = "IntelBluetoothFirmware is a Kernel Extension that uploads Intel Wireless Bluetooth Firmware to provide native Bluetooth in macOS."
+from = "README.md"
+
+[kext."IntelBluetoothInjector.kext"]
+group = "Bluetooth"
+said = "Intel Bluetooth Kernel Extensions for macOS"
+from = "@description"
+project = true
+
+[kext."IntelBTPatcher.kext"]
+group = "Bluetooth"
+said = "Intel Bluetooth Kernel Extensions for macOS"
+from = "@description"
+project = true
+
+[kext."VoodooPS2Controller.kext"]
+group = "Input"
+
+[kext."VoodooI2C.kext"]
+group = "Input"
+said = "Intel I2C controller and slave device drivers for macOS"
+from = "@description"
+
+[kext."VoodooI2CHID.kext"]
+group = "Input"
+said = "An example of a satellite kext is VoodooI2CHID.kext which adds support for I2C-HID devices."
+from = "README.md"
+
+[kext."VoodooI2CELAN.kext"]
+group = "Input"
+said = "The satellites are a collection of various kernel extensions that implement support for a specific type of I2C device."
+from = "README.md"
+project = true
+
+[kext."VoodooI2CFTE.kext"]
+group = "Input"
+said = "The satellites are a collection of various kernel extensions that implement support for a specific type of I2C device."
+from = "README.md"
+project = true
+
+[kext."VoodooI2CSynaptics.kext"]
+group = "Input"
+said = "The satellites are a collection of various kernel extensions that implement support for a specific type of I2C device."
+from = "README.md"
+project = true
+
+[kext."VoodooRMI.kext"]
+group = "Input"
+said = "A port for macOS of Synaptic's RMI Trackpad driver from Linux."
+from = "README.md"
+
+[kext."VoodooSMBus.kext"]
+group = "Input"
+said = "Synaptic Trackpad driver over SMBus/I2C for macOS"
+from = "@description"
+project = true
+
+[kext."USBToolBox.kext"]
+group = "USB"
+said = "The USBToolBox kext is a kext intended to make common actions for USB mapping easier."
+from = "README.md"
+
+[kext."UTBDefault.kext"]
+group = "USB"
+said = "The USBToolBox kext is a kext intended to make common actions for USB mapping easier."
+from = "README.md"
+project = true
+
+[kext."USBInjectAll.kext"]
+group = "USB"
+
+[kext."XHCI-unsupported.kext"]
+group = "USB"
+
+[kext."XLNCUSBFix.kext"]
+group = "USB"

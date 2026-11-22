@@ -8,28 +8,50 @@ namespace Shell.Views;
 
 public sealed class KextItem
 {
+    /// <summary>A heading row: the group the kexts under it are filed in.</summary>
+    public KextItem(string group, int count)
+    {
+        IsHeader = true;
+        Heading = $"{group.ToUpperInvariant()}  ·  {count}";
+    }
+
     public KextItem(KextRow row)
     {
+        IsRow = true;
         Bundle = row.Bundle;
         Upstream = row.Upstream ?? "no upstream recorded";
         Version = row.Version ?? "—";
         // "none stated" is the absence of a licence, not a permissive one, and
         // the table says so in the same words the licence file does
         Licence = row.Licence ?? "unread";
+        // marked, because either one means nobody has granted anything
+        LicenceUnclear = Licence is "unread" or "none stated";
         // The table is generated from what each kext binds to by device id.
         // AppleALC matches on a layout, Lilu on nothing at all - neither is
         // idle, and neither has a row, so this says what is true of both.
-        Drives = row.Label ?? "not matched by device id";
+        Drives = row.Label ?? "";
+        // what it is for, in its project's words, where nothing claims a
+        // device for it - AppleALC matches a codec layout, Lilu nothing
+        Said = row.Said.Length == 0 ? ""
+             : (row.SaidOfProject ? "Its project: " : "") + $"\u201c{row.Said}\u201d";
+        HasSaid = Said.Length > 0 && (row.Label is null);
+        if (row.Label is null && Said.Length == 0) Drives = "nothing it says about itself is recorded";
         Devices = row.Devices == 1 ? "1 device id" : $"{row.Devices} device ids";
         HasDevices = row.Devices > 0;
     }
 
-    public string Bundle { get; }
-    public string Upstream { get; }
-    public string Version { get; }
-    public string Licence { get; }
-    public string Drives { get; }
-    public string Devices { get; }
+    public bool IsHeader { get; }
+    public bool IsRow { get; }
+    public string Heading { get; } = "";
+    public bool LicenceUnclear { get; }
+    public string Said { get; } = "";
+    public bool HasSaid { get; }
+    public string Bundle { get; } = "";
+    public string Upstream { get; } = "";
+    public string Version { get; } = "";
+    public string Licence { get; } = "";
+    public string Drives { get; } = "";
+    public string Devices { get; } = "";
     public bool HasDevices { get; }
 }
 
@@ -72,6 +94,13 @@ public partial class KextsView : UserControl
                      $"never reaches the network. {claiming} of them claim {ids} device " +
                      "ids between them, read out of the kexts themselves rather than " +
                      "from a list somebody kept.";
-        Rows.ItemsSource = list.Kexts.Select(k => new KextItem(k)).ToList();
+        // in the engine's order, which is by group, each group under its name
+        var rows = new System.Collections.Generic.List<KextItem>();
+        foreach (var g in list.Kexts.GroupBy(k => k.Group))
+        {
+            rows.Add(new KextItem(g.Key, g.Count()));
+            rows.AddRange(g.Select(k => new KextItem(k)));
+        }
+        Rows.ItemsSource = rows;
     }
 }

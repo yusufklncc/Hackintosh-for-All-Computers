@@ -488,7 +488,14 @@ def describe_machine(hw, label, source):
     show_machine(hw, label)
     if summary.worth_showing(hw):
         print()
-        print('\n'.join(summary.render(hw, source)))
+        if UI.protocol:
+            # the window draws the table from the rows, in its own columns
+            UI.emit(t='hardware', source=source,
+                    rows=[{k: r.get(k) for k in ('part', 'what', 'verdict', 'detail')}
+                          for r in summary.rows(hw)])
+            print('\n'.join(summary.render(hw, source, table_too=False)[2:]))
+        else:
+            print('\n'.join(summary.render(hw, source)))
     elif hw:
         print(f'  {DIM}nothing here is in any table this repository has, so there is '
               f'no summary to give{RESET}')
@@ -718,6 +725,9 @@ def main():
             # did, which is when the tuple went in whole.
             carried = load_machine(a.machine)[0] if a.machine else None
             document = inventory.recoveries(carried)
+        elif a.inventory == 'efi':
+            # the folder a build wrote, read back for the cards shown after it
+            document = inventory.efi(a.out)
         elif a.inventory == 'community':
             # which cards fit the machine the Machine pane is showing: a report
             # when one is open, otherwise this machine, read the way it reads it

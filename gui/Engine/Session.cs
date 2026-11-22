@@ -17,6 +17,9 @@ namespace Shell.Engine;
 // and the transcript uses both.
 public sealed record TextSpan(string Tone, string Text);
 
+/// <summary>One row of the hardware summary, drawn by the window in columns.</summary>
+public sealed record HardwareRow(string Part, string What, string Verdict, string Detail);
+
 public sealed record Option(int Number, string Label, bool Detected,
                             string? Value);
 
@@ -31,6 +34,7 @@ public sealed class Session
 
     public event Action<IReadOnlyList<TextSpan>>? Said;
     public event Action<Question>? Asked;
+    public event Action<string, IReadOnlyList<HardwareRow>>? Hardware;
     public event Action<int, string?>? Finished;
 
     /// <summary>Start a build and read it until it ends.</summary>
@@ -102,6 +106,13 @@ public sealed class Session
                         Asked?.Invoke(new Question(
                             root.GetProperty("id").GetInt32(), Text(root, "question") ?? "",
                             Array.Empty<Option>(), Text(root, "note"), true));
+                        break;
+                    case "hardware":
+                        var rows = new List<HardwareRow>();
+                        foreach (var r in root.GetProperty("rows").EnumerateArray())
+                            rows.Add(new HardwareRow(Text(r, "part") ?? "", Text(r, "what") ?? "",
+                                                     Text(r, "verdict") ?? "", Text(r, "detail") ?? ""));
+                        Hardware?.Invoke(Text(root, "source") ?? "", rows);
                         break;
                     case "built":
                         built = Text(root, "out");

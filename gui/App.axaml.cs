@@ -60,6 +60,10 @@ public partial class App : Application
                 try
                 {
                     Console.WriteLine("drive: " + await window.DriveBuilder());
+                    // the end of it too: the cards a finished build shows are
+                    // read back from the folder, a moment after it is written
+                    await System.Threading.Tasks.Task.Delay(TimeSpan.FromSeconds(3));
+                    Save(window, into.Replace(".png", "-built.png", StringComparison.Ordinal));
                     foreach (var pane in new[] { "report", "recovery", "installer",
                                                  "stick", "devices", "community",
                                                  "kexts", "about" })

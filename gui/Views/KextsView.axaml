@@ -28,8 +28,15 @@
           <ItemsControl Name="Rows">
             <ItemsControl.ItemTemplate>
               <DataTemplate x:DataType="v:KextItem">
-                <Border BorderBrush="{DynamicResource Line}" BorderThickness="0,0,0,1"
-                        Padding="14,9">
+                <Panel>
+                <Border IsVisible="{Binding IsHeader}" Background="{DynamicResource Surface2}"
+                        BorderBrush="{DynamicResource Line}" BorderThickness="0,0,0,1"
+                        Padding="14,7">
+                  <TextBlock Classes="eyebrow" Text="{Binding Heading}"
+                             Foreground="{DynamicResource Accent}" />
+                </Border>
+                <Border IsVisible="{Binding IsRow}" BorderBrush="{DynamicResource Line}"
+                        BorderThickness="0,0,0,1" Padding="14,9">
                   <Grid ColumnDefinitions="260,*,120,150">
                     <StackPanel Grid.Column="0" Margin="0,0,12,0">
                       <TextBlock Classes="mono kext" Text="{Binding Bundle}" />
@@ -38,16 +45,26 @@
                     </StackPanel>
                     <StackPanel Grid.Column="1" Margin="0,0,12,0">
                       <TextBlock Text="{Binding Drives}" FontSize="13"
-                                 Foreground="{DynamicResource Ink}" TextWrapping="Wrap" />
+                                 Foreground="{DynamicResource Ink}" TextWrapping="Wrap"
+                                 IsVisible="{Binding !HasSaid}" />
+                      <TextBlock Text="{Binding Said}" FontSize="12.5" FontStyle="Italic"
+                                 Foreground="{DynamicResource Muted}" TextWrapping="Wrap"
+                                 IsVisible="{Binding HasSaid}" />
                       <TextBlock Text="{Binding Devices}" FontSize="12"
                                  Foreground="{DynamicResource Muted}"
                                  IsVisible="{Binding HasDevices}" />
                     </StackPanel>
                     <TextBlock Grid.Column="2" Classes="mono" Text="{Binding Version}" />
                     <TextBlock Grid.Column="3" Classes="mono" Text="{Binding Licence}"
-                               TextWrapping="Wrap" />
+                               TextWrapping="Wrap" IsVisible="{Binding !LicenceUnclear}" />
+                    <Border Grid.Column="3" Classes="pill warn" VerticalAlignment="Top"
+                            IsVisible="{Binding LicenceUnclear}"
+                            ToolTip.Tip="No licence was read for it: nothing grants a right to use or pass it on.">
+                      <TextBlock Text="{Binding Licence}" />
+                    </Border>
                   </Grid>
                 </Border>
+                </Panel>
               </DataTemplate>
             </ItemsControl.ItemTemplate>
           </ItemsControl>

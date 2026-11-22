@@ -22,7 +22,7 @@ import thirdparty
 
 # One list, named once. It was written twice - the argument parser's and the
 # dispatch table's - and they drifted the first time a document was added.
-WHAT = ('kexts', 'about', 'devices', 'recovery', 'community')
+WHAT = ('kexts', 'about', 'devices', 'recovery', 'community', 'efi')
 
 LOCK = Path('vendor/kexts.lock')
 CATALOGUE = Path('profiles/catalogue.toml')
@@ -64,17 +64,32 @@ def kexts():
     if not LOCK.exists():
         return {'t': 'kexts', 'kexts': []}
     roles = _roles()
+    # what each one is for, in its own project's words, and the group the
+    # pane files it under: data/kextroles.toml says where each sentence is from
+    told = ocgen.read_toml(KEXTROLES)['kext'] if KEXTROLES.exists() else {}
     out = []
     for bundle in sorted(ocgen.read_toml(LOCK)['kext']):
         facts = summary.kext_facts(bundle)
         drives = roles.get(bundle)
+        said = told.get(bundle, {})
         out.append({
             **facts,
             'roles': drives['roles'] if drives else [],
             'label': ', '.join(drives['labels']) if drives else None,
             'devices': drives['devices'] if drives else 0,
+            'group': said.get('group', 'Other'),
+            'said': said.get('said', ''),
+            # the project's line rather than one about this kext
+            'said_of_project': bool(said.get('project')),
         })
+    order = {g: i for i, g in enumerate(KEXT_GROUPS)}
+    out.sort(key=lambda k: (order.get(k['group'], len(order)), k['bundle'].lower()))
     return {'t': 'kexts', 'kexts': out}
+
+
+KEXTROLES = Path('data/kextroles.toml')
+KEXT_GROUPS = ('Core', 'Graphics', 'Audio', 'Network', 'Bluetooth', 'Input', 'USB',
+               'Storage', 'Sensors and power', 'Other')
 
 
 CATEGORIES = ('Ethernet', 'Wi-Fi', 'Bluetooth', 'Trackpad', 'Graphics',
@@ -345,8 +360,48 @@ def community(hw=None):
     return _community.document(hw)
 
 
+def efi(folder):
+    """What a written EFI holds, for the cards the EFI pane shows when a build
+    ends: read from the folder itself, so the cards say what is on disk and
+    not what the build meant to put there."""
+    import plistlib
+    folder = Path(folder)
+    try:
+        with open(folder / 'OC' / 'config.plist', 'rb') as fh:
+            config = plistlib.load(fh)
+    except (OSError, plistlib.InvalidFileException, ValueError) as exc:
+        return {'t': 'efi', 'complaint': f'{folder}: {exc}'}
+    generic = config.get('PlatformInfo', {}).get('Generic', {})
+    args = (config.get('NVRAM', {}).get('Add', {})
+            .get('7C436110-AB2A-4BBB-A880-FE41995C9F82', {}).get('boot-args') or '')
+    alcid = next((a.split('=', 1)[1] for a in args.split() if a.startswith('alcid=')), None)
+    kexts = []
+    for e in config.get('Kernel', {}).get('Add', []):
+        top = (e.get('BundlePath') or '').split('/')[0]
+        if e.get('Enabled') and top and top not in kexts:
+            kexts.append(top)
+    # the headings of the follow-up file written beside the EFI: what is left
+    # to do by hand, in the order it was written
+    steps = folder.parent / 'NEXT-STEPS.txt'
+    left = []
+    if steps.exists():
+        lines = steps.read_text(encoding='utf-8').splitlines()
+        for i, line in enumerate(lines[2:], start=2):
+            if line and not line.startswith(' ') and not set(line) <= {'=', '-'}:
+                left.append(line.strip())
+    import community
+    return {'t': 'efi', 'folder': str(folder),
+            'smbios': generic.get('SystemProductName') or '',
+            'kexts': kexts, 'boot_args': args, 'alcid': alcid,
+            'secure_boot_model': config.get('Misc', {}).get('Security', {}).get('SecureBootModel'),
+            'community': [e['name'] for e in community.added(folder)],
+            'next': left, 'next_file': str(steps) if steps.exists() else ''}
+
+
 DOCUMENTS = {'kexts': kexts, 'about': about, 'devices': devices,
-             'recovery': recoveries, 'community': community}
+             'recovery': recoveries, 'community': community,
+             # the folder a build writes when nobody names one
+             'efi': lambda: efi(Path('build/EFI'))}
 
 
 def main(argv=None):

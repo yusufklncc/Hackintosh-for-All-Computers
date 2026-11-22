@@ -33,6 +33,28 @@
         <Path Fill="{DynamicResource Surface2}" Stroke="{DynamicResource Line}" StrokeThickness="2"
               Data="M14,100 H174 A6,6 0 0 1 168,108 H20 A6,6 0 0 1 14,100 Z" />
       </Canvas>
+      <!-- a desktop: a monitor on its stand and the case beside it, drawn in
+           the same strokes, so a Z790 board is not shown as a laptop -->
+      <Canvas Grid.Column="0" Width="188" Height="120" Name="Tower" IsVisible="False">
+        <Rectangle Canvas.Left="6" Canvas.Top="12" Width="118" Height="76" RadiusX="6" RadiusY="6"
+                   Fill="{DynamicResource Surface2}" Stroke="{DynamicResource Line}" StrokeThickness="2" />
+        <Rectangle Canvas.Left="13" Canvas.Top="19" Width="104" Height="62" RadiusX="3" RadiusY="3"
+                   Fill="{DynamicResource AccentSoft}" Stroke="{DynamicResource Line}" StrokeThickness="1.5" />
+        <Path Stroke="{DynamicResource Accent}" StrokeThickness="2.5" Opacity="0.45"
+              StrokeLineCap="Round" Data="M26,68 H104 M26,60 H82 M26,52 H96" />
+        <Ellipse Canvas.Left="56" Canvas.Top="26" Width="18" Height="18"
+                 Stroke="{DynamicResource Accent}" StrokeThickness="2.5" Opacity="0.55" />
+        <Path Fill="{DynamicResource Chrome}" Stroke="{DynamicResource Line}" StrokeThickness="2"
+              Data="M56,88 H74 L78,104 H52 Z" />
+        <Path Fill="{DynamicResource Surface2}" Stroke="{DynamicResource Line}" StrokeThickness="2"
+              Data="M38,104 H92 A4,4 0 0 1 92,110 H38 A4,4 0 0 1 38,104 Z" />
+        <Rectangle Canvas.Left="134" Canvas.Top="18" Width="46" Height="92" RadiusX="5" RadiusY="5"
+                   Fill="{DynamicResource Surface2}" Stroke="{DynamicResource Line}" StrokeThickness="2" />
+        <Path Stroke="{DynamicResource Line}" StrokeThickness="2" StrokeLineCap="Round"
+              Data="M142,32 H172 M142,40 H172 M142,48 H164" />
+        <Ellipse Canvas.Left="151" Canvas.Top="90" Width="12" Height="12"
+                 Stroke="{DynamicResource Accent}" StrokeThickness="2" Opacity="0.55" />
+      </Canvas>
 
       <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
         <TextBlock Name="Source" Classes="eyebrow" Text="READ FROM THIS MACHINE" />
@@ -92,6 +114,9 @@
       <Border Grid.Column="1" Classes="panel">
         <StackPanel Spacing="10">
           <TextBlock Classes="eyebrow" Text="WHAT SETS THE LIMITS" />
+          <TextBlock Name="NoBounds" IsVisible="False" FontSize="12.5" TextWrapping="Wrap"
+                     Foreground="{DynamicResource Muted}"
+                     Text="No part of this machine has a first or last macOS recorded in these tables." />
           <ItemsControl Name="Bounds">
             <ItemsControl.ItemTemplate>
               <DataTemplate x:DataType="v:BoundView">

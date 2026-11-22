@@ -44,6 +44,9 @@ public partial class RecoveryView : UserControl
         {
             var picked = Which.SelectedItem as RecoveryChoice;
             var note = picked?.Note ?? "";
+            // the engine writes it to follow a dash in the console; on its own
+            // line here it is a sentence, and a sentence starts with a capital
+            if (note.Length > 0) note = char.ToUpperInvariant(note[0]) + note[1..];
             Chosen.Text = note;
             Chosen.IsVisible = note.Length > 0;
             // the offer to ask belongs to the row that cannot name itself

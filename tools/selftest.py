@@ -1847,6 +1847,49 @@ def genuine_macs():
         check('an Intel Mac Apple stopped at Tahoe is told so',
               made['to'] and made['to']['name'] == 'Tahoe', made)
     check('and its served lines are a separate fact', made['serving'], made)
+    # the Kexts pane: every vendored kext filed, each sentence with a source
+    import inventory
+    roles = ocgen.read_toml(Path('data/kextroles.toml'))
+    lock = ocgen.read_toml(Path('vendor/kexts.lock'))['kext']
+    check('every vendored kext has a group on the Kexts pane',
+          set(roles['kext']) == set(lock), sorted(set(lock) ^ set(roles['kext'])))
+    check('  and every sentence says where it is from, a README at a recorded commit',
+          all(v.get('from') in ('@description', 'README.md') for v in roles['kext'].values() if v.get('said'))
+          and all(lock[k]['upstream'] in roles['sources'] for k, v in roles['kext'].items()
+                  if v.get('from') == 'README.md'))
+    check('  and a kext with no upstream is not given words of its own',
+          not any(v.get('said') for k, v in roles['kext'].items() if not lock[k].get('upstream')))
+    listed = inventory.kexts()['kexts']
+    check('  listed group by group, in the pane\'s order',
+          [k['group'] for k in listed] == sorted((k['group'] for k in listed),
+                                                 key=inventory.KEXT_GROUPS.index))
+
+    # a written EFI, read back for the cards the EFI pane shows after a build
+    with tempfile.TemporaryDirectory() as tmp:
+        run([sys.executable, 'tools/build.py', '--platform', 'laptop', '--cpu', 'kaby-lake',
+             '--out', str(Path(tmp) / 'EFI'), '--no-validate'])
+        facts = inventory.efi(Path(tmp) / 'EFI')
+        check('a built EFI is read back: its identity, its kexts, its audio layout',
+              facts.get('smbios', '').startswith('Mac') and 'Lilu.kext' in facts['kexts']
+              and facts['alcid'] and facts['community'] == [], facts)
+        check('  and a folder with no config says so rather than inventing one',
+              'complaint' in inventory.efi(Path(tmp) / 'nothing'))
+
+    # the window draws the hardware table itself; the console still lines it up
+    hw, _ = detect.read_report('tools/fixtures/thinkpad-e570.json')
+    full = summary.render(hw)
+    short = summary.render(hw, table_too=False)
+    check('the hardware summary can leave out its table for a window that draws it',
+          len(short) == len(full) - len(summary.rows(hw)) - sum(
+              1 for l in full if l.startswith(' ' * 20)) or len(short) < len(full))
+    setup_src = Path('tools/setup.py').read_text(encoding='utf-8')
+    builder_src = Path('gui/Views/BuilderView.axaml.cs').read_text(encoding='utf-8')
+    check('  and a protocol run sends the rows instead',
+          "UI.emit(t='hardware'" in setup_src and 'session.Hardware +=' in builder_src)
+    check('theme colours are looked up from code with the theme named',
+          'TryFindResource(key, ActualThemeVariant' in builder_src
+          and 'TryFindResource(key, out' not in builder_src)
+
     shown = summary.audio_row({'hda_ids': ['8086:281e']})
     check('an Intel codec alone is the display outputs\' audio, not unsupported sound',
           'HDMI' in str(shown) and summary.UNSUPPORTED not in shown.values(), shown)

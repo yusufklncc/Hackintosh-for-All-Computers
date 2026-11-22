@@ -9,7 +9,8 @@
        and Installer made an image - and the way to choose between them was to
        know already which one fitted. Here the choice comes first, with the one
        this machine's network makes sensible marked, and the rest follows it. -->
-  <ScrollViewer>
+  <Grid RowDefinitions="*,Auto">
+  <ScrollViewer Grid.Row="0">
     <StackPanel Margin="28,24" Spacing="18" MaxWidth="890" HorizontalAlignment="Left">
       <StackPanel Spacing="8">
         <TextBlock Classes="eyebrow" Text="THE USB STICK" />
@@ -81,13 +82,21 @@
       <TextBlock Name="Step3" Classes="eyebrow" Text="3 · WHICH STICK" />
       <v:StickView Name="Stick" />
 
-      <StackPanel Name="GoRow" Spacing="8">
-        <Button Name="Go" Content="Put it on the stick" Classes="accent"
-                IsEnabled="False" HorizontalAlignment="Left" />
-        <TextBlock Name="GoNote" FontSize="12.5" TextWrapping="Wrap"
-                   Foreground="{DynamicResource Muted}" />
-      </StackPanel>
       </StackPanel>
     </StackPanel>
   </ScrollViewer>
+
+  <!-- What the button will do, and the button, held at the bottom: the pane
+       is three steps long, and the one thing every step leads to was below
+       the fold on a laptop screen -->
+  <Border Grid.Row="1" Name="GoRow" IsVisible="False" Background="{DynamicResource Surface}"
+          BorderBrush="{DynamicResource Line}" BorderThickness="0,1,0,0" Padding="28,12">
+    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="18" MaxWidth="890" HorizontalAlignment="Left">
+      <TextBlock Grid.Column="0" Name="GoNote" FontSize="12.5" TextWrapping="Wrap"
+                 VerticalAlignment="Center" Foreground="{DynamicResource Muted}" />
+      <Button Grid.Column="1" Name="Go" Content="Put it on the stick" Classes="accent"
+              IsEnabled="False" VerticalAlignment="Center" />
+    </Grid>
+  </Border>
+  </Grid>
 </UserControl>

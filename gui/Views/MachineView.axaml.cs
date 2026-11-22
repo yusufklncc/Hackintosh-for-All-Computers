@@ -140,6 +140,9 @@ public partial class MachineView : UserControl
         if (m.Profile.Generation is { } gen) spec.Add(new SpecView("generation", gen));
         if (m.Profile.Cores is { } cores) spec.Add(new SpecView("cores", cores.ToString()));
         if (m.Platform is { } platform) spec.Add(new SpecView("form factor", platform));
+        // the drawing follows what the machine is, not what most of them are
+        Tower.IsVisible = m.Platform == "desktop";
+        Silhouette.IsVisible = !Tower.IsVisible;
         if (m.Profile.Oem is { } oem) spec.Add(new SpecView("board", oem));
         Spec.ItemsSource = spec;
 
@@ -228,7 +231,7 @@ public partial class MachineView : UserControl
             GraphicsWarning.IsVisible = true;
             GraphicsWarning.Foreground = (IBrush?)(
                 this.TryFindResource(advice.Tone == "unknown" ? "Warn" : "Bad",
-                                     out var brush) ? brush : null);
+                                     ActualThemeVariant, out var brush) ? brush : null);
         }
         else
         {
@@ -237,6 +240,8 @@ public partial class MachineView : UserControl
 
         if (m.Mac is null)
             Bounds.ItemsSource = m.Macos.Parts.Select(b => new BoundView(b)).ToList();
+        // an empty panel read as one that had not loaded
+        NoBounds.IsVisible = Bounds.ItemsSource is System.Collections.ICollection { Count: 0 };
         Rows.ItemsSource =
             m.Rows.Select(r => new RowView(r)).ToList();
     }

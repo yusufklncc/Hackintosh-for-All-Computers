@@ -904,8 +904,11 @@ def _fit(text, width):
     return text if len(text) <= width else text[:width - 1] + '\u2026'
 
 
-def render(hw, source='this machine'):
-    """The whole screen as lines."""
+def render(hw, source='this machine', table_too=True):
+    """The whole screen as lines.
+
+    Without the table when a window draws it from the rows itself: lined up in
+    spaces, it ran off the right of the EFI pane and was cut mid-sentence."""
     table = rows(hw)
     width = max(len(r['what']) for r in table)
     width = min(max(width, 24), 44)
@@ -913,7 +916,7 @@ def render(hw, source='this machine'):
     # straight into the sentence after it
     verdict_width = max(14, max(len(r['verdict']) for r in table)) + 1
     lines = [f'{BOLD}Hardware for macOS{RESET}  {DIM}from {source}{RESET}', '']
-    for r in table:
+    for r in (table if table_too else []):
         what = _fit(r['what'], width)
         colour = COLOUR[r['verdict']]
         # a detail that does not fit wraps rather than being cut. The part that
