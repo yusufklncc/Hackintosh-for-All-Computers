@@ -256,10 +256,13 @@ public sealed class OfflineChoice
     [JsonPropertyName("size")] public long Size { get; set; }
     [JsonPropertyName("boots")] public string Boots { get; set; } = "";
     [JsonPropertyName("steps")] public List<string> Steps { get; set; } = new();
+    [JsonPropertyName("newest")] public bool Newest { get; set; }
 
-    public string Titled => $"{Name} {Version}";
+    public string Titled => $"{Name} {Version} ({Build})";
     public string Detail => (Size > 0 ? $"{Size / 1e9:0.0} GB" : "size unknown")
-                          + $" · boots {Boots}'s recovery";
+                          + (Boots.StartsWith("its own") ? " · recovery from the package"
+                                                         : $" · boots {Boots}'s recovery")
+                          + (Newest ? "" : " · older build");
 }
 
 public sealed class OfflineList

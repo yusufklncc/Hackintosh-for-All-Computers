@@ -87,37 +87,68 @@ def catalog(work):
     return g, None
 
 
-def offered(g):
-    """The newest build of each macOS that runs on Intel, newest first.
+def runs_on_intel(p):
+    """Whether an installer in the catalog is one an Intel Mac runs.
 
-    [{'name', 'version', 'build', 'size', 'product', 'prod'}]; 'prod' is the
-    tool's own record, which is what downloading takes."""
+    From Big Sur on the catalog says so, by listing the x86 virtual machine
+    board among the models. Before Big Sur it lists no models at all - and
+    there was no Apple silicon yet, so every one of those is Intel. Reading
+    the missing list as "not Intel" is what hid High Sierra to Catalina."""
+    ids = [d.lower() for d in p.get('device_ids', [])]
+    if INTEL in ids:
+        return True
+    return (p.get('version') or '').strip().startswith('10.')
+
+
+def _key(v):
+    return tuple(int(x) for x in v.split('.') if x.isdigit())
+
+
+def _build_key(build):
+    """19H15 after 19H4: the number after the letter is a number, not text."""
+    import re as _re
+    return tuple(int(x) if x.isdigit() else x for x in _re.findall(r'\d+|\D+', build or ''))
+
+
+def offered(g):
+    """Every build Apple serves that runs on Intel, newest first.
+
+    All of them, not one per release: a point release is sometimes the one
+    that works on a given machine, and the choice is the person's to make.
+    [{'name', 'major', 'version', 'build', 'size', 'product', 'prod',
+    'newest'}]; 'prod' is the tool's own record, which downloading takes, and
+    'newest' marks the latest build of each release."""
     names = {v: k.title() for k, v in g.version_names.items()}
-    best = {}
+    rows = []
     for p in g.mac_prods:
-        if INTEL not in [d.lower() for d in p.get('device_ids', [])]:
+        if not runs_on_intel(p):
             continue
         v = (p.get('version') or '').strip()
         # 10.15 is a release of its own; from 11 on the first number is
         major = '.'.join(v.split('.')[:2]) if v.startswith('10.') else v.split('.')[0]
         if major not in names:
             continue
-        key = tuple(int(x) for x in v.split('.') if x.isdigit())
-        if major not in best or key > best[major][0]:
-            best[major] = (key, p)
-    rows = []
-    for major, (_, p) in best.items():
-        rows.append({'name': names[major], 'major': major,
-                     'version': p['version'].strip(), 'build': p.get('build', ''),
-                     'size': sum(x.get('Size') or 0 for x in p.get('packages', [])) or -1, 'product': p['product'], 'prod': p})
-    rows.sort(key=lambda r: tuple(int(x) for x in r['major'].split('.')), reverse=True)
+        rows.append({'name': names[major], 'major': major, 'version': v,
+                     'build': p.get('build', ''), 'product': p['product'],
+                     'size': sum(x.get('Size') or 0 for x in p.get('packages', [])) or -1,
+                     'prod': p})
+    rows.sort(key=lambda r: (_key(r['version']), _build_key(r['build'])), reverse=True)
+    seen = set()
+    for r in rows:
+        r['newest'] = r['major'] not in seen
+        seen.add(r['major'])
     return rows
 
 
 def find(rows, wanted):
+    """A build or a product id picks exactly one row; a name or a release
+    number picks the newest build of it."""
     wanted = (wanted or '').strip().lower()
     for r in rows:
-        if wanted in (r['name'].lower(), r['major'], r['version'], r['product'].lower()):
+        if wanted in (r['build'].lower(), r['product'].lower()):
+            return r
+    for r in rows:                     # newest first, so the first match is newest
+        if wanted in (r['name'].lower(), r['major'], r['version']):
             return r
     return None
 
@@ -167,7 +198,8 @@ def main(argv=None):
     if a.list or not a.macos:
         print('Full installers Apple serves for Intel Macs')
         for r in rows:
-            print(f"  {r['name']:14} {r['version']:10} {r['build']:10} {size_text(r['size'])}")
+            print(f"  {r['name']:14} {r['version']:10} {r['build']:10} {size_text(r['size'])}"
+                  + ('' if r['newest'] else '   (older build)'))
         print(f'\n  Read from Apple\'s catalog by gibMacOS {version()}.')
         return 0
     row = find(rows, a.macos)

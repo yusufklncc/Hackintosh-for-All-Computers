@@ -21,8 +21,9 @@ kurulu. UnPlugged, recovery içinde Apple'ın kurulum paketinden
 | `OPENCORE`, FAT32 | 1 GB | `EFI` ve `com.apple.recovery.boot` |
 | `UNPLUGGED`, ExFAT | kalanı | `InstallAssistant.pkg` ve yanındaki dosyalar, `UnPlugged.command`, Sonoma ve sonrası için o sürümün `BaseSystem.dmg`'si |
 
-Kurulum paketi 12–19 GB arası; **16 GB veya üzeri** bir bellek kullanın, Tahoe için
-**32 GB**.
+Apple'ın Intel Mac'ler için hâlâ sunduğu her yapı listelenir; High Sierra'dan
+Tahoe'ya, eski ara sürümler dahil. Kurulum paketi 6–19 GB arası; **16 GB veya
+üzeri** bir bellek kullanın, Tahoe için **32 GB**.
 
 !!! note "Sonoma ve sonrası Monterey'in recovery'siyle açılır"
     Sonoma'dan itibaren recovery FAT32 ve ExFAT bölümleri okuyamıyor, yani
@@ -65,6 +66,8 @@ Bellekten açın ve OpenCore seçicisinde recovery girişini seçin. Sonra:
 3. Kurulumun nereden alınacağını sorduğunda şunu seçin:
     - Sonoma ve sonrası: **Extract the Install … app from BaseSystem.dmg**
     - Big Sur'dan Ventura'ya: **Fully expand InstallAssistant.pkg**
+    - High Sierra'dan Catalina'ya: seçecek bir şey yok, `InstallESDDmg.pkg`'yi
+      kendisi bulur. Bunlar Apple'ın paketindeki kendi recovery'leriyle açılır.
 4. Az önce sildiğiniz birimi seçin ve `y` yazın.
 5. **Terminal'i kapatmayın.** Kapatırsanız kurulum da kapanır.
 

@@ -21,8 +21,9 @@ starts it, with no connection.
 | `OPENCORE`, FAT32 | 1 GB | `EFI` and `com.apple.recovery.boot` |
 | `UNPLUGGED`, ExFAT | the rest | `InstallAssistant.pkg` and the files that come with it, `UnPlugged.command`, and for Sonoma and later that macOS's `BaseSystem.dmg` |
 
-The installer is 12 to 19 GB, so use a stick of **16 GB or more** - **32 GB** for
-Tahoe.
+Every build Apple still serves for Intel Macs is offered, High Sierra to Tahoe,
+older point releases included. The installer is 6 to 19 GB, so use a stick of
+**16 GB or more** - **32 GB** for Tahoe.
 
 !!! note "Sonoma and later boot Monterey's recovery"
     Recovery from Sonoma onwards cannot read a FAT32 or ExFAT partition, so it
@@ -66,6 +67,8 @@ Boot the stick and pick the recovery entry in OpenCore's picker. Then:
 3. When it asks where the installer comes from, choose:
     - Sonoma and later: **Extract the Install … app from BaseSystem.dmg**
     - Big Sur to Ventura: **Fully expand InstallAssistant.pkg**
+    - High Sierra to Catalina: nothing to choose - it finds `InstallESDDmg.pkg`
+      by itself. These boot their own recovery, taken from Apple's package.
 4. Pick the volume you just erased and type `y`.
 5. **Leave Terminal open.** Closing it also closes the installer.
 

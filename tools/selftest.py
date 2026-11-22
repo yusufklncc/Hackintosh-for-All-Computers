@@ -2917,15 +2917,29 @@ def a_stick_that_needs_no_network():
                 'device_ids': list(ids), 'packages': [{'URL': 'x/InstallAssistant.pkg',
                                                        'Size': 13_000_000_000}]}
     g = types.SimpleNamespace(version_names={'sequoia': '15', 'sonoma': '14',
-                                             'tahoe': '26', 'monterey': '12'},
-                              mac_prods=[prod('15.7.4', 'a'), prod('15.8.3', 'b'),
-                                         prod('26.7.3', 'c', ('J314sAP',)),
-                                         prod('14.8.9', 'd')])
+                                             'tahoe': '26', 'catalina': '10.15'},
+                              mac_prods=[prod('15.7.4', '24G4'), prod('15.8.3', '24H241'),
+                                         prod('26.7.3', '25G342', ('J314sAP',)),
+                                         prod('14.8.9', '23J631'),
+                                         prod('10.15.7', '19H4', ()),
+                                         prod('10.15.7', '19H15', ())])
     rows = fullinstaller.offered(g)
-    check('only installers an Intel Mac runs are offered',
-          [r['name'] for r in rows] == ['Sequoia', 'Sonoma'], [r['name'] for r in rows])
-    check('  each at its newest build', rows[0]['build'] == 'b', rows[0]['build'])
+    check('every build an Intel Mac runs is offered, newest first',
+          [r['build'] for r in rows] == ['24H241', '24G4', '23J631', '19H15', '19H4'],
+          [r['build'] for r in rows])
+    check('  an Apple silicon only build is not', '25G342' not in [r['build'] for r in rows])
+    check('  and a pre-Big Sur one, which lists no models, is Intel',
+          any(r['name'] == 'Catalina' for r in rows))
+    check('  19H15 sorts after 19H4, as a number', rows[3]['build'] == '19H15')
+    check('  the newest of each release is marked',
+          [r['newest'] for r in rows] == [True, False, True, True, False])
     check('  with the size the packages add up to', rows[0]['size'] == 13_000_000_000)
+    check('a build picks exactly one row, a name the newest of it',
+          fullinstaller.find(rows, '24G4')['version'] == '15.7.4'
+          and fullinstaller.find(rows, 'sequoia')['build'] == '24H241')
+    old = offline.plan({'name': 'Catalina', 'major': '10.15', 'version': '10.15.7', 'size': 1})
+    check('High Sierra to Catalina take the recovery from their own package',
+          old['recovery_from_package'] and not old['basesystem_on_exfat'], old)
 
     later = offline.plan({'name': 'Sequoia', 'major': '15', 'version': '15.8.3', 'size': 1})
     check('Sonoma and later boot Monterey\'s recovery, as UnPlugged says',
@@ -2959,7 +2973,7 @@ def a_stick_that_needs_no_network():
             fat, big = Path(tmp) / 'OPENCORE', Path(tmp) / 'UNPLUGGED'
             fat.mkdir(); big.mkdir()
             row = {'name': 'Sequoia', 'major': '15', 'version': '15.8.3', 'size': 1,
-                   'prod': {}}
+                   'build': '24H241', 'prod': {}}
             _, why = offline.build(row, fat, big, g=object(), say=lambda *_: None)
             check('an offline stick is put together without complaint', why is None, why)
             check('  UnPlugged goes on the ExFAT side', ('unplugged', 'UNPLUGGED') in calls, calls)
@@ -2968,6 +2982,25 @@ def a_stick_that_needs_no_network():
             check('  Sequoia\'s BaseSystem beside the installer, at the root',
                   (big / 'BaseSystem.dmg').read_text() == 'Sequoia')
             check('  and the installer on the ExFAT side', ('full', 'UNPLUGGED') in calls, calls)
+
+            # Catalina: the package brings its own BaseSystem, and that is the recovery
+            calls.clear()
+            def full(g, row, into):
+                calls.append(('full', Path(into).name))
+                (Path(into) / 'BaseSystem.dmg').write_text('catalina')
+                (Path(into) / 'BaseSystem.chunklist').write_text('list')
+                return [], None
+            offline.fullinstaller.fetch = full
+            fat2, big2 = Path(tmp) / 'F2', Path(tmp) / 'B2'
+            fat2.mkdir(); big2.mkdir()
+            old_row = {'name': 'Catalina', 'major': '10.15', 'version': '10.15.7',
+                       'size': 1, 'build': '19H15', 'prod': {}}
+            _, why = offline.build(old_row, fat2, big2, g=object(), say=lambda *_: None)
+            check('Catalina goes on without asking macrecovery for anything',
+                  why is None and not any(c[0] == 'recovery' for c in calls), (why, calls))
+            check('  its own BaseSystem and chunklist become the recovery',
+                  (fat2 / offline.recovery.FOLDER / 'BaseSystem.dmg').read_text() == 'catalina'
+                  and (fat2 / offline.recovery.FOLDER / 'BaseSystem.chunklist').exists())
     finally:
         (offline.unplugged.fetch, offline.recovery.find, offline.recovery.fetch,
          offline.fullinstaller.fetch, offline.check_room) = saved

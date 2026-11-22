@@ -54,6 +54,10 @@ def plan(row):
     rules = ocgen.read_toml(RULES)['recovery']
     darwin = darwin_of(row)
     older = darwin is not None and darwin >= rules['boots_from_older_from_darwin']
+    # High Sierra to Catalina come as InstallESD, and Apple's package carries
+    # its own BaseSystem: that is the recovery, and it needs nothing from
+    # macrecovery - which has no Mojave to offer anyway
+    packaged = row['major'].startswith('10.')
     return {
         'macos': row,
         'darwin': darwin,
@@ -61,15 +65,19 @@ def plan(row):
         # travel on the ExFAT side for UnPlugged
         'boot_recovery': rules['boot_with'] if older else row['name'],
         'basesystem_on_exfat': older,
+        'recovery_from_package': packaged,
     }
 
 
 def steps(p):
     """What to do once the stick has booted, in UnPlugged's order."""
     big = stick.OFFLINE[1]
-    approach = ('"Extract the Install ... app from BaseSystem.dmg"'
-                if p['basesystem_on_exfat'] else
-                '"Fully expand InstallAssistant.pkg"')
+    if p.get('recovery_from_package'):
+        approach = None
+    elif p['basesystem_on_exfat']:
+        approach = '"Extract the Install ... app from BaseSystem.dmg"'
+    else:
+        approach = '"Fully expand InstallAssistant.pkg"'
     booted = ('Monterey\'s recovery - Sonoma and later cannot read this stick from '
               'their own' if p['basesystem_on_exfat'] else
               f"{p['macos']['name']}'s recovery")
@@ -78,7 +86,10 @@ def steps(p):
         'Disk Utility: View > Show All Devices, then erase the target *disk* '
         '(not a volume) as APFS with a GUID Partition Map. Quit Disk Utility.',
         f'Terminal: cd /Volumes/{big} and then bash UnPlugged.command',
-        f'When it asks where the installer comes from, choose {approach}.',
+        (f'When it asks where the installer comes from, choose {approach}.'
+         if approach else
+         'It finds InstallESDDmg.pkg and the files beside it by itself; '
+         'check what it lists and go on.'),
         'Pick the volume you just erased, type y, and leave Terminal open: '
         'closing it closes the installer.',
     ]
@@ -116,6 +127,9 @@ def build(row, fat, exfat, efi=None, work=None, g=None, say=print):
             return p, complaint
         say(f'      {GREEN}EFI copied to {fat}{RESET}')
 
+    if p['recovery_from_package']:
+        return _from_package(p, row, fat, exfat, work, g, say)
+
     say(f'{BOLD}Recovery to boot: {p["boot_recovery"]}{RESET}')
     choice = recovery.find(p['boot_recovery'])
     if not choice:
@@ -136,16 +150,8 @@ def build(row, fat, exfat, efi=None, work=None, g=None, say=print):
             for f in (Path(tmp) / recovery.FOLDER).glob('BaseSystem.*'):
                 shutil.copy2(f, exfat / f.name)
 
-    say(f'{BOLD}{row["name"]} {row["version"]} from Apple, '
-        f'{fullinstaller.size_text(row["size"])}{RESET}')
-    if g is None:
-        g, complaint = fullinstaller.catalog(Path(work or tempfile.mkdtemp()) / 'gibmacos')
-        if not g:
-            return p, complaint
-    files, complaint = fullinstaller.fetch(g, row, exfat)
-    if complaint:
-        return p, complaint
-    return p, None
+    complaint = _installer(row, exfat, work, g, say)
+    return p, complaint or None
 
 
 def listing(work=None):
@@ -158,9 +164,38 @@ def listing(work=None):
     for r in fullinstaller.offered(g):
         p = plan(r)
         out.append({'name': r['name'], 'version': r['version'], 'build': r['build'],
-                    'size': r['size'], 'boots': p['boot_recovery'],
+                    'size': r['size'], 'newest': r['newest'],
+                    'boots': ('its own, from the package' if p['recovery_from_package']
+                              else p['boot_recovery']),
                     'steps': steps(p)})
     return {'macos': out, 'complaint': ''}
+
+
+def _installer(row, exfat, work, g, say):
+    say(f'{BOLD}{row["name"]} {row["version"]} ({row["build"]}) from Apple, '
+        f'{fullinstaller.size_text(row["size"])}{RESET}')
+    if g is None:
+        g, complaint = fullinstaller.catalog(Path(work or tempfile.mkdtemp()) / 'gibmacos')
+        if not g:
+            return complaint
+    return fullinstaller.fetch(g, row, exfat)[1]
+
+
+def _from_package(p, row, fat, exfat, work, g, say):
+    """High Sierra to Catalina: the installer, then its own BaseSystem as the
+    recovery. Apple checks a BaseSystem against its chunklist; both travel."""
+    complaint = _installer(row, exfat, work, g, say)
+    if complaint:
+        return p, complaint
+    found = sorted(Path(exfat).glob('BaseSystem.*'))
+    if not any(f.suffix == '.dmg' for f in found):
+        return p, f'Apple\'s {row["name"]} package came without a BaseSystem.dmg'
+    target = Path(fat) / recovery.FOLDER
+    target.mkdir(parents=True, exist_ok=True)
+    for f in found:
+        shutil.copy2(f, target / f.name)
+    say(f'      {GREEN}its BaseSystem is the recovery, in {target}{RESET}')
+    return p, None
 
 
 def main(argv=None):
@@ -184,8 +219,10 @@ def main(argv=None):
         print(f'{BOLD}macOS that can be put on an offline stick{RESET}')
         for r in rows:
             p = plan(r)
-            print(f"  {r['name']:14} {r['version']:10} {fullinstaller.size_text(r['size']):>9}"
-                  f"   boots {p['boot_recovery']}'s recovery")
+            boots = ('its own recovery, from the package' if p['recovery_from_package']
+                     else f"{p['boot_recovery']}'s recovery")
+            print(f"  {r['name']:14} {r['version']:10} {r['build']:9} "
+                  f"{fullinstaller.size_text(r['size']):>9}   boots {boots}")
         return 0
     row = fullinstaller.find(rows, a.macos)
     if not row:

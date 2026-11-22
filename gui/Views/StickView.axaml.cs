@@ -334,7 +334,7 @@ public partial class StickView : UserControl
             if (line.Trim().Length == 0) return;
             said.Add(line.TrimEnd());
             ResultText.Text = string.Join("\n", said.TakeLast(8));
-        }, Long, "--usb-offline", choice.Name, "--usb-fat", stick.Fat!,
+        }, Long, "--usb-offline", choice.Build, "--usb-fat", stick.Fat!,
            "--usb-exfat", stick.Exfat!, "--out", _efi);
         BuildOffline.IsEnabled = true;
         if (code != 0)

@@ -84,12 +84,12 @@
           <TextBlock FontSize="13.5" TextWrapping="Wrap" Foreground="{DynamicResource Ink}"
                      Text="For a machine with no Wi-Fi or Ethernet macOS can use: the whole installer goes on the stick, and UnPlugged starts it from recovery without a connection." />
           <TextBlock FontSize="12.5" TextWrapping="Wrap" Foreground="{DynamicResource Muted}"
-                     Text="The stick needs two partitions - FAT32 for OpenCore and the recovery, ExFAT for the installer - and 16 GB or more; Tahoe needs a 32 GB one. Erase it below with 'for an offline install' ticked. The download is 12 to 19 GB, from Apple." />
+                     Text="The stick needs two partitions - FAT32 for OpenCore and the recovery, ExFAT for the installer - and 16 GB or more; Tahoe needs a 32 GB one. Erase it below with 'for an offline install' ticked. Every build Apple still serves for Intel Macs is listed, High Sierra to Tahoe; the download is 6 to 19 GB, from Apple." />
           <ComboBox Name="OfflineWhich" HorizontalAlignment="Stretch"
                     PlaceholderText="Reading Apple's catalog…" x:DataType="e:OfflineChoice">
             <ComboBox.ItemTemplate>
               <DataTemplate x:DataType="e:OfflineChoice">
-                <Grid ColumnDefinitions="200,*" ColumnSpacing="10">
+                <Grid ColumnDefinitions="250,*" ColumnSpacing="10">
                   <TextBlock Grid.Column="0" Text="{Binding Titled}" />
                   <TextBlock Grid.Column="1" Text="{Binding Detail}" Classes="mono"
                              Foreground="{DynamicResource Faint}" VerticalAlignment="Center" />
