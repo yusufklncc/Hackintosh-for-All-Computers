@@ -143,6 +143,14 @@ public static class Updater
             var text = await Http.GetStringAsync(ManifestUrl);
             info = JsonSerializer.Deserialize(text, UpdateJson.Default.UpdateInfo);
         }
+        catch (TaskCanceledException)
+        {
+            // A firewall that asks about each new program (LuLu, Little
+            // Snitch) holds the connection open until it is answered, and a
+            // rebuilt program is a new one to it: no error, only no answer.
+            return (null, $"GitHub did not answer within {Http.Timeout.TotalSeconds:0} seconds. "
+                        + "If a firewall is asking whether this program may connect, allow it and check again.");
+        }
         catch (Exception e)
         {
             return (null, $"Could not ask GitHub: {e.Message}");
