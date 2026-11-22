@@ -366,6 +366,15 @@ def catalogue():
                  'added to an EFI here. A card the driver matches but has not '
                  'run is said to be so; the macOS range of a machine does not '
                  'lean on any of them.'),
+        dict(area='The offline stick', kind=QUOTED,
+             file='data/unplugged.toml',
+             source="corpnewt/UnPlugged's README, at the commit recorded",
+             tool='tools/offline.py', count='1 layout',
+             covers='the FAT32 and ExFAT split, the 1024 KB cluster limit, and '
+                    'Monterey\'s recovery for Sonoma and later',
+             gap='UnPlugged states no licence, so its script is fetched from its '
+                 'author at a pinned hash rather than shipped. The recovery steps '
+                 'were not run here: a real stick on a real machine is the test.'),
         dict(area='en0 and iServices', kind=QUOTED,
              file='data/iservices.toml',
              source="Dortania's OpenCore-Post-Install, universal/iservices.md, "

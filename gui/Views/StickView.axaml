@@ -75,14 +75,45 @@
         </StackPanel>
       </Border>
 
+      <!-- The whole installer on the stick, for a machine that has no network
+           macOS can use. corpnewt's UnPlugged builds the installer from it in
+           recovery; the engine fetches everything, from Apple and from the
+           projects themselves. -->
+      <Expander Name="OfflineBox" Header="Install with no network" HorizontalAlignment="Stretch">
+        <StackPanel Spacing="12" Margin="0,8,0,0">
+          <TextBlock FontSize="13.5" TextWrapping="Wrap" Foreground="{DynamicResource Ink}"
+                     Text="For a machine with no Wi-Fi or Ethernet macOS can use: the whole installer goes on the stick, and UnPlugged starts it from recovery without a connection." />
+          <TextBlock FontSize="12.5" TextWrapping="Wrap" Foreground="{DynamicResource Muted}"
+                     Text="The stick needs two partitions - FAT32 for OpenCore and the recovery, ExFAT for the installer - and 16 GB or more; Tahoe needs a 32 GB one. Erase it below with 'for an offline install' ticked. The download is 12 to 19 GB, from Apple." />
+          <ComboBox Name="OfflineWhich" HorizontalAlignment="Stretch"
+                    PlaceholderText="Reading Apple's catalog…" x:DataType="e:OfflineChoice">
+            <ComboBox.ItemTemplate>
+              <DataTemplate x:DataType="e:OfflineChoice">
+                <Grid ColumnDefinitions="200,*" ColumnSpacing="10">
+                  <TextBlock Grid.Column="0" Text="{Binding Titled}" />
+                  <TextBlock Grid.Column="1" Text="{Binding Detail}" Classes="mono"
+                             Foreground="{DynamicResource Faint}" VerticalAlignment="Center" />
+                </Grid>
+              </DataTemplate>
+            </ComboBox.ItemTemplate>
+          </ComboBox>
+          <TextBlock Name="OfflineWhere" FontSize="12.5" TextWrapping="Wrap"
+                     Foreground="{DynamicResource Muted}" />
+          <Button Name="BuildOffline" Content="Put it on the stick" Classes="accent"
+                  IsEnabled="False" HorizontalAlignment="Left" />
+        </StackPanel>
+      </Expander>
+
       <!-- Erasing is the only thing here that destroys something, so it is
            its own panel, folded away, and asks for the disk by name. -->
-      <Expander Name="EraseBox" Header="Erase and format it first">
+      <Expander Name="EraseBox" Header="Erase and format it first" HorizontalAlignment="Stretch">
         <StackPanel Spacing="12" Margin="0,8,0,0">
           <TextBlock Name="EraseWhat" FontSize="13.5" TextWrapping="Wrap"
                      Foreground="{DynamicResource Ink}" />
           <TextBlock Name="EraseHow" FontSize="12.5" TextWrapping="Wrap"
                      Foreground="{DynamicResource Muted}" />
+          <CheckBox Name="EraseOffline"
+                    Content="For an offline install: FAT32 for OpenCore, ExFAT for the installer" />
           <StackPanel Name="EraseAsk" Spacing="8">
             <TextBox Name="Typed" Watermark="type the disk name to confirm"
                      HorizontalAlignment="Left" Width="260" />

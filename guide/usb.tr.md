@@ -16,6 +16,9 @@ Recovery daha kısa yol ve programın baştan sona yapabildiği yol. İmaj ise
 makinenin kurulum sırasında macOS'un kullanabileceği bir ağı yoksa, ya da
 bağlantı güvenilmeyecek kadar yavaşsa devreye giren cevap.
 
+Program bu tür bir belleği Apple'ın kendi kurulum paketiyle, her sistemde
+kendisi de hazırlayabilir: [İnternet gerektirmeyen bellek](offline.md).
+
 ## Recovery ile — hepsini program yapar
 
 1. **Recovery** panelini açın, istediğiniz macOS'u seçin ve indirmeye basın.

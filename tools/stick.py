@@ -362,6 +362,7 @@ def sticks():
             continue
         stick['size'] = _sizeof(stick['bytes'])
         stick['ready'], stick['write_to'], stick['why'] = verdict(stick)
+        stick['fat'], stick['exfat'], stick['offline_why'] = offline_volumes(stick)
         out.append(stick)
     return sorted(out, key=lambda s: s['device'])
 
@@ -431,8 +432,42 @@ def bootable(volume):
 
 # --- erasing it ----------------------------------------------------------------
 
-def prepare(device, label='USB'):
-    """Erase a stick to one FAT32 partition under GPT. Returns (mount, complaint).
+# The offline stick: OpenCore and a recovery on FAT32, the full installer and
+# UnPlugged.command on ExFAT. Sizes and the cluster limit are UnPlugged's own,
+# quoted in data/unplugged.toml.
+OFFLINE = ('OPENCORE', 'UNPLUGGED')
+EXFAT = {'exfat'}
+
+
+def _offline_rules():
+    import ocgen
+    return ocgen.read_toml(Path('data/unplugged.toml'))['layout']
+
+
+def offline_volumes(stick):
+    """(FAT32 mount, ExFAT mount, why) for a stick laid out for UnPlugged.
+
+    Either mount is None when the stick does not have it yet, and why says
+    what is missing - the same answer whichever system did the formatting."""
+    volumes = stick.get('volumes', [])
+    fat = [v for v in volumes if (v.get('fs') or '').lower() in FAT and v.get('mount')]
+    big = [v for v in volumes if (v.get('fs') or '').lower() in EXFAT and v.get('mount')]
+    fat_at = max(fat, key=lambda v: v.get('free') or 0)['mount'] if fat else None
+    big_at = max(big, key=lambda v: v.get('free') or 0)['mount'] if big else None
+    if fat_at and big_at:
+        return fat_at, big_at, 'a mounted FAT32 partition and a mounted ExFAT one'
+    missing = ' and '.join(x for x, have in (('a mounted FAT32 partition', fat_at),
+                                              ('a mounted ExFAT partition', big_at))
+                           if not have)
+    return fat_at, big_at, f'it needs {missing}; erase it for an offline install'
+
+
+def prepare(device, label='USB', offline=False):
+    """Erase a stick under GPT. Returns (mount, complaint).
+
+    One FAT32 partition, or with offline=True the two UnPlugged wants: about a
+    gigabyte of FAT32 for OpenCore and a recovery, and ExFAT on the rest for the
+    installer. For offline the mount returned is the list of both.
 
     This destroys what is on it. The device has to be one `sticks()` offered at
     the moment this runs; nothing else is accepted, and the caller having asked
@@ -441,6 +476,8 @@ def prepare(device, label='USB'):
     if stick is None:
         return None, (f'{device} is not one of the removable disks this can '
                       'write to, so it will not be erased')
+    if offline:
+        return _prepare_offline(stick)
 
     if sys.platform == 'darwin':
         done = _run('diskutil', 'eraseDisk', 'MS-DOS', label, 'GPT',
@@ -459,6 +496,41 @@ def prepare(device, label='USB'):
                       f'administrator: select disk {stick["device"]}, clean, '
                       'convert gpt, create partition primary, '
                       f'format fs=fat32 quick label={label}, assign')
+    return None, f'no way to erase a disk on {sys.platform}'
+
+
+def _prepare_offline(stick):
+    rules = _offline_rules()
+    small, big = OFFLINE
+    fat_mb = rules['fat32_mb']
+    # ExFAT's cluster has to be 1024 KB or less for macOS to mount it; 128 KB is
+    # what Windows and macOS choose for a stick this size anyway, and saying it
+    # outright means a large stick does not get a larger default
+    if stick.get('bytes') and stick['bytes'] < rules['min_stick_gb'] * 1000**3 * 0.9:
+        return None, (f"{stick['size']} is too small: UnPlugged asks for a "
+                      f"{rules['min_stick_gb']} GB stick or larger, and the "
+                      f'installer alone is 13 GB or more')
+    dev = stick['device']
+    if sys.platform == 'darwin':
+        done = _run('diskutil', 'partitionDisk', f'/dev/{dev}', 'GPT',
+                    'MS-DOS', small, f'{fat_mb}M', 'ExFAT', big, 'R')
+        if done is None or done.returncode != 0:
+            return None, _said(done)
+        return _macos_mounts(dev) or None, None
+    if sys.platform.startswith('linux'):
+        return None, ('erasing a disk needs root on Linux, and this does not ask '
+                      f'for it. Run: sudo sgdisk --zap-all /dev/{dev} '
+                      f'&& sudo sgdisk -n 1:0:+{fat_mb}M -t 1:0700 -n 2:0:0 -t 2:0700 /dev/{dev} '
+                      f'&& sudo mkfs.vfat -F 32 -n {small} /dev/{dev}1 '
+                      f'&& sudo mkfs.exfat -c 128K -L {big} /dev/{dev}2')
+    if sys.platform.startswith('win'):
+        return None, ('erasing a disk needs an administrator on Windows, and '
+                      'this is not running as one. Open diskpart as '
+                      f'administrator: select disk {dev}, clean, convert gpt, '
+                      f'create partition primary size={fat_mb}, '
+                      f'format fs=fat32 quick label={small}, assign, '
+                      'create partition primary, '
+                      f'format fs=exfat quick unit=128K label={big}, assign')
     return None, f'no way to erase a disk on {sys.platform}'
 
 
@@ -528,6 +600,9 @@ def main(argv=None):
     ap.add_argument('--recovery', help='the folder holding com.apple.recovery.boot')
     ap.add_argument('--prepare', metavar='DEVICE',
                     help='ERASE this disk and format it FAT32 under GPT')
+    ap.add_argument('--offline', action='store_true',
+                    help='with --prepare: FAT32 for OpenCore and ExFAT for the '
+                         'full installer, the layout UnPlugged needs')
     ap.add_argument('--yes', action='store_true',
                     help='answer the erase confirmation, for scripting')
     a = ap.parse_args(argv)
@@ -550,12 +625,13 @@ def main(argv=None):
             if typed != stick['device']:
                 print(f'{DIM}  nothing was erased{RESET}')
                 return 1
-        mount, complaint = prepare(stick['device'])
+        mount, complaint = prepare(stick['device'], offline=a.offline)
         if complaint:
             print(f'{YELLOW}  {complaint}{RESET}')
             return 1
+        shown = ', '.join(mount) if isinstance(mount, list) else mount
         print(f'{GREEN}  erased and formatted{RESET}'
-              + (f', mounted at {mount}' if mount else ''))
+              + (f', mounted at {shown}' if shown else ''))
         return 0
 
     if a.place:

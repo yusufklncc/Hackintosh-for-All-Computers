@@ -26,6 +26,17 @@ upstream = "corpnewt/SSDTTime"
 license = "MIT"
 note = "the source tree at that commit, copied out and driven"
 
+# gibMacOS reads Apple's software update catalog and downloads the full
+# installer from it, for a stick that installs with no network. Only the program
+# and the four helpers it imports are here: its disk tools and BOOTICE are for
+# making a stick its own way, which this repository does differently.
+[tool."gibMacOS"]
+version = "bf8f2ab"
+sha256 = ""   # a tree, not a file; the commit is the pin
+upstream = "corpnewt/gibMacOS"
+license = "MIT"
+note = "gibMacOS.py and Scripts/{downloader,utils,run,plist}.py at that commit, driven"
+
 # iasl compiles the SSDTs and acpidump reads the tables off the machine.
 # Both are ACPICA, dual licensed Intel or GPL-2.0; the Intel option is the
 # one taken, and condition 3.3 requires its notice to travel with the

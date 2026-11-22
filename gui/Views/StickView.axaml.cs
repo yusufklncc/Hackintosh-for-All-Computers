@@ -51,6 +51,9 @@ public partial class StickView : UserControl
             TypedHint.Text = typed.Length == 0 || Erase.IsEnabled ? ""
                            : $"that is not {want}";
         };
+        OfflineBox.Expanded += async (_, _) => await LoadOffline();
+        OfflineWhich.SelectionChanged += (_, _) => DescribeOffline();
+        BuildOffline.Click += async (_, _) => await PutOffline();
         Open.Click += (_, _) =>
         {
             if (Which.SelectedItem is Stick s && s.Where.Length > 0) Reveal.Show(s.Where);
@@ -197,6 +200,7 @@ public partial class StickView : UserControl
         Typed.Text = "";
         TypedHint.Text = "";
         if (!_erasable) Erase.IsEnabled = true;
+        DescribeOffline();
     }
 
     async Task Pick(bool efi)
@@ -266,7 +270,9 @@ public partial class StickView : UserControl
             if (line.Trim().Length == 0) return;
             said.Add(line.TrimEnd());
             ResultText.Text = string.Join("\n", said.TakeLast(8));
-        }, Bound, "--usb-prepare", stick.Device);
+        }, Bound, EraseOffline.IsChecked == true
+                ? new[] { "--usb-prepare", stick.Device, "--offline-layout" }
+                : new[] { "--usb-prepare", stick.Device });
 
         if (code != 0)
         {
@@ -281,6 +287,65 @@ public partial class StickView : UserControl
         Typed.Text = "";
         _loaded = null;
         await Load();                      // it has a new mount point now
+    }
+
+    // a full installer is 12 to 19 GB; on a slow line that is hours, not a hang
+    static readonly TimeSpan Long = TimeSpan.FromHours(8);
+    Task? _offline;
+
+    Task LoadOffline() => _offline is { IsFaulted: false } ? _offline : _offline = FillOffline();
+
+    async Task FillOffline()
+    {
+        var engine = Builder.Find(out var missing);
+        if (engine is null) { OfflineWhere.Text = missing; return; }
+        OfflineWhere.Text = "Reading Apple's catalog…";
+        var (list, complaint) = await Inventory.Offline(engine);
+        if (list is null) { OfflineWhere.Text = complaint; return; }
+        OfflineWhich.ItemsSource = list.Macos;
+        OfflineWhich.SelectedIndex = list.Macos.Count > 0 ? 0 : -1;
+        DescribeOffline();
+    }
+
+    void DescribeOffline()
+    {
+        var stick = Which.SelectedItem as Stick;
+        var choice = OfflineWhich.SelectedItem as OfflineChoice;
+        if (stick is null) { OfflineWhere.Text = "Pick a stick above."; BuildOffline.IsEnabled = false; return; }
+        var ready = stick.Fat is { Length: > 0 } && stick.Exfat is { Length: > 0 };
+        OfflineWhere.Text = ready
+            ? $"OpenCore and the recovery go on {stick.Fat}; the installer and "
+            + $"UnPlugged.command on {stick.Exfat}."
+            : $"{stick.Name}: {stick.OfflineWhy}.";
+        BuildOffline.IsEnabled = ready && choice is not null;
+    }
+
+    async Task PutOffline()
+    {
+        if (Which.SelectedItem is not Stick stick || OfflineWhich.SelectedItem is not OfflineChoice choice)
+            return;
+        var engine = Builder.Find(out var missing);
+        if (engine is null) { Show("No engine", missing, null); return; }
+        BuildOffline.IsEnabled = false;
+        Show($"Putting {choice.Titled} on {stick.Name}…", "", null);
+        var said = new List<string>();
+        var (complaint, code) = await Builder.Stream(engine, line =>
+        {
+            if (line.Trim().Length == 0) return;
+            said.Add(line.TrimEnd());
+            ResultText.Text = string.Join("\n", said.TakeLast(8));
+        }, Long, "--usb-offline", choice.Name, "--usb-fat", stick.Fat!,
+           "--usb-exfat", stick.Exfat!, "--out", _efi);
+        BuildOffline.IsEnabled = true;
+        if (code != 0)
+        {
+            Show("The offline stick is not finished",
+                 complaint is { Length: > 0 } ? complaint : string.Join("\n", said.TakeLast(12)), null);
+            return;
+        }
+        Show($"{stick.Name} installs {choice.Name} with no network",
+             string.Join("\n", said.TakeLast(8)),
+             string.Join("\n", choice.Steps.Select((s, i) => $"{i + 1}. {s}")));
     }
 
     void Show(string title, string body, string? next)

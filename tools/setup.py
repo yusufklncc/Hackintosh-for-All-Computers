@@ -259,6 +259,17 @@ def check_tools():
         except Exception as exc:                   # noqa: BLE001 - the whole point
             report('macrecovery loads, with everything it imports', False, repr(exc))
 
+    # gibMacOS too, for the offline stick. Loading it reads no catalog.
+    import fullinstaller
+    import tempfile
+    try:
+        with tempfile.TemporaryDirectory() as tmp:
+            module = fullinstaller.load(fullinstaller.prepare(Path(tmp) / 'gib'))
+            report('gibMacOS loads, with everything it imports',
+                   hasattr(module, 'gibMacOS'), fullinstaller.version())
+    except Exception as exc:                       # noqa: BLE001
+        report('gibMacOS loads, with everything it imports', False, repr(exc))
+
     print()
     if failed:
         print(f'  {len(failed)} failed: {", ".join(failed)}')
@@ -539,6 +550,18 @@ def main():
     ap.add_argument('--usb-prepare', metavar='DEVICE',
                     help='ERASE that removable disk and format it FAT32 under '
                          'GPT; only ever a disk --usb-list offered')
+    ap.add_argument('--offline-layout', action='store_true',
+                    help='with --usb-prepare: FAT32 for OpenCore and ExFAT for '
+                         'the full installer, for an install with no network')
+    ap.add_argument('--offline-list', action='store_true',
+                    help="the full installers Apple serves for Intel Macs, as "
+                         'JSON; this reads Apple\'s catalog')
+    ap.add_argument('--usb-offline', metavar='MACOS',
+                    help='put that macOS on a stick for an install with no '
+                         'network: recovery and EFI on --usb-fat, the installer '
+                         'and UnPlugged.command on --usb-exfat')
+    ap.add_argument('--usb-fat', metavar='VOLUME', help='the FAT32 side, for --usb-offline')
+    ap.add_argument('--usb-exfat', metavar='VOLUME', help='the ExFAT side, for --usb-offline')
     ap.add_argument('--installer-plan', metavar='APP',
                     help='what building an installer image from that app would '
                          'take; macOS only, and it says so')
@@ -589,7 +612,8 @@ def main():
         for opt in ('machine', 'report', 'usb_map', 'acpi_tables',
                     'recovery_to', 'usb_place', 'recovery_from',
                     'recovery_newest', 'installer_plan', 'make_installer',
-                    'installer_out', 'installer_efi', 'installer_script'):
+                    'installer_out', 'installer_efi', 'installer_script',
+                    'usb_fat', 'usb_exfat'):
             if getattr(a, opt):
                 setattr(a, opt, str((started_in / getattr(a, opt)).resolve()))
 
@@ -614,7 +638,19 @@ def main():
         # name and size. What stops the wrong disk is not the question: it is
         # that usb.prepare refuses anything --usb-list did not offer, checked
         # again at the moment it runs.
-        return stick.main(['--prepare', a.usb_prepare, '--yes'])
+        return stick.main(['--prepare', a.usb_prepare, '--yes']
+                          + (['--offline'] if a.offline_layout else []))
+
+    if a.offline_list:
+        import json as _json
+        import offline as _off
+        sys.stdout.write(_json.dumps(_off.listing(), ensure_ascii=False) + '\n')
+        return 0
+
+    if a.usb_offline:
+        import offline as _off
+        return _off.main(['--macos', a.usb_offline, '--fat', a.usb_fat or '',
+                          '--exfat', a.usb_exfat or '', '--efi', a.out])
 
     if a.recovery:
         # the EFI folder's parent is the drive, which is where OpenCore looks

@@ -16,6 +16,9 @@ Recovery is the shorter road and the one the program can do end to end. An image
 is the answer when the machine has no network macOS can use during the install,
 or when the connection is too slow to trust.
 
+The program can also build that kind of stick itself, from Apple's own
+installer and on any system: see [A stick that needs no network](offline.md).
+
 ## With recovery - the program does all of it
 
 1. Open the **Recovery** pane, pick the macOS you want, and press download.

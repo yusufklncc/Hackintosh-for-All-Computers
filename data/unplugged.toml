@@ -1,0 +1,32 @@
+# corpnewt/UnPlugged: the script, and the facts the offline stick is built on.
+#
+# PROVENANCE: quoted, from the project's README at the commit named. The script
+# itself is not in this repository - see tools/unplugged.py for why.
+
+[script]
+upstream = "corpnewt/UnPlugged"
+commit = "e7e0696dcb6dee23d25422678a8bc90ac2597ef5"
+sha256 = "92f2c3dc4e01ba465ecdf8c309aa9f1c3c91cf8c47199befb04cecde36b5c6c5"
+licence = "none stated"
+licence_asked = "https://github.com/corpnewt/UnPlugged/issues/17"
+
+[layout]
+# "Format your USB with 2 partitions: A FAT32 partition of ~750MB to 1GB
+# (enough to accommodate the EFI and com.apple.recovery.boot folders) [and] An
+# ExFAT partition of the remaining space"
+fat32_mb = 1024
+# "macOS seems to have issues mounting ExFAT partitions whose allocation unit
+# size is greater than 1024 KB"
+exfat_cluster_kb_max = 1024
+# "A 16+ GB USB drive"
+min_stick_gb = 16
+
+[recovery]
+# "It seems the Sonoma+ BaseSystem.dmg recovery environment does not allow
+# mounting FAT32 or ExFAT volumes by default ... You'll need to use an earlier
+# BaseSystem.dmg|.chunklist downloaded via `macrecovery.py` ... (Monterey works
+# fine with FAT32 and ExFAT volumes). You'll also need to download Sonoma's
+# BaseSystem.dmg via `macrecovery.py` and place that alongside the files
+# downloaded with `gibMacOS`"
+boots_from_older_from_darwin = 23
+boot_with = "Monterey"

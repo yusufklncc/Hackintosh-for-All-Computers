@@ -223,6 +223,11 @@ public sealed class Stick
     [JsonPropertyName("write_to")] public string WriteTo { get; set; } = "";
     [JsonPropertyName("why")] public string Why { get; set; } = "";
 
+    // the two volumes an offline stick needs, and what is missing if not
+    [JsonPropertyName("fat")] public string? Fat { get; set; }
+    [JsonPropertyName("exfat")] public string? Exfat { get; set; }
+    [JsonPropertyName("offline_why")] public string OfflineWhy { get; set; } = "";
+
     public string Titled => $"{Name} · {Size}".Trim();
     public string Where => WriteTo.Length > 0 ? WriteTo
                          : Mounted.Count > 0 ? Mounted[0] : "";
@@ -241,6 +246,29 @@ public sealed class StickList
     [JsonPropertyName("sticks")] public List<Stick> Sticks { get; set; } = new();
 }
 
+/// <summary>A macOS that can go on a stick for an install with no network:
+/// Apple's full installer, and which recovery the stick boots.</summary>
+public sealed class OfflineChoice
+{
+    [JsonPropertyName("name")] public string Name { get; set; } = "";
+    [JsonPropertyName("version")] public string Version { get; set; } = "";
+    [JsonPropertyName("build")] public string Build { get; set; } = "";
+    [JsonPropertyName("size")] public long Size { get; set; }
+    [JsonPropertyName("boots")] public string Boots { get; set; } = "";
+    [JsonPropertyName("steps")] public List<string> Steps { get; set; } = new();
+
+    public string Titled => $"{Name} {Version}";
+    public string Detail => (Size > 0 ? $"{Size / 1e9:0.0} GB" : "size unknown")
+                          + $" · boots {Boots}'s recovery";
+}
+
+public sealed class OfflineList
+{
+    [JsonPropertyName("macos")] public List<OfflineChoice> Macos { get; set; } = new();
+    [JsonPropertyName("complaint")] public string Complaint { get; set; } = "";
+}
+
+[JsonSerializable(typeof(OfflineList))]
 [JsonSerializable(typeof(InstallerPlan))]
 [JsonSerializable(typeof(Newest))]
 [JsonSerializable(typeof(StickList))]
@@ -360,6 +388,18 @@ public static class Inventory
         try
         {
             return (JsonSerializer.Deserialize(output, Carried.Default.StickList), "");
+        }
+        catch (JsonException e) { return (null, e.Message); }
+    }
+
+    public static async Task<(OfflineList? list, string complaint)> Offline(Located engine)
+    {
+        var (output, error, code) = await Builder.Run(engine, "--offline-list");
+        if (code != 0) return (null, Said(error, code));
+        try
+        {
+            var list = JsonSerializer.Deserialize(output, Carried.Default.OfflineList);
+            return list is { Complaint.Length: > 0 } ? (null, list.Complaint) : (list, "");
         }
         catch (JsonException e) { return (null, e.Message); }
     }

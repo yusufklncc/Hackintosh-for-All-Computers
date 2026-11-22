@@ -85,6 +85,7 @@ plugins:
             Building for another machine: Başka bir makine için kurmak
             Check compatibility: Uyumluluğu kontrol edin
             Make the USB stick: USB belleği hazırlayın
+            A stick that needs no network: İnternet gerektirmeyen bellek
             Building the stick on a Mac: Belleği bir Mac üzerinde hazırlamak
             macOS images: macOS imajları
             Install: Yükleme
@@ -131,6 +132,7 @@ nav:
       - Building for another machine: another-machine.md
       - Check compatibility: compatibility.md
       - Make the USB stick: usb.md
+      - A stick that needs no network: offline.md
       - Building the stick on a Mac: mac-installer.md
       - macOS images: images.md
   - Install:

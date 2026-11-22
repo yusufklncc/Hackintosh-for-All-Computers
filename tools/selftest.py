@@ -687,18 +687,21 @@ def frozen_build():
     import ast
     spec = Path('tools/pyinstaller.spec').read_text()
     named = set(re.findall(r"'([\w.]+)'", spec))
-    wanted = set()
-    for f in sorted(Path('vendor/tools/SSDTTime').rglob('*.py')):
-        for node in ast.walk(ast.parse(f.read_text(encoding='utf-8', errors='replace'))):
-            if isinstance(node, ast.Import):
-                wanted |= {a.name.split('.')[0] for a in node.names}
-            elif isinstance(node, ast.ImportFrom) and not node.level and node.module:
-                wanted.add(node.module.split('.')[0])
-    # only the standard library: the Python 2 fallbacks in its try blocks are
-    # not there to be found, and the frozen build is Python 3
-    wanted = {m for m in wanted if m in sys.stdlib_module_names}
-    missing = sorted(wanted - named)
-    check('every module SSDTTime imports is named in the spec', not missing, missing)
+    for tree in ('SSDTTime', 'gibMacOS'):
+        wanted = set()
+        for f in sorted(Path('vendor/tools', tree).rglob('*.py')):
+            for node in ast.walk(ast.parse(f.read_text(encoding='utf-8', errors='replace'))):
+                if isinstance(node, ast.Import):
+                    wanted |= {a.name.split('.')[0] for a in node.names}
+                elif isinstance(node, ast.ImportFrom) and not node.level and node.module:
+                    wanted.add(node.module.split('.')[0])
+        # only the standard library: the Python 2 fallbacks in its try blocks
+        # are not there to be found, and the frozen build is Python 3
+        wanted = {m for m in wanted if m in sys.stdlib_module_names}
+        missing = sorted(wanted - named)
+        check(f'every module {tree} imports is named in the spec', not missing, missing)
+    check('and the offline tools are in the bundle',
+          all(f"'{m}'" in spec for m in ('fullinstaller', 'offline', 'unplugged')))
 
     r = run([sys.executable, 'tools/setup.py', '--check-tools'])
     check('and the builder can load the tools on demand', r.returncode == 0)
@@ -2859,6 +2862,138 @@ def en0_and_iservices():
           .split('def _macos():', 1)[1].split('\ndef ', 1)[0])
 
 
+def a_stick_that_needs_no_network():
+    """The whole installer on the stick, for corpnewt's UnPlugged.
+
+    Recovery fetches macOS during the install, which a machine with no network
+    driver cannot do. gibMacOS (MIT, vendored) fetches Apple's full installer;
+    UnPlugged.command has no licence, so it is fetched from its author at a
+    pinned commit and hash and never shipped from here."""
+    import types
+    import fullinstaller
+    import offline
+    import stick
+    import unplugged
+
+    pin = ocgen.read_toml('data/unplugged.toml')
+    check('UnPlugged is pinned to a commit and a hash',
+          re.fullmatch(r'[0-9a-f]{40}', pin['script']['commit'])
+          and re.fullmatch(r'[0-9a-f]{64}', pin['script']['sha256']))
+    check('  and its licence is written down as what it is: none stated',
+          pin['script']['licence'] == 'none stated'
+          and 'issues/17' in pin['script']['licence_asked'])
+    shipped = run(['git', 'ls-files']).stdout.splitlines()
+    check('  so the script itself is nowhere in this repository',
+          not any(f.endswith('UnPlugged.command') for f in shipped))
+    lock = ocgen.read_toml('vendor/tools.lock')['tool']
+    check('gibMacOS is vendored, MIT, at a commit',
+          lock.get('gibMacOS', {}).get('license') == 'MIT'
+          and (Path('vendor/tools/gibMacOS') / 'LICENSE').exists())
+    check('  without the disk tools and BOOTICE it carries upstream',
+          not any(Path('vendor/tools/gibMacOS').rglob('BOOTICE*'))
+          and not (Path('vendor/tools/gibMacOS') / 'Scripts' / 'disk.py').exists())
+
+    good = b'#!/bin/bash\n'
+    import hashlib
+    with tempfile.TemporaryDirectory() as tmp:
+        real = pin['script']['sha256']
+        try:
+            unplugged.pin = lambda: dict(pin['script'], sha256=hashlib.sha256(good).hexdigest())
+            path, why = unplugged.fetch(tmp, get=lambda url: good)
+            check('the script is written when it is the file that was checked',
+                  path and path.read_bytes() == good and why is None, why)
+            path, why = unplugged.fetch(Path(tmp) / 'b', get=lambda url: good + b'x')
+            check('  and refused, with nothing written, when it is not',
+                  path is None and 'not the file' in why
+                  and not (Path(tmp) / 'b' / 'UnPlugged.command').exists(), why)
+        finally:
+            unplugged.pin = lambda: ocgen.read_toml(unplugged.TABLE)['script']
+        check('  the address names the commit, not a branch',
+              real and pin['script']['commit'] in unplugged.url())
+
+    # what the catalog offers: Intel only, the newest build of each
+    def prod(v, build, ids=('VMM-x86_64',)):
+        return {'version': v, 'build': build, 'title': 'macOS', 'product': build,
+                'device_ids': list(ids), 'packages': [{'URL': 'x/InstallAssistant.pkg',
+                                                       'Size': 13_000_000_000}]}
+    g = types.SimpleNamespace(version_names={'sequoia': '15', 'sonoma': '14',
+                                             'tahoe': '26', 'monterey': '12'},
+                              mac_prods=[prod('15.7.4', 'a'), prod('15.8.3', 'b'),
+                                         prod('26.7.3', 'c', ('J314sAP',)),
+                                         prod('14.8.9', 'd')])
+    rows = fullinstaller.offered(g)
+    check('only installers an Intel Mac runs are offered',
+          [r['name'] for r in rows] == ['Sequoia', 'Sonoma'], [r['name'] for r in rows])
+    check('  each at its newest build', rows[0]['build'] == 'b', rows[0]['build'])
+    check('  with the size the packages add up to', rows[0]['size'] == 13_000_000_000)
+
+    later = offline.plan({'name': 'Sequoia', 'major': '15', 'version': '15.8.3', 'size': 1})
+    check('Sonoma and later boot Monterey\'s recovery, as UnPlugged says',
+          later['boot_recovery'] == 'Monterey' and later['basesystem_on_exfat'], later)
+    same = offline.plan({'name': 'Ventura', 'major': '13', 'version': '13.7.8', 'size': 1})
+    check('  and earlier ones boot their own', same['boot_recovery'] == 'Ventura'
+          and not same['basesystem_on_exfat'], same)
+    said = ' '.join(offline.steps(later))
+    check('the recovery steps name the script and the approach for that macOS',
+          'UnPlugged.command' in said and 'BaseSystem.dmg' in said
+          and 'GUID' in said and 'leave Terminal open' in said, said)
+
+    # putting it together, with every download stood in for
+    calls = []
+    saved = (offline.unplugged.fetch, offline.recovery.find, offline.recovery.fetch,
+             offline.fullinstaller.fetch, offline.check_room)
+    try:
+        offline.unplugged.fetch = lambda into: (calls.append(('unplugged', Path(into).name))
+                                                or (Path(into) / 'UnPlugged.command', None))
+        offline.recovery.find = lambda name: {'name': name}
+        def rec(choice, into):
+            calls.append(('recovery', choice['name']))
+            folder = Path(into) / offline.recovery.FOLDER
+            folder.mkdir(parents=True, exist_ok=True)
+            (folder / 'BaseSystem.dmg').write_text(choice['name'])
+            return [folder / 'BaseSystem.dmg'], None
+        offline.recovery.fetch = rec
+        offline.fullinstaller.fetch = lambda g, row, into: (calls.append(('full', Path(into).name)) or ([], None))
+        offline.check_room = lambda exfat, row: None
+        with tempfile.TemporaryDirectory() as tmp:
+            fat, big = Path(tmp) / 'OPENCORE', Path(tmp) / 'UNPLUGGED'
+            fat.mkdir(); big.mkdir()
+            row = {'name': 'Sequoia', 'major': '15', 'version': '15.8.3', 'size': 1,
+                   'prod': {}}
+            _, why = offline.build(row, fat, big, g=object(), say=lambda *_: None)
+            check('an offline stick is put together without complaint', why is None, why)
+            check('  UnPlugged goes on the ExFAT side', ('unplugged', 'UNPLUGGED') in calls, calls)
+            check('  Monterey\'s recovery on the FAT32 side',
+                  (fat / offline.recovery.FOLDER / 'BaseSystem.dmg').read_text() == 'Monterey')
+            check('  Sequoia\'s BaseSystem beside the installer, at the root',
+                  (big / 'BaseSystem.dmg').read_text() == 'Sequoia')
+            check('  and the installer on the ExFAT side', ('full', 'UNPLUGGED') in calls, calls)
+    finally:
+        (offline.unplugged.fetch, offline.recovery.find, offline.recovery.fetch,
+         offline.fullinstaller.fetch, offline.check_room) = saved
+
+    # the stick
+    both = stick.offline_volumes({'volumes': [
+        {'fs': 'msdos', 'mount': '/Volumes/OPENCORE', 'free': 9e8},
+        {'fs': 'exfat', 'mount': '/Volumes/UNPLUGGED', 'free': 3e10}]})
+    check('a stick with both partitions mounted is found ready',
+          both[:2] == ('/Volumes/OPENCORE', '/Volumes/UNPLUGGED'), both)
+    one = stick.offline_volumes({'volumes': [{'fs': 'msdos', 'mount': '/x', 'free': 1}]})
+    check('  and one without ExFAT says what is missing',
+          one[1] is None and 'ExFAT' in one[2], one)
+    src = Path('tools/stick.py').read_text(encoding='utf-8')
+    check('the ExFAT cluster stays under the 1024 KB macOS mounts',
+          'unit=128K' in src and '-c 128K' in src)
+    check('  and macOS partitions it in one diskutil call',
+          "'partitionDisk'" in src and "'ExFAT'" in src)
+    engine = Path('tools/setup.py').read_text(encoding='utf-8')
+    check('the engine lists, erases and fills an offline stick',
+          all(f in engine for f in ('--offline-list', '--usb-offline', '--offline-layout')))
+    pane = Path('gui/Views/StickView.axaml.cs').read_text(encoding='utf-8')
+    check('and the stick pane drives all three',
+          all(f in pane for f in ('"--usb-offline"', '"--offline-layout"', 'Inventory.Offline')))
+
+
 def cards_somebody_else_drives():
     """An Arc or a Turing-and-newer GeForce: no Apple driver, but a real one.
 
@@ -4184,6 +4319,7 @@ if __name__ == '__main__':
                     cards_somebody_else_drives,
                     en0_and_iservices,
                     haswell_cursor_patch,
+                    a_stick_that_needs_no_network,
                     what_the_download_shows,
                     building_an_installer_image,
                     a_kext_that_stops_below_the_target,
