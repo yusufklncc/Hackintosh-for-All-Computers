@@ -49,6 +49,27 @@ def darwin_of(row):
     return None
 
 
+def intact(folder):
+    """Whether a BaseSystem.dmg in this folder matches its chunklist.
+
+    macrecovery's own check, the one it runs after every download."""
+    folder = Path(folder)
+    dmg, cnk = folder / 'BaseSystem.dmg', folder / 'BaseSystem.chunklist'
+    if not (dmg.exists() and cnk.exists()):
+        return False
+    tool = recovery.vendored()
+    if tool is None:
+        return False
+    try:
+        import contextlib
+        import io
+        with contextlib.redirect_stdout(io.StringIO()):
+            recovery._load(tool).verify_image(str(dmg), str(cnk))
+        return True
+    except Exception:          # a short or damaged image raises; fetch it again
+        return False
+
+
 def plan(row):
     """What goes where for this macOS. Pure: no download, no disk."""
     rules = ocgen.read_toml(RULES)['recovery']
@@ -134,21 +155,29 @@ def build(row, fat, exfat, efi=None, work=None, g=None, say=print):
     choice = recovery.find(p['boot_recovery'])
     if not choice:
         return p, f'{p["boot_recovery"]} is not in macrecovery\'s board list'
-    files, complaint = recovery.fetch(choice, fat)
-    if complaint:
-        return p, complaint
+    if intact(fat / recovery.FOLDER):
+        # a second go after the window closed: what is there already checks
+        # out against Apple's chunklist, so 700 MB is not fetched again
+        say(f'      {GREEN}already on the stick, and it checks out{RESET}')
+    else:
+        files, complaint = recovery.fetch(choice, fat)
+        if complaint:
+            return p, complaint
 
     if p['basesystem_on_exfat']:
         say(f'{BOLD}{row["name"]}\'s BaseSystem, for UnPlugged{RESET}')
         own = recovery.find(row['name'])
         if not own:
             return p, f'{row["name"]} is not in macrecovery\'s board list'
-        with tempfile.TemporaryDirectory() as tmp:
-            files, complaint = recovery.fetch(own, tmp)
-            if complaint:
-                return p, complaint
-            for f in (Path(tmp) / recovery.FOLDER).glob('BaseSystem.*'):
-                shutil.copy2(f, exfat / f.name)
+        if intact(exfat):
+            say(f'      {GREEN}already on the stick, and it checks out{RESET}')
+        else:
+            with tempfile.TemporaryDirectory() as tmp:
+                files, complaint = recovery.fetch(own, tmp)
+                if complaint:
+                    return p, complaint
+                for f in (Path(tmp) / recovery.FOLDER).glob('BaseSystem.*'):
+                    shutil.copy2(f, exfat / f.name)
 
     complaint = _installer(row, exfat, work, g, say)
     return p, complaint or None

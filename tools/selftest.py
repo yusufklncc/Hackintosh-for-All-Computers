@@ -2937,6 +2937,44 @@ def a_stick_that_needs_no_network():
     check('a build picks exactly one row, a name the newest of it',
           fullinstaller.find(rows, '24G4')['version'] == '15.7.4'
           and fullinstaller.find(rows, 'sequoia')['build'] == '24H241')
+    # the download: no second process, and a partial file is said to resume
+    seen = {}
+    with tempfile.TemporaryDirectory() as tmp:
+        part = Path(tmp) / 'InstallAssistant.pkg'
+        part.write_bytes(b'x' * 1000)
+        said = []
+        def stream(url, file_path, *a, **k):
+            seen.update(k)
+            return file_path
+        fake = types.SimpleNamespace(d=types.SimpleNamespace(stream_to_file=stream))
+        fake.download_prod = lambda prod: fake.d.stream_to_file(
+            'u/InstallAssistant.pkg', str(part), allow_resume=True)
+        saved_progress = fullinstaller.recovery.Progress
+        class Quiet(saved_progress):
+            def say(self, text):
+                said.append(text)
+        fullinstaller.recovery.Progress = Quiet
+        try:
+            files, why = fullinstaller.fetch(fake, {'prod': {'packages': [
+                {'URL': 'u/InstallAssistant.pkg', 'Size': 5000}]}}, tmp, every=60)
+        finally:
+            fullinstaller.recovery.Progress = saved_progress
+        check('the installer downloads with no second process for its progress bar',
+              seen.get('progress') is False and seen.get('allow_resume') is True, seen)
+        check('  and the tool gets its own downloader back afterwards',
+              fake.d.stream_to_file is stream)
+        check('  a partial file is said to resume, with how far it had got',
+              any('resuming at 1.0 KB' in s or 'resuming at 0.0 MB' in s for s in said), said)
+    src = Path('tools/fullinstaller.py').read_text(encoding='utf-8')
+    check('  nothing here starts a process of its own for it',
+          'multiprocessing' not in src.split('class Watch', 1)[1].split('def fetch', 1)[0]
+          .replace('second *process*', ''))
+    with tempfile.TemporaryDirectory() as tmp:
+        check('a recovery that is not there is not intact', not offline.intact(tmp))
+        (Path(tmp) / 'BaseSystem.dmg').write_bytes(b'x')
+        (Path(tmp) / 'BaseSystem.chunklist').write_bytes(b'not a chunklist')
+        check('  nor is one that fails its chunklist', not offline.intact(tmp))
+
     old = offline.plan({'name': 'Catalina', 'major': '10.15', 'version': '10.15.7', 'size': 1})
     check('High Sierra to Catalina take the recovery from their own package',
           old['recovery_from_package'] and not old['basesystem_on_exfat'], old)

@@ -50,6 +50,10 @@ Everything is downloaded fresh:
 
 Nothing of Apple's is in this repository or in its downloads.
 
+If the download stops, or the window is closed, press the button again with the
+same macOS and the same stick: a half-finished file carries on from where it
+stopped, and a recovery already on the stick is checked rather than fetched again.
+
 ## In recovery
 
 Boot the stick and pick the recovery entry in OpenCore's picker. Then:

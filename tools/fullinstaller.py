@@ -23,6 +23,7 @@ import importlib.util
 import os
 import shutil
 import sys
+import time
 from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -159,23 +160,90 @@ def size_text(size):
     return f'{size / 1e9:.1f} GB'
 
 
+def _amount(n):
+    return f'{n / 1e9:.2f} GB' if n >= 1e8 else f'{n / 1e6:.1f} MB'
+
+
+class Watch:
+    """How far one file has got, said every few seconds from a thread here.
+
+    The tool draws its own progress bar from a second *process*. In a frozen
+    build that process is the engine started again - PyInstaller re-runs the
+    program for it, and without freeze_support() that is a second builder
+    parsing arguments it was never given. A thread reading the file's size
+    needs none of that, and its lines are whole ones a window can show."""
+
+    def __init__(self, say, every):
+        import threading
+        self.say, self.every = say, every
+        self.path, self.total, self.start_at = None, 0, 0
+        self.stop = threading.Event()
+        self.thread = threading.Thread(target=self._run, daemon=True)
+
+    def begin(self, path, total):
+        self.path, self.total = Path(path), total
+        self.start_at = self.path.stat().st_size if self.path.exists() else 0
+        self.t0 = time.monotonic()
+        name = self.path.name
+        if 0 < self.start_at < total:
+            self.say(f'{name}: resuming at {_amount(self.start_at)} of {_amount(total)}')
+        elif total and self.start_at >= total:
+            self.say(f'{name}: already here, {_amount(total)}')
+        else:
+            self.say(f'{name}: {_amount(total)}' if total else name)
+        if not self.thread.is_alive():
+            self.thread.start()
+
+    def line(self):
+        if not self.path or not self.path.exists() or self.total < 1e8:
+            return None
+        have = self.path.stat().st_size
+        rate = (have - self.start_at) / max(time.monotonic() - self.t0, 1e-3)
+        left = (self.total - have) / rate if rate > 0 else 0
+        when = (f', about {left / 3600:.1f} h left' if left >= 3600 else
+                f', about {left / 60:.0f} min left' if left >= 60 else '')
+        return (f'{self.path.name}: {have / 1e9:.2f} of {self.total / 1e9:.2f} GB, '
+                f'{rate / 1e6:.1f} MB/s{when}')
+
+    def _run(self):
+        while not self.stop.wait(self.every):
+            said = self.line()
+            if said:
+                self.say(said)
+
+
 def fetch(g, row, into, every=2.0):
     """Download one product into <into>. Returns (files, complaint).
 
-    The downloader resumes a partial file, so asking again after a dropped
-    connection picks up where it stopped rather than starting the 13 GB over."""
+    One connection, as the tool makes it. A partial file is resumed with an
+    HTTP Range request and a finished one is skipped by its size, so pressing
+    the button again after the window closed - same build, same folder -
+    carries on rather than starting the 13 GB over."""
     into = Path(into)
     into.mkdir(parents=True, exist_ok=True)
     g.download_dir = str(into)
+    sizes = {pkg['URL']: pkg.get('Size') or 0 for pkg in row['prod'].get('packages', [])}
     progress = recovery.Progress(every=every)
+    watch = Watch(progress.say, every)
+    original = g.d.stream_to_file
+
+    def stream(url, file_path, *args, **kwargs):
+        kwargs['progress'] = False          # no second process; see Watch
+        watch.begin(file_path, sizes.get(url, 0))
+        return original(url, file_path, *args, **kwargs)
+
+    g.d.stream_to_file = stream
     try:
         with contextlib.redirect_stdout(progress), \
                 contextlib.redirect_stderr(progress):
             g.download_prod(row['prod'])
     except Exception as exc:  # the tool's own ProgramError, or the network's
+        return [], (str(exc).strip() or type(exc).__name__) + (
+            '. What was downloaded is kept: run it again and it resumes.')
+    finally:
+        watch.stop.set()
+        g.d.stream_to_file = original
         progress.close()
-        return [], str(exc).strip() or type(exc).__name__
-    progress.close()
     files = sorted(p for p in into.iterdir() if p.is_file())
     return files, None
 

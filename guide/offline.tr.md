@@ -49,6 +49,10 @@ Her şey yeniden indirilir:
 
 Apple'a ait hiçbir şey bu depoda ya da indirmelerinde yer almaz.
 
+İndirme yarıda kalırsa ya da pencere kapanırsa aynı macOS ve aynı bellekle düğmeye
+tekrar basın: yarım kalan dosya kaldığı yerden devam eder, bellekte zaten olan
+recovery yeniden indirilmez, yalnızca doğrulanır.
+
 ## Recovery içinde
 
 Bellekten açın ve OpenCore seçicisinde recovery girişini seçin. Sonra:
