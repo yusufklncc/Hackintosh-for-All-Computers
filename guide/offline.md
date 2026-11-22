@@ -54,6 +54,10 @@ If the download stops, or the window is closed, press the button again with the
 same macOS and the same stick: a half-finished file carries on from where it
 stopped, and a recovery already on the stick is checked rather than fetched again.
 
+Once downloaded, the installer is checked against the integrity data Apple's
+catalog publishes for it - a SHA-256 for every 10 MB. A stretch that does not
+match is downloaded again on its own, not the whole package.
+
 ## In recovery
 
 Boot the stick and pick the recovery entry in OpenCore's picker. Then:

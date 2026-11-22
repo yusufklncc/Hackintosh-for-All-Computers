@@ -248,6 +248,126 @@ def fetch(g, row, into, every=2.0):
     return files, None
 
 
+# --- checking what arrived --------------------------------------------------
+#
+# Apple's catalog gives every package an IntegrityDataURL: a chunklist, the
+# same CNKL format as BaseSystem.chunklist - a SHA-256 for each 10 MB of the
+# file. gibMacOS does not use it; this does. Most carry signature method 2,
+# where the file ends in a SHA-256 of itself rather than Apple's RSA signature,
+# so what it proves is that the bytes match what Apple's catalog points at -
+# fetched over HTTPS from the address the HTTPS catalog gave. That catches a
+# damaged or swapped download. Authenticity is the package's own Apple
+# signature, which the installer checks before it runs anything.
+#
+# macrecovery reads the same format but refuses method 2 outright, as it
+# should for what it does; so the reading is done here, against the same
+# struct layout it uses.
+
+import hashlib as _hashlib
+import struct as _struct
+import urllib.request as _request
+
+CNKL = _struct.Struct('<4sIBBBxQQQ')
+CHUNK = _struct.Struct('<I32s')
+
+
+def chunks(data):
+    """[(size, sha256)] from a chunklist's bytes, or raise on anything off."""
+    if len(data) < CNKL.size:
+        raise ValueError('shorter than a chunklist header')
+    magic, size, version, method, signed, count, offset, sig_at = CNKL.unpack_from(data)
+    if magic != b'CNKL' or size != CNKL.size or version != 1 or method != 1 \
+            or offset != CNKL.size or sig_at != offset + CHUNK.size * count or not count:
+        raise ValueError('not a chunklist this understands')
+    body = data[:sig_at]
+    out = [CHUNK.unpack_from(data, offset + i * CHUNK.size) for i in range(count)]
+    tail = data[sig_at:]
+    if signed == 2:
+        if tail != _hashlib.sha256(body).digest():
+            raise ValueError('the chunklist does not match its own digest')
+    elif signed == 1:
+        if len(tail) != 256:
+            raise ValueError('the chunklist signature is the wrong length')
+    else:
+        raise ValueError(f'unknown signature method {signed}')
+    return out
+
+
+def _get(url, headers=None):
+    req = _request.Request(url, headers=dict({'User-Agent': 'hackintosh-fullinstaller'},
+                                             **(headers or {})))
+    with _request.urlopen(req, timeout=120) as r:
+        return r.read()
+
+
+def bad_chunks(path, listed, say=None, every=200):
+    """[(index, offset, size)] of chunks whose SHA-256 is not the listed one.
+
+    A file of the wrong length is reported as every chunk past where it ends."""
+    bad, offset = [], 0
+    with open(path, 'rb') as f:
+        for i, (size, digest) in enumerate(listed):
+            block = f.read(size)
+            if len(block) != size or _hashlib.sha256(block).digest() != digest:
+                bad.append((i, offset, size))
+            offset += size
+            if say and i and i % every == 0:
+                say(f'{Path(path).name}: checked {offset / 1e9:.1f} GB')
+        if f.read(1):
+            bad.append((len(listed), offset, -1))       # longer than Apple's
+    return bad
+
+
+def check(row, into, say=print, get=_get, repair=True):
+    """Check every downloaded package against Apple's integrity data.
+
+    Returns a complaint, or None when all of them check out. A bad chunk is
+    downloaded again on its own, by byte range, and checked again - a 15 GB
+    package with one damaged 10 MB stretch costs 10 MB, not 15 GB."""
+    into = Path(into)
+    for pkg in row['prod'].get('packages', []):
+        name = pkg['URL'].rsplit('/', 1)[-1]
+        path = into / name
+        if not path.exists():
+            continue
+        if pkg.get('IntegrityDataURL'):
+            try:
+                data = get(pkg['IntegrityDataURL'])
+                if pkg.get('IntegrityDataSize') and len(data) != pkg['IntegrityDataSize']:
+                    return f'{name}: Apple\'s integrity data is not the size the catalog gives'
+                listed = chunks(data)
+            except Exception as exc:                 # noqa: BLE001
+                return f'{name}: Apple\'s integrity data could not be read ({exc})'
+            bad = bad_chunks(path, listed, say)
+            if bad and repair:
+                if any(size < 0 for _, _, size in bad):
+                    with open(path, 'r+b') as f:      # longer than it should be
+                        f.truncate(sum(s for s, _ in listed))
+                    bad = [b for b in bad if b[2] >= 0]
+                say(f'{name}: {len(bad)} of {len(listed)} chunks do not match; '
+                    f'downloading only those again')
+                with open(path, 'r+b') as f:
+                    for i, offset, size in bad:
+                        f.seek(offset)
+                        f.write(get(pkg['URL'], {'Range': f'bytes={offset}-{offset + size - 1}'}))
+                bad = bad_chunks(path, listed)
+            if bad:
+                return (f'{name}: {len(bad)} of {len(listed)} chunks still do not match '
+                        f'Apple\'s integrity data; delete it and download again')
+            say(f'{name}: every chunk matches Apple\'s integrity data')
+        elif pkg.get('Digest'):
+            h = _hashlib.sha1()
+            with open(path, 'rb') as f:
+                for block in iter(lambda: f.read(1 << 22), b''):
+                    h.update(block)
+            if h.hexdigest() != pkg['Digest'].lower():
+                return f'{name}: does not match the digest in Apple\'s catalog'
+            say(f'{name}: matches the digest in Apple\'s catalog')
+        elif pkg.get('Size') and path.stat().st_size != pkg['Size']:
+            return f'{name}: {path.stat().st_size} bytes where Apple lists {pkg["Size"]}'
+    return None
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -255,6 +375,8 @@ def main(argv=None):
     ap.add_argument('--macos', help='a name or a version, as --list prints them')
     ap.add_argument('--out', default='.', help='where the package goes')
     ap.add_argument('--work', default=None, help='where the tool keeps its catalog')
+    ap.add_argument('--check', action='store_true',
+                    help='only check what is already in --out against Apple\'s integrity data')
     a = ap.parse_args(argv)
 
     work = Path(a.work) if a.work else Path(a.out) / '.gibmacos'
@@ -275,7 +397,12 @@ def main(argv=None):
         print(f'  {a.macos}: Apple\'s catalog has no installer by that name for Intel Macs')
         return 1
     print(f"  {row['name']} {row['version']} ({row['build']}), {size_text(row['size'])}")
-    files, complaint = fetch(g, row, a.out)
+    if not a.check:
+        files, complaint = fetch(g, row, a.out)
+        if complaint:
+            print(f'  {complaint}')
+            return 1
+    complaint = check(row, a.out, say=lambda s: print(f'  {s}'))
     if complaint:
         print(f'  {complaint}')
         return 1

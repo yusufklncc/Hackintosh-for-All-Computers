@@ -207,7 +207,11 @@ def _installer(row, exfat, work, g, say):
         g, complaint = fullinstaller.catalog(Path(work or tempfile.mkdtemp()) / 'gibmacos')
         if not g:
             return complaint
-    return fullinstaller.fetch(g, row, exfat)[1]
+    complaint = fullinstaller.fetch(g, row, exfat)[1]
+    if complaint:
+        return complaint
+    say(f'{BOLD}Checking it against Apple\'s integrity data{RESET}')
+    return fullinstaller.check(row, exfat, say=lambda s: say(f'      {s}'))
 
 
 def _from_package(p, row, fat, exfat, work, g, say):

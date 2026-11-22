@@ -53,6 +53,10 @@ Apple'a ait hiçbir şey bu depoda ya da indirmelerinde yer almaz.
 tekrar basın: yarım kalan dosya kaldığı yerden devam eder, bellekte zaten olan
 recovery yeniden indirilmez, yalnızca doğrulanır.
 
+İndirme bitince kurulum paketi, Apple'ın kataloğunda onun için yayımladığı bütünlük
+verisiyle karşılaştırılır: her 10 MB için bir SHA-256. Uyuşmayan bir parça varsa
+paketin tamamı değil, yalnızca o parça yeniden indirilir.
+
 ## Recovery içinde
 
 Bellekten açın ve OpenCore seçicisinde recovery girişini seçin. Sonra:

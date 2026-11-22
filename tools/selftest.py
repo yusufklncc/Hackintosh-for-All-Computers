@@ -2969,6 +2969,57 @@ def a_stick_that_needs_no_network():
     check('  nothing here starts a process of its own for it',
           'multiprocessing' not in src.split('class Watch', 1)[1].split('def fetch', 1)[0]
           .replace('second *process*', ''))
+    # Apple's integrity data: a CNKL chunklist per package, checked chunk by
+    # chunk, and a bad chunk fetched again on its own
+    import hashlib as _h
+    import struct as _s
+    blob = bytes(range(256)) * 160                     # 40 KB, four 10 KB chunks
+    sizes = [10240] * 4
+    body = _s.pack('<4sIBBBxQQQ', b'CNKL', 0x24, 1, 1, 2, 4, 0x24, 0x24 + 36 * 4)
+    for i, n in enumerate(sizes):
+        body += _s.pack('<I32s', n, _h.sha256(blob[i * n:(i + 1) * n]).digest())
+    cnkl = body + _h.sha256(body).digest()
+    check('Apple\'s integrity data reads as a chunklist',
+          [n for n, _ in fullinstaller.chunks(cnkl)] == sizes)
+    try:
+        fullinstaller.chunks(cnkl[:-1] + bytes([cnkl[-1] ^ 1]))
+        tampered = False
+    except ValueError:
+        tampered = True
+    check('  and one that does not match its own digest is refused', tampered)
+    with tempfile.TemporaryDirectory() as tmp:
+        pkg = Path(tmp) / 'InstallAssistant.pkg'
+        damaged = bytearray(blob)
+        damaged[15000] ^= 0xFF                         # inside the second chunk
+        pkg.write_bytes(bytes(damaged))
+        fetched = []
+        def get(url, headers=None):
+            if url.endswith('.integrityDataV1'):
+                return cnkl
+            lo, hi = (int(x) for x in headers['Range'][6:].split('-'))
+            fetched.append((lo, hi))
+            return blob[lo:hi + 1]
+        row = {'prod': {'packages': [{'URL': 'u/InstallAssistant.pkg', 'Size': len(blob),
+                                      'IntegrityDataURL': 'u/InstallAssistant.pkg.integrityDataV1',
+                                      'IntegrityDataSize': len(cnkl)}]}}
+        check('a damaged chunk is found',
+              [i for i, _, _ in fullinstaller.bad_chunks(pkg, fullinstaller.chunks(cnkl))] == [1])
+        why = fullinstaller.check(row, tmp, say=lambda *_: None, get=get)
+        check('  and only that chunk is fetched again, after which it all matches',
+              why is None and fetched == [(10240, 20479)] and pkg.read_bytes() == blob,
+              (why, fetched))
+        pkg.write_bytes(blob[:25000])                  # cut short
+        fetched.clear()
+        why = fullinstaller.check(row, tmp, say=lambda *_: None, get=get)
+        check('  a file cut short is finished the same way',
+              why is None and pkg.read_bytes() == blob, (why, fetched))
+        row2 = {'prod': {'packages': [{'URL': 'u/InstallAssistant.pkg', 'Size': len(blob),
+                                       'Digest': _h.sha1(b'other').hexdigest()}]}}
+        check('without integrity data the catalog\'s SHA-1 is checked instead',
+              'digest' in (fullinstaller.check(row2, tmp, say=lambda *_: None) or ''))
+    check('the offline stick checks the installer once it has it',
+          'fullinstaller.check(row, exfat' in Path('tools/offline.py').read_text(encoding='utf-8'))
+
     with tempfile.TemporaryDirectory() as tmp:
         check('a recovery that is not there is not intact', not offline.intact(tmp))
         (Path(tmp) / 'BaseSystem.dmg').write_bytes(b'x')
