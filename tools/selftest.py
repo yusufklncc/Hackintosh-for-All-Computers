@@ -3406,6 +3406,27 @@ def community_drivers_into_an_efi():
     check('the question offers no as the ready answer',
           "[('no', 'No, leave it out'), ('yes'" in src)
 
+    # how each one was written is said where the decision is made, not only
+    # on the Community tab
+    import contextlib, io, types
+    import setup as engine
+    fake = dict(community.projects()[0], name='Written', recipe={'steps': []},
+                ai='', ai_files=[], ai_commits=[8, 10], ai_tools=['Claude'])
+    plain = dict(fake, name='Plain', ai_commits=[0, 0])
+    real = community.offered
+    community.offered = lambda hw: [fake, plain]
+    out = io.StringIO()
+    try:
+        with contextlib.redirect_stdout(out):
+            engine.community_step({}, 24, types.SimpleNamespace(community='', out='.'))
+    finally:
+        community.offered = real
+    said = out.getvalue()
+    check('the build says an AI-written driver is one, and why',
+          'AI-written: 8 of its last 10 commits credit Claude as co-author' in said, said[-400:])
+    check('and says nothing is known when nothing is',
+          'AI: not stated' in said.split('Plain', 1)[-1], said[-400:])
+
 
 def the_window_updates_itself():
     """A newer build of the release, found, checked and swapped in.

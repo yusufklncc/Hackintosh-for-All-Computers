@@ -1461,6 +1461,12 @@ def community_step(hw, darwin, a):
             print(f'      {DIM}"{p["quote"]}"{RESET}')
         if p.get('macos'):
             print(f'      {DIM}{p["macos"]}{RESET}')
+        # how it was written, as the Community tab says it, here where the
+        # decision is made rather than only on a pane nobody has to open
+        level, why = community.ai_level(p)
+        badge = {'written': 'AI-written', 'assisted': 'AI-assisted'}.get(level, '')
+        print(f'      {YELLOW}{badge}: {why}{RESET}' if badge else
+              f'      {DIM}AI: not stated, which is not the same as written by hand{RESET}')
         r = p['recipe']
         if r.get('extra'):
             print(f'      {DIM}also fetches {", ".join(e["name"] for e in r["extra"])}{RESET}')
@@ -1472,8 +1478,9 @@ def community_step(hw, darwin, a):
             if p['name'].lower() in named:
                 picks.append(p)
             continue
+        yes = f'Yes, add it (experimental{", " + badge if badge else ""})'
         if ask(0, 0, f'Add {p["name"]} to this EFI?',
-               [('no', 'No, leave it out'), ('yes', 'Yes, add it (experimental)')]) == 'yes':
+               [('no', 'No, leave it out'), ('yes', yes)]) == 'yes':
             picks.append(p)
     if not picks:
         return None
