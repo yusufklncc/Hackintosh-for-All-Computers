@@ -8,10 +8,11 @@ Hazır yazılmış yükleyiciler, her sürüm için bir tane. Her biri zip için
 `.raw` dosyası, [balenaEtcher](usb.md#imaj-ile) için.
 
 !!! tip "Bunlardan birine ihtiyacınız olmayabilir"
-    **Recovery** paneli Apple'ın kendi yükleyicisini indirir — on iki gigabayt
-    yerine yaklaşık 700 MB — ve EFI'nin durduğu FAT32 bölümüne sığar. Buradan
-    imaj almak, yalnızca makinenin kurulum sırasında macOS'un sürebileceği bir
-    ağı yoksa gerekir. Bkz. [USB belleği hazırlayın](usb.md).
+    **USB stick** paneli Apple'ın kendi recovery'sini — on iki gigabayt yerine
+    yaklaşık 700 MB — doğrudan EFI'nin durduğu FAT32 bölümüne indirir. Kurulum
+    sırasında macOS'un sürebileceği bir ağı olmayan makine için Apple'ın bütün
+    yükleyicisini de belleğe koyabilir. Bkz. [USB belleği hazırlayın](usb.md) ve
+    [İnternet gerektirmeyen bellek](offline.md).
 
 | Sürüm | Numara | USB | Komut seti |
 |---|---|---|---|

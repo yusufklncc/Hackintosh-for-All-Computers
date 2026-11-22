@@ -13,7 +13,7 @@ the Apple logo and the installer appear.
 
 !!! failure "The text stops and stays stopped"
     Photograph where it stopped. The last few lines are what an issue needs; a
-    `machine.json` from the **Report** pane alongside it turns the guess into
+    `machine.json` from **Save this machine's report** on the Machine pane alongside it turns the guess into
     an answer.
 
 ## If you get an SMBIOS error

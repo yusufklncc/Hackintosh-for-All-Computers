@@ -14,7 +14,7 @@ logosu ve yükleyici gelir.
 
 !!! failure "Yazı durdu ve durmuş kaldı"
     Durduğu yerin fotoğrafını çekin. Bir issue'nun ihtiyacı son birkaç satırdır;
-    yanına **Report** panelinden bir `machine.json` eklemek tahmini cevaba
+    yanına Machine panelindeki **Save this machine's report** ile bir `machine.json` eklemek tahmini cevaba
     çevirir.
 
 ## SMBIOS hatası alıyorsanız

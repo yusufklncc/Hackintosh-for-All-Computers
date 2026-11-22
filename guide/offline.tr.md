@@ -32,12 +32,15 @@ Tahoe'ya, eski ara sürümler dahil. Kurulum paketi 6–19 GB arası; **16 GB ve
 
 ## Programda
 
-1. **USB stick** bölmesinde belleği seçin.
-2. **Erase and format it first** kısmını açın, **For an offline install**
-   kutusunu işaretleyin, disk adını yazıp silin. Windows ve Linux'ta bunun için
-   yönetici yetkisi gerekir; bölme size çalıştırmanız gereken komutları yazar.
-3. **Install with no network** kısmını açın, macOS'u seçin ve **Put it on the
-   stick** düğmesine basın.
+1. **USB stick** panelini açın ve **No network** yolunu seçin. Kurulum yapılacak
+   makinede macOS altında bağlanan hiçbir şey yoksa *for this machine* diye
+   işaretlidir.
+2. macOS'u seçin. Apple'ın Intel Mac'ler için hâlâ sunduğu her yapı listelenir.
+3. Belleği seçin ve orada silin: **No network** seçiliyken silme, bunun için
+   gereken iki bölümü oluşturur. Onaylamak için disk adını yazın. Windows ve
+   Linux'ta bunun için yönetici yetkisi gerekir; panel çalıştırmanız gereken
+   komutları yazar.
+4. **Put it on the stick** düğmesine basın.
 
 Her şey yeniden indirilir:
 

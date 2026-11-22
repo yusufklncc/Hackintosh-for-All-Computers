@@ -4,7 +4,7 @@ title: EFI'nizi alın
 
 # EFI'nizi alın
 
-**Builder** panelini açın ve başlata basın. Birkaç soru sorar ve klasörü yazar.
+**EFI** panelini açın ve başlata basın. Birkaç soru sorar ve klasörü yazar.
 
 Cevabı makinenizden okuyabildiği yerde bunu sorunun yanında söyler, ama sizin
 yerinize asla seçmez — tespit yanılabilir, ve önceden işaretlenmiş gelen yanlış

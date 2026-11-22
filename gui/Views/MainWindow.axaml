@@ -41,17 +41,19 @@
                      Foreground="{DynamicResource Faint}" />
         </StackPanel>
 
+        <!-- In the order the work goes: the machine, the EFI for it, the stick
+             it boots from. Report, Recovery and Installer were panes of their
+             own once; a report is now part of the machine, and the three ways
+             of putting macOS on a stick are one pane that asks which. -->
         <StackPanel Spacing="2">
+          <TextBlock Classes="eyebrow" Text="THIS MACHINE" Margin="12,0,0,4" />
           <RadioButton Name="ToMachine" Classes="nav" GroupName="pane" IsChecked="True"
                        Content="Machine" />
-          <RadioButton Name="ToBuilder" Classes="nav" GroupName="pane" Content="Builder" />
-          <RadioButton Name="ToReport" Classes="nav" GroupName="pane" Content="Report" />
-          <RadioButton Name="ToRecovery" Classes="nav" GroupName="pane"
-                       Content="Recovery" />
-          <RadioButton Name="ToInstaller" Classes="nav" GroupName="pane"
-                       Content="Installer" />
+          <TextBlock Classes="eyebrow" Text="MAKE" Margin="12,14,0,4" />
+          <RadioButton Name="ToBuilder" Classes="nav" GroupName="pane" Content="EFI" />
           <RadioButton Name="ToStick" Classes="nav" GroupName="pane"
                        Content="USB stick" />
+          <Border Height="1" Background="{DynamicResource Line}" Margin="10,14,10,10" />
           <RadioButton Name="ToDevices" Classes="nav" GroupName="pane"
                        Content="Compatible Hardware" />
           <RadioButton Name="ToKexts" Classes="nav" GroupName="pane" Content="Kexts" />
@@ -65,13 +67,13 @@
            engine and a transcript; rebuilding it on every click would throw
            both away. -->
       <ScrollViewer Name="MachinePane">
-        <v:MachineView />
+        <StackPanel>
+          <v:MachineView Name="MachineInfo" />
+          <v:ReportView Name="ReportPart" />
+        </StackPanel>
       </ScrollViewer>
       <v:BuilderView Name="BuilderPane" IsVisible="False" />
-      <v:ReportView Name="ReportPane" IsVisible="False" />
-      <v:RecoveryView Name="RecoveryPane" IsVisible="False" />
-      <v:InstallerView Name="InstallerPane" IsVisible="False" />
-      <v:StickView Name="StickPane" IsVisible="False" />
+      <v:MediaView Name="StickPane" IsVisible="False" />
       <v:DevicesView Name="DevicesPane" IsVisible="False" />
       <v:KextsView Name="KextsPane" IsVisible="False" />
       <v:AboutView Name="AboutPane" IsVisible="False" />

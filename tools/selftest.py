@@ -3111,8 +3111,9 @@ def a_stick_that_needs_no_network():
     engine = Path('tools/setup.py').read_text(encoding='utf-8')
     check('the engine lists, erases and fills an offline stick',
           all(f in engine for f in ('--offline-list', '--usb-offline', '--offline-layout')))
-    pane = Path('gui/Views/StickView.axaml.cs').read_text(encoding='utf-8')
-    check('and the stick pane drives all three',
+    pane = (Path('gui/Views/StickView.axaml.cs').read_text(encoding='utf-8')
+            + Path('gui/Views/MediaView.axaml.cs').read_text(encoding='utf-8'))
+    check('and the USB stick pane drives all three',
           all(f in pane for f in ('"--usb-offline"', '"--offline-layout"', 'Inventory.Offline')))
 
 
@@ -3592,17 +3593,34 @@ def building_an_installer_image():
               'Installer' in said and 'by hand' in said or 'elle' in said, page)
     for page in ('guide/app.md', 'guide/app.tr.md'):
         said = Path(page).read_text(encoding='utf-8')
-        check(f'{page} lists it among the panes',
-              '### Installer' in said, page)
+        check(f'{page} names it among the ways onto a stick',
+              'Installer image' in said, page)
     # and counts them right, since the number is written out
     panes = Path('gui/Views/MainWindow.axaml').read_text(encoding='utf-8')
     how_many = panes.count('Classes="nav"')
-    for page, word in (('guide/app.md', 'nine'), ('guide/app.tr.md', 'Dokuz')):
+    for page, word in (('guide/app.md', 'six'), ('guide/app.tr.md', 'Altı')):
         check(f'{page} says how many there are, and is right',
               f'{word} pane' in Path(page).read_text(encoding='utf-8')
               or f'{word} panel' in Path(page).read_text(encoding='utf-8'),
               f'{how_many} in the window')
-    check('and the window really has that many', how_many == 9, how_many)
+    check('and the window really has that many', how_many == 6, how_many)
+    # Report, Recovery and Installer were panes; now they live where the work is
+    window = Path('gui/Views/MainWindow.axaml').read_text(encoding='utf-8')
+    check('a report is part of the Machine pane',
+          '<v:ReportView Name="ReportPart" />' in window and 'ToReport' not in window)
+    check('the three ways onto a stick are one pane that asks which',
+          '<v:MediaView Name="StickPane"' in window
+          and 'RecoveryPane' not in window and 'InstallerPane' not in window)
+    media = Path('gui/Views/MediaView.axaml.cs').read_text(encoding='utf-8')
+    check('  and marks the way this machine\'s network makes sensible',
+          'Recovery.Verdict' in media and '("offline", "no") => true' in media)
+    check('  and downloads recovery straight onto the stick, not into a folder',
+          'Recovery.FetchTo(stick.Where)' in media and 'Stick.PlaceEfi()' in media)
+    check('the open report is what the builder and the recovery verdict judge',
+          '"--machine"' in Path('gui/Engine/Session.cs').read_text(encoding='utf-8')
+          and '"recovery", "--machine", report' in Path('gui/Engine/Inventory.cs').read_text(encoding='utf-8'))
+    check('  and the engine takes the machine out of the pair load_machine returns',
+          'carried = load_machine(a.machine)[0]' in Path('tools/setup.py').read_text(encoding='utf-8'))
 
     # A macOS package holds two programs and both have to be the architecture
     # the file is named for. .NET cross-compiles the window from -r osx-x64;

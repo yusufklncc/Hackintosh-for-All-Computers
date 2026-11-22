@@ -21,26 +21,20 @@ installer and on any system: see [A stick that needs no network](offline.md).
 
 ## With recovery - the program does all of it
 
-1. Open the **Recovery** pane, pick the macOS you want, and press download.
+1. Open the **USB stick** pane. Its first step offers three ways; choose
+   **Recovery**. It is marked *for this machine* when the machine being
+   installed has a network card macOS drives.
 
-    The rows under the top one are named releases. **The top row is the newest
-    macOS** - it asks Apple for whatever is being served today rather than for
-    a version number.
+2. Pick the macOS. Each tile is a release the board table OpenCore ships can
+   ask Apple for, newest first.
 
-    The board table OpenCore ships records those boards as `latest` and never
-    names the release, so the name beside it comes from `data/mac.toml`, which
-    this repository refreshes from Apple's own metadata. **Check with Apple**
-    asks Apple directly, for today's answer.
+3. Pick the stick. It lists the removable disks it can see and says, for each,
+   whether it is ready as it stands - FAT32 under GPT with room - or has to be
+   erased first. If it has to be, erase it there and type the disk's name when
+   it asks.
 
-    It saves `BaseSystem.dmg` and `BaseSystem.chunklist` into a
-    `com.apple.recovery.boot` folder.
-
-2. Open the **USB stick** pane. It lists the removable disks it can see and
-   says, for each, whether it is ready as it stands - FAT32 under GPT with room
-   - or has to be erased first. If it has to be, press format and type the
-   disk's name when it asks.
-
-3. Press copy. It puts both folders at the root of the stick, side by side:
+4. Press **Put it on the stick**. The recovery downloads straight onto the stick
+   and the EFI is copied beside it:
 
 ```
 /Volumes/USB/
@@ -59,15 +53,16 @@ and the installer downloads the rest of macOS itself.
     Not on the one that made the stick. That machine needs Ethernet, or a Wi-Fi
     card macOS already drives, while it installs.
 
-    **The Recovery pane now says which of these you are**, before you download
-    anything, reading it off the hardware report:
+    **The USB stick pane says which of these you are**, above the three ways,
+    reading it off the machine the Machine pane shows - this one, or the report
+    you opened there:
 
     | What it says | What it means |
     |---|---|
     | *This machine can download during the install* | Wi-Fi has a macOS driver. Nothing else to do. |
     | *Use an Ethernet cable for the install* | Your Wi-Fi has no macOS driver, but your Ethernet does. Recovery works — plug a cable in before you start. This is the common case on laptops with Realtek Wi-Fi. |
-    | *Recovery cannot finish on this machine* | Neither card is driven. Use [a whole image](images.md) instead, or fit a supported card. |
-    | *Not known for this machine* | No report to read. It will not guess.  |
+    | *Recovery cannot finish on this machine* | Neither card is driven. The pane marks **No network** instead - see [A stick that needs no network](offline.md) - or fit a supported card. |
+    | *Not known for this machine* | No report to read. It will not guess. |
 
 ## With an image
 

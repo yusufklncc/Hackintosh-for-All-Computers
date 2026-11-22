@@ -20,7 +20,8 @@ This is the long way round. Take it when:
   [ready image](images.md) somebody else prepared.
 
 !!! tip "The program does all of this for you"
-    Open the **Installer** pane, point it at the installer app, and it runs
+    Open the **USB stick** pane, choose **Installer image**, point it at the
+    installer app, and it runs
     every step on this page in one go: sizes the image, partitions it, calls
     `createinstallmedia`, makes it bootable on a BIOS machine, copies the EFI
     folder in, and leaves you the image.

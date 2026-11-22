@@ -696,7 +696,10 @@ def main():
         # during the install, and the machine in question is the one being
         # built for - which is the report when there is one, not this computer
         if a.inventory == 'recovery':
-            carried = load_machine(a.machine) if a.machine else None
+            # load_machine answers (machine, where it came from); the verdict
+            # wants the machine. Nothing passed --machine here until the window
+            # did, which is when the tuple went in whole.
+            carried = load_machine(a.machine)[0] if a.machine else None
             document = inventory.recoveries(carried)
         else:
             document = inventory.DOCUMENTS[a.inventory]()

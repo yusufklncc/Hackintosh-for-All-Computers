@@ -13,18 +13,22 @@ want any of it in the config.
 
 The fix is to take the report on the target machine and carry it over.
 
-1. On the machine you are building **for**, run the program and open the
-   **Report** pane. It writes one small JSON file: CPU, board, graphics, PCI,
-   USB and audio ids, NVMe models.
+1. On the machine you are building **for**, run the program and press
+   **Save this machine's report** under the table on the **Machine** pane. It
+   writes one small JSON file: CPU, board, graphics, PCI, USB and audio ids,
+   NVMe models.
 
-    The Builder's fourth answer, *Neither - just write this machine's report*,
+    The EFI pane's fourth answer, *Neither - just write this machine's report*,
     does the same thing.
 
 2. Copy that file to the computer you are building **on** - by USB stick, mail,
    anything. It holds no serial numbers and no raw device dump.
 
-3. There, start the Builder and answer *Another machine, and I have its hardware
-   report*. It asks for the file.
+3. There, press **Open a report** on the Machine pane and pick the file. The
+   pane then shows that machine, and the EFI and USB stick panes work for it -
+   the builder no longer asks which machine, and the stick's advice is about
+   that machine's network. Answering *Another machine, and I have its hardware
+   report* in the EFI pane still works too.
 
 Every question and every piece of advice then applies to that machine.
 

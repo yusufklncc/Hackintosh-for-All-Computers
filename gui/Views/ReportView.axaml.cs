@@ -4,6 +4,7 @@
 // put the file and a sentence saying what to do with it.
 using System;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Platform.Storage;
@@ -22,6 +23,36 @@ public partial class ReportView : UserControl
         Choose.Click += async (_, _) => await Pick();
         Take.Click += async (_, _) => await Take_();
         Open.Click += (_, _) => Reveal.Show(_to);
+        OpenReport.Click += async (_, _) => await OpenOne();
+        Back.Click += (_, _) => Showing_(null);
+        Showing_(Program.MachineFile, quiet: true);
+    }
+
+    /// <summary>Raised with the report now being shown, or null for this machine.</summary>
+    public event Action<string?>? Switched;
+
+    async Task OpenOne()
+    {
+        var top = TopLevel.GetTopLevel(this);
+        if (top is null) return;
+        var picked = await top.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+        {
+            Title = "Which hardware report?",
+            AllowMultiple = false,
+            FileTypeFilter = new[] { new FilePickerFileType("Hardware report") { Patterns = new[] { "*.json" } } },
+        });
+        var path = picked.FirstOrDefault()?.TryGetLocalPath();
+        if (path is null) return;
+        Showing_(path);
+    }
+
+    void Showing_(string? report, bool quiet = false)
+    {
+        Program.MachineFile = report;
+        Showing.Text = report is null ? "Showing this machine."
+                                      : $"Showing the machine in {Path.GetFileName(report)}.";
+        Back.IsVisible = report is not null;
+        if (!quiet) Switched?.Invoke(report);
     }
 
     /// <summary>Take one without a click, and say what came of it.
@@ -70,9 +101,8 @@ public partial class ReportView : UserControl
         // the engine prints what it read and where the tables went; that is the
         // useful part and it is already written for a person
         Show("Written", output.Trim(),
-             $"Copy {Path.GetFileName(_to)} to the machine you build on, open the " +
-             "Builder there, and answer “Another machine, and I have its " +
-             "hardware report”.");
+             $"Copy {Path.GetFileName(_to)} to the machine you build on and " +
+             "open it there with Open a report.");
     }
 
     void Show(string title, string body, string? next)

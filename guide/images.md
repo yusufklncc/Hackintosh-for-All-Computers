@@ -8,10 +8,11 @@ Ready-written installers, one per release. Each is a `.raw` inside a zip, for
 [balenaEtcher](usb.md#with-an-image).
 
 !!! tip "You may not need one of these"
-    The **Recovery** pane downloads Apple's own installer - about 700 MB instead
-    of twelve gigabytes - and it fits on the FAT32 partition the EFI lives on.
-    Take an image from here only when the machine has no network macOS can drive
-    during the install. See [Make the USB stick](usb.md).
+    The **USB stick** pane downloads Apple's own recovery - about 700 MB instead
+    of twelve gigabytes - straight onto the FAT32 partition the EFI lives on.
+    For a machine with no network macOS can drive during the install it can also
+    put Apple's whole installer on the stick. See [Make the USB stick](usb.md)
+    and [A stick that needs no network](offline.md).
 
 | Release | Version | USB | Instruction set |
 |---|---|---|---|

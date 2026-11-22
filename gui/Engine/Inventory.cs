@@ -375,7 +375,10 @@ public static class Inventory
 
     public static async Task<(RecoveryList? list, string complaint)> Recoveries(Located engine)
     {
-        var (output, error, code) = await Builder.Run(engine, "--inventory", "recovery");
+        // judged for the machine being installed: the one the Machine pane shows
+        var (output, error, code) = Program.MachineFile is { Length: > 0 } report
+            ? await Builder.Run(engine, "--inventory", "recovery", "--machine", report)
+            : await Builder.Run(engine, "--inventory", "recovery");
         if (code != 0) return (null, Said(error, code));
         try
         {

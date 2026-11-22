@@ -48,12 +48,12 @@ else is needed.
   <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/App/builder.png">
 </p>
 
-**Builder** asks the questions and writes the EFI folder - and answers none of
-them for you. **Recovery** fetches Apple's own installer, about 700 MB that fits
-where a 12 GB image never could, and says first whether the machine you are
-building for can reach the network during the install at all. **USB stick**
-formats the drive and copies both folders onto it. **Report** carries a machine
-to another computer. **Compatible Hardware** lists 772 devices across 8
+**Machine** shows what the computer has and what macOS makes of it, and saves
+or opens a report, which is how a machine is carried to another computer.
+**EFI** asks the questions and writes the EFI folder - and answers none of them
+for you. **USB stick** puts macOS and the EFI on a stick three ways - recovery,
+the whole installer with no network needed, or an installer image on a Mac -
+and marks the one the machine's network makes sensible. **Compatible Hardware** lists 772 devices across 8
 categories, **Kexts** the 42 that ship inside, and **About** says where every
 answer came from.
 
@@ -63,17 +63,12 @@ not - and everything here can be done from a terminal instead, or by hand from
 two zip files.
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/App/recovery.png">&nbsp;
-  <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/App/usb.png">
+  <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/App/usb.png">&nbsp;
+  <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/App/hardware.png">
 </p>
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/App/hardware.png">&nbsp;
-  <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/App/kexts.png">
-</p>
-
-<p align="center">
-  <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/App/report.png">&nbsp;
+  <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/App/kexts.png">&nbsp;
   <img src="https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/App/about.png">
 </p>
 
@@ -113,8 +108,8 @@ pip install -r guide/requirements.txt
 mkdocs serve
 ```
 
-If you hit a problem, open an issue with what you have and what happened. The
-**Report** pane writes a `machine.json` with no serial numbers in it -
+If you hit a problem, open an issue with what you have and what happened.
+**Save this machine's report** on the Machine pane writes a `machine.json` with no serial numbers in it -
 attaching that turns a guess into an answer.
 
 <br>

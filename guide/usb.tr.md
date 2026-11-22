@@ -21,25 +21,20 @@ kendisi de hazırlayabilir: [İnternet gerektirmeyen bellek](offline.md).
 
 ## Recovery ile — hepsini program yapar
 
-1. **Recovery** panelini açın, istediğiniz macOS'u seçin ve indirmeye basın.
+1. **USB stick** panelini açın. İlk adım üç yol sunar; **Recovery**'yi seçin.
+   Kurulum yapılacak makinede macOS'un sürdüğü bir ağ kartı varsa *for this
+   machine* diye işaretlidir.
 
-    Alttaki satırlar adı konmuş sürümler. **En üstteki satır en yeni macOS'tur**
-    — bir sürüm numarası yerine, Apple'a o gün ne sunuyorsa onu sorar.
+2. macOS'u seçin. Her karo, OpenCore'un getirdiği kart tablosunun Apple'dan
+   isteyebildiği bir sürüm; en yenisi başta.
 
-    OpenCore'un getirdiği kart tablosu o kartları `latest` diye kaydediyor ve
-    sürüme isim vermiyor; yanındaki isim `data/mac.toml`'dan geliyor, ki bu depo
-    onu Apple'ın kendi verisinden tazeliyor. **Check with Apple** düğmesi
-    Apple'a doğrudan sorar, bugünün cevabı için.
+3. Belleği seçin. Gördüğü çıkarılabilir diskleri listeler ve her biri için,
+   olduğu gibi hazır mı — GPT altında yeterli yeri olan FAT32 — yoksa önce
+   silinmesi mi gerekiyor, söyler. Gerekiyorsa orada silin ve sorduğunda diskin
+   adını yazın.
 
-    `BaseSystem.dmg` ve `BaseSystem.chunklist` dosyalarını bir
-    `com.apple.recovery.boot` klasörüne kaydeder.
-
-2. **USB stick** panelini açın. Gördüğü çıkarılabilir diskleri listeler ve her
-   biri için, olduğu gibi hazır mı — GPT altında yeterli yeri olan FAT32 — yoksa
-   önce silinmesi mi gerekiyor, söyler. Silinmesi gerekiyorsa biçimlendirmeye
-   basın ve sorduğunda diskin adını yazın.
-
-3. Kopyalamaya basın. İki klasörü de belleğin köküne, yan yana koyar:
+4. **Put it on the stick** düğmesine basın. Recovery doğrudan belleğe iner, EFI
+   de yanına kopyalanır:
 
 ```
 /Volumes/USB/
@@ -57,14 +52,15 @@ Onu seçin; yükleyici macOS'un kalanını kendisi indirir.
     Belleği hazırlayan makinede değil. O makinenin kurulum sırasında Ethernet'e,
     ya da macOS'un zaten sürdüğü bir Wi-Fi kartına ihtiyacı var.
 
-    **Recovery paneli artık hangisi olduğunuzu söylüyor** — hiçbir şey
-    indirmeden önce, donanım raporundan okuyarak:
+    **USB stick paneli hangisi olduğunuzu söylüyor**, üç yolun hemen üstünde;
+    Machine panelinin gösterdiği makineden — bu makine ya da orada açtığınız
+    rapor — okuyarak:
 
     | Ne diyor | Ne demek |
     |---|---|
     | *This machine can download during the install* | Wi-Fi'nin macOS sürücüsü var. Yapılacak başka bir şey yok. |
     | *Use an Ethernet cable for the install* | Wi-Fi'nizin macOS sürücüsü yok ama Ethernet'inizin var. Recovery çalışır — başlamadan önce kablo takın. Realtek Wi-Fi'lı dizüstülerde en sık görülen durum bu. |
-    | *Recovery cannot finish on this machine* | İki kart da sürülmüyor. Onun yerine [tam imaj](images.md) kullanın, ya da desteklenen bir kart takın. |
+    | *Recovery cannot finish on this machine* | İki kart da sürülmüyor. Panel bunun yerine **No network** yolunu işaretler — bkz. [İnternet gerektirmeyen bellek](offline.md) — ya da desteklenen bir kart takın. |
     | *Not known for this machine* | Okunacak rapor yok. Tahmin etmez. |
 
 ## İmaj ile

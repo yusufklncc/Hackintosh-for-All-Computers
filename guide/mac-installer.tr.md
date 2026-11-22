@@ -19,7 +19,8 @@ Bu uzun yol. Şu durumda tercih edin:
   yükleyicisini tercih ediyorsunuz.
 
 !!! tip "Program bunların hepsini sizin için yapıyor"
-    **Installer** panelini açın, yükleyici uygulamasını gösterin; bu sayfadaki
+    **USB stick** panelini açın, **Installer image** yolunu seçin, yükleyici
+    uygulamasını gösterin; bu sayfadaki
     her adımı tek seferde çalıştırır: imajı boyutlandırır, böler,
     `createinstallmedia`'yı çağırır, BIOS makinede açılabilir yapar, EFI
     klasörünü kopyalar ve imajı size bırakır.

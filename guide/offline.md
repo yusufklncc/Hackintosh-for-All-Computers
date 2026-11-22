@@ -33,12 +33,14 @@ older point releases included. The installer is 6 to 19 GB, so use a stick of
 
 ## In the program
 
-1. **USB stick** pane, pick the stick.
-2. Open **Erase and format it first**, tick **For an offline install**, type the
-   disk name and erase it. On Windows and Linux this needs an administrator, so
-   the pane prints the exact commands to run instead.
-3. Open **Install with no network**, pick the macOS, and press **Put it on the
-   stick**.
+1. Open the **USB stick** pane and choose **No network**. It is marked *for this
+   machine* when nothing on the machine being installed connects under macOS.
+2. Pick the macOS. Every build Apple still serves for Intel Macs is listed.
+3. Pick the stick and erase it there: with **No network** chosen, erasing makes
+   the two partitions this needs. Type the disk name to confirm. On Windows and
+   Linux this needs an administrator, so the pane prints the exact commands to
+   run instead.
+4. Press **Put it on the stick**.
 
 Everything is downloaded fresh:
 

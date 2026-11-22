@@ -47,7 +47,10 @@ konsolun söylemeyeceği bir şeyi söyleyemez.
     tarafından imzalanmış değil. Her sistemde bir iletişim kutusu demek bu;
     adımlar [Sisteminiz engellerse](blocked.md) sayfasında.
 
-## Dokuz panel
+## Altı panel
+
+İşin sırasıyla — makine, onun EFI'si, açıldığı bellek — ve ardından bir şeylere
+bakmak için üç panel.
 
 ### Machine
 
@@ -58,9 +61,18 @@ o sınırı koyan parça.
 `unknown`, buradaki hiçbir tablonun o aygıtı tanımadığı anlamına gelir —
 çalışmadığı anlamına değil.
 
+Tablonun altındaki **Save this machine's report** bu makineyi tek bir JSON
+dosyasına okur ve ACPI tablolarını yanına döker — kurulumu hazırlayacağınız
+bilgisayara taşıyacağınız dosya budur. İçinde seri numarası ya da ham aygıt
+dökümü yoktur; yardım eden birine göndermeniz güvenlidir. **Open a report**
+öbür yarısıdır: panel o makineyi gösterir, EFI ve USB stick panelleri de o makine
+için konuşur.
+
+[Başka bir makine için kurmak :material-arrow-right:](another-machine.md){ .md-button }
+
 ![Machine paneli](https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/App/machine.png)
 
-### Builder
+### EFI
 
 Soruları sorar ve EFI klasörünü yazar. Hiçbirini sizin yerinize yanıtlamaz:
 makine bir şeyi söyleyebiliyorsa seçenek *detected* diye işaretlenir, seçimi yine
@@ -68,67 +80,32 @@ siz yaparsınız.
 
 [EFI'nizi alın :material-arrow-right:](efi.md){ .md-button }
 
-![Builder paneli](https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/App/builder.png)
-
-### Report
-
-Bu makineyi tek bir JSON dosyasına okur ve ACPI tablolarını yanına döker. USB'yi
-başka bir yerde hazırlıyorsanız, kurulum yapacağınız bilgisayara taşıyacağınız
-dosya budur.
-
-İçinde seri numarası ya da ham aygıt dökümü yoktur; yardım eden birine
-göndermeniz güvenlidir.
-
-[Başka bir makine için kurmak :material-arrow-right:](another-machine.md){ .md-button }
-
-![Report paneli](https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/App/report.png)
-
-### Recovery
-
-Apple'ın kendi yükleyicisini EFI'nin yanına, belleğe koyar — açılan, bağlanan ve
-macOS'un kalanını kendi indiren yaklaşık 700 MB'lık bir parça. Tam imaj
-sığmadığında cevap budur: EFI'nin durduğu FAT32 bölümü 4 GB'tan büyük bir dosya
-tutamaz.
-
-Kart tablosunun sunduğu her sürüm bir karo, en yenisi başta. En üstteki satır bir
-sürüm numarası yerine Apple o gün ne sunuyorsa onu ister; kart tablosu ona isim
-vermiyor, o yüzden yanındaki isim `data/mac.toml`'dan geliyor ve **Check with
-Apple** düğmesi bugünün cevabını Apple'a doğrudan sorar.
-
-Hiçbir şey indirmeden önce, kurulum yapacağınız makinenin bunu bitirip
-bitiremeyeceğini söyler: recovery macOS'u *o makinede* indirir, dolayısıyla tek
-kartı Realtek Wi-Fi olan bir dizüstü yükleyiciyi açar ve orada durur. Ethernet'i
-sürülüyorsa kablo kullanmanızı söyler. Bkz.
-[USB belleği hazırlayın](usb.md).
-
-![Recovery paneli](https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/App/recovery.png)
-
-### Installer
-
-Bir yükleyici uygulamasını tek seferde bütün bir açılabilir imaja çeviriyor:
-boyutlandırıyor, bölüyor, Apple'ın `createinstallmedia`'sını çağırıyor,
-OpenCore'un kendi DuetPkg'siyle legacy BIOS makinede açılabilir yapıyor ve EFI
-klasörünü kopyalıyor.
-
-Çıkan şey düz bir sektör imajı, yani balenaEtcher onu her sistemden belleğe
-yazıyor — bellek daha sonra üzerinde hiç macOS olmayan bir makinede yeniden
-yapılabiliyor.
-
-Yalnızca macOS'ta, çünkü `createinstallmedia` uygulamanın içinde gelen bir
-Apple ikilisi; Windows ve Linux'ta panel bunu söylüyor. Programda yönetici
-parolası isteyen tek yer burası, ve sormadan önce çalıştıracağı betiği
-gösteriyor.
-
-[Belleği bir Mac üzerinde hazırlamak :material-arrow-right:](mac-installer.md){ .md-button }
+![EFI paneli](https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/App/builder.png)
 
 ### USB stick
 
-Çıkarılabilir diskleri bulur, isterseniz birini biçimlendirir ve iki klasörü de
-doğru yerlere kopyalar. Her bellek için, olduğu gibi yazılabilir mi — GPT altında
-yeterli yeri olan FAT32 — yoksa önce silinmesi mi gerekiyor, bunu söyler.
+macOS'u ve EFI'yi belleğe üç adımda koyar: macOS belleğe nasıl gelecek, hangi
+macOS, hangi bellek. İlk adım üç yol sunar ve kurulum yapılacak makineye uyanı
+işaretler:
 
-Yalnızca çıkarılabilir diskleri listeler, bilgisayarın açıldığı diski asla; ve
-silme işlemi başlamadan önce diski kendi adıyla yazmanızı ister.
+- **Recovery** — açılıp macOS'un kalanını kurulum sırasında indiren yaklaşık 700
+  MB; o makinenin macOS'un sürdüğü bir ağ kartı olmalı. Doğrudan belleğe, EFI'nin
+  yanına indirilir.
+- **No network** — Apple'ın bütün yükleyicisi ve UnPlugged; macOS'un kullanabileceği
+  bir ağı olmayan makine için. Bkz. [İnternet gerektirmeyen bellek](offline.md).
+- **Installer image** — bir Install macOS uygulamasından, legacy BIOS açılışıyla,
+  balenaEtcher'ın her belleğe yazdığı bir imaj. Yalnızca macOS'ta, çünkü Apple'ın
+  `createinstallmedia`'sı bir Mac programı; programda yönetici parolası isteyen tek
+  yer burası ve önce betiği gösterir. Bkz.
+  [Belleği bir Mac üzerinde hazırlamak](mac-installer.md).
+
+Hangi yolun işaretleneceğini makinenin ağı belirler: recovery macOS'u *o makinede*
+indirir, dolayısıyla tek kartı Realtek Wi-Fi olan bir dizüstü yükleyiciyi açar ve
+orada durur. Ethernet'i sürülüyorsa kablo kullanmanızı söyler.
+
+Yalnızca çıkarılabilir diskleri listeler, bilgisayarın açıldığı diski asla;
+seçilen yolun istediği düzende siler ve başlamadan önce diski kendi adıyla
+yazmanızı ister.
 
 ![USB stick paneli](https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/App/usb.png)
 

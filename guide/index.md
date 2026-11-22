@@ -44,10 +44,11 @@ device means no table here says anything about that device, not that it fails.
 
 It does not redistribute Apple's software. No installer, no BaseSystem, no
 image: the recovery download comes from Apple, over Apple's own protocol, using
-the tool OpenCore ships for it. The macOS release icons in the Recovery pane are
+the tool OpenCore ships for it. The macOS release icons in the USB stick pane are
 Apple's, and are there to identify which release a tile stands for.
 
 !!! question "Something went wrong"
-    Open an issue with what you have and what happened. The **Report** pane
-    writes a `machine.json` with no serial numbers in it - attaching that
+    Open an issue with what you have and what happened. **Save this machine's
+    report** on the Machine pane writes a `machine.json` with no serial numbers
+    in it - attaching that
     turns a guess into an answer.

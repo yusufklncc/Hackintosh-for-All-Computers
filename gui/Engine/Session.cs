@@ -54,6 +54,13 @@ public sealed class Session
         info.ArgumentList.Add("--protocol");
         info.ArgumentList.Add("--out");
         info.ArgumentList.Add(outFolder);
+        // the machine the Machine pane is showing, so the builder answers for
+        // the same one - a report opened there is the machine being built for
+        if (Program.MachineFile is { Length: > 0 } report)
+        {
+            info.ArgumentList.Add("--machine");
+            info.ArgumentList.Add(report);
+        }
 
         var process = new Process { StartInfo = info };
         process.Start();

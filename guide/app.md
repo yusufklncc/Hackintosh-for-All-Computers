@@ -46,7 +46,10 @@ console would not.
     is one dialog on each system, and [When your system blocks
     it](blocked.md) has the steps.
 
-## The nine panes
+## The six panes
+
+In the order the work goes - the machine, the EFI for it, the stick it boots
+from - and then three that are there to look things up.
 
 ### Machine
 
@@ -56,9 +59,18 @@ together with the part that sets that floor.
 
 `unknown` means no table here claims the device - not that it fails.
 
+Under the table, **Save this machine's report** reads this machine into a single
+JSON file and dumps its ACPI tables beside it - the file to carry to the
+computer you build on. It holds no serial numbers and no raw device dump, so it
+is safe to send to someone who is helping you. **Open a report** does the other
+half: the pane then shows that machine, and the EFI builder and the USB stick
+advice are about it too.
+
+[Building for another machine :material-arrow-right:](another-machine.md){ .md-button }
+
 ![The Machine pane](https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/App/machine.png)
 
-### Builder
+### EFI
 
 Asks the questions and writes the EFI folder. It answers none of them for you:
 where the machine can tell it something the option is marked *detected*, and you
@@ -66,66 +78,32 @@ still choose.
 
 [Get your EFI :material-arrow-right:](efi.md){ .md-button }
 
-![The Builder pane](https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/App/builder.png)
-
-### Report
-
-Reads this machine into a single JSON file and dumps its ACPI tables beside it.
-That is the file to carry to the computer you build on, when the stick is being
-prepared somewhere else.
-
-It holds no serial numbers and no raw device dump, so it is safe to send to
-someone who is helping you.
-
-[Building for another machine :material-arrow-right:](another-machine.md){ .md-button }
-
-![The Report pane](https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/App/report.png)
-
-### Recovery
-
-Puts Apple's own installer on the stick beside the EFI - about 700 MB that
-boots, connects, and downloads the rest of macOS itself. It is the answer when a
-whole image will not fit: the FAT32 partition an EFI lives on cannot hold a file
-over 4 GB.
-
-Every release the board table offers is a tile, newest first. The top one asks
-for whatever macOS Apple is serving rather than for a version number; the board
-table will not name it, so the name beside it comes from `data/mac.toml`, and
-**Check with Apple** asks Apple directly for today's answer.
-
-Before you download anything it says whether the machine you are building for
-can actually finish: recovery pulls macOS down *on that machine*, so a laptop
-whose only card is a Realtek Wi-Fi boots the installer and then stops. If its
-Ethernet is driven it tells you to use a cable. See
-[Make the USB stick](usb.md).
-
-![The Recovery pane](https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/App/recovery.png)
-
-### Installer
-
-Turns an installer app into a whole bootable image in one run: sizes it,
-partitions it, calls Apple's `createinstallmedia`, makes it bootable on a
-legacy BIOS machine with OpenCore's own DuetPkg, and copies the EFI folder in.
-
-What comes out is a flat sector image, so balenaEtcher writes it to a stick
-from any system - the stick can be made again later on a machine with no macOS
-on it.
-
-macOS only, because `createinstallmedia` is an Apple binary that ships inside
-the app; on Windows and Linux the pane says so. It is the one place in the
-program that asks for an administrator password, and it shows the script it
-will run before asking.
-
-[Building the stick on a Mac :material-arrow-right:](mac-installer.md){ .md-button }
+![The EFI pane](https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/App/builder.png)
 
 ### USB stick
 
-Finds the removable disks, formats one if you want, and copies both folders onto
-it in the right places. It says whether the stick can be written to as it stands
-- FAT32 under GPT with room - or whether it has to be erased first.
+Puts macOS and the EFI on a stick, in three steps: how macOS gets onto it, which
+macOS, which stick. The first step offers three ways, and marks the one that
+fits the machine being installed:
 
-It lists removable disks only, never the one the computer booted from, and
-erasing asks you for the disk by its own name before it starts.
+- **Recovery** - about 700 MB that boots and downloads the rest of macOS during
+  the install, so that machine needs a network card macOS drives. It is
+  downloaded straight onto the stick, beside the EFI.
+- **No network** - Apple's whole installer and UnPlugged, for a machine with no
+  network macOS can use. See [A stick that needs no network](offline.md).
+- **Installer image** - from an Install macOS app, with legacy BIOS boot, as an
+  image balenaEtcher writes to any stick. macOS only, because Apple's
+  `createinstallmedia` is a Mac program; it is the one place that asks for an
+  administrator password, and it shows the script first. See
+  [Building the stick on a Mac](mac-installer.md).
+
+Which way is marked comes from the machine's network: recovery pulls macOS down
+*on that machine*, so a laptop whose only card is a Realtek Wi-Fi boots the
+installer and then stops. If its Ethernet is driven it says to use a cable.
+
+It lists removable disks only, never the one the computer booted from, erases
+in the layout the chosen way needs, and asks for the disk by its own name
+before it starts.
 
 ![The USB stick pane](https://raw.githubusercontent.com/yusufklncc/Hackintosh-for-All-Computers/main/Resources/App/usb.png)
 

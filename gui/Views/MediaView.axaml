@@ -1,0 +1,81 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:v="clr-namespace:Shell.Views"
+             xmlns:e="clr-namespace:Shell.Engine"
+             x:Class="Shell.Views.MediaView"
+             x:DataType="v:MediaView">
+  <!-- One pane for one job: macOS and the EFI on a stick. It used to be three
+       - Recovery downloaded into a folder, USB stick copied that folder over,
+       and Installer made an image - and the way to choose between them was to
+       know already which one fitted. Here the choice comes first, with the one
+       this machine's network makes sensible marked, and the rest follows it. -->
+  <ScrollViewer>
+    <StackPanel Margin="28,24" Spacing="18" MaxWidth="890" HorizontalAlignment="Left">
+      <StackPanel Spacing="8">
+        <TextBlock Classes="eyebrow" Text="THE USB STICK" />
+        <TextBlock FontSize="15" TextWrapping="Wrap" Foreground="{DynamicResource Ink}"
+                   Text="Put macOS and the EFI on a stick." />
+      </StackPanel>
+
+      <TextBlock Classes="eyebrow" Text="1 · HOW MACOS GETS ONTO IT" />
+      <ListBox Name="Ways" Classes="tiles" SelectionMode="Single"
+               Background="Transparent" BorderThickness="0" Padding="0"
+               x:DataType="v:Way">
+        <ListBox.ItemsPanel>
+          <ItemsPanelTemplate>
+            <WrapPanel Orientation="Horizontal" />
+          </ItemsPanelTemplate>
+        </ListBox.ItemsPanel>
+        <ListBox.ItemTemplate>
+          <DataTemplate x:DataType="v:Way">
+            <StackPanel Width="262" Height="104" Margin="0,2" Spacing="5"
+                        Opacity="{Binding Dim}">
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <TextBlock Text="{Binding Title}" FontSize="15" FontWeight="SemiBold"
+                           Foreground="{DynamicResource Ink}" />
+                <Border Classes="pill ok" IsVisible="{Binding Recommended}"
+                        VerticalAlignment="Center">
+                  <TextBlock Text="for this machine" />
+                </Border>
+              </StackPanel>
+              <TextBlock Text="{Binding Cost}" FontSize="12.5" TextWrapping="Wrap"
+                         Foreground="{DynamicResource Muted}" />
+            </StackPanel>
+          </DataTemplate>
+        </ListBox.ItemTemplate>
+      </ListBox>
+      <TextBlock Name="WayNote" FontSize="12.5" TextWrapping="Wrap"
+                 Foreground="{DynamicResource Muted}" />
+
+      <TextBlock Name="Step2" Classes="eyebrow" Text="2 · WHICH MACOS" />
+      <v:RecoveryView Name="Recovery" />
+      <StackPanel Name="Offline" Spacing="10" IsVisible="False">
+        <ComboBox Name="Build" HorizontalAlignment="Stretch"
+                  PlaceholderText="Reading Apple's catalog…" x:DataType="e:OfflineChoice">
+          <ComboBox.ItemTemplate>
+            <DataTemplate x:DataType="e:OfflineChoice">
+              <Grid ColumnDefinitions="250,*" ColumnSpacing="10">
+                <TextBlock Grid.Column="0" Text="{Binding Titled}" />
+                <TextBlock Grid.Column="1" Text="{Binding Detail}" Classes="mono"
+                           Foreground="{DynamicResource Faint}" VerticalAlignment="Center" />
+              </Grid>
+            </DataTemplate>
+          </ComboBox.ItemTemplate>
+        </ComboBox>
+        <TextBlock Name="BuildNote" FontSize="12.5" TextWrapping="Wrap"
+                   Foreground="{DynamicResource Muted}" />
+      </StackPanel>
+      <v:InstallerView Name="Image" IsVisible="False" />
+
+      <TextBlock Name="Step3" Classes="eyebrow" Text="3 · WHICH STICK" />
+      <v:StickView Name="Stick" />
+
+      <StackPanel Name="GoRow" Spacing="8">
+        <Button Name="Go" Content="Put it on the stick" Classes="accent"
+                IsEnabled="False" HorizontalAlignment="Left" />
+        <TextBlock Name="GoNote" FontSize="12.5" TextWrapping="Wrap"
+                   Foreground="{DynamicResource Muted}" />
+      </StackPanel>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

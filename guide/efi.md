@@ -4,7 +4,7 @@ title: Get your EFI
 
 # Get your EFI
 
-Open the **Builder** pane and press start. It asks a handful of questions and
+Open the **EFI** pane and press start. It asks a handful of questions and
 writes the folder.
 
 Where it can read the answer off your machine it says so next to the question,

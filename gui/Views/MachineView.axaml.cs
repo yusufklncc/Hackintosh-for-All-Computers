@@ -50,6 +50,9 @@ public partial class MachineView : UserControl
         };
     }
 
+    /// <summary>Read the machine again: after a report was opened, or closed.</summary>
+    public System.Threading.Tasks.Task Reload() => Load();
+
     async System.Threading.Tasks.Task Load()
     {
         // Reading a machine takes as long as that machine takes, and on Windows
@@ -89,8 +92,8 @@ public partial class MachineView : UserControl
                  + "kext would claim each device - none of them would - but which "
                  + $"driver macOS has given it. {driven} of these were read from the "
                  + $"running system, along with {ids} device ids. A Mac needs no EFI "
-                 + "from this program: take a Report on the machine you are "
-                 + "converting, or open the Builder with its report.");
+                 + "from this program: save a report on the machine you are "
+                 + "converting, and open it below.");
         }
         else if (!machine.WorthShowing)
         {

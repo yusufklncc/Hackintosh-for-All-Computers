@@ -121,6 +121,48 @@ public partial class RecoveryView : UserControl
         // a machine that cannot download is not stopped from fetching - the
         // stick may be for a different computer than the one making it
         _blocked = verdict == "no";
+        Verdict = verdict;
+    }
+
+    // --- inside the USB stick wizard ----------------------------------------
+
+    bool _fetched;
+
+    /// <summary>ready, cable, no or unknown: whether the machine being installed
+    /// can finish a recovery install. The wizard recommends a way from it.</summary>
+    public string? Verdict { get; private set; }
+
+    public RecoveryChoice? Selected => Which.SelectedItem as RecoveryChoice;
+
+    /// <summary>Raised when the macOS picked changes.</summary>
+    public event Action? Changed;
+
+    public void Embed()
+    {
+        Head.IsVisible = false;
+        OntoRow.IsVisible = false;
+        Target.IsVisible = false;
+        Actions.IsVisible = false;
+        WhichLabel.IsVisible = false;     // the wizard numbers it
+        Root.Margin = new Avalonia.Thickness(0);
+        Which.SelectionChanged += (_, _) => Changed?.Invoke();
+    }
+
+    /// <summary>Read the list again: the machine it is judged for has changed.</summary>
+    public Task Reload()
+    {
+        _read = null;
+        return Load();
+    }
+
+    /// <summary>Download the picked recovery straight onto a drive's root.</summary>
+    public async Task<bool> FetchTo(string drive)
+    {
+        _to = drive;
+        Where.Text = _to;
+        _fetched = false;
+        await Get();
+        return _fetched;
     }
 
     bool _blocked;
@@ -275,11 +317,13 @@ public partial class RecoveryView : UserControl
             : new List<FileInfo>();
         if (code != 0 || files.Count == 0)
         {
+            _fetched = false;
             Show("Nothing was fetched",
                  complaint is { Length: > 0 } ? complaint : string.Join("\n", said.TakeLast(8)),
                  null);
             return;
         }
+        _fetched = true;
         Open.IsVisible = true;
         Show($"{choice.Titled} is on the stick",
              string.Join("\n", files.Select(f => $"{f.Name}  {f.Length / 1024.0 / 1024:0.0} MB")),

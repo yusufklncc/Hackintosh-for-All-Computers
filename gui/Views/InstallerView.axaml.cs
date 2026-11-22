@@ -71,6 +71,13 @@ public partial class InstallerView : UserControl
         Build.Click += async (_, _) => await Run();
     }
 
+    /// <summary>Inside the USB stick wizard, which says what this is above it.</summary>
+    public void Embed()
+    {
+        Head.IsVisible = false;
+        Root.Margin = new Avalonia.Thickness(0);
+    }
+
     public Task Load()
     {
         if (_read is { IsFaulted: true }) _read = null;

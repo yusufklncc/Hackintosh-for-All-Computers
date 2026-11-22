@@ -12,18 +12,22 @@ NVMe, trackpad — yanlış makineye aittir ve hiçbirini config'de istemezsiniz
 
 Çözüm, raporu hedef makinede alıp taşımaktır.
 
-1. Kurulum **yapacağınız** makinede programı çalıştırın ve **Report** panelini
-   açın. Tek bir küçük JSON dosyası yazar: CPU, anakart, grafik, PCI, USB ve ses
+1. Kurulum **yapacağınız** makinede programı çalıştırın ve **Machine**
+   panelinde tablonun altındaki **Save this machine's report** düğmesine basın.
+   Tek bir küçük JSON dosyası yazar: CPU, anakart, grafik, PCI, USB ve ses
    kimlikleri, NVMe modelleri.
 
-    Builder'ın dördüncü cevabı — *Neither - just write this machine's report* —
+    EFI panelinin dördüncü cevabı — *Neither - just write this machine's report* —
     aynı işi yapar.
 
 2. Dosyayı derlemeyi **yapacağınız** bilgisayara kopyalayın — USB, e-posta, fark
    etmez. İçinde seri numarası ya da ham aygıt dökümü yoktur.
 
-3. Orada Builder'ı başlatın ve *Another machine, and I have its hardware report*
-   cevabını verin. Dosyayı soracaktır.
+3. Orada Machine panelinde **Open a report** düğmesine basıp dosyayı seçin. Panel
+   o makineyi gösterir; EFI ve USB stick panelleri de onun için çalışır —
+   derleyici hangi makine olduğunu artık sormaz, belleğin önerisi de o makinenin
+   ağına göredir. EFI panelinde *Another machine, and I have its hardware report*
+   cevabını vermek de hâlâ çalışır.
 
 Bundan sonra her soru ve her öneri o makineye göre işler.
 

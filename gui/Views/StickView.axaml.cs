@@ -39,7 +39,7 @@ public partial class StickView : UserControl
         PickRecovery.Click += async (_, _) => await Pick(false);
         Copy.Click += async (_, _) => await CopyOn();
         Erase.Click += async (_, _) => await EraseIt();
-        Which.SelectionChanged += (_, _) => Describe();
+        Which.SelectionChanged += (_, _) => { Describe(); Changed?.Invoke(); };
         // the button turns on only when what is typed is the disk that is
         // selected. A checkbox would be a habit; this has to be read.
         Typed.TextChanged += (_, _) =>
@@ -51,9 +51,6 @@ public partial class StickView : UserControl
             TypedHint.Text = typed.Length == 0 || Erase.IsEnabled ? ""
                            : $"that is not {want}";
         };
-        OfflineBox.Expanded += async (_, _) => await LoadOffline();
-        OfflineWhich.SelectionChanged += (_, _) => DescribeOffline();
-        BuildOffline.Click += async (_, _) => await PutOffline();
         Open.Click += (_, _) =>
         {
             if (Which.SelectedItem is Stick s && s.Where.Length > 0) Reveal.Show(s.Where);
@@ -103,6 +100,7 @@ public partial class StickView : UserControl
                    + "among them and cannot be.",
         };
         Describe();
+        Changed?.Invoke();
     }
 
     /// <summary>What the pane found, for the screenshot pass.
@@ -189,8 +187,12 @@ public partial class StickView : UserControl
         // volume's name - USB, RUFUS_BOOT - and the button stayed grey with
         // nothing saying why
         EraseHow.Text = _erasable
-            ? $"It becomes one FAT32 partition under GPT, which is what OpenCore "
-            + $"boots from. Type {stick.Device} below to turn the button on."
+            ? (EraseOffline.IsChecked == true
+                ? "It becomes 1 GB of FAT32 for OpenCore and the recovery, and ExFAT "
+                + "on the rest for the installer. "
+                : "It becomes one FAT32 partition under GPT, which is what OpenCore "
+                + "boots from. ")
+            + $"Type {stick.Device} below to turn the button on."
             : "This system cannot do it from here - it needs a root or "
             + "administrator the engine does not have. Press it anyway and the "
             + "exact commands to run yourself are printed below.";
@@ -200,7 +202,6 @@ public partial class StickView : UserControl
         Typed.Text = "";
         TypedHint.Text = "";
         if (!_erasable) Erase.IsEnabled = true;
-        DescribeOffline();
     }
 
     async Task Pick(bool efi)
@@ -289,64 +290,56 @@ public partial class StickView : UserControl
         await Load();                      // it has a new mount point now
     }
 
-    // a full installer is 12 to 19 GB; on a slow line that is hours, not a hang
-    static readonly TimeSpan Long = TimeSpan.FromHours(8);
-    Task? _offline;
+    // --- inside the USB stick wizard ----------------------------------------
+    //
+    // The wizard asks which macOS and how it gets there; this pane answers
+    // which stick, and erases it in the layout the chosen way needs. Its own
+    // heading, the recovery-folder row and the copy button belong to the pane
+    // standing alone, and are hidden here so nothing is said twice.
 
-    Task LoadOffline() => _offline is { IsFaulted: false } ? _offline : _offline = FillOffline();
+    /// <summary>Raised when the stick list or the selection changes.</summary>
+    public event Action? Changed;
 
-    async Task FillOffline()
+    public Stick? Selected => Which.SelectedItem as Stick;
+    public string Efi => _efi;
+
+    public void Embed()
     {
-        var engine = Builder.Find(out var missing);
-        if (engine is null) { OfflineWhere.Text = missing; return; }
-        OfflineWhere.Text = "Reading Apple's catalog…";
-        var (list, complaint) = await Inventory.Offline(engine);
-        if (list is null) { OfflineWhere.Text = complaint; return; }
-        OfflineWhich.ItemsSource = list.Macos;
-        OfflineWhich.SelectedIndex = list.Macos.Count > 0 ? 0 : -1;
-        DescribeOffline();
+        Head.IsVisible = false;
+        RecoveryRow.IsVisible = false;
+        Actions.IsVisible = false;
+        Root.Margin = new Avalonia.Thickness(0);
     }
 
-    void DescribeOffline()
+    /// <summary>The layout an erase produces: one FAT32, or FAT32 and ExFAT.</summary>
+    public bool OfflineLayout
     {
-        var stick = Which.SelectedItem as Stick;
-        var choice = OfflineWhich.SelectedItem as OfflineChoice;
-        if (stick is null) { OfflineWhere.Text = "Pick a stick above."; BuildOffline.IsEnabled = false; return; }
-        var ready = stick.Fat is { Length: > 0 } && stick.Exfat is { Length: > 0 };
-        OfflineWhere.Text = ready
-            ? $"OpenCore and the recovery go on {stick.Fat}; the installer and "
-            + $"UnPlugged.command on {stick.Exfat}."
-            : $"{stick.Name}: {stick.OfflineWhy}.";
-        BuildOffline.IsEnabled = ready && choice is not null;
+        set
+        {
+            EraseOffline.IsChecked = value;
+            EraseOffline.IsVisible = false;   // the way chosen above decides it
+            Describe();
+        }
     }
 
-    async Task PutOffline()
+    /// <summary>Copy the EFI folder onto the selected stick. True when it was.</summary>
+    public async Task<bool> PlaceEfi()
     {
-        if (Which.SelectedItem is not Stick stick || OfflineWhich.SelectedItem is not OfflineChoice choice)
-            return;
+        if (Selected is not { } stick || stick.Where.Length == 0) return false;
         var engine = Builder.Find(out var missing);
-        if (engine is null) { Show("No engine", missing, null); return; }
-        BuildOffline.IsEnabled = false;
-        Show($"Putting {choice.Titled} on {stick.Name}…", "", null);
+        if (engine is null) { Show("No engine", missing, null); return false; }
         var said = new List<string>();
         var (complaint, code) = await Builder.Stream(engine, line =>
         {
-            if (line.Trim().Length == 0) return;
-            said.Add(line.TrimEnd());
-            ResultText.Text = string.Join("\n", said.TakeLast(8));
-        }, Long, "--usb-offline", choice.Build, "--usb-fat", stick.Fat!,
-           "--usb-exfat", stick.Exfat!, "--out", _efi);
-        BuildOffline.IsEnabled = true;
+            if (line.Trim().Length > 0) said.Add(line.TrimEnd());
+        }, Bound, "--usb-place", stick.Where, "--out", _efi);
         if (code != 0)
-        {
-            Show("The offline stick is not finished",
-                 complaint is { Length: > 0 } ? complaint : string.Join("\n", said.TakeLast(12)), null);
-            return;
-        }
-        Show($"{stick.Name} installs {choice.Name} with no network",
-             string.Join("\n", said.TakeLast(8)),
-             string.Join("\n", choice.Steps.Select((s, i) => $"{i + 1}. {s}")));
+            Show("The EFI was not copied",
+                 complaint is { Length: > 0 } ? complaint : string.Join("\n", said), null);
+        return code == 0;
     }
+
+    public void Say(string title, string body, string? next) => Show(title, body, next);
 
     void Show(string title, string body, string? next)
     {

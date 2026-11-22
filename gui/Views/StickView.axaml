@@ -5,8 +5,8 @@
              x:Class="Shell.Views.StickView"
              x:DataType="v:StickView">
   <ScrollViewer>
-    <StackPanel Margin="28,24" Spacing="20" MaxWidth="760" HorizontalAlignment="Left">
-      <StackPanel Spacing="8">
+    <StackPanel Name="Root" Margin="28,24" Spacing="20" MaxWidth="760" HorizontalAlignment="Left">
+      <StackPanel Name="Head" Spacing="8">
         <TextBlock Classes="eyebrow" Text="THE USB STICK" />
         <TextBlock FontSize="15" TextWrapping="Wrap" Foreground="{DynamicResource Ink}"
                    Text="Put the EFI and the installer on it." />
@@ -60,7 +60,7 @@
                        VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
             <Button Grid.Column="2" Name="PickEfi" Content="Change…" />
           </Grid>
-          <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+          <Grid Name="RecoveryRow" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
             <TextBlock Grid.Column="0" Classes="eyebrow" Text="INSTALLER"
                        VerticalAlignment="Center" Width="70" />
             <TextBlock Grid.Column="1" Name="RecoveryFrom" Classes="mono"
@@ -68,41 +68,12 @@
             <Button Grid.Column="2" Name="PickRecovery" Content="Change…" />
           </Grid>
 
-          <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Left">
+          <StackPanel Name="Actions" Orientation="Horizontal" Spacing="8" HorizontalAlignment="Left">
             <Button Name="Copy" Content="Copy onto the stick" Classes="accent" />
             <Button Name="Open" Content="Show the stick" IsVisible="False" />
           </StackPanel>
         </StackPanel>
       </Border>
-
-      <!-- The whole installer on the stick, for a machine that has no network
-           macOS can use. corpnewt's UnPlugged builds the installer from it in
-           recovery; the engine fetches everything, from Apple and from the
-           projects themselves. -->
-      <Expander Name="OfflineBox" Header="Install with no network" HorizontalAlignment="Stretch">
-        <StackPanel Spacing="12" Margin="0,8,0,0">
-          <TextBlock FontSize="13.5" TextWrapping="Wrap" Foreground="{DynamicResource Ink}"
-                     Text="For a machine with no Wi-Fi or Ethernet macOS can use: the whole installer goes on the stick, and UnPlugged starts it from recovery without a connection." />
-          <TextBlock FontSize="12.5" TextWrapping="Wrap" Foreground="{DynamicResource Muted}"
-                     Text="The stick needs two partitions - FAT32 for OpenCore and the recovery, ExFAT for the installer - and 16 GB or more; Tahoe needs a 32 GB one. Erase it below with 'for an offline install' ticked. Every build Apple still serves for Intel Macs is listed, High Sierra to Tahoe; the download is 6 to 19 GB, from Apple." />
-          <ComboBox Name="OfflineWhich" HorizontalAlignment="Stretch"
-                    PlaceholderText="Reading Apple's catalog…" x:DataType="e:OfflineChoice">
-            <ComboBox.ItemTemplate>
-              <DataTemplate x:DataType="e:OfflineChoice">
-                <Grid ColumnDefinitions="250,*" ColumnSpacing="10">
-                  <TextBlock Grid.Column="0" Text="{Binding Titled}" />
-                  <TextBlock Grid.Column="1" Text="{Binding Detail}" Classes="mono"
-                             Foreground="{DynamicResource Faint}" VerticalAlignment="Center" />
-                </Grid>
-              </DataTemplate>
-            </ComboBox.ItemTemplate>
-          </ComboBox>
-          <TextBlock Name="OfflineWhere" FontSize="12.5" TextWrapping="Wrap"
-                     Foreground="{DynamicResource Muted}" />
-          <Button Name="BuildOffline" Content="Put it on the stick" Classes="accent"
-                  IsEnabled="False" HorizontalAlignment="Left" />
-        </StackPanel>
-      </Expander>
 
       <!-- Erasing is the only thing here that destroys something, so it is
            its own panel, folded away, and asks for the disk by name. -->

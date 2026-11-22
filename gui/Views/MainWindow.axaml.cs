@@ -9,10 +9,16 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
-        foreach (var nav in new[] { ToMachine, ToBuilder, ToReport, ToRecovery,
-                                    ToInstaller, ToStick, ToDevices, ToKexts,
-                                    ToAbout })
+        foreach (var nav in new[] { ToMachine, ToBuilder, ToStick, ToDevices,
+                                    ToKexts, ToAbout })
             nav.IsCheckedChanged += async (_, _) => await Swap();
+        // a report opened on the Machine pane is the machine everything else is
+        // about: the table, the builder's answers and the stick's advice
+        ReportPart.Switched += async _ =>
+        {
+            await MachineInfo.Reload();
+            await StickPane.MachineChanged();
+        };
         _ = Standing();
     }
 
@@ -37,17 +43,12 @@ public partial class MainWindow : Window
     {
         MachinePane.IsVisible = ToMachine.IsChecked == true;
         BuilderPane.IsVisible = ToBuilder.IsChecked == true;
-        ReportPane.IsVisible = ToReport.IsChecked == true;
-        RecoveryPane.IsVisible = ToRecovery.IsChecked == true;
-        InstallerPane.IsVisible = ToInstaller.IsChecked == true;
         StickPane.IsVisible = ToStick.IsChecked == true;
         DevicesPane.IsVisible = ToDevices.IsChecked == true;
         KextsPane.IsVisible = ToKexts.IsChecked == true;
         AboutPane.IsVisible = ToAbout.IsChecked == true;
         // read on first sight rather than at startup: opening the program
         // should not wait on three documents nobody has asked for yet
-        if (ToRecovery.IsChecked == true) await RecoveryPane.Load();
-        if (ToInstaller.IsChecked == true) await InstallerPane.Load();
         if (ToStick.IsChecked == true) await StickPane.Load();
         if (ToDevices.IsChecked == true) await DevicesPane.Load();
         if (ToKexts.IsChecked == true) await KextsPane.Load();
@@ -63,12 +64,12 @@ public partial class MainWindow : Window
 
     public string BuilderState() => BuilderPane.State();
 
-    public Task<string> TakeReport() => ReportPane.TakeForRender();
+    public Task<string> TakeReport() => ReportPart.TakeForRender();
 
-    public Task<string> ListRecoveries() => RecoveryPane.ListForRender();
+    public Task<string> ListRecoveries() => StickPane.ListRecoveries();
 
-    public Task<string> ListSticks() => StickPane.ListForRender();
-    public Task<string> InstallerState() => InstallerPane.StateForRender();
+    public Task<string> ListSticks() => StickPane.ListSticks();
+    public Task<string> InstallerState() => StickPane.InstallerState();
 
     public Task<string> DriveBuilder() => BuilderPane.DriveToEnd();
 
@@ -77,8 +78,9 @@ public partial class MainWindow : Window
     {
         var nav = pane switch
         {
-            "report" => ToReport, "recovery" => ToRecovery,
-            "installer" => ToInstaller, "stick" => ToStick,
+            // the parts that were panes of their own are shown where they live now
+            "report" => ToMachine,
+            "recovery" or "installer" or "stick" => ToStick,
             "devices" => ToDevices, "kexts" => ToKexts,
             "about" => ToAbout,
             "builder" => ToBuilder, _ => ToMachine,

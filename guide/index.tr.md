@@ -45,10 +45,11 @@ anlamına gelir; çalışmayacağı anlamına değil.
 
 **Apple'ın yazılımını yeniden dağıtmaz.** Ne yükleyici, ne BaseSystem, ne imaj:
 recovery indirmesi Apple'dan, Apple'ın kendi protokolüyle, OpenCore'un bunun
-için verdiği araçla yapılır. Recovery panelindeki macOS sürüm simgeleri Apple'a
+için verdiği araçla yapılır. USB stick panelindeki macOS sürüm simgeleri Apple'a
 aittir ve bir karonun hangi sürüm olduğunu göstermek için oradadır.
 
 !!! question "Bir şey ters gittiyse"
-    Elinizde ne olduğunu ve ne olduğunu yazarak issue açın. **Report** paneli
-    içinde seri numarası bulunmayan bir `machine.json` yazar; onu eklemek
+    Elinizde ne olduğunu ve ne olduğunu yazarak issue açın. Machine panelindeki
+    **Save this machine's report** içinde seri numarası bulunmayan bir
+    `machine.json` yazar; onu eklemek
     tahmini cevaba çevirir.
