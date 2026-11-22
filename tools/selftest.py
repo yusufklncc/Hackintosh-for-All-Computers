@@ -3908,6 +3908,14 @@ def what_it_looks_like_when_it_arrives():
     shipped = Path('.github/workflows/release.yml').read_text()
     check('the AppImage is published on its own, not inside the folder zip',
           '.AppImage' in shipped and 'dist/*.AppImage' in shipped)
+    # the release page says what changed, not how to use the program again
+    oc = sorted(p.name for p in Path('vendor/opencore').glob('*') if p.is_dir())[-1]
+    notes = Path(f'docs/releases/v{oc}.md')
+    check(f'the release for OpenCore {oc} has notes saying what changed',
+          notes.exists() and 'What changed' in notes.read_text(encoding='utf-8'))
+    check('  and the workflow publishes those, and refuses without them',
+          'body_path: notes.md' in shipped and 'docs/releases/$tag.md' in shipped
+          and 'body: |' not in shipped)
 
     # and the zip is made by the build that made the thing. An artifact is a
     # file tree: carrying a .app as one lost the symlinks inside

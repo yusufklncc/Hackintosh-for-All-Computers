@@ -67,6 +67,17 @@ jobs:
           chmod +x dist/*.AppImage 2>/dev/null || true
           ls -la dist
 
+      # What changed, from docs/releases/<tag>.md, and a short list of the
+      # files. The page used to be a how-to repeated on every release, which
+      # told nobody what was different about this one. No notes file, no
+      # release: a version that cannot say what it changed is not ready.
+      - name: The notes say what changed
+        run: |
+          tag="${{ github.event.inputs.tag || github.ref_name }}"
+          test -s "docs/releases/$tag.md" \
+            || { echo "::error::docs/releases/$tag.md is missing"; exit 1; }
+          cat "docs/releases/$tag.md" docs/releases/downloads.md > notes.md
+
       - name: Publish
         uses: softprops/action-gh-release@v3
         with:
@@ -75,41 +86,4 @@ jobs:
             dist/*.zip
             dist/*.AppImage
             dist/HackintoshEFIBuilder-console-win-x64.zip
-          body: |
-            **`HackintoshEFIBuilder-win-x64.zip`** is the easy path: unzip it and
-            run `HackintoshEFIBuilder.exe`. A window that reads your machine,
-            says what macOS will and will not drive in it, and writes the EFI
-            folder. Nothing to install. The same package is there for
-            `linux-x64` and `osx-arm64`.
-
-            On macOS the zip holds **Hackintosh EFI Builder.app**; on Linux
-            there is a single **`.AppImage`** as well as the folder, and it
-            runs on whatever distribution you have without installing anything.
-
-            **`HackintoshEFIBuilder-console-win-x64.zip`** is the same builder
-            without a window, for anyone who prefers a terminal or is working
-            over one.
-
-            Everything ships as a folder rather than a single file. A one-file
-            build unpacks itself into a temporary directory on every run, which
-            is what Windows Defender flags as a trojan - it did, on a real
-            machine. Neither program is signed, so the first run may still need
-            "More info" then "Run anyway" on Windows, or an allow in System
-            Settings on macOS.
-
-            The remaining two zips are the manual path. `EFI-base.zip` is the EFI folder;
-            `configs.zip` holds one `config.plist` per supported machine.
-
-            1. Extract `EFI-base.zip` - you get an `EFI` folder.
-            2. Open `configs.zip`, find the entry matching your hardware, and copy
-               that `.plist` into `EFI/OC/` renamed to `config.plist`.
-            3. Copy the `EFI` folder to the EFI partition of your USB drive.
-
-            OpenCore loads only what the config names, so one base serves every
-            machine.
-
-            Each config ships with a generated serial, MLB and UUID, but everyone
-            downloading the same file shares them. Generate your own with
-            GenSMBIOS, and set `ROM` to your own MAC address, before signing in to
-            iCloud, iMessage or FaceTime. The Post Installation section of the
-            README walks through it.
+          body_path: notes.md
