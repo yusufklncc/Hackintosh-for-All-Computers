@@ -80,7 +80,9 @@ public partial class AboutView : UserControl
         var engine = Builder.Find(out var missing);
         if (engine is null) { Tally.Text = missing; return; }
 
+        Reading.Say("Reading where every answer comes from…");
         var (about, complaint) = await Inventory.Facts(engine);
+        Reading.Say(null);
         if (about is null) { Tally.Text = complaint; return; }
 
         Counts.ItemsSource = new List<CountItem>

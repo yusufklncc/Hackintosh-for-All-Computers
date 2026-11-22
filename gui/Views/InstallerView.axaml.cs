@@ -341,6 +341,7 @@ public partial class InstallerView : UserControl
         Result.IsVisible = true;
         Bar.IsVisible = true;
         ResultTitle.Text = "Building the image…";
+        Working.Say("");
         ResultNext.IsVisible = false;
 
         var said = new List<string>();
@@ -362,6 +363,7 @@ public partial class InstallerView : UserControl
         if (code != 0 || !File.Exists(_out))
         {
             ResultTitle.Text = "The image was not built";
+        Working.Say(null);
             if (complaint is { Length: > 0 }) said.Add(complaint);
             ResultText.Text = string.Join("\n", said.TakeLast(10));
             return;
@@ -369,6 +371,7 @@ public partial class InstallerView : UserControl
 
         var size = new FileInfo(_out).Length;
         ResultTitle.Text = $"{Path.GetFileName(_out)} is ready";
+        Working.Say(null);
         ResultText.Text = $"{_out}\n{size / 1024.0 / 1024 / 1024:0.0} GiB";
         ResultNext.IsVisible = true;
         ResultNext.Text =
@@ -383,6 +386,7 @@ public partial class InstallerView : UserControl
         Result.IsVisible = true;
         Bar.IsVisible = false;
         ResultTitle.Text = "No engine";
+        Working.Say(null);
         ResultText.Text = complaint;
     }
 }

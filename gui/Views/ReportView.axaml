@@ -44,8 +44,11 @@
 
     <Border Name="Result" Classes="panel" IsVisible="False">
       <StackPanel Spacing="8">
-        <TextBlock Name="ResultTitle" FontSize="15" FontWeight="SemiBold"
+        <StackPanel Orientation="Horizontal" Spacing="10">
+          <v:Busy Name="Working" IsVisible="False" VerticalAlignment="Center" />
+          <TextBlock Name="ResultTitle" FontSize="15" FontWeight="SemiBold"
                    Foreground="{DynamicResource Ink}" />
+        </StackPanel>
         <TextBlock Name="ResultText" Classes="mono" TextWrapping="Wrap" />
         <TextBlock Name="ResultNext" FontSize="12.5" TextWrapping="Wrap"
                    Foreground="{DynamicResource Muted}" IsVisible="False" />

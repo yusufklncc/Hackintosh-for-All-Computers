@@ -61,7 +61,9 @@ public partial class KextsView : UserControl
         var engine = Builder.Find(out var missing);
         if (engine is null) { Blurb.Text = missing; return; }
 
+        Reading.Say("Reading the kexts…");
         var (list, complaint) = await Inventory.Kexts(engine);
+        Reading.Say(null);
         if (list is null) { Blurb.Text = complaint; return; }
 
         var claiming = list.Kexts.Count(k => k.Devices > 0);

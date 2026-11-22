@@ -71,10 +71,12 @@ public partial class StickView : UserControl
         // Windows takes its time over this: a PowerShell start, Get-Disk, and
         // a Get-Volume for every partition. An empty box with nothing under it
         // for ten seconds reads as "no stick", which is how it was read.
-        Found.Text = "Looking…";
+        Found.Text = "";
+        Searching.Say("Looking for removable disks…");
         Again.IsEnabled = false;
         var (list, complaint) = await Inventory.Sticks(engine);
         Again.IsEnabled = true;
+        Searching.Say(null);
         if (list is null)
         {
             Found.Text = complaint;
@@ -345,6 +347,8 @@ public partial class StickView : UserControl
     {
         Result.IsVisible = true;
         ResultTitle.Text = title;
+        // a title that ends in "…" is a thing still happening
+        Working.Say(title.EndsWith('…') ? "" : null);
         ResultText.Text = body;
         ResultNext.Text = next ?? "";
         ResultNext.IsVisible = next is not null;

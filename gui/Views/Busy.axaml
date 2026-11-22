@@ -1,0 +1,32 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="Shell.Views.Busy">
+  <!-- Something is being read, and it is not stuck. A sentence alone did not
+       say that: "Looking…" reads the same after two seconds and after two
+       minutes, and a pane that is waiting looks like a pane that is empty. -->
+  <UserControl.Styles>
+    <Style Selector="Path.arc">
+      <Style.Animations>
+        <Animation Duration="0:0:0.9" IterationCount="Infinite">
+          <KeyFrame Cue="0%"><Setter Property="RotateTransform.Angle" Value="0" /></KeyFrame>
+          <KeyFrame Cue="100%"><Setter Property="RotateTransform.Angle" Value="360" /></KeyFrame>
+        </Animation>
+      </Style.Animations>
+    </Style>
+  </UserControl.Styles>
+  <StackPanel Orientation="Horizontal" Spacing="10">
+    <Grid Width="16" Height="16" VerticalAlignment="Center">
+      <Ellipse Stroke="{DynamicResource Line}" StrokeThickness="2" />
+      <!-- a quarter of the ring, turning -->
+      <Path Classes="arc" Stroke="{DynamicResource Accent}" StrokeThickness="2"
+            StrokeLineCap="Round" Data="M 8,1 A 7,7 0 0 1 15,8"
+            RenderTransformOrigin="50%,50%">
+        <Path.RenderTransform>
+          <RotateTransform />
+        </Path.RenderTransform>
+      </Path>
+    </Grid>
+    <TextBlock Name="Said" FontSize="12.5" VerticalAlignment="Center"
+               TextWrapping="Wrap" Foreground="{DynamicResource Muted}" />
+  </StackPanel>
+</UserControl>

@@ -9,6 +9,7 @@
     <Border Name="Trouble" Classes="panel" IsVisible="False">
       <StackPanel Spacing="6">
         <TextBlock Name="TroubleTitle" Classes="eyebrow" Text="NO MACHINE TO SHOW" />
+        <v:Busy Name="Reading" IsVisible="False" Text="Reading…" />
         <TextBlock Name="TroubleText" FontSize="13" TextWrapping="Wrap"
                    Foreground="{DynamicResource Muted}" />
       </StackPanel>

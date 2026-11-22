@@ -78,6 +78,9 @@ public partial class MediaView : UserControl
         await Task.WhenAll(Recovery.Load(), Stick.Load());
         Recommend();
         await Switch();
+        Loading.Say(null);
+        Body.IsVisible = true;
+        Body.Opacity = 1;
     }
 
     /// <summary>The machine the Machine pane shows has changed: judge again.</summary>
@@ -144,8 +147,10 @@ public partial class MediaView : UserControl
     {
         var engine = Builder.Find(out var missing);
         if (engine is null) { BuildNote.Text = missing; return; }
-        BuildNote.Text = "Reading Apple's catalog…";
+        BuildNote.Text = "";
+        Cataloguing.Say("Reading Apple's catalog of full installers…");
         var (list, complaint) = await Inventory.Offline(engine);
+        Cataloguing.Say(null);
         if (list is null) { BuildNote.Text = complaint; _catalog = null; return; }
         Build.ItemsSource = list.Macos;
         Build.SelectedIndex = list.Macos.Count > 0 ? 0 : -1;

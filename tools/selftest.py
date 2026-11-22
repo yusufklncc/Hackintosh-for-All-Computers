@@ -3616,6 +3616,18 @@ def building_an_installer_image():
           'Recovery.Verdict' in media and '("offline", "no") => true' in media)
     check('  and downloads recovery straight onto the stick, not into a folder',
           'Recovery.FetchTo(stick.Where)' in media and 'Stick.PlaceEfi()' in media)
+    # something being read says so with something moving, not only a sentence
+    busy = Path('gui/Views/Busy.axaml').read_text(encoding='utf-8')
+    check('the window has one turning "working on it"',
+          'IterationCount="Infinite"' in busy and 'RotateTransform.Angle' in busy)
+    waits = {f: Path(f'gui/Views/{f}.axaml.cs').read_text(encoding='utf-8')
+             for f in ('MediaView', 'StickView', 'MachineView', 'BuilderView',
+                       'DevicesView', 'KextsView', 'AboutView')}
+    check('  and every pane that reads on first sight shows it while it reads',
+          all('.Say(' in src for src in waits.values()),
+          [f for f, src in waits.items() if '.Say(' not in src])
+    check('  the USB stick pane fades in once its first read is done',
+          'Body.Opacity = 1' in waits['MediaView'])
     check('the open report is what the builder and the recovery verdict judge',
           '"--machine"' in Path('gui/Engine/Session.cs').read_text(encoding='utf-8')
           and '"recovery", "--machine", report' in Path('gui/Engine/Inventory.cs').read_text(encoding='utf-8'))

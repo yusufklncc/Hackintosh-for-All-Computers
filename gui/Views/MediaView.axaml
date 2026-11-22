@@ -17,6 +17,16 @@
                    Text="Put macOS and the EFI on a stick." />
       </StackPanel>
 
+      <v:Busy Name="Loading" Text="Reading the macOS list, this machine's network and the sticks…" />
+
+      <!-- hidden until the first read is in, then faded in: tiles that fill
+           in one by one under a reader's eyes read as a broken page -->
+      <StackPanel Name="Body" Spacing="18" Opacity="0" IsVisible="False">
+        <StackPanel.Transitions>
+          <Transitions>
+            <DoubleTransition Property="Opacity" Duration="0:0:0.25" />
+          </Transitions>
+        </StackPanel.Transitions>
       <TextBlock Classes="eyebrow" Text="1 · HOW MACOS GETS ONTO IT" />
       <ListBox Name="Ways" Classes="tiles" SelectionMode="Single"
                Background="Transparent" BorderThickness="0" Padding="0"
@@ -62,6 +72,7 @@
             </DataTemplate>
           </ComboBox.ItemTemplate>
         </ComboBox>
+        <v:Busy Name="Cataloguing" IsVisible="False" />
         <TextBlock Name="BuildNote" FontSize="12.5" TextWrapping="Wrap"
                    Foreground="{DynamicResource Muted}" />
       </StackPanel>
@@ -75,6 +86,7 @@
                 IsEnabled="False" HorizontalAlignment="Left" />
         <TextBlock Name="GoNote" FontSize="12.5" TextWrapping="Wrap"
                    Foreground="{DynamicResource Muted}" />
+      </StackPanel>
       </StackPanel>
     </StackPanel>
   </ScrollViewer>

@@ -67,7 +67,9 @@ public partial class MachineView : UserControl
         var engine = Builder.Find(out var missing);
         if (engine is null) { NoMachine(missing); return; }
 
+        Reading.Say(Program.MachineFile is null ? "Reading this machine…" : "Reading the report…");
         var (machine, complaint) = await Builder.Describe(engine, Program.MachineFile);
+        Reading.Say(null);
         if (machine is null) { NoMachine(complaint); return; }
         // A Mac gets the note and the table both: the table is what it has,
         // and the note is why none of it is claimed here. Hiding the table

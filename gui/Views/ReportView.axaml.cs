@@ -109,6 +109,8 @@ public partial class ReportView : UserControl
     {
         Result.IsVisible = true;
         ResultTitle.Text = title;
+        // a title that ends in "…" is a thing still happening
+        Working.Say(title.EndsWith('…') ? "" : null);
         ResultText.Text = body;
         ResultNext.Text = next ?? "";
         ResultNext.IsVisible = next is not null;

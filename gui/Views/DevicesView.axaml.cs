@@ -127,7 +127,9 @@ public partial class DevicesView : UserControl
         var engine = Builder.Find(out var missing);
         if (engine is null) { Blurb.Text = missing; return; }
 
+        Reading.Say("Reading every table this repository carries…");
         var (list, complaint) = await Inventory.Devices(engine);
+        Reading.Say(null);
         if (list is null) { Blurb.Text = complaint; return; }
 
         _all = list.Devices.Select(d => new DeviceItem(d)).ToList();

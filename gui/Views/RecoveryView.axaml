@@ -118,8 +118,11 @@
 
       <Border Name="Result" Classes="panel" IsVisible="False">
         <StackPanel Spacing="8">
-          <TextBlock Name="ResultTitle" FontSize="15" FontWeight="SemiBold"
+          <StackPanel Orientation="Horizontal" Spacing="10">
+            <v:Busy Name="Working" IsVisible="False" VerticalAlignment="Center" />
+            <TextBlock Name="ResultTitle" FontSize="15" FontWeight="SemiBold"
                      Foreground="{DynamicResource Ink}" />
+          </StackPanel>
 
           <!-- macrecovery prints "123.4/700.0 MB |====| 17.6% downloaded" and
                redraws it. A window can do better than echo that: the numbers

@@ -65,6 +65,9 @@
       </StackPanel>
     </Border>
 
+    <!-- While the engine works and nothing is being asked -->
+    <v:Busy Grid.Row="2" Name="Waiting" IsVisible="False" Margin="2,18,0,0" />
+
     <!-- Before it starts, and after it ends -->
     <Border Grid.Row="2" Name="Standby" Classes="panel" Margin="0,16,0,0">
       <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">

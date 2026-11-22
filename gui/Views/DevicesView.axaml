@@ -6,6 +6,7 @@
   <Grid RowDefinitions="Auto,Auto,*" Margin="28,24">
     <StackPanel Grid.Row="0" Spacing="8" Margin="0,0,0,14">
       <TextBlock Classes="eyebrow" Text="EVERY DEVICE THIS PROGRAM KNOWS" />
+      <v:Busy Name="Reading" IsVisible="False" />
       <TextBlock Name="Blurb" FontSize="13.5" TextWrapping="Wrap" MaxWidth="760"
                  HorizontalAlignment="Left" Foreground="{DynamicResource Muted}" />
     </StackPanel>

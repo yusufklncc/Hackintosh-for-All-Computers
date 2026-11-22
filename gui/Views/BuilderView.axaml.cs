@@ -171,6 +171,8 @@ public partial class BuilderView : UserControl
 
         Transcript.Children.Clear();
         Standby.IsVisible = false;
+        Waiting.Say(Program.MachineFile is null ? "Starting, and reading this machine…"
+                                                : "Starting, and reading the report…");
         Begin.IsEnabled = false;
         _ended = new TaskCompletionSource<string>();
 
@@ -239,6 +241,7 @@ public partial class BuilderView : UserControl
     void Show(Question question)
     {
         _open = question;
+        Waiting.Say(null);
         Prompt.IsVisible = true;
         // the panel below changes how tall the transcript is, and an
         // offset that was at the bottom is not any more
@@ -326,6 +329,9 @@ public partial class BuilderView : UserControl
         var id = _open.Id;
         _open = null;
         Prompt.IsVisible = false;
+        // until the next question or the end: an SSDT pass or a build can take
+        // a while, and an empty space under the transcript says nothing
+        Waiting.Say("Working…");
         // the panel below changes how tall the transcript is, and an
         // offset that was at the bottom is not any more
         StickToEnd();
@@ -334,6 +340,7 @@ public partial class BuilderView : UserControl
 
     void Done(int code, string? built)
     {
+        Waiting.Say(null);
         _session = null;
         Prompt.IsVisible = false;
         // the panel below changes how tall the transcript is, and an

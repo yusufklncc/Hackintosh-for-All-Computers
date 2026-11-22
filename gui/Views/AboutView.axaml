@@ -61,6 +61,7 @@
 
       <StackPanel Spacing="10">
         <TextBlock Classes="eyebrow" Text="WHERE THE ANSWERS COME FROM" />
+        <v:Busy Name="Reading" IsVisible="False" />
         <TextBlock Name="Tally" FontSize="13" TextWrapping="Wrap" MaxWidth="740"
                    HorizontalAlignment="Left" Foreground="{DynamicResource Muted}" />
         <ItemsControl Name="Sources">
