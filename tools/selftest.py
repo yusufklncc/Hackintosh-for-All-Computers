@@ -2714,6 +2714,98 @@ def the_stick_it_writes_to():
           'ListSticks' in pass_ and 'usb-prepare' not in pass_)
 
 
+def en0_and_iservices():
+    """built-in on en0 only when macOS says it is not, and only on the right device.
+
+    Dortania's order is check, then fix. OpCore-Simplify marks every network
+    and storage controller built-in without checking; that is what this is not.
+    The path comes from the registry, and anything that does not read cleanly
+    declines with a reason rather than marking the wrong device."""
+    import en0
+
+    r = ocgen.read_toml('data/iservices.toml')
+    check('the rule is pinned to a Dortania commit',
+          re.fullmatch(r'[0-9a-f]{40}', r['commit']) and r['commit'] in r['source'])
+    check('  and quotes the check before the fix',
+          'check whether the device has a check mark under built-in' in r['check']
+          and '`built-in` with type `Data` and value `01`' in r['fix'])
+
+    def tree(*rows, builtin='No'):
+        lines = []
+        for depth, (name, cls) in enumerate(rows):
+            lines.append('  ' * depth + f'+-o {name}  <class {cls}, id 0x1, registered>')
+        pad = '  ' * len(rows)
+        lines += [pad + '{', pad + '  "BSD Name" = "en0"',
+                  pad + f'  "IOBuiltin" = {builtin}', pad + '}']
+        return '\n'.join(lines)
+
+    top = [('Root', 'IORegistryEntry'), ('iMac19,1', 'IOPlatformExpertDevice'),
+           ('AppleACPIPlatformExpert', 'AppleACPIPlatformExpert'),
+           ('PCI0@0', 'IOACPIPlatformDevice'), ('AppleACPIPCI', 'AppleACPIPCI')]
+    onboard = tree(*top, ('GIGE@1F,6', 'IOPCIDevice'),
+                   ('AppleIntelI210Ethernet', 'AppleIntelI210Ethernet'),
+                   ('en0', 'IOEthernetInterface'))
+    nodes = en0.chain(onboard)
+    check('the chain is read from Root down to en0',
+          [n for n, _, _ in nodes][-1] == 'en0' and nodes[-1][2]['IOBuiltin'] == 'No')
+    path, why = en0.path_of(nodes, lambda name: 0 if name == 'PCI0' else None)
+    check("onboard Intel ethernet lands where Dortania's example does",
+          path == 'PciRoot(0x0)/Pci(0x1f,0x6)', (path, why))
+
+    bridged = tree(*top, ('RP05@1C,4', 'IOPCIDevice'), ('IOPP', 'IOPCI2PCIBridge'),
+                   ('ARPT@0', 'IOPCIDevice'), ('AirPort', 'AirPortBrcmNIC'),
+                   ('en0', 'IOEthernetInterface'))
+    path, _ = en0.path_of(en0.chain(bridged), lambda name: 0)
+    check('a card behind a root port takes the port and then the card',
+          path == 'PciRoot(0x0)/Pci(0x1c,0x4)/Pci(0x0,0x0)', path)
+
+    usb = tree(*top, ('XHC@14', 'IOPCIDevice'), ('XHC@14000000', 'AppleUSBXHCISPT'),
+               ('USB Ethernet@14100000', 'IOUSBHostDevice'),
+               ('AppleUSBECM', 'AppleUSBECM'), ('en0', 'IOEthernetInterface'))
+    path, why = en0.path_of(en0.chain(usb), lambda name: 0)
+    check('a USB adapter declines instead of marking the USB controller',
+          path is None and 'USB' in why, why)
+    path, why = en0.path_of(nodes, lambda name: None)
+    check('a root bridge with no _UID declines', path is None and '_UID' in why, why)
+    arm = tree(('Root', 'IORegistryEntry'), ('J314sAP', 'IOPlatformExpertDevice'),
+               ('apcie@90000000', 'AppleARMIODevice'), ('wlan@0', 'IOPCIDevice'),
+               ('en0', 'IOSkywalkLegacyEthernetInterface'))
+    path, why = en0.path_of(en0.chain(arm), lambda name: 0)
+    check('no ACPI root means no PciRoot, not a made-up one', path is None, why)
+    check('the _UID is read as ioreg prints it',
+          en0._uid_from('  "_UID" = "0"') == 0 and en0._uid_from('"_UID" = "1"') == 1
+          and en0._uid_from('"name" = <"PNP0A08">') is None)
+
+    def ioreg(text, uid='"_UID" = "0"'):
+        return lambda cmd: text if '-t' in cmd else uid
+    state = en0.read(run=ioreg(onboard))
+    check('read: not built-in, with the path',
+          state == {'builtin': False, 'path': 'PciRoot(0x0)/Pci(0x1f,0x6)', 'why': None}, state)
+    check('read: built-in says so and looks no further',
+          en0.read(run=ioreg(tree(*top, ('GIGE@1F,6', 'IOPCIDevice'),
+                                  ('en0', 'IOEthernetInterface'), builtin='Yes')))
+          == {'builtin': True, 'path': None, 'why': None})
+    check('read: no en0 at all is None, which is not "not built-in"',
+          en0.read(run=lambda cmd: '') is None)
+
+    lines, props = en0.advice(state)
+    check('advice puts built-in = 01 on that path and nowhere else',
+          props == {'PciRoot(0x0)/Pci(0x1f,0x6)': {'built-in': 'hex:01'}}, props)
+    check('  and quotes the guide', any(r['fix'] in x for x in lines), lines)
+    lines, props = en0.advice(en0.read(run=ioreg(usb)))
+    check('a declined path writes nothing and says where the steps are',
+          props == {} and any(r['page'] in x for x in lines), lines)
+    check('built-in, or no reading, is silent',
+          en0.advice({'builtin': True, 'path': None, 'why': None}) == ([], {})
+          and en0.advice(None) == ([], {}))
+    src = Path('tools/setup.py').read_text(encoding='utf-8')
+    check('setup only acts on a report that carries en0',
+          "en0.advice(hw.get('en0'))" in src)
+    check('detect records it only on macOS',
+          "out['en0'] = en0.read(" in Path('tools/detect.py').read_text(encoding='utf-8')
+          .split('def _macos():', 1)[1].split('\ndef ', 1)[0])
+
+
 def cards_somebody_else_drives():
     """An Arc or a Turing-and-newer GeForce: no Apple driver, but a real one.
 
@@ -4003,6 +4095,7 @@ if __name__ == '__main__':
                     whether_recovery_can_land, a_mark_for_every_macos,
                     what_it_says_about_amd_integrated,
                     cards_somebody_else_drives,
+                    en0_and_iservices,
                     what_the_download_shows,
                     building_an_installer_image,
                     a_kext_that_stops_below_the_target,

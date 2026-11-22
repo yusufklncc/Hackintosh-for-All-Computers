@@ -353,6 +353,16 @@ def catalogue():
                  'added to an EFI here. A card the driver matches but has not '
                  'run is said to be so; the macOS range of a machine does not '
                  'lean on any of them.'),
+        dict(area='en0 and iServices', kind=QUOTED,
+             file='data/iservices.toml',
+             source="Dortania's OpenCore-Post-Install, universal/iservices.md, "
+                    "at the commit recorded",
+             tool='tools/en0.py', count='1 rule',
+             covers='built-in = 01 under en0\'s PciRoot path, only when macOS '
+                    'reports en0 is not built-in',
+             gap='Needs a report taken on macOS; a machine that has never booted '
+                 'it gets nothing. en0 behind USB, or a root bridge with no _UID, '
+                 'is declined with the reason rather than guessed.'),
         dict(area='AMD integrated graphics',
              kind=REPORTED if _amd_igpu() else NONE,
              file='data/amdigpu.toml', source='machines somebody has run',

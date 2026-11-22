@@ -1,0 +1,22 @@
+# What the builder does about en0, and the sentences it does it on.
+#
+# PROVENANCE: quoted, from Dortania's OpenCore-Post-Install, universal/iservices.md,
+# at the commit named.
+#
+# Messages, FaceTime and the App Store look for a network interface called en0
+# that macOS counts as built-in. The guide's order is: check first, and only if
+# en0 is not built-in, add built-in = 01 under that device's PciRoot path. That
+# is the whole rule this file carries - it is not "mark every network card
+# built-in", which is what OpCore-Simplify does and the guide never says.
+#
+# The check needs macOS running on the machine, so it only answers when the
+# report was taken on macOS. A machine that has never booted macOS gets nothing,
+# and the 179 published configs are not touched by any of it.
+
+source = "https://github.com/dortania/OpenCore-Post-Install/blob/6efd820293a1ee4d4597d58afb59afd8f4266f36/universal/iservices.md"
+commit = "6efd820293a1ee4d4597d58afb59afd8f4266f36"
+page = "https://dortania.github.io/OpenCore-Post-Install/universal/iservices.html#fixing-en0"
+
+check = "look for `en0` under `BSD` and check whether the device has a check mark under built-in. If there is a check mark, skip to the Fixing ROM section otherwise continue reading."
+any_type = "`en0` can be either Wifi, ethernet or even Thunderbolt. The type doesn't matter, just that it's present and marked as built-in."
+fix = "go into your config.plist -> DeviceProperties -> Add and apply the property of `built-in` with type `Data` and value `01`"

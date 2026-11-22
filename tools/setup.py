@@ -27,6 +27,7 @@ import advise
 import audio
 import build
 import detect
+import en0
 import gpu
 import igpu
 import inputdev
@@ -1296,6 +1297,17 @@ def main():
         cmd += ['--boot-args', ' '.join(boot_args)]
     if cmd_extra_drop:
         cmd += ['--drop-kexts', ','.join(cmd_extra_drop)]
+
+    # en0 and iServices: only a report taken on macOS can say, so a machine that
+    # has never booted it gets nothing here.
+    elines, eprops = en0.advice(hw.get('en0'))
+    if elines:
+        print(f'\n{BOLD}en0 (Messages, FaceTime, App Store){RESET}')
+        for line in elines:
+            print(f'      {YELLOW if not eprops else GREEN}{line}{RESET}')
+        for path, values in eprops.items():
+            device_props.setdefault(path, {}).update(values)
+        notes.append('\n'.join(elines))
 
     import json
     import tempfile

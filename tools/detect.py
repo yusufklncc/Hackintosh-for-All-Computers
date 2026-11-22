@@ -27,6 +27,7 @@ import sys
 from pathlib import Path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import sysenv  # noqa: F401,E402  ioreg and system_profiler are in /usr/sbin
+import en0  # noqa: E402
 
 
 def _run(cmd, shell=False):
@@ -554,6 +555,9 @@ def _macos():
     # a MacBook's trackpad is not on PS/2 or I2C; it is its own device class
     out['multitouch'] = bool(_ioreg('AppleMultitouchDevice'))
     out['camera_driver'] = macos_camera_driver()
+    # whether en0 is built-in is decided by macOS at boot, so only a report
+    # taken here can carry it; see tools/en0.py
+    out['en0'] = en0.read(run=_run)
     # the codec query finds nothing on Apple silicon, but the devices are named
     out['audio_devices'] = [m.strip() for m in re.findall(
         r'^\s{8}(\S.*?):$', _run(['system_profiler', 'SPAudioDataType']), re.M)]
