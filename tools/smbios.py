@@ -58,7 +58,7 @@ def _get(url):
     import urllib.error
     import urllib.request
     try:
-        with urllib.request.urlopen(url, timeout=60) as r:
+        with urllib.request.urlopen(ocgen.github(url), timeout=60) as r:
             return r.read()
     except urllib.error.URLError as first:
         import shutil

@@ -436,3 +436,19 @@ def version_supported(version, oc_min, oc_max):
     if oc_max and v > _ver(oc_max):
         return f'above the tested maximum {oc_max}'
     return ''
+
+
+def github(url):
+    """A request for GitHub's API, signed with GITHUB_TOKEN when there is one.
+
+    Anonymous calls share sixty an hour per address, and a CI runner's address
+    is shared with everybody else's: the weekly refresh hit "rate limit
+    exceeded" on its first call. Outside CI there is no token and nothing
+    changes; anything that is not the API passes through untouched."""
+    import os
+    import urllib.request
+    headers = {'User-Agent': 'hackintosh-for-all-computers'}
+    token = os.environ.get('GITHUB_TOKEN')
+    if token and 'api.github.com' in url:
+        headers['Authorization'] = f'Bearer {token}'
+    return urllib.request.Request(url, headers=headers)

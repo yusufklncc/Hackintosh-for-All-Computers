@@ -68,6 +68,8 @@ jobs:
 
       - name: Anything moved?
         id: diff
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           {
             echo "Regenerated from the upstream sources. Nothing here was decided by"

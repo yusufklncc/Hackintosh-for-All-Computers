@@ -26,7 +26,9 @@ def _get(url):
     urllib carries its own trust store and a network that inspects TLS refuses
     it; curl uses the system's. Same fallback as the other fetchers here."""
     try:
-        with urllib.request.urlopen(url, timeout=60) as r:
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        import ocgen
+        with urllib.request.urlopen(ocgen.github(url), timeout=60) as r:
             return r.read()
     except urllib.error.URLError as first:
         import shutil

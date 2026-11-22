@@ -66,7 +66,7 @@ def fetch_licence(repo):
     """(spdx, name) as GitHub reads the project's own LICENSE file."""
     try:
         with urllib.request.urlopen(
-                f'https://api.github.com/repos/{repo}/license', timeout=30) as r:
+                ocgen.github(f'https://api.github.com/repos/{repo}/license'), timeout=30) as r:
             d = json.load(r)['license']
         spdx = d.get('spdx_id')
         return (NONE_STATED if spdx in (None, 'NOASSERTION') and not d.get('name')

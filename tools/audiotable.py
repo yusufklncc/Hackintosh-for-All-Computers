@@ -37,7 +37,7 @@ REPO = 'acidanthera/AppleALC'
 
 
 def latest_ref():
-    with urllib.request.urlopen(f'https://api.github.com/repos/{REPO}/releases/latest') as r:
+    with urllib.request.urlopen(ocgen.github(f'https://api.github.com/repos/{REPO}/releases/latest')) as r:
         return json.load(r)['tag_name']
 
 

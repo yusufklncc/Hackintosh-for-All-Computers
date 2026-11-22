@@ -105,7 +105,7 @@ def scan():
 
 def latest(repo):
     try:
-        with urllib.request.urlopen(f'https://api.github.com/repos/{repo}/releases/latest') as r:
+        with urllib.request.urlopen(ocgen.github(f'https://api.github.com/repos/{repo}/releases/latest')) as r:
             return json.load(r).get('tag_name', '')
     except urllib.error.URLError:
         return ''
