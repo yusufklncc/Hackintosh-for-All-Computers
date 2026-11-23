@@ -110,9 +110,10 @@ quoted = ["quote", "macos"]
 repo = "SongXiaoXi/AppleIGC"
 kind = "device"
 role = "ethernet"
-# shown though it states no licence: nothing of it is shipped here, the card
-# links to the project, and the machine it was run on is recorded below
-stage = "experimental"
+# shown though it states no licence: nothing of it is shipped here - a yes
+# downloads it from the project at the hash below. Recommended because it was
+# run: data/field.toml names who, on what, and what happened
+stage = "recommended"
 install = "efi"
 licence = "none stated"
 archived = false
@@ -138,6 +139,14 @@ id = "8086:125c"
 name = "I226-V"
 tested = true
 said = "run on an ASUS ROG Strix Z790-A with macOS 26.7.1 Tahoe: \"Intel I226-V Ethernet (AppleIGC)\" (yusufklncc/intel-gpu-macos-driver efi/sample-z790/README.md at 990b650)"
+
+# AppleIGC's README gives no steps of its own, so these are the steps of the
+# EFI it was run in: one kext, a plain Kernel -> Add entry, no kernel bounds -
+# what that config.plist has for it, at the same commit
+[project.recipe]
+from = "yusufklncc/intel-gpu-macos-driver efi/sample-z790/README.md at 990b650315b1727f825ab37186be9d1142c97bf7"
+steps = ["2. **Kexts** into `EFI/OC/Kexts`, the versions the test machine runs:", "| AppleIGC | 1.9 | [SongXiaoXi/AppleIGC](https://github.com/SongXiaoXi/AppleIGC/releases) | Intel I226-V Ethernet |"]
+add = ["AppleIGC.kext"]
 
 [[project]]
 name = "AppleIGB"

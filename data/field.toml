@@ -71,3 +71,18 @@ data/oclp.toml, which records Legacy Wireless Patches as needed from 12.0. \
 Injecting the kexts creates the interface; the root patches that make it work \
 live on the installed system, and a recovery environment has none of them. \
 Ethernet during the install is the way through."""
+
+# A community driver somebody has run, which is what moves one from
+# experimental to recommended in data/community.toml. The project's own words
+# stay on its card; this is what happened on a named machine.
+[[driver]]
+name = "AppleIGC"
+id = "8086:125c"
+card = "Intel I226-V, on an ASUS ROG Strix Z790-A Gaming WiFi II"
+macos = "15, 26"
+release = "v1.9"
+observed_by = "yusufklncc"
+observed = """The installer and the installed system reached the network over the \
+I226-V with AppleIGC 1.9 alone, on Sequoia and on Tahoe 26.7.1: a plain \
+Kernel -> Add entry, no kernel bounds, no other Ethernet kext."""
+source = "yusufklncc/intel-gpu-macos-driver efi/sample-z790/README.md at 990b650, and its config.plist"

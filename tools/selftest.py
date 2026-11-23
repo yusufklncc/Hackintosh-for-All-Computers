@@ -3442,9 +3442,22 @@ def community_drivers_into_an_efi():
 
     by = {p['name']: p for p in community.projects()}
     with_recipe = [p for p in community.projects() if p.get('recipe')]
-    check('four projects carry a recipe', sorted(p['name'] for p in with_recipe) ==
-          ['AMDRadeonRDNA4', 'AirPort_RTW89', 'BroadTek', 'IntelSpeedShiftEPP'],
+    check('five projects carry a recipe', sorted(p['name'] for p in with_recipe) ==
+          ['AMDRadeonRDNA4', 'AirPort_RTW89', 'AppleIGC', 'BroadTek', 'IntelSpeedShiftEPP'],
           [p['name'] for p in with_recipe])
+    # recommended means run: a named person, a named machine, what happened
+    field = ocgen.read_toml(Path('data/field.toml')).get('driver', [])
+    ran = {d['name'] for d in field if d.get('observed_by') and d.get('observed')}
+    recommended = [p['name'] for p in community.projects() if p.get('stage') == 'recommended']
+    check('every recommended driver has somebody named who ran it, in data/field.toml',
+          recommended and all(n in ran for n in recommended), (recommended, ran))
+    igc = by['AppleIGC']
+    check('  AppleIGC is one: an I226-V run under Sequoia and Tahoe',
+          igc['stage'] == 'recommended' and any(c['id'] == '8086:125c' and c['tested']
+                                                for c in igc.get('card', [])))
+    check('  and its recipe is the EFI it ran in: one kext, no kernel bounds',
+          igc['recipe']['add'] == ['AppleIGC.kext'] and 'min_kernel' not in igc['recipe']
+          and 'sample-z790' in igc['recipe']['from'])
     for p in with_recipe:
         r = p['recipe']
         check(f"{p['name']}'s recipe quotes its own steps and pins every download",
@@ -3538,6 +3551,16 @@ def community_drivers_into_an_efi():
         weg = [e for e in cfg['Kernel']['Add'] if e['BundlePath'] == 'WhateverGreen.kext']
         check('RDNA 4 turns WhateverGreen off, as its step 3 says',
               weg and not weg[0]['Enabled'])
+        igc_zip = zipped('AppleIGC.kext')
+        igc = dict(by['AppleIGC'], sha256=_h.sha256(igc_zip).hexdigest())
+        why = community.apply(efi, [igc], darwin=25, say=lambda *_: None,
+                              get=lambda u, a=None: igc_zip, cache=Path(tmp) / 'cache-igc')
+        cfg = _pl.loads((efi / 'OC' / 'config.plist').read_bytes())
+        entry = [e for e in cfg['Kernel']['Add'] if e['BundlePath'] == 'AppleIGC.kext']
+        check('AppleIGC goes in as one enabled entry with no kernel bounds', why is None
+              and len(entry) == 1 and entry[0]['Enabled'] and entry[0]['MinKernel'] == ''
+              and entry[0]['MaxKernel'] == '', (why, entry))
+        community.remove(efi, ['AppleIGC'], say=lambda *_: None)
 
         # taken out again, one at a time: the rest stays as it was put in, and
         # with none left the EFI is the one that was built
