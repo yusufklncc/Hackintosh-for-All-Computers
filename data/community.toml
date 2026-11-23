@@ -393,6 +393,40 @@ uploader = "cuadra8998"
 attested = false
 
 [[project]]
+name = "WhateverXe"
+quoted = ["quote"]
+repo = "b00t0x/WhateverXe"
+kind = "device"
+role = "graphics"
+stage = "experimental"
+install = "system"
+licence = "BSD-3-Clause"
+release = "0.8.3"
+asset = "WhateverXe-0.8.3-RELEASE.zip"
+asset_match = "RELEASE"
+sha256 = "d56e3a7055b1dbb6f75f9f155bc4fe1ce1b5989b6038e79902e3a6cccce762e2"
+commit = "f26a36880c49ea1063393d943527808c0f38feca"
+source = "docs/device-selection.md"
+quote_source = "README.md"
+ids_from = "quoted"
+ids = ["8086:9a40", "8086:9a49", "8086:9a59", "8086:9a60", "8086:9a68", "8086:9a70", "8086:9a78", "8086:9ac0", "8086:9ac9", "8086:9ad9", "8086:9af8", "8086:46d0", "8086:46d1", "8086:46d2", "8086:46d3", "8086:46d4", "8086:4626", "8086:4628", "8086:462a", "8086:46a0", "8086:46a1", "8086:46a2", "8086:46a3", "8086:46a6", "8086:46a8", "8086:46aa", "8086:46b0", "8086:46b1", "8086:46b2", "8086:46b3", "8086:46c0", "8086:46c1", "8086:46c2", "8086:46c3", "8086:a720", "8086:a7a0", "8086:a7a8", "8086:a7aa", "8086:a7ab", "8086:a721", "8086:a7a1", "8086:a7a9", "8086:a7ac", "8086:a7ad", "8086:4680", "8086:4682", "8086:4688", "8086:468a", "8086:468b", "8086:4690", "8086:4692", "8086:4693", "8086:a780", "8086:a781", "8086:a782", "8086:a783", "8086:a788", "8086:a789", "8086:a78a", "8086:a78b"]
+# the families its device list names, for a machine whose iGPU is switched
+# off and so has no id to match: what turning it on would be worth
+igpu_generations = ["tiger-lake", "alder-lake", "raptor-lake"]
+macos = "Big Sur to Tahoe. Tested on Tiger Lake-U, Alder Lake-N, Alder Lake-H, Alder Lake-S (UHD 770) and Raptor Lake-U; Raptor Lake-S/HX expected to work, not yet tested on hardware"
+min_darwin = 20
+quote = "WhateverXe is a Lilu plugin, derived from WhateverGreen, that adapts Apple graphics drivers for selected Intel Xe-LP integrated GPUs."
+covers = "Intel Xe-LP integrated graphics: Tiger Lake, Alder Lake and Raptor Lake, UHD 770 among them"
+how = "a kext in the EFI with AMFIAnchor, csr-active-config and two boot-args, then its WhateverXe Graphics package installed in macOS"
+needs = "Lilu 1.7.2 or later, AMFIAnchor, csr-active-config 03080000, -allow3d -disablegfxfirmware, and DVMT at 96MB; not with WhateverGreen"
+conflicts = ["WhateverGreen.kext"]
+ai_files = ["AGENTS.md"]
+ai_commits = [0, 100]
+ai_tools = []
+uploader = "github-actions[bot]"
+attested = false
+
+[[project]]
 name = "AMDRadeonRDNA4"
 quoted = ["quote", "macos"]
 repo = "RX4Darwin/AMDRadeonRDNA4.kext"

@@ -701,47 +701,68 @@ def graphics_advice(hw):
         return None
 
     named = ', '.join(d['name'] for d in bad)
-    # a community driver that claims the card is said beside Apple's answer,
-    # never instead of it: the Graphics row names it, and a warning that the
-    # card "has to be replaced" with no word of it contradicted the row above
-    others = []
+    # Apple's answer first, and in Apple's terms: no driver of its own. A
+    # community driver that runs the card is said beside it, never instead of
+    # it - and when every such card has one, the warning is amber, not red:
+    # "has to be replaced" was wrong for a card somebody's driver runs.
+    community_for = {}
     for d in bad:
         got = gpu.third_party(d['device'])
         if got:
-            others.append(f'{got[0]["name"]}, a community driver, claims {d["name"]} '
-                          f'({got[0]["stage"]}; nothing for it goes in this EFI).')
-    aside = (' ' + ' '.join(others)) if others else ''
+            community_for[d['name']] = got
+    aside = ''.join(f' {got[0]["name"]}, a community driver, runs {name} '
+                    f'({got[0]["stage"]}{_tested(got)}; it installs on macOS, '
+                    'nothing for it goes in this EFI).'
+                    for name, got in community_for.items())
+    covered = len(community_for) == len(bad)
+    tone = UNKNOWN if covered else UNSUPPORTED
+    apple = f'macOS has no driver of its own for {named}.'
+    replace = ('' if covered else
+               ' Otherwise the card has to be replaced with one macOS drives.')
     usable = [d for d in integrated if d['verdict'] in ('works', 'works-spoofed')]
     if usable:
-        return {'tone': UNSUPPORTED,
-                'text': f'{named} is not supported. macOS would run on '
-                        f'{usable[0]["name"]} instead, so the range above still '
-                        'holds - but the card gives you nothing and the display '
-                        'has to come off the integrated one.' + aside}
+        return {'tone': tone,
+                'text': f'{apple} macOS would run on {usable[0]["name"]} instead, so '
+                        'the range above still holds, with the display on the '
+                        'integrated graphics.' + aside}
     if integrated:
-        return {'tone': UNSUPPORTED,
-                'text': f'{named} is not supported, and neither is '
-                        f'{integrated[0]["name"]}. The card has to be replaced '
-                        'with one macOS drives; the integrated graphics cannot '
-                        'cover for it.' + aside}
+        igpu_side = ''.join(f' {got[0]["name"]}, a community driver, runs {d["name"]} '
+                            f'({got[0]["stage"]}).'
+                            for d in integrated if (got := gpu.third_party(d['device'])))
+        return {'tone': tone,
+                'text': f'{apple} Apple has none for {integrated[0]["name"]} either.'
+                        + replace + aside + igpu_side}
     # None seen is not none there: a K processor has one, and a board with a
     # card in it often switches it off in the firmware. What it would be worth
-    # turned on is the generation's answer.
-    seen = (f'{named} is not supported, and no integrated graphics was seen on this '
-            'machine - the processor may have none, or it may be switched off in the '
-            'firmware.')
-    igpu, models = gpu.igpu_verdict(generation)
+    # turned on is Apple's answer for the generation, and any community
+    # driver that lists the generation.
+    era = (generation or '').replace('-', ' ').title()
+    seen = (f'{apple} No integrated graphics was seen on this machine: the processor '
+            'may have none, or it may be switched off in the firmware.')
+    igpu, _ = gpu.igpu_verdict(generation)
+    import community
+    listed = [p for p in community.shown() if generation and
+              generation in p.get('igpu_generations', [])]
     if igpu == 'works':
-        then = (' Turned on, macOS could run on it instead. Otherwise the card has to '
-                'be replaced with one macOS drives.')
+        then = ' Turned on, macOS could run on it.'
+    elif listed:
+        then = (f' Turned on, Apple has no driver for {era} integrated graphics, but '
+                + ', '.join(f'{p["name"]}, a community driver ({p["stage"]}),'
+                            for p in listed)
+                + ' lists it.')
     elif igpu == 'unsupported':
-        then = (f' On a {generation.replace("-", " ").title()} processor it would not help: macOS has no driver '
-                'for that integrated graphics either. The card has to be replaced with '
-                'one macOS drives, or this machine has no display under macOS.')
+        then = f' Turned on, it would not help: Apple has no driver for {era} integrated graphics.'
     else:
-        then = (' The card has to be replaced with one macOS drives, or there is '
-                'no display under macOS.')
-    return {'tone': UNSUPPORTED, 'text': seen + then + aside}
+        then = ''
+    return {'tone': tone, 'text': seen + then + replace + aside}
+
+
+def _tested(got):
+    """', tested on this card' where the driver's own table says so."""
+    _, card = got
+    if card is None:
+        return ''
+    return ', tested on this card' if card.get('tested') else ', not yet run on this card'
 
 
 def macos_range(hw):

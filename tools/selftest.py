@@ -347,9 +347,11 @@ def hardware_summary():
                                 {'id': '8086:a780', 'name': 'Intel UHD Graphics 770'}])
     parts = [r['part'] for r in summary.rows(desktop)]
     verdicts = {(r['part'], r['what']): r['verdict'] for r in summary.rows(desktop)}
-    check('an unsupported card and an unsupported igpu are both called out',
-          [v for (p_, _), v in verdicts.items()
-           if p_ == 'Graphics'] == [summary.UNSUPPORTED] * 2, verdicts)
+    # the UHD 770 has no Apple driver, and WhateverXe, a community one, lists
+    # its id: Apple's answer and the community's, side by side, as for a B580
+    check('an unsupported card is called out, and a UHD 770 is the driver WhateverXe lists',
+          [v for (p_, _), v in verdicts.items() if p_ == 'Graphics']
+          == [summary.UNSUPPORTED, summary.THIRD_PARTY], verdicts)
     check('a codec AppleALC does not carry is not called supported',
           verdicts[('Audio', 'ffff:ffff')] == summary.UNSUPPORTED, verdicts)
     check('a desktop with no pointing device gets no trackpad row',
@@ -1983,31 +1985,35 @@ def graphics_and_the_range():
     fallback = summary.graphics_advice({'generation': 'comet-lake',
                                         'gpu_devices': [arc, igpu]})
     check('an unsupported card with a working iGPU says to use the iGPU',
-          fallback['tone'] == summary.UNSUPPORTED
+          fallback['tone'] in (summary.UNSUPPORTED, summary.UNKNOWN)
           and 'UHD Graphics' in fallback['text']
           and 'range above still holds' in fallback['text'], fallback)
 
     alone = summary.graphics_advice({'generation': 'comet-lake',
                                      'gpu_devices': [arc]})
     check('an unsupported card with no iGPU seen says none was seen, not none exists',
-          'no integrated graphics was seen' in alone['text']
+          'no integrated graphics was seen' in alone['text'].lower()
           and 'switched off in the firmware' in alone['text'], alone)
     check('  on a generation whose iGPU works, that turning it on is the way out',
           'Turned on, macOS could run on it' in alone['text'], alone)
     check('and that it has to be replaced', 'replaced' in alone['text'])
     b580 = {'id': '8086:e20b', 'name': 'Intel(R) Arc(TM) B580 Graphics'}
     z790 = summary.graphics_advice({'generation': 'raptor-lake', 'gpu_devices': [b580]})
-    check('a Raptor Lake machine is told its iGPU would not help either',
-          'would not help' in z790['text'], z790)
-    check('  and the community driver the Graphics row names is named here too',
-          'intel-gpu-macos-driver, a community driver, claims' in z790['text'], z790)
+    check('a card a community driver runs is Apple-less, not unsupported, and amber',
+          'no driver of its own' in z790['text'] and z790['tone'] == summary.UNKNOWN
+          and 'replaced' not in z790['text'], z790)
+    check('  the driver the Graphics row names is named here too, with how far it was run',
+          'intel-gpu-macos-driver, a community driver, runs' in z790['text']
+          and 'tested on this card' in z790['text'], z790)
+    check('  and a Raptor Lake iGPU switched off is told what turning it on is worth',
+          'WhateverXe' in z790['text'] and 'switched off in the firmware' in z790['text'], z790)
 
     # the field report about this processor says its iGPU does not accelerate,
     # so the iGPU cannot be offered as the way out
     dead = summary.graphics_advice({'cpu': 'i5-10200H', 'generation': 'comet-lake',
                                     'gpu_devices': [arc, igpu]})
-    check('an unsupported card and a dead iGPU says neither is supported',
-          'neither is' in dead['text'] and 'cannot cover for it' in dead['text'], dead)
+    check('an unsupported card and a dead iGPU says Apple has a driver for neither',
+          'Apple has none for' in dead['text'] and 'replaced' in dead['text'], dead)
 
     unheard = summary.graphics_advice({
         'generation': 'comet-lake',
