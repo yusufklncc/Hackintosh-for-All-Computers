@@ -6,7 +6,7 @@
   <!-- The question first, the transcript under it and folded away: what a
        person has to decide is the top of the pane, and what the engine said
        on the way is there for whoever wants it. -->
-  <Grid RowDefinitions="Auto,Auto,Auto,*" Margin="28,24,28,24">
+  <Grid RowDefinitions="Auto,Auto,*,Auto" Margin="28,24,28,24">
 
     <StackPanel Grid.Row="0" Spacing="10" Margin="0,0,0,14">
       <TextBlock Classes="eyebrow" Text="BUILD AN EFI" />
@@ -37,8 +37,14 @@
                     VerticalAlignment="Center" />
     </Grid>
 
+    <!-- The question, the wait, or the end, in the room the details leave:
+         a finished build's cards and drivers were taller than that room, and
+         with the details open the transcript was squeezed to a sliver. This
+         part scrolls; the details keep a share of the pane of their own. -->
+    <ScrollViewer Grid.Row="2" Name="Main" VerticalScrollBarVisibility="Auto">
+    <Panel>
     <!-- The question that is open, if one is -->
-    <Border Grid.Row="2" Name="Prompt" Classes="panel" Margin="0,16,0,0" IsVisible="False">
+    <Border Name="Prompt" Classes="panel" Margin="0,16,0,0" IsVisible="False">
       <StackPanel Spacing="12">
         <StackPanel Spacing="3">
           <TextBlock Name="Step" Classes="eyebrow" IsVisible="False" />
@@ -68,10 +74,10 @@
     </Border>
 
     <!-- While the engine works and nothing is being asked -->
-    <v:Busy Grid.Row="2" Name="Waiting" IsVisible="False" Margin="2,18,0,0" />
+    <v:Busy Name="Waiting" IsVisible="False" Margin="2,18,0,0" />
 
     <!-- Before it starts, and after it ends -->
-    <Border Grid.Row="2" Name="Standby" Classes="panel" Margin="0,16,0,0">
+    <Border Name="Standby" Classes="panel" Margin="0,16,0,0">
       <!-- the sentence and the buttons on one row, and what was written
            under both at the full width: beside the buttons the cards were
            squeezed into a column and took the transcript's height -->
@@ -109,6 +115,9 @@
         </StackPanel>
       </Grid>
     </Border>
+
+    </Panel>
+    </ScrollViewer>
 
     <!-- What the engine has said so far, in the colours it said it in -->
     <Border Grid.Row="3" Name="Details" BorderBrush="{DynamicResource Line}" BorderThickness="1"

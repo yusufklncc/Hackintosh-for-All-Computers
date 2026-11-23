@@ -155,7 +155,13 @@ public partial class BuilderView : UserControl
         OutFolder.Text = _out;
         // the answers may use up to two fifths of the pane and scroll past
         // that, so the transcript and the buttons always keep their room
-        SizeChanged += (_, e) => OptionsScroll.MaxHeight = Math.Max(160, e.NewSize.Height * 0.4);
+        SizeChanged += (_, e) =>
+        {
+            OptionsScroll.MaxHeight = Math.Max(160, e.NewSize.Height * 0.4);
+            // the details' own share, opened: enough to read, and the rest
+            // stays the question's, which scrolls above it
+            Details.Height = Math.Max(200, e.NewSize.Height * 0.42);
+        };
         Begin.Click += async (_, _) => await Run();
         Choose.Click += async (_, _) => await Pick();
         Continue.Click += (_, _) => Send();
