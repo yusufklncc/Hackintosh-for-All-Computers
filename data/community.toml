@@ -110,9 +110,6 @@ quoted = ["quote", "macos"]
 repo = "SongXiaoXi/AppleIGC"
 kind = "device"
 role = "ethernet"
-# shown though it states no licence: nothing of it is shipped here - a yes
-# downloads it from the project at the hash below. Recommended because it was
-# run: data/field.toml names who, on what, and what happened
 stage = "recommended"
 install = "efi"
 licence = "none stated"
@@ -140,9 +137,6 @@ name = "I226-V"
 tested = true
 said = "run on an ASUS ROG Strix Z790-A with macOS 26.7.1 Tahoe: \"Intel I226-V Ethernet (AppleIGC)\" (yusufklncc/intel-gpu-macos-driver efi/sample-z790/README.md at 990b650)"
 
-# AppleIGC's README gives no steps of its own, so these are the steps of the
-# EFI it was run in: one kext, a plain Kernel -> Add entry, no kernel bounds -
-# what that config.plist has for it, at the same commit
 [project.recipe]
 from = "yusufklncc/intel-gpu-macos-driver efi/sample-z790/README.md at 990b650315b1727f825ab37186be9d1142c97bf7"
 steps = ["2. **Kexts** into `EFI/OC/Kexts`, the versions the test machine runs:", "| AppleIGC | 1.9 | [SongXiaoXi/AppleIGC](https://github.com/SongXiaoXi/AppleIGC/releases) | Intel I226-V Ethernet |"]
@@ -214,9 +208,9 @@ role = "wifi"
 stage = "experimental"
 install = "efi"
 licence = "GPL-2.0"
-release = "v0.7.0-BETA"
-asset = "AirPort_RTW89-0.7.0.zip"
-sha256 = "dde4e5a9e2b36784cc0e2d62eb3cf60b561dd6964f0edd3ae86ef3ce128f70af"
+release = "v0.7.1-BETA"
+asset = "AirPort_RTW89-0.7.1.zip"
+sha256 = "5fde3f9fb64505669c1baab515fd4ea925752fe93318bd44f40efd08f486cf04"
 commit = "607a97b86ad6d5cdd10e4566a3afe0cafde46404"
 source = "README.md"
 ids_from = "kext"
@@ -426,17 +420,15 @@ role = "graphics"
 stage = "experimental"
 install = "system"
 licence = "BSD-3-Clause"
-release = "0.8.3"
-asset = "WhateverXe-0.8.3-RELEASE.zip"
+release = "0.8.4"
+asset = "WhateverXe-0.8.4-RELEASE.zip"
 asset_match = "RELEASE"
-sha256 = "d56e3a7055b1dbb6f75f9f155bc4fe1ce1b5989b6038e79902e3a6cccce762e2"
+sha256 = "1fc3308fd0d99166a9cdc67724bd6e3bbe4d8c81120afcc58a2a174d96f14c76"
 commit = "f26a36880c49ea1063393d943527808c0f38feca"
 source = "docs/device-selection.md"
 quote_source = "README.md"
 ids_from = "quoted"
 ids = ["8086:9a40", "8086:9a49", "8086:9a59", "8086:9a60", "8086:9a68", "8086:9a70", "8086:9a78", "8086:9ac0", "8086:9ac9", "8086:9ad9", "8086:9af8", "8086:46d0", "8086:46d1", "8086:46d2", "8086:46d3", "8086:46d4", "8086:4626", "8086:4628", "8086:462a", "8086:46a0", "8086:46a1", "8086:46a2", "8086:46a3", "8086:46a6", "8086:46a8", "8086:46aa", "8086:46b0", "8086:46b1", "8086:46b2", "8086:46b3", "8086:46c0", "8086:46c1", "8086:46c2", "8086:46c3", "8086:a720", "8086:a7a0", "8086:a7a8", "8086:a7aa", "8086:a7ab", "8086:a721", "8086:a7a1", "8086:a7a9", "8086:a7ac", "8086:a7ad", "8086:4680", "8086:4682", "8086:4688", "8086:468a", "8086:468b", "8086:4690", "8086:4692", "8086:4693", "8086:a780", "8086:a781", "8086:a782", "8086:a783", "8086:a788", "8086:a789", "8086:a78a", "8086:a78b"]
-# the families its device list names, for a machine whose iGPU is switched
-# off and so has no id to match: what turning it on would be worth
 igpu_generations = ["tiger-lake", "alder-lake", "raptor-lake"]
 macos = "Big Sur to Tahoe. Tested on Tiger Lake-U, Alder Lake-N, Alder Lake-H, Alder Lake-S (UHD 770) and Raptor Lake-U; Raptor Lake-S/HX expected to work, not yet tested on hardware"
 min_darwin = 20
@@ -506,7 +498,7 @@ covers = "AMD Radeon 680M and 660M (Rembrandt) integrated graphics"
 how = "a kext, a Lilu plugin and a framebuffer, per its README"
 ids = ["1002:164d", "1002:1681"]
 ai_files = ["CLAUDE.md"]
-ai_commits = [85, 100]
+ai_commits = [95, 100]
 ai_tools = ["Claude"]
 uploader = "FranciumOS-org"
 attested = false
@@ -659,9 +651,9 @@ stage = "experimental"
 commit = "a70855499a4b8def8db9fa384c2c08dfd1d64b88"
 source = "README.md"
 quoted = ["quote", "macos"]
-release = "v2.7.88-alpha"
-asset = "AirportItlwm-Sequoia-v2.7.88-RELEASE-alpha-a708554.zip"
-sha256 = "be5053a98f7ea9aa87de33b4ad249d68f33da8ced8a46af20802ed398324c942"
+release = "v2.7.99-alpha"
+asset = "AirportItlwm-Sequoia-v2.7.99-RELEASE-alpha-d614834.zip"
+sha256 = "16ee7d990d5843ce8000fabcb08e2716194f4fbd3f04f7a70ca586a54fcd2e5b"
 name = "AirportItlwm (Tahoe fork)"
 kind = "device"
 role = "wifi"
@@ -687,9 +679,9 @@ stage = "experimental"
 commit = "938a8d9cdf5e74b70c2a4194d3b3f8d37b82454d"
 source = "README.md"
 quoted = ["quote", "macos"]
-release = "v0.6.0-beta.4"
-asset = "ForbiddenItlwm-0.6.0-beta.4-Sequoia.zip"
-sha256 = "1f72688046e894ac6528b21e0540f060f02eb87f72694fc3e6bdbd7024f95d56"
+release = "v0.7.0-alpha.1"
+asset = "ForbiddenItlwm-0.7.0-alpha.1-Sequoia.zip"
+sha256 = "34e14a6eb442598b5f6cfdcacf12a79b38ce47200a93cf1a1babc4a91862605f"
 name = "ForbiddenItlwm"
 kind = "device"
 role = "wifi"
@@ -715,7 +707,7 @@ attested = false
 [[project]]
 repo = "labrouss/S0ixStandby"
 stage = "experimental"
-commit = "f1f8604c78c8e7339b5c0a9394bcb15c035f4ffe"
+commit = "6c395195fa2eabaee37a7bf262e0f1e744bc087b"
 source = "README.md"
 quoted = ["quote", "macos"]
 release = "v0.5.8"
