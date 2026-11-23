@@ -121,20 +121,11 @@
           <TextBlock Name="NoBounds" IsVisible="False" FontSize="12.5" TextWrapping="Wrap"
                      Foreground="{DynamicResource Muted}"
                      Text="No part of this machine has a first or last macOS recorded in these tables." />
-          <ItemsControl Name="Bounds">
-            <ItemsControl.ItemTemplate>
-              <DataTemplate x:DataType="v:BoundView">
-                <!-- the value wraps on the right rather than running into the
-                     label: a list of five macOS lines is wider than a range -->
-                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="14" Margin="0,0,0,6">
-                  <TextBlock Grid.Column="0" Text="{Binding What}" FontSize="13"
-                             Foreground="{DynamicResource Ink}" />
-                  <TextBlock Grid.Column="1" Classes="mono" Text="{Binding Span}"
-                             TextWrapping="Wrap" TextAlignment="Right" />
-                </Grid>
-              </DataTemplate>
-            </ItemsControl.ItemTemplate>
-          </ItemsControl>
+          <!-- one row per part: its name, a strip across the macOS releases
+               with its span filled in, and the span in words. The part that
+               sets an end of the range is marked; drawn in code, because the
+               strip's proportions come from the releases -->
+          <StackPanel Name="Bounds" Spacing="12" />
         </StackPanel>
       </Border>
     </Grid>

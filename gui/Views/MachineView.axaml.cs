@@ -6,7 +6,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Layout;
 using Avalonia.Media;
 using Shell;
 using Shell.Engine;
@@ -33,6 +35,94 @@ public sealed class TallyView
 
 public partial class MachineView : UserControl
 {
+    // the releases the strips run across, oldest to newest darwin
+    (int lo, int hi) _scale = (14, 25);
+
+    IBrush? Brush(string key) =>
+        this.TryFindResource(key, ActualThemeVariant, out var b) ? b as IBrush : null;
+
+    /// <summary>One part's span of macOS: its name, whether it sets an end of
+    /// the machine's range, a strip with the span filled in, and the span in
+    /// words underneath.</summary>
+    Control RangeRow(string what, Release? from, Release? to, string sets)
+    {
+        var (lo, hi) = _scale;
+        var start = Math.Clamp(from?.Darwin ?? lo, lo, hi);
+        var end = Math.Clamp((to?.Darwin ?? hi) + 1, start + 1, hi + 1);
+        var marks = sets.Length > 0;
+
+        var head = new Grid { ColumnDefinitions = new ColumnDefinitions("*,Auto"), ColumnSpacing = 8 };
+        head.Children.Add(new TextBlock
+        {
+            Text = what, FontSize = 13, Foreground = Brush("Ink"),
+            FontWeight = marks ? FontWeight.SemiBold : FontWeight.Normal,
+            TextTrimming = TextTrimming.CharacterEllipsis,
+        });
+        if (marks)
+        {
+            var tag = new Border
+            {
+                CornerRadius = new CornerRadius(8), Padding = new Thickness(7, 1, 7, 2),
+                Background = Brush("AccentSoft"), VerticalAlignment = VerticalAlignment.Center,
+                Child = new TextBlock { Text = sets, FontSize = 10.5, FontWeight = FontWeight.SemiBold,
+                                        Foreground = Brush("Accent") },
+            };
+            Grid.SetColumn(tag, 1);
+            head.Children.Add(tag);
+        }
+
+        // the strip: what comes before the span, the span, what comes after
+        var strip = new Grid
+        {
+            Height = 6, Margin = new Thickness(0, 6, 0, 4),
+            ColumnDefinitions = new ColumnDefinitions(
+                $"{Math.Max(start - lo, 0.0001)}*,{end - start}*,{Math.Max(hi + 1 - end, 0.0001)}*"),
+        };
+        strip.Children.Add(new Border
+        {
+            CornerRadius = new CornerRadius(3), Background = Brush("Chrome"),
+            [Grid.ColumnSpanProperty] = 3,
+        });
+        var span = new Border
+        {
+            CornerRadius = new CornerRadius(3),
+            Background = marks ? Brush("Accent") : Brush("Muted"),
+            Opacity = marks ? 1 : 0.45,
+        };
+        Grid.SetColumn(span, 1);
+        strip.Children.Add(span);
+
+        var words = new TextBlock
+        {
+            Classes = { "mono" }, FontSize = 11.5,
+            Text = $"{(from is null ? "any" : from.ToString())}  →  {(to is null ? "current" : to.ToString())}",
+        };
+        var row = new StackPanel { Spacing = 0 };
+        row.Children.Add(head);
+        row.Children.Add(strip);
+        row.Children.Add(words);
+        return row;
+    }
+
+    /// <summary>A list that is not a range - the lines Apple still updates -
+    /// as one chip each, so it cannot be read as a span.</summary>
+    Control ChipRow(string what, IEnumerable<string> values)
+    {
+        var row = new StackPanel { Spacing = 6 };
+        row.Children.Add(new TextBlock { Text = what, FontSize = 13, Foreground = Brush("Ink") });
+        var chips = new WrapPanel();
+        foreach (var v in values)
+            chips.Children.Add(new Border
+            {
+                CornerRadius = new CornerRadius(6), Padding = new Thickness(8, 2, 8, 3),
+                Margin = new Thickness(0, 0, 6, 6), BorderThickness = new Thickness(1),
+                BorderBrush = Brush("Line"), Background = Brush("Surface2"),
+                Child = new TextBlock { Text = v, Classes = { "mono" }, Foreground = Brush("Ink") },
+            });
+        row.Children.Add(chips);
+        return row;
+    }
+
     /// <summary>Raised by the button that goes on to the EFI pane.</summary>
     public event Action? BuildRequested;
 
@@ -185,22 +275,21 @@ public partial class MachineView : UserControl
                 + "by, which names Intel Macs only, so how far it goes is not read here."
                 : $"{m.Mac.Board} is offered up to {last}. There is no floor "
                 + "here: nothing this reads knows the oldest macOS a Mac runs.";
-            var bounds = new List<BoundView>();
+            Bounds.Children.Clear();
             if (!unread)
-                bounds.Add(new(new Bound { What = "Apple, for " + m.Mac.Board, To = m.Mac.To }));
+                Bounds.Children.Add(RangeRow("Apple, for " + m.Mac.Board, null, m.Mac.To,
+                                             m.Mac.To is null ? "" : "sets the newest"));
             // a different fact, and it used to be read as the one above:
             // which lines Apple still publishes for it is about updates
             if (m.Mac.Serving.Count > 0)
-                bounds.Add(new BoundView("Apple still updates it on",
-                                         string.Join(", ", m.Mac.Serving)));
-            Bounds.ItemsSource = bounds;
+                Bounds.Children.Add(ChipRow("Apple still updates it on", m.Mac.Serving));
         }
         else if (m.Mac is { Listed: false })
         {
             Window.Text = "Not in Apple's list";
             WindowWhy.Text = $"{m.Mac.Board} is not in any macOS line Apple still "
                            + "serves, which happens to a Mac too old for all of them.";
-            Bounds.ItemsSource = new List<BoundView>();
+            Bounds.Children.Clear();
         }
         else if (m.Macos.From is { } from)
         {
@@ -250,9 +339,21 @@ public partial class MachineView : UserControl
         BuildForIt.IsVisible = m.Mac is null;
         Read?.Invoke();
         if (m.Mac is null)
-            Bounds.ItemsSource = m.Macos.Parts.Select(b => new BoundView(b)).ToList();
+        {
+            Bounds.Children.Clear();
+            _scale = (Math.Min(14, m.Macos.Parts.Select(b => b.From?.Darwin ?? 99).DefaultIfEmpty(99).Min()),
+                      Math.Max(25, m.Macos.Parts.Select(b => b.To?.Darwin ?? 0).DefaultIfEmpty(0).Max()));
+            foreach (var b in m.Macos.Parts)
+            {
+                var floor = b.From is not null && b.What == m.Macos.FromBecause;
+                var ceiling = b.To is not null && b.What == m.Macos.ToBecause;
+                Bounds.Children.Add(RangeRow(b.What, b.From, b.To,
+                    floor && ceiling ? "sets both ends" : floor ? "sets the oldest"
+                    : ceiling ? "sets the newest" : ""));
+            }
+        }
         // an empty panel read as one that had not loaded
-        NoBounds.IsVisible = Bounds.ItemsSource is System.Collections.ICollection { Count: 0 };
+        NoBounds.IsVisible = Bounds.Children.Count == 0;
         Rows.ItemsSource =
             m.Rows.Select(r => new RowView(r)).ToList();
     }

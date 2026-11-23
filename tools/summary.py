@@ -929,7 +929,9 @@ def document(hw, source='this machine'):
         'mac': genuine_mac(hw),
         # what the graphics mean for that range: not a bound on it, but the
         # difference between a machine that boots to a display and one that does not
-        'graphics_advice': graphics_advice(hw),
+        # - and on a Mac read as itself, none: macOS is already driving its
+        # graphics, and "nothing here can say" about an M1 Pro was noise
+        'graphics_advice': None if genuine_mac(hw) else graphics_advice(hw),
         # where somebody else's patches take it past that, which is not a thing
         # this program does and is worth knowing anyway
         'oclp': patched_further(hw),

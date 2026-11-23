@@ -53,26 +53,31 @@
         <StackPanel Spacing="2">
           <TextBlock Classes="eyebrow" Text="THIS MACHINE" Margin="12,0,0,4" />
           <!-- the three steps of the work, each ticked once it has been done
-               in this session: read, built, written to a stick -->
+               in this session: read, built, written to a stick. The tick is
+               drawn: neither face carries U+2713, and the fallback's looked
+               like a square root -->
           <RadioButton Name="ToMachine" Classes="nav" GroupName="pane" IsChecked="True">
             <DockPanel>
-              <TextBlock Name="MachineDone" DockPanel.Dock="Right" Text="✓" IsVisible="False"
-                         Foreground="{DynamicResource Ok}" FontWeight="Bold" />
+              <Path Name="MachineDone" DockPanel.Dock="Right" IsVisible="False" Width="12" Height="10"
+                    VerticalAlignment="Center" Stroke="{DynamicResource Ok}" StrokeThickness="2"
+                    StrokeLineCap="Round" StrokeJoin="Round" Data="M1,5 L4.5,8.5 L11,1.5" />
               <TextBlock Text="Machine" />
             </DockPanel>
           </RadioButton>
           <TextBlock Classes="eyebrow" Text="MAKE" Margin="12,14,0,4" />
           <RadioButton Name="ToBuilder" Classes="nav" GroupName="pane">
             <DockPanel>
-              <TextBlock Name="EfiDone" DockPanel.Dock="Right" Text="✓" IsVisible="False"
-                         Foreground="{DynamicResource Ok}" FontWeight="Bold" />
+              <Path Name="EfiDone" DockPanel.Dock="Right" IsVisible="False" Width="12" Height="10"
+                    VerticalAlignment="Center" Stroke="{DynamicResource Ok}" StrokeThickness="2"
+                    StrokeLineCap="Round" StrokeJoin="Round" Data="M1,5 L4.5,8.5 L11,1.5" />
               <TextBlock Text="EFI" />
             </DockPanel>
           </RadioButton>
           <RadioButton Name="ToStick" Classes="nav" GroupName="pane">
             <DockPanel>
-              <TextBlock Name="StickDone" DockPanel.Dock="Right" Text="✓" IsVisible="False"
-                         Foreground="{DynamicResource Ok}" FontWeight="Bold" />
+              <Path Name="StickDone" DockPanel.Dock="Right" IsVisible="False" Width="12" Height="10"
+                    VerticalAlignment="Center" Stroke="{DynamicResource Ok}" StrokeThickness="2"
+                    StrokeLineCap="Round" StrokeJoin="Round" Data="M1,5 L4.5,8.5 L11,1.5" />
               <TextBlock Text="USB stick" />
             </DockPanel>
           </RadioButton>

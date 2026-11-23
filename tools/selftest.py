@@ -1898,6 +1898,14 @@ def genuine_macs():
     shown = summary.audio_row({'hda_ids': ['8086:281e', '10ec:0897']})
     check('  and beside a Realtek one, the Realtek one is the machine\'s audio',
           'ALC897' in str(shown), shown)
+    m1 = summary.document({'system': 'Darwin', 'board_id': 'J314sAP', 'cpu': 'Apple M1 Pro',
+                           'gpu_devices': [{'name': 'Apple M1 Pro'}]})
+    check('a Mac read as itself gets no graphics warning: macOS already drives it',
+          m1['graphics_advice'] is None, m1['graphics_advice'])
+    view = Path('gui/Views/MachineView.axaml.cs').read_text(encoding='utf-8')
+    check('the limits are drawn as strips, the part that sets an end marked',
+          'Control RangeRow(' in view and '"sets the oldest"' in view
+          and 'Control ChipRow(' in view)
     made = summary.genuine_mac({'system': 'Darwin', 'board_id': 'J314sAP'})
     check('an Apple silicon Mac, in no recovery list, has no ceiling rather than one named None',
           made['listed'] and made['to'] is None and not made['current'] and made['serving'], made)
@@ -4623,8 +4631,10 @@ def what_it_looks_like_when_it_arrives():
     # the sidebar drew the same chip a second time, by hand, in Path data. Two
     # drawings of one mark are one edit away from disagreeing, and the one
     # nobody re-exports is the one that goes stale.
+    # the step ticks are the only paths allowed: three strokes, not a mark
+    ticks = len(re.findall(r'<Path Name="\w+Done"', window))
     check('and the sidebar draws that file rather than redrawing the mark',
-          window.count('Assets/Icon/png') >= 2 and '<Path ' not in window)
+          window.count('Assets/Icon/png') >= 2 and window.count('<Path ') == ticks == 3)
 
     # the bundler
     bundler = Path('tools/appbundle.py').read_text()
