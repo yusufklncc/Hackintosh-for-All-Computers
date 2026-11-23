@@ -2978,6 +2978,72 @@ def en0_and_iservices():
           .split('def _macos():', 1)[1].split('\ndef ', 1)[0])
 
 
+def unplugged_with_its_questions_answered():
+    """install.sh, driving the real UnPlugged.command to its last question.
+
+    The script at the pinned commit, its four paths pointed at a folder that
+    stands in for /Volumes, and "n" at its own confirmation: what it would do
+    is printed and nothing is done. Without the network it is not fetched, and
+    the run says so rather than passing."""
+    import unplugged
+    import offline
+    with tempfile.TemporaryDirectory() as tmp:
+        got, complaint = unplugged.fetch(Path(tmp) / 'fetched')
+        if complaint:
+            check('UnPlugged.command could not be fetched, so install.sh was not run against it',
+                  True, complaint)
+            return
+        real = got.read_text()
+        swaps = {'cd /Volumes/;': 'cd "{V}/";',
+                 'selected_disk="/Volumes/$drive"': 'selected_disk="{V}/$drive"',
+                 'find / -name "Install*.app"': 'find "{R}" -name "Install*.app"',
+                 'cat /usr/sbin/pkgutil': 'cat "{P}"'}
+        check('the four places UnPlugged reads the machine are where install.sh reads it too',
+              all(k in real for k in swaps))
+        for want, extra, vols, pick, step in (
+                ('extract', ['BaseSystem.dmg'], ['OPENCORE', 'macOS Base System', 'Macintosh HD'],
+                 '', '- Mount BaseSystem.dmg'),
+                ('expand', [], ['OPENCORE', 'Macintosh HD', 'Other Disk'],
+                 '1\n', '- Expand InstallAssistant.pkg')):
+            t = Path(tmp) / want
+            V, R = t / 'Volumes', t / 'root'
+            stick = V / 'UNPLUGGED'
+            for v in vols + ['UNPLUGGED']:
+                (V / v).mkdir(parents=True)
+            (R / 'Install macOS Monterey.app').mkdir(parents=True)
+            P = t / 'pkgutil'
+            P.write_text('--expand-full\n')
+            for name in ['InstallAssistant.pkg'] + extra:
+                (stick / name).write_bytes(b'')
+            patched = real
+            for k, v in swaps.items():
+                patched = patched.replace(k, v.format(V=V, R=R, P=P))
+            (stick / 'UnPlugged.command').write_text(patched)
+            unplugged.write_installer(stick, offline.plan(
+                {'name': 'Sonoma' if want == 'extract' else 'Ventura',
+                 'version': '14.8.9' if want == 'extract' else '13.7.8',
+                 'major': '14' if want == 'extract' else '13'}))
+            env = dict(os.environ, UNPLUGGED_VOLUMES=str(V), UNPLUGGED_ROOT=str(R),
+                       UNPLUGGED_PKGUTIL=str(P), UNPLUGGED_FINAL='n', TERM='dumb')
+            r = subprocess.run(['bash', str(stick / 'install.sh')], input=pick + 'y\n',
+                               env=env, capture_output=True, text=True, timeout=60)
+            said = r.stdout
+            check(f'{want}: UnPlugged is answered to its own summary, and stops there on "n"',
+                  r.returncode == 0 and 'Task Summary:' in said, said[-600:])
+            check(f'  the way that stick is for: "{step}"', step in said, said[-600:])
+            check(f'  onto the volume that was picked, by name, wherever it lists',
+                  f'{V}/Macintosh HD' in said, said[-600:])
+            check('  copying, not symlinking, and the unreadable-package question answered',
+                  'Copy files to' in said and 'Could not extract required info' in said)
+        conf = (Path(tmp) / 'extract' / 'Volumes' / 'UNPLUGGED' / 'install.conf').read_text()
+        check('install.conf says the macOS and the way', 'WANT="extract"' in conf
+              and 'NAME="Sonoma"' in conf, conf)
+    steps = ' '.join(offline.steps(offline.plan({'name': 'Sonoma', 'version': '14.8.9',
+                                                  'major': '14'})))
+    check('the steps the window shows are the one line', 'bash /Volumes/UNPLUGGED/install.sh' in steps,
+          steps)
+
+
 def a_stick_that_needs_no_network():
     """The whole installer on the stick, for corpnewt's UnPlugged.
 
@@ -3154,8 +3220,8 @@ def a_stick_that_needs_no_network():
           and not same['basesystem_on_exfat'], same)
     said = ' '.join(offline.steps(later))
     check('the recovery steps name the script and the approach for that macOS',
-          'UnPlugged.command' in said and 'BaseSystem.dmg' in said
-          and 'GUID' in said and 'leave Terminal open' in said, said)
+          'install.sh' in said and 'BaseSystem.dmg' in said
+          and 'GUID' in said and 'leave terminal open' in said.lower(), said)
 
     # putting it together, with every download stood in for
     calls = []
@@ -5053,6 +5119,7 @@ if __name__ == '__main__':
                     en0_and_iservices,
                     haswell_cursor_patch,
                     a_stick_that_needs_no_network,
+                    unplugged_with_its_questions_answered,
                     what_the_download_shows,
                     building_an_installer_image,
                     a_kext_that_stops_below_the_target,

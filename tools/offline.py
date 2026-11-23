@@ -106,13 +106,14 @@ def steps(p):
         f'Boot the stick and pick the recovery entry. It is {booted}.',
         'Disk Utility: View > Show All Devices, then erase the target *disk* '
         '(not a volume) as APFS with a GUID Partition Map. Quit Disk Utility.',
-        f'Terminal: cd /Volumes/{big} and then bash UnPlugged.command',
-        (f'When it asks where the installer comes from, choose {approach}.'
-         if approach else
-         'It finds InstallESDDmg.pkg and the files beside it by itself; '
-         'check what it lists and go on.'),
-        'Pick the volume you just erased, type y, and leave Terminal open: '
-        'closing it closes the installer.',
+        f'Terminal: bash /Volumes/{big}/{unplugged.INSTALLER}',
+        'It asks which volume when there is more than one, and whether to go on: '
+        'type y. UnPlugged then runs with its own questions answered'
+        + (f' ({approach}, the volume, copy).' if approach else '.'),
+        'Leave Terminal open: closing it closes the installer. If anything is not '
+        f'as expected it starts UnPlugged as it is - then choose '
+        + (f'{approach}, ' if approach else '')
+        + 'the volume you erased, copy, and y.',
     ]
 
 
@@ -141,6 +142,8 @@ def build(row, fat, exfat, efi=None, work=None, g=None, say=print):
     if complaint:
         return p, complaint
     say(f'      {GREEN}{path}{RESET}')
+    # and beside it, the script that answers its questions
+    say(f'      {GREEN}{unplugged.write_installer(exfat, p)}{RESET}')
 
     if efi:
         written, complaint = stick.place(fat, efi=efi)

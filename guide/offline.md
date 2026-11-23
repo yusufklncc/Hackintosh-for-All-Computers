@@ -70,17 +70,27 @@ Boot the stick and pick the recovery entry in OpenCore's picker. Then:
 2. Open **Terminal** and run:
 
     ```
-    cd /Volumes/UNPLUGGED
-    bash UnPlugged.command
+    bash /Volumes/UNPLUGGED/install.sh
     ```
 
-3. When it asks where the installer comes from, choose:
-    - Sonoma and later: **Extract the Install … app from BaseSystem.dmg**
-    - Big Sur to Ventura: **Fully expand InstallAssistant.pkg**
-    - High Sierra to Catalina: nothing to choose - it finds `InstallESDDmg.pkg`
-      by itself. These boot their own recovery, taken from Apple's package.
-4. Pick the volume you just erased and type `y`.
-5. **Leave Terminal open.** Closing it also closes the installer.
+    It asks which volume, when there is more than one, says what it is about to
+    do, and asks once whether to go on: type `y`. It then runs UnPlugged with
+    the answers UnPlugged would have asked for - the way to build the installer
+    for this macOS, the volume, copying rather than symlinking - each worked
+    out there and then with UnPlugged's own commands.
+3. **Leave Terminal open.** Closing it also closes the installer.
+
+If anything is not as `install.sh` expects, it says what and starts UnPlugged
+as it is. Then answer UnPlugged yourself:
+
+- where the installer comes from: **Extract the Install … app from
+  BaseSystem.dmg** on Sonoma and later, **Fully expand InstallAssistant.pkg**
+  on Big Sur to Ventura. High Sierra to Catalina have nothing to choose: it
+  finds `InstallESDDmg.pkg` by itself, and they boot their own recovery, taken
+  from Apple's package;
+- the volume you just erased, by its number;
+- **2**, Copy, for how to put the files in place;
+- `y` to go on.
 
 The install then carries on as usual. When it is done, continue with
 [First boot](first-boot.md).

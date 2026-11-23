@@ -70,17 +70,27 @@ Bellekten açın ve OpenCore seçicisinde recovery girişini seçin. Sonra:
 2. **Terminal**'i açıp şunu çalıştırın:
 
     ```
-    cd /Volumes/UNPLUGGED
-    bash UnPlugged.command
+    bash /Volumes/UNPLUGGED/install.sh
     ```
 
-3. Kurulumun nereden alınacağını sorduğunda şunu seçin:
-    - Sonoma ve sonrası: **Extract the Install … app from BaseSystem.dmg**
-    - Big Sur'dan Ventura'ya: **Fully expand InstallAssistant.pkg**
-    - High Sierra'dan Catalina'ya: seçecek bir şey yok, `InstallESDDmg.pkg`'yi
-      kendisi bulur. Bunlar Apple'ın paketindeki kendi recovery'leriyle açılır.
-4. Az önce sildiğiniz birimi seçin ve `y` yazın.
-5. **Terminal'i kapatmayın.** Kapatırsanız kurulum da kapanır.
+    Birden fazla birim varsa hangisine kurulacağını sorar, ne yapacağını söyler
+    ve devam edilsin mi diye bir kez sorar: `y` yazın. Ardından UnPlugged'ı,
+    UnPlugged'ın soracağı cevaplarla çalıştırır - bu macOS için kurulumun nasıl
+    hazırlanacağı, birim, sembolik bağ yerine kopyalama - her biri o anda,
+    UnPlugged'ın kendi komutlarıyla hesaplanır.
+3. **Terminal'i kapatmayın.** Kapatırsanız kurulum da kapanır.
+
+`install.sh` beklemediği bir şeyle karşılaşırsa bunu söyler ve UnPlugged'ı
+olduğu gibi açar. O zaman UnPlugged'ı kendiniz cevaplayın:
+
+- kurulumun nereden alınacağı: Sonoma ve sonrasında **Extract the Install …
+  app from BaseSystem.dmg**, Big Sur'dan Ventura'ya **Fully expand
+  InstallAssistant.pkg**. High Sierra'dan Catalina'ya seçecek bir şey yok:
+  `InstallESDDmg.pkg`'yi kendisi bulur, bunlar Apple'ın paketindeki kendi
+  recovery'leriyle açılır;
+- az önce sildiğiniz birim, numarasıyla;
+- dosyaların nasıl yerleştirileceği için **2**, Copy;
+- devam etmek için `y`.
 
 Kurulum bundan sonra her zamanki gibi devam eder. Bitince
 [İlk açılış](first-boot.md) ile devam edin.
