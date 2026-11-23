@@ -47,6 +47,7 @@ public partial class RecoveryView : UserControl
             // the engine writes it to follow a dash in the console; on its own
             // line here it is a sentence, and a sentence starts with a capital
             if (note.Length > 0) note = char.ToUpperInvariant(note[0]) + note[1..];
+            if (picked is { Past: true }) note = $"Beyond this machine - {picked.Beyond}. " + note;
             Chosen.Text = note;
             Chosen.IsVisible = note.Length > 0;
             // the offer to ask belongs to the row that cannot name itself
@@ -92,7 +93,9 @@ public partial class RecoveryView : UserControl
         }
         _folder = list.Folder;
         Which.ItemsSource = list.Choices;
-        Which.SelectedIndex = 0;
+        // the newest this machine takes, not the newest there is: a stick of
+        // Tahoe for a laptop whose Wi-Fi stops at Ventura was the default
+        Which.SelectedIndex = Math.Max(0, list.Choices.FindIndex(c => c.Fits != false));
         SayNetwork(list);
         Provenance.Text = $"{list.Choices.Count} of them, read from macrecovery's own "
                         + "boards.json, which records the newest macOS Apple offers "

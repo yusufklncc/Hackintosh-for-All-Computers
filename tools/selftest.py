@@ -1898,6 +1898,16 @@ def genuine_macs():
     shown = summary.audio_row({'hda_ids': ['8086:281e', '10ec:0897']})
     check('  and beside a Realtek one, the Realtek one is the machine\'s audio',
           'ALC897' in str(shown), shown)
+    import inventory as _inv
+    e570, _ = detect.read_report('tools/fixtures/thinkpad-e570.json')
+    rows = {c['label']: c for c in _inv.recoveries(e570)['choices']}
+    check('a macOS past the machine\'s range is said to be, with the part that sets it',
+          rows['Tahoe']['fits'] is False and 'Broadcom Wi-Fi' in rows['Tahoe']['beyond']
+          and rows['Ventura']['fits'] is True, {k: v['fits'] for k, v in rows.items()})
+    pane = Path('gui/Views/RecoveryView.axaml.cs').read_text(encoding='utf-8')
+    check('  the pane starts on the newest that fits, and leaves the rest pickable',
+          'FindIndex(c => c.Fits != false)' in pane
+          and 'Past ? 0.72' in Path('gui/Engine/Inventory.cs').read_text(encoding='utf-8'))
     m1 = summary.document({'system': 'Darwin', 'board_id': 'J314sAP', 'cpu': 'Apple M1 Pro',
                            'gpu_devices': [{'name': 'Apple M1 Pro'}]})
     check('a Mac read as itself gets no graphics warning: macOS already drives it',

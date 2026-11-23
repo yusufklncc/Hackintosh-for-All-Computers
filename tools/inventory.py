@@ -347,10 +347,34 @@ def recoveries(hw=None):
         't': 'recovery',
         'folder': recovery.FOLDER,
         'available': recovery.vendored() is not None,
-        'choices': recovery.choices(),
+        'choices': _fitted(recovery.choices(), hw),
         'network': verdict,
         'network_note': said,
     }
+
+
+def _fitted(choices, hw):
+    """Each choice marked with whether the machine's macOS range takes it.
+
+    The range the Machine pane shows, from the same tables: a release past its
+    ceiling is said to be, with the part that sets it, so the pane can dim it
+    and start on the newest that fits rather than on whatever is newest.
+    Nothing is removed - a person may know better than the tables."""
+    window = summary.macos_range(hw) if hw else None
+    darwin = {r['name']: r['darwin'] for r in ocgen.read_toml(Path('data/macos.toml'))['release']}
+    for c in choices:
+        c['fits'], c['beyond'] = None, ''
+        d = darwin.get(c.get('name') or c.get('art') or '')
+        if d is None or not window:
+            continue
+        floor, ceiling = window
+        if ceiling and d > ceiling[2]:
+            c['fits'], c['beyond'] = False, f'past {summary.name_for(ceiling[2])}: {ceiling[0]}'
+        elif d < floor[1]:
+            c['fits'], c['beyond'] = False, f'before {summary.name_for(floor[1])}: {floor[0]}'
+        else:
+            c['fits'] = True
+    return choices
 
 
 # the same names WHAT lists, so a document cannot be offered and then not

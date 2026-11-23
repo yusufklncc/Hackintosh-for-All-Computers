@@ -24,7 +24,8 @@ public sealed record Option(int Number, string Label, bool Detected,
                             string? Value);
 
 public sealed record Question(
-    int Id, string Text, IReadOnlyList<Option> Options, string? Note, bool FreeText);
+    int Id, string Text, IReadOnlyList<Option> Options, string? Note, bool FreeText,
+    bool Expert = false);
 
 public sealed class Session
 {
@@ -191,8 +192,9 @@ public sealed class Session
             ? t.GetInt32() : (int?)null;
         var note = step is null ? null
             : total is null ? $"question {step}" : $"question {step} of {total}";
+        var expert = root.TryGetProperty("expert", out var x) && x.ValueKind == JsonValueKind.True;
         return new Question(root.GetProperty("id").GetInt32(),
-                            Text(root, "question") ?? "", options, note, false);
+                            Text(root, "question") ?? "", options, note, false, expert);
     }
 }
 

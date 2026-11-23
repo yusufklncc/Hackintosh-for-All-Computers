@@ -151,6 +151,19 @@
       <Setter Property="TextBlock.Foreground" Value="{DynamicResource Faint}" />
     </Style>
 
+    <!-- A switch drawn as a button - Show details - pressed in the accent's
+         soft colour rather than Fluent's system blue -->
+    <Style Selector="ToggleButton:checked /template/ ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource AccentSoft}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource Accent}" />
+      <Setter Property="TextBlock.Foreground" Value="{DynamicResource Accent}" />
+    </Style>
+    <Style Selector="ToggleButton:checked:pointerover /template/ ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource AccentSoft}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource Accent}" />
+      <Setter Property="TextBlock.Foreground" Value="{DynamicResource Accent}" />
+    </Style>
+
     <!-- The same for the drop-downs, which sat beside these as grey slabs too -->
     <Style Selector="ComboBox">
       <Setter Property="CornerRadius" Value="6" />

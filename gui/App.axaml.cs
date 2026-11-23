@@ -64,6 +64,10 @@ public partial class App : Application
                     // read back from the folder, a moment after it is written
                     await System.Threading.Tasks.Task.Delay(TimeSpan.FromSeconds(3));
                     Save(window, into.Replace(".png", "-built.png", StringComparison.Ordinal));
+                    // and back: the second question again, the first answered
+                    // again without asking, as clicking its chip does
+                    Console.WriteLine("back: " + await window.BuilderBackTo(2));
+                    Save(window, into.Replace(".png", "-back.png", StringComparison.Ordinal));
                     foreach (var pane in new[] { "report", "recovery", "installer",
                                                  "stick", "devices", "community",
                                                  "kexts", "about" })

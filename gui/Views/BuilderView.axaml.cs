@@ -24,6 +24,16 @@ public partial class BuilderView : UserControl
 {
     Session? _session;
     Question? _open;
+
+    /// <summary>An answer given: to which question, what was sent, what it
+    /// said, and whether the pane took it rather than the person.</summary>
+    sealed record Given(string Question, string Sent, string Label, bool Auto);
+
+    // every answer of this run, in order: the trail above, and what going
+    // back replays
+    readonly List<Given> _given = new();
+    // the answers to give again, without asking, after going back
+    Queue<Given>? _replay;
     string _out = DefaultFolder();
     TaskCompletionSource<string>? _ended;
     string? _built;
@@ -91,6 +101,23 @@ public partial class BuilderView : UserControl
         return await ended.Task;
     }
 
+    /// <summary>Go back to question <paramref name="number"/> (from 1) and wait
+    /// until it is the one asked: what clicking its chip does, checked by the
+    /// screenshot pass rather than trusted.</summary>
+    public async Task<string> BackForRender(int number)
+    {
+        var before = _given.Take(number - 1).Select(g => g.Label).ToList();
+        var asked = _given.Count >= number ? _given[number - 1].Question : null;
+        if (asked is null) return $"no question {number} to go back to";
+        var going = GoBack(number - 1);
+        var deadline = DateTime.UtcNow.AddMinutes(2);
+        while (_open?.Text != asked && DateTime.UtcNow < deadline) await Task.Delay(150);
+        var again = _given.Select(g => g.Label).ToList();
+        return _open?.Text == asked && again.SequenceEqual(before)
+            ? $"back at question {number}, \"{asked}\", with {again.Count} answers given again"
+            : $"did not get back to \"{asked}\": {State()}";
+    }
+
     /// <summary>Follow the last line down, once the layout knows where it is.
     ///
     /// Posting a ScrollToEnd asks the scroller for an end it has not measured
@@ -135,6 +162,32 @@ public partial class BuilderView : UserControl
         Stop.Click += (_, _) => Halt();
         Open.Click += (_, _) => Reveal.Show(_built ?? _out);
         ToStick.Click += (_, _) => StickRequested?.Invoke();
+        Back.Click += async (_, _) => await GoBack(_given.Count - 1);
+        // folded unless asked for - or unless this is the screenshot pass,
+        // whose checks read where the transcript is scrolled to
+        DetailsToggle.IsCheckedChanged += (_, _) =>
+        {
+            Details.IsVisible = DetailsToggle.IsChecked == true;
+            DetailsToggle.Content = Details.IsVisible ? "Hide details" : "Show details";
+            if (Details.IsVisible) StickToEnd();
+        };
+        DetailsToggle.IsChecked = Program.RenderTo is not null;
+    }
+
+    /// <summary>Back to answer number <paramref name="index"/> (from 0): the
+    /// engine starts again and is given every answer before it, unasked, so
+    /// the first question it puts to the person is that one.
+    ///
+    /// Again rather than undone, because the engine is a program asking in
+    /// order: what a later question offers can depend on an earlier answer,
+    /// and only running it again gets that right.</summary>
+    async Task GoBack(int index)
+    {
+        if (index < 0 || index >= _given.Count) return;
+        var keep = _given.Take(index).ToList();
+        StopQuietly();
+        _replay = new Queue<Given>(keep);
+        await Run(going: index + 1);
     }
 
     /// <summary>Beside the program, which is where somebody who double-clicked it is.</summary>
@@ -160,8 +213,9 @@ public partial class BuilderView : UserControl
         OutFolder.Text = _out;
     }
 
-    async Task Run()
+    async Task Run(int going = 0)
     {
+        if (going == 0) _replay = null;
         var engine = Builder.Find(out var missing);
         if (engine is null)
         {
@@ -176,18 +230,24 @@ public partial class BuilderView : UserControl
         Begin.Classes.Set("accent", true);
         Trail.Children.Clear();
         Trail.IsVisible = false;
+        _given.Clear();
+        HwSummary.Children.Clear();
         Standby.IsVisible = false;
-        Waiting.Say(Program.MachineFile is null ? "Starting, and reading this machine…"
-                                                : "Starting, and reading the report…");
+        Waiting.Say(going > 0 ? $"Going back to question {going}…"
+                    : Program.MachineFile is null ? "Starting, and reading this machine…"
+                                                  : "Starting, and reading the report…");
         Begin.IsEnabled = false;
         _ended = new TaskCompletionSource<string>();
 
         var session = Session.Start(engine, _out);
         _session = session;
-        session.Said += spans => Dispatcher.UIThread.Post(() => Say(spans));
-        session.Asked += question => Dispatcher.UIThread.Post(() => Show(question));
-        session.Hardware += (source, rows) => Dispatcher.UIThread.Post(() => Table(source, rows));
-        session.Finished += (code, built) => Dispatcher.UIThread.Post(() => Done(code, built));
+        // only the run on screen speaks: one stopped to go back still has a
+        // last line or two in its pipe, and its "done" would end the new one
+        bool Mine() => ReferenceEquals(_session, session);
+        session.Said += spans => Dispatcher.UIThread.Post(() => { if (Mine()) Say(spans); });
+        session.Asked += question => Dispatcher.UIThread.Post(() => { if (Mine()) Show(question); });
+        session.Hardware += (source, rows) => Dispatcher.UIThread.Post(() => { if (Mine()) Table(source, rows); });
+        session.Finished += (code, built) => Dispatcher.UIThread.Post(() => { if (Mine()) Done(code, built); });
         try
         {
             await session.Read();
@@ -197,6 +257,16 @@ public partial class BuilderView : UserControl
             Say(new[] { new TextSpan("bad", "the engine stopped talking: " + e.Message) });
             Done(1, null);
         }
+    }
+
+    /// <summary>Stop the engine without saying so: going back starts another.</summary>
+    void StopQuietly()
+    {
+        var old = _session;
+        _session = null;
+        _open = null;
+        old?.Stop();
+        Prompt.IsVisible = false;
     }
 
     void Halt()
@@ -293,6 +363,30 @@ public partial class BuilderView : UserControl
         }
         Transcript.Children.Add(box);
         StickToEnd();
+
+        // and in a line at the top, the way the Machine pane counts them: the
+        // whole table is in the details, and on the Machine pane
+        HwSummary.Children.Clear();
+        HwSummary.Children.Add(new TextBlock
+        {
+            Text = "HARDWARE", Classes = { "eyebrow" }, VerticalAlignment = VerticalAlignment.Center,
+            Margin = new Thickness(0, 0, 10, 0),
+        });
+        foreach (var g in rows.Where(r => r.Verdict != "-").GroupBy(r => r.Verdict))
+        {
+            var tone = g.Key switch
+            {
+                "supported" or "driven by macOS" => "ok",
+                "not supported" => "bad",
+                "third-party driver" or "unknown" => "warn",
+                _ => "",
+            };
+            var pill = new Border { Classes = { "pill" }, Margin = new Thickness(0, 0, 6, 0),
+                                    Child = new TextBlock { Text = $"{g.Count()} {g.Key}" } };
+            if (tone.Length > 0) pill.Classes.Add(tone);
+            ToolTip.SetTip(pill, string.Join("\n", g.Select(r => $"{r.Part}: {r.What}")));
+            HwSummary.Children.Add(pill);
+        }
     }
 
     /// <summary>A colour of the current theme, from code.
@@ -308,7 +402,31 @@ public partial class BuilderView : UserControl
 
     void Show(Question question)
     {
+        // going back: the answers before the one being changed are given
+        // again, as long as the engine asks what it asked before
+        if (_replay is { Count: > 0 } && _replay.Peek().Question == question.Text
+            && (question.FreeText || question.Options.Any(o => o.Number.ToString() == _replay.Peek().Sent
+                                                             && o.Label == _replay.Peek().Label)))
+        {
+            var again = _replay.Dequeue();
+            Give(question, again.Sent, again.Label, again.Auto);
+            return;
+        }
+        _replay = null;
+        // an expert question with an answer ready is answered with it, and
+        // shown above like any other, unless Advanced asks for all of them
+        if (question.Expert && AskAll.IsChecked != true && !question.FreeText)
+        {
+            var ready = question.Options.FirstOrDefault(o => o.Detected)
+                        ?? question.Options.FirstOrDefault(o => o.Value is "no");
+            if (ready is not null)
+            {
+                Give(question, ready.Number.ToString(), ready.Label, auto: true);
+                return;
+            }
+        }
         _open = question;
+        Back.IsEnabled = _given.Count > 0;
         Waiting.Say(null);
         Prompt.IsVisible = true;
         // the panel below changes how tall the transcript is, and an
@@ -367,10 +485,24 @@ public partial class BuilderView : UserControl
             Dispatcher.UIThread.Post(() => picked.BringIntoView(), DispatcherPriority.Loaded);
     }
 
-    void Answered(string question, string answer)
+    /// <summary>Send an answer and put it on the trail.</summary>
+    void Give(Question question, string sent, string label, bool auto)
     {
-        var n = Trail.Children.Count + 1;
+        if (_session is null) return;
+        _given.Add(new Given(question.Text, sent, label, auto));
+        Answered(question.Text, label, auto, _given.Count - 1);
+        _open = null;
+        Prompt.IsVisible = false;
+        Waiting.Say("Working…");
+        StickToEnd();
+        _session.Answer(question.Id, sent);
+    }
+
+    void Answered(string question, string answer, bool auto, int index)
+    {
+        var n = index + 1;
         var shown = answer.Length > 34 ? answer[..33] + "\u2026" : answer;
+        if (answer.Length == 0) shown = "(left empty)";
         var chip = new Border
         {
             CornerRadius = new CornerRadius(11), Padding = new Thickness(9, 3, 10, 4),
@@ -383,7 +515,16 @@ public partial class BuilderView : UserControl
                             new Run(shown) { Foreground = Brush("Ink") } },
             },
         };
-        ToolTip.SetTip(chip, $"{question}\n{answer}");
+        if (auto)
+        {
+            // taken by the pane: said so, in the chip and its tip
+            ((TextBlock)chip.Child!).Inlines!.Add(new Run("  detected") { Foreground = Brush("Ok"), FontSize = 10.5 });
+        }
+        ToolTip.SetTip(chip, $"{question}\n{answer}"
+                           + (auto ? "\nTaken as detected; Advanced asks it." : "")
+                           + "\nClick to go back to this question.");
+        chip.Cursor = new Avalonia.Input.Cursor(Avalonia.Input.StandardCursorType.Hand);
+        chip.PointerPressed += async (_, _) => await GoBack(index);
         Trail.Children.Add(chip);
         Trail.IsVisible = true;
     }
@@ -399,9 +540,11 @@ public partial class BuilderView : UserControl
     {
         if (_open is null || _session is null) return;
         string answer;
+        var label = "";
         if (_open.FreeText)
         {
             answer = FreeText.Text ?? "";
+            label = answer;
         }
         else
         {
@@ -416,19 +559,13 @@ public partial class BuilderView : UserControl
             answer = chosen.Tag!.ToString()!;
             // the answer joins the trail above, so what has been settled stays
             // on screen after its question is gone
-            var said = _open.Options.FirstOrDefault(o => o.Number.ToString() == answer)?.Label ?? answer;
-            Answered(_open.Text, said);
+            label = _open.Options.FirstOrDefault(o => o.Number.ToString() == answer)?.Label ?? answer;
         }
-        var id = _open.Id;
-        _open = null;
-        Prompt.IsVisible = false;
         // until the next question or the end: an SSDT pass or a build can take
-        // a while, and an empty space under the transcript says nothing
-        Waiting.Say("Working…");
-        // the panel below changes how tall the transcript is, and an
-        // offset that was at the bottom is not any more
-        StickToEnd();
-        _session.Answer(id, answer);
+        // a while, and an empty space under the question says nothing. The
+        // panel going changes how tall the transcript is, so it follows its
+        // end again (StickToEnd();, in Give).
+        Give(_open, answer, label, auto: false);
     }
 
     /// <summary>Raised by the button that goes on to the USB stick pane.</summary>
@@ -448,6 +585,8 @@ public partial class BuilderView : UserControl
         Standby.IsVisible = true;
         Begin.IsEnabled = true;
         Begin.Content = "Build again";
+        // a run that failed says why in the transcript: open it
+        if (code != 0) DetailsToggle.IsChecked = true;
         _built = built;
         Open.IsVisible = code == 0 && built is not null;
         // one filled button: the next step when there is one, starting again

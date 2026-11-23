@@ -59,10 +59,12 @@ public partial class MediaView : UserControl
         Ways.ItemsSource = _ways;
         Ways.SelectedIndex = 0;
         Ways.SelectionChanged += async (_, _) => await Switch();
-        Recovery.Changed += Ready;
+        Recovery.Changed += () => { Ready(); if (_step < Last) ShowStep(); };
         Stick.Changed += Ready;
         Build.SelectionChanged += (_, _) => { NoteBuild(); Ready(); };
         Go.Click += async (_, _) => await Run();
+        Next.Click += (_, _) => { _step++; ShowStep(); };
+        StepBack.Click += (_, _) => { _step--; ShowStep(); };
     }
 
     /// <summary>Raised when a stick was made, for the sidebar's tick.</summary>
@@ -136,12 +138,60 @@ public partial class MediaView : UserControl
         Recovery.IsVisible = way == "recovery";
         Offline.IsVisible = way == "offline";
         Image.IsVisible = way == "image";
-        // the image is a file balenaEtcher writes; it has no stick of its own
-        Step3.IsVisible = Stick.IsVisible = GoRow.IsVisible = way != "image";
+        // the image is a file balenaEtcher writes; it has no stick of its own,
+        // so it has two steps and its own button
+        Stick.IsVisible = way != "image";
+        GoRow.IsVisible = true;
         Stick.OfflineLayout = way == "offline";
         if (way == "image") await Image.Load();
         if (way == "offline") await LoadCatalog();
         Ready();
+        ShowStep();
+    }
+
+    // ---- the steps -------------------------------------------------------
+
+    /// <summary>Put a step on screen without a click, for the screenshot pass.</summary>
+    public void ShowStepForRender(int step) { _step = step; ShowStep(); }
+
+    int _step = 1;
+    int Last => Chosen == "image" ? 2 : 3;
+    static readonly string[] StepNames = { "How it gets on", "Which macOS", "Which stick" };
+
+    /// <summary>One step on screen, the bar saying which, and the buttons
+    /// that fit it: Next until the last, then the one that does the work.</summary>
+    void ShowStep()
+    {
+        _step = Math.Clamp(_step, 1, Last);
+        StepWay.IsVisible = _step == 1;
+        StepMacos.IsVisible = _step == 2;
+        StepStick.IsVisible = _step == 3;
+        StepBack.IsEnabled = _step > 1;
+        Next.IsVisible = _step < Last;
+        Go.IsVisible = _step == Last && Chosen != "image";
+        // on the way there, say where the next step goes; at the end, what
+        // the button will do (Ready writes that)
+        if (_step < Last) GoNote.Text = _step == 1
+            ? $"{(Ways.SelectedItem as Way)?.Title}: next, which macOS."
+            : Chosen == "recovery" && Recovery.Selected is { } r
+                ? $"{r.Titled}{(r.Past ? " - beyond this machine" : "")}: next, which stick."
+                : "Next, which stick.";
+        else Ready();
+
+        Steps.Children.Clear();
+        for (var i = 1; i <= Last; i++)
+        {
+            var n = i;
+            var here = n == _step;
+            var chip = new Button
+            {
+                Content = $"{n}  {(n == 2 && Chosen == "image" ? "Which installer" : StepNames[n - 1])}",
+                Padding = new Avalonia.Thickness(12, 5),
+            };
+            if (here) chip.Classes.Add("accent");
+            chip.Click += (_, _) => { _step = n; ShowStep(); };
+            Steps.Children.Add(chip);
+        }
     }
 
     Task LoadCatalog() => _catalog is { IsFaulted: false } ? _catalog : _catalog = FillCatalog();
@@ -187,7 +237,8 @@ public partial class MediaView : UserControl
             _ => (false, ""),
         };
         Go.IsEnabled = ok;
-        GoNote.Text = why;
+        // the bottom line belongs to the step on screen; this is the last one's
+        if (_step == Last) GoNote.Text = why;
     }
 
     async Task Run()
@@ -248,15 +299,17 @@ public partial class MediaView : UserControl
 
     // --- for the screenshot pass -------------------------------------------
 
-    public Task<string> ListRecoveries() => Show("recovery", Recovery.ListForRender);
-    public Task<string> InstallerState() => Show("image", Image.StateForRender);
-    public Task<string> ListSticks() => Show("recovery", Stick.ListForRender);
+    public Task<string> ListRecoveries() => Show("recovery", 2, Recovery.ListForRender);
+    public Task<string> InstallerState() => Show("image", 2, Image.StateForRender);
+    public Task<string> ListSticks() => Show("recovery", 3, Stick.ListForRender);
 
-    async Task<string> Show(string way, Func<Task<string>> then)
+    async Task<string> Show(string way, int step, Func<Task<string>> then)
     {
         await Load();
         Ways.SelectedIndex = _ways.FindIndex(w => w.Key == way);
         await Switch();
+        // after the way, which decides how many steps there are
+        ShowStepForRender(step);
         return await then();
     }
 }

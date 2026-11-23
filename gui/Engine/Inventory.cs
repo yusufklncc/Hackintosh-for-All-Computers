@@ -122,6 +122,12 @@ public sealed class RecoveryChoice
     [JsonPropertyName("note")] public string Note { get; set; } = "";
     [JsonPropertyName("board")] public string Board { get; set; } = "";
     [JsonPropertyName("boards")] public int Boards { get; set; }
+    // whether the machine being installed takes it, by the range the Machine
+    // pane shows; null when nothing is known. Past it is dimmed, not hidden.
+    [JsonPropertyName("fits")] public bool? Fits { get; set; }
+    [JsonPropertyName("beyond")] public string Beyond { get; set; } = "";
+    public bool Past => Fits == false;
+    public double Dim => Past ? 0.72 : 1.0;   // told, not disabled: it can still be picked
     // drawn by this window, decided by the engine: two surfaces colouring the
     // same release differently is the same failure as wording it differently
     [JsonPropertyName("mark")] public RecoveryMark? Mark { get; set; }

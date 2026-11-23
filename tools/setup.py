@@ -111,7 +111,7 @@ def prompt(question, note=None):
 
 
 def ask(step, total, question, options, detected=None, allow_skip=False,
-        skip_label='none of these'):
+        skip_label='none of these', expert=False):
     """One numbered menu. options is [(value, label)]. Returns the chosen value.
 
     `detected` is shown as a note and marks its row, but the person still types
@@ -146,6 +146,10 @@ def ask(step, total, question, options, detected=None, allow_skip=False,
     }
     if allow_skip:
         event['skip'] = {'n': len(options) + 1, 'label': skip_label}
+    # a question only somebody who knows the answer should change: a window
+    # takes the detected answer (or the skip) unless it was asked to ask
+    if expert:
+        event['expert'] = True
     while True:
         raw = _answer(**event)
         if raw.isdigit():
@@ -1161,7 +1165,7 @@ def main():
                                 f'{igpu.NO_ACCELERATION["label"]}'))
                 options.append((None, 'leave the key out; WhateverGreen picks'))
                 picked = ask(0, 0, 'Which framebuffer id?', options,
-                             detected=cands[0]['value'])
+                             detected=cands[0]['value'], expert=True)
                 by_value = {c['value']: c for c in cands}
                 by_value[igpu.NO_ACCELERATION['value']] = igpu.NO_ACCELERATION
                 device_props = {k: v for k, v in device_props.items()
@@ -1201,7 +1205,7 @@ def main():
                                     f'Fake it to {report["fake"]} - reported, '
                                     f'not stated by WhateverGreen'))
                 fake = ask(0, 0, 'Fake the device-id?', options, allow_skip=True,
-                           skip_label='No, leave it as the machine reports it')
+                           skip_label='No, leave it as the machine reports it', expert=True)
                 if fake:
                     device_props.setdefault(igpu.IGPU_PATH, {})
                     if fake.startswith('reported:'):

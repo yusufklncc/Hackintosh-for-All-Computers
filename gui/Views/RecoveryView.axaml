@@ -38,7 +38,8 @@
                        the first row is called "Whatever Apple serves now" and
                        an ellipsis in the middle of it says nothing. -->
                   <Grid ColumnDefinitions="Auto,*" ColumnSpacing="13"
-                        Width="250" Height="72" Margin="0,2">
+                        Width="250" Height="72" Margin="0,2" Opacity="{Binding Dim}"
+                        ToolTip.Tip="{Binding Beyond}">
                     <!-- Apple's own icon where there is one; the drawn mark
                          where there is not. Only one of the two is ever
                          visible, and neither leaves a gap. -->
@@ -64,6 +65,9 @@
                                  Foreground="{DynamicResource Ink}" />
                       <TextBlock Text="{Binding Version}" Classes="mono"
                                  FontSize="12" Foreground="{DynamicResource Faint}" />
+                      <!-- past what this machine runs: the part that says so -->
+                      <TextBlock Text="beyond this machine" FontSize="11"
+                                 Foreground="{DynamicResource Warn}" IsVisible="{Binding Past}" />
                     </StackPanel>
                   </Grid>
                 </DataTemplate>

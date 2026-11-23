@@ -86,6 +86,9 @@ public partial class MainWindow : Window
 
     public Task<string> DriveBuilder() => BuilderPane.DriveToEnd();
 
+    /// <summary>Go back to a question of the finished run, for the screenshot pass.</summary>
+    public Task<string> BuilderBackTo(int question) => BuilderPane.BackForRender(question);
+
     /// <summary>Show one pane by name, for the screenshot pass.</summary>
     public async Task Show(string pane)
     {
