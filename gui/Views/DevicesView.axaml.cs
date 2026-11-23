@@ -132,7 +132,7 @@ public sealed class CommunityItem
             ? $"Offered at the end of the EFI pane when this machine matches, and never added "
               + "unasked; its own manual steps are applied as written. "
               + $"{how}."
-            : $"Its own installer edits the EFI ({p.How}); nothing here adds it.";
+            : $"It goes in the EFI by the project's own steps ({p.How}); nothing here adds it.";
         Needs = string.Join("  ", new[]
         {
             p.Needs.Length > 0 ? $"Needs {p.Needs}." : "",

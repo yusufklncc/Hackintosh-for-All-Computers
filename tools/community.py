@@ -139,7 +139,9 @@ def line(p, card=None):
     where = ('Installed after macOS boots' if p.get('install') == 'system'
              else 'A kext for the EFI, offered when the EFI is built and never added unasked'
              if p.get('recipe') else
-             f"Its own installer edits the EFI ({p.get('how', '')}); nothing here adds it")
+             # in the project's terms, which are often not an installer: a
+             # kext added by hand, a Lilu plugin, one kext for OpenCore
+             f"It goes in the EFI by the project's own steps ({p.get('how', '')}); nothing here adds it")
     said = (p.get('macos') or '').strip().rstrip('.')
     level = {'written': ', AI-written', 'assisted': ', AI-assisted'}.get(ai_level(p)[0], '')
     return f"{p['name']} ({p['stage']}{tested}{level}) - {said}. {where}. {p['repo']}"
