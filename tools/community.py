@@ -183,7 +183,7 @@ def report_url(p, hw=None):
         'machine': '\n'.join(machine)})
 
 
-ROLE = {'graphics': 'Graphics', 'wifi': 'Wi-Fi', 'bluetooth': 'Bluetooth',
+ROLE = {'graphics': 'Graphics', 'wifi': 'Wi-Fi', 'bluetooth': 'Bluetooth', 'macos': 'macOS',
         'ethernet': 'Ethernet', 'cpu': 'CPU', 'card reader': 'Card reader'}
 
 

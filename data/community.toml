@@ -91,7 +91,7 @@ macos = "15.5 Sequoia or later, or 26 Tahoe, x86_64"
 min_darwin = 24
 how = "installed with its own 1401 app, after macOS boots"
 source = "README.md"
-commit = "87e524ab36f12d17c04626d6cf7fc3bde1cc63e4"
+commit = "900470d4289add5081614f020a299d78ecfd0c50"
 quote = "Supported cards are Turing and newer: GTX 16, RTX 20, 30, 40 and 50, TITAN RTX, Quadro RTX and the T-series."
 caveat = "Most testing is done on an RTX 5060, so other cards may have problems that haven't been found yet."
 chips = ["TU", "GA", "AD", "GB"]
@@ -99,8 +99,35 @@ ids_from = "chips"
 ai_files = ["AGENTS.md"]
 ai_commits = [0, 100]
 ai_tools = []
-release = "v3.0"
+release = "v3.1"
 covers = "NVIDIA GeForce Turing and newer: GTX 16, RTX 20, 30, 40 and 50"
+uploader = "nullmoth"
+attested = false
+
+[[project]]
+name = "Liberator"
+quoted = ["quote", "caveat"]
+repo = "nullmoth/liberator"
+kind = "device"
+role = "macos"
+stage = "experimental"
+install = "system"
+licence = "PolyForm-Noncommercial-1.0.0"
+release = "v3.0.0-beta.6"
+commit = "2a03cfd2734fdfcfbe7d183d2f09f9150c88f18e"
+source = "README.md"
+quote = "Liberator moves an OpenCore PC with an NVIDIA card from macOS 15 or 26 to macOS 27, and sets up the NullMoth NVIDIA driver there."
+caveat = "This is a beta. macOS 27 has been started this way on one desktop PC: an Intel processor with an RTX 50-series card."
+macos = "from macOS 15 or 26, already running through OpenCore with the NullMoth NVIDIA driver, to macOS 27"
+# the cards the driver it sets up takes, which is what it needs to find
+chips = ["TU", "GA", "AD", "GB"]
+ids_from = "chips"
+covers = "macOS 27 on an OpenCore PC with an NVIDIA card, Turing and newer"
+how = "a Mac app run on macOS 15 or 26 that puts macOS 27 on new volumes beside it; no Wi-Fi or Bluetooth on macOS 27 yet, by its own account"
+needs = "the NullMoth NVIDIA driver working on macOS 15 or 26, about 92 GB free, and a wired network"
+ai_files = ["AGENTS.md"]
+ai_commits = [0, 72]
+ai_tools = []
 uploader = "nullmoth"
 attested = false
 
