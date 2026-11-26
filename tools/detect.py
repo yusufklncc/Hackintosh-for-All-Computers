@@ -113,6 +113,21 @@ def cpu_generation(brand, laptop):
             return 'ice-lake' if gsuffix else 'comet-lake'
         table = INTEL_LAPTOP if laptop else INTEL_DESKTOP
         return table.get(gen)
+    # Some Xeons do say which generation they are, in a numbering of their own.
+    # E-2100 is Coffee Lake and E-2200 its refresh - the 8th and 9th Core
+    # generations, an M after the digits a mobile part (E-2176M is a
+    # Coffee Lake-H six-core, the i7-8850H's sibling). E3-1200/1500 vN count
+    # from Sandy Bridge: v1 is the 2nd generation, v6 the 7th.
+    m = re.search(r'\bxeon\b.*?\be-2([12])\d\d([a-z]*)\b', b)
+    if m:
+        gen = 8 if m.group(1) == '1' else 9
+        mobile = laptop or m.group(2).startswith('m')
+        return (INTEL_LAPTOP if mobile else INTEL_DESKTOP).get(gen)
+    m = re.search(r'\bxeon\b.*?\be3-1[25]\d\d[a-z]*\s*v(\d)\b', b)
+    if m and 1 <= int(m.group(1)) <= 6:
+        gen = int(m.group(1)) + 1
+        mobile = laptop or bool(re.search(r'\be3-15\d\dm', b))
+        return (INTEL_LAPTOP if mobile else INTEL_DESKTOP).get(gen)
     if 'xeon' in b or 'core 2' in b or 'pentium' in b or 'celeron' in b:
         return None                       # too many families share these names
     return None

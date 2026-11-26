@@ -424,6 +424,31 @@ def device_names():
           detect._names('some heading', detect.PCI_PATTERNS) == {})
 
 
+def xeons_that_name_their_generation():
+    """Issue #110: a Xeon E-2176M laptop read as an unknown processor.
+
+    Most Xeon names say nothing a table here can use, and those still get no
+    guess. E-2100/E-2200 and E3 vN say it in a numbering of their own."""
+    import summary
+    cases = [
+        ('Intel(R) Xeon(R) E-2176M  CPU @ 2.70GHz', True, 'coffee-lake-whiskey-lake'),
+        ('Intel(R) Xeon(R) E-2276M CPU @ 2.80GHz', True, 'coffe-lake-plus'),
+        ('Intel(R) Xeon(R) E-2146G CPU @ 3.50GHz', False, 'coffe-lake'),
+        ('Intel(R) Xeon(R) E-2176M CPU @ 2.70GHz', False, 'coffee-lake-whiskey-lake'),
+        ('Intel(R) Xeon(R) CPU E3-1505M v5 @ 2.80GHz', True, 'sky-lake'),
+        ('Intel(R) Xeon(R) CPU E3-1230 v3 @ 3.30GHz', False, 'haswell'),
+        ('Intel(R) Xeon(R) CPU E5-2680 v4 @ 2.40GHz', False, None),
+        ('Intel(R) Xeon(R) W-2135 CPU @ 3.70GHz', False, None),
+    ]
+    for brand, laptop, want in cases:
+        got = detect.cpu_generation(brand, laptop)
+        check(f'{brand.split("(R) ")[-1][:22]} -> {want}', got == want, got)
+    hw = {'cpu': cases[0][0], 'generation': cases[0][2], 'laptop': True}
+    cpu = summary.rows(hw)[0]
+    check('and the E-2176M laptop is a supported processor on the Machine pane',
+          cpu['part'] == 'CPU' and cpu['verdict'] == summary.SUPPORTED, cpu)
+
+
 def detection_gaps():
     """Four things the tables knew and the tools were not reading."""
     import inputdev
@@ -5094,7 +5119,8 @@ if __name__ == '__main__':
     for section in (graphics, graphics_advice, audio_advice, storage, peripherals,
                     trackpad, framebuffer, boot_args, other_machine,
                     undecodable_output, scripted_answers, hardware_summary,
-                    device_names, broadcom_wifi, detection_gaps, provenance,
+                    device_names, broadcom_wifi, detection_gaps,
+                    xeons_that_name_their_generation, provenance,
                     framebuffers, native_device_ids, field_reports, load_order,
                     smbus_trackpad, macos_window, card_readers, third_party,
                     usb_mapping, acpi_tables, the_windows_only_ways_this_broke,
